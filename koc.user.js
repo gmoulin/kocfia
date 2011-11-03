@@ -3,20 +3,12 @@
 // @version       0.1
 // @namespace     KOC
 // @description   améliorations et automatisations diverses pour KOC
-// @resource jQuery http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
-// @resource JQueryUI http://koc.kapok.fr/jquery-ui-1.8.16.custom.css
+// @require http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
+// @require http://koc.kapok.fr/jquery-ui-1.8.16.custom.js
 // @include        *kingdomsofcamelot.com/*main_src.php*
 // ==/UserScript==
 var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; }"
 ;
-
-//load jQuery
-var jq = GM_getResourceText("jQuery");
-eval(jq);
-
-//load jQueryUI custom
-var jqui = GM_getResourceText("jQueryUI");
-eval(jqui);
 
 $('head').append( $('<link rel="stylesheet" href="http://koc.kapok.fr/jquery-ui-1.8.16.custom.css" type="text/css">') )
 		 .append( $('<style>').text(kocCss) );

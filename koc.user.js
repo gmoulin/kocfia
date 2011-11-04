@@ -1,17 +1,21 @@
 // ==UserScript==
-// @name          KOC
-// @version       0.1
-// @namespace     KOC
-// @description   améliorations et automatisations diverses pour KOC
-// @require http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
-// @require http://koc.kapok.fr/jquery-ui-1.8.16.custom.js
-// @include        *kingdomsofcamelot.com/*main_src.php*
+// @name			KOC
+// @version			0.1
+// @namespace		KOC
+// @description		améliorations et automatisations diverses pour KOC
+// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js
+// @require			http://koc.kapok.fr/jquery-ui-1.8.16.custom.min.js
+// @include			*kingdomsofcamelot.com/*main_src.php*
 // ==/UserScript==
+console.log('koc start');
 var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; }"
+		+ "\n.draggable .handle { cursor: move; }"
 ;
 
 $('head').append( $('<link rel="stylesheet" href="http://koc.kapok.fr/jquery-ui-1.8.16.custom.css" type="text/css">') )
 		 .append( $('<style>').text(kocCss) );
+
+console.log('koc css inject done');
 
 var kocFrame = parent.document.getElementById('kofc_iframe_0');
 //force koc iframe to width 100%
@@ -22,29 +26,25 @@ var style = document.createElement('style')
 style.innerHTML = 'body { margin:0; width:100% !important;}';
 kocFrame.parentNode.appendChild(style);
 
-/* localStorage helpers */
-	/**
-	 * localStorage method for caching javascript objects
-	 */
-	if( typeof Storage != "undefined" ){
-		Storage.prototype.setObject = function(key, value){
-			this.setItem(key, JSON.stringify(value));
-		}
+console.log('koc iframe width to 100% done');
 
-		Storage.prototype.getObject = function(key){
-			return this.getItem(key) && JSON.parse( this.getItem(key) );
-		}
-	} else {
-		alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !')
+console.log(window.Storage);
+console.log(unsafeWindow.Storage);
+console.log(Storage);
+/* localStorage helpers */
+	localStorage.setObject = function(key, value){
+		localStorage.setItem(key, JSON.stringify(value));
 	}
 
+	localStorage.getObject = function(key){
+		var value = localStorage.getItem(key);
+		return value && JSON.parse(value);
+	}
+
+console.log('before KOC object declaration');
 var KOC = {
 	'init': function(){
-		/* default conf */
-		this.conf = {
-			'chat': this.chatOptions,
-		};
-
+		console.log('KOC init function');
 		/* get stored conf if present */
 			try {
 				var storedConf = localStorage.getObject('koc_conf');
@@ -55,32 +55,42 @@ var KOC = {
 				alert(e);
 			}
 
-		if( this.conf.chat.active ){
+		console.log(this.conf);
+
+		if( this.conf.chatOptions.active ){
 			this.initChat();
 		}
 
-	},
-	'chatOptions': {
-		'active': 1,
-		'resizable': 1,
-		'draggable': 1,
-		'position': {'top': 0, 'left': 0},
-		'alerts': {},
-		'cleanHelp': 1,
 	},
 	'initChat': function(){
 		console.log('chat init');
 
 		//Chat :
 		//- placement
-		$('#chat').draggable({
-
+		$('#kocmain_bottom').find('div.mod_comm').draggable({
+			helper: "original",
+			//handle: 'p',
 		});
 		//- couleur
 		//- suppression du superflu (demande aide et son résultat)
 
+	},
+	/* default conf */
+	'conf': {
+		'chatOptions': {
+			'active': 1,
+			'resizable': 1,
+			'draggable': 1,
+			'position': {'top': 0, 'left': 0},
+			'alerts': {},
+			'cleanHelp': 1,
+		},
 	}
 };
+
+console.log('after KOC object declaration');
+
+KOC.init();
 
 //Construction :
 //- mise en place de la ville (à détailler)
@@ -139,5 +149,6 @@ var KOC = {
 //- utilisation wagon ou cavalerie
 //- approvisionnement ville x à partri de ville y si ressources < z
 
+//Coordination :
+//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des pourfendeurs connectés jusqu'à un point donné, pour un type d'unité à choisir)
 
-KOC.init();

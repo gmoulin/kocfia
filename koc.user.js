@@ -25,10 +25,12 @@ var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; 
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
 		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
+		+ "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }"
 		+ "\n#koc-conf-panel { display: none; position: absolute; z-index: 99999; }"
 		+ "\n#koc-conf-panel-tabs { padding-left: 10px; }"
 		+ "\n.koc-conf-panel-tab.on { background-color: #A5C77F; }"
 		+ "\n.koc-conf-panel-tab.off { background-color: #A2ABA5; }"
+		+ "\nkoc-chat ul { padding-left: 0; }"
 ;
 
 var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; }"
@@ -54,28 +56,26 @@ var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px 
 ;
 var kocChatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
 
-var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor { background-color: #C3ECE4; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor { background-color: #C7E3F7; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer { background-color: #D5D2F7; }"
+var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: #C3ECE4; }"
+		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }"
+		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: #D5D2F7; }"
 ;
 
 (function($){
 	try{
 		/* helpers */
-			/**
-			 * localStorage method for caching javascript objects
-			 */
-			if( typeof window.Storage != "undefined" ){
-				window.Storage.prototype.setObject = function(key, value){
-					this.setItem(key, JSON.stringify(value));
-				}
+			//localStorage method for caching javascript objects
+				if( typeof window.Storage != "undefined" ){
+					window.Storage.prototype.setObject = function(key, value){
+						this.setItem(key, JSON.stringify(value));
+					}
 
-				window.Storage.prototype.getObject = function(key){
-					return this.getItem(key) && JSON.parse( this.getItem(key) );
+					window.Storage.prototype.getObject = function(key){
+						return this.getItem(key) && JSON.parse( this.getItem(key) );
+					}
+				} else {
+					alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !')
 				}
-			} else {
-				alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !')
-			}
 
 			/*
 			 * jQuery each2 - v0.2 - 8/02/2010
@@ -319,7 +319,7 @@ var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.c
 						'onRightPosition': {'top': '-562px', 'left': '761px'},
 						'highlightLeaders': 0,
 					},
-					'friendList': {},
+					'friendList': [],
 					'leaders': {},
 					'confPanel': function( $section ){
 						console.log('KOC chat confPanel function');
@@ -336,61 +336,44 @@ var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.c
 					'modPanel': function(){
 						console.log('KOC chat modPanel function');
 						var $section = $('<section id="koc-chat">');
+
+						var f = '';
+						for(var i = 0; i < KOC.chat.friendList.length; i++ ){
+							f += '<li><a href="#">'+ KOC.chat.friendList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
+						}
+
 						$section.append('<h2>Liste d\'amis</h2>')
 								.append(
-									  '<p><label for="koc-friends-group">Alliance : </label>'
-									+ '<input type="text" id="koc-friends-group" name="koc-friends-group" list="koc-friends-group-list">'
-									+ '<datalist id="koc-friends-group-list"></datalist>'
-									+ '<label for="koc-friend">Joueur : </label>'
+									  '<p><label for="koc-friend">Joueur : </label>'
 									+ '<input type="text" name="koc-friend" id="koc-friend" />'
 									+ '<button>Ajouter</button></p>'
 								)
-								.append('<ul></ul>');
-
-						var $d = $section.find('datalist'),
-							groupes = [],
-							$ul = $('#koc-chat').find('ul');
-						for( var groupe in KOC.conf.chat.fiendList ){
-							groupes.push(groupe);
-						}
-						groupes.sort();
-						for( var i = 0; i < groupes.length; i++ ){
-							$d.append( '<option value="'+ groupes[i] +'">'+ groupes[i] +'</option>');
-
-							var f = '';
-							for(var j = 0; j < KOC.conf.chat.fiendList[ groupes[i] ].length; j++ ){
-								f += '<p><a href="#">'+ KOC.conf.chat.fiendList[ groupes[i] ][j] +'</a><span class="ui-icon ui-icon-trash"></span></p>'
-							}
-
-							$ul.append(
-								$('<li>').data('groupe', groupes[i]).append(f)
-							);
-						}
+								.append( $('<ul>').append( f ) );
 
 						$section
 							.delegate('button', 'click', function(e){
 								e.preventDefault();
 
-								var $fields = $(this).parent().find('input'),
-									grp = $fields.eq(0).val(),
-									name = $fields.eq(1).val(),
-									$ul = $('#koc-chat').find('ul'),
-									$li = $ul.find('li').filter('[data-group='+ grp +']');
+								var name = $(this).parent().find('input').val(),
+									$ul = $('#koc-chat').find('ul');
 
-								if( $li.length ){
-									$li.append('<p><a href="#">'+ name +'</a><span class="ui-icon ui-icon-trash"></span></p>');
-								} else {
-									$ul.append(
-										$('<li>').data('groupe', grp)
-											.append('<p><a href="#">'+ name +'</a><span class="ui-icon ui-icon-trash"></span></p>')
-									);
+								if( !$ul.find('li').find('a').filter(':contains("'+ name +'")').length ){
+									KOC.chat.friendList.push( name );
+									KOC.chat.friendList.sort();
+									var f = '';
+									for(var i = 0; i < KOC.chat.friendList.length; i++ ){
+										f += '<li><a href="#">'+ KOC.chat.friendList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
+									}
+									$ul.html( f );
+
+									KOC.chat.storeFriendList();
 								}
-
-								KOC.chat.generateFriendList();
 							})
 							.delegate('.ui-icon-trash', 'click', function(){
-								$(this).parent().parent().remove();
-								KOC.chat.generateFriendList();
+								var $li = $(this).parent();
+								KOC.chat.friendList.splice(KOC.chat.friendList.indexOf( $li.find('a').text() ), 1);
+								KOC.chat.storeFriendList();
+								$li.remove();
 							})
 							.delegate('a', 'click', function(e){
 								e.preventDefault();
@@ -435,7 +418,7 @@ var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.c
 							try{
 								var persistentFriendList = localStorage.getObject('koc_chat_fiend_list');
 								if( persistentFriendList ){
-									KOC.conf.chat.fiendList = persistentFriendList;
+									KOC.chat.friendList = persistentFriendList;
 								}
 							} catch(e){
 								alert(e);
@@ -587,21 +570,6 @@ var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.c
 								}, 250);
 							}
 					},
-					'generateFriendList': function(){
-						console.log('KOC chat generateFriendList function');
-						var friendList = {};
-						$('#koc-chat').find('li').each2(function(i, $li){
-							var grp = $li.data('group');
-							friendList[ grp ] = [];
-							$li.find('a').each2(function(j, $a){
-								friendList[ grp ].push( $a.text() );
-							});
-							friendList[ grp ].sort();
-						});
-						friendList.sort();
-						KOC.conf.chat.friendList = friendList;
-						KOC.storeConf();
-					},
 					'highlightLeaders': function(){
 						console.log('KOC chat highlightLeaders function');
 						$chatAlliance
@@ -630,8 +598,8 @@ var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.c
 					},
 					'storeFriendList': function(){
 						console.log('KOC storeFriendList function');
-						console.log(KOC.conf);
-						localStorage.setObject('koc_chat_fiend_list', KOC.conf.chat.fiendList);
+						console.log(KOC.chat.friendList);
+						localStorage.setObject('koc_chat_fiend_list', KOC.chat.friendList);
 					},
 				},
 			/* default configuration */

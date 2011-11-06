@@ -22,9 +22,9 @@ var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; 
 		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
 ;
 
-var kocConfPanelCss = "#koc-conf-panel-toggle { position: absolute; top: 15px; left: 10px; }"
+var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
-		+ "\n#koc-conf-panel .ui-icon-close { float: right; }"
+		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
 		+ "\n#koc-conf-panel { display: none; position: absolute; z-index: 99999; }"
 		+ "\n#koc-conf-panel-tabs { padding-left: 10px; }"
 		+ "\n.koc-conf-panel-tab.on { background-color: #A5C77F; }"
@@ -54,7 +54,9 @@ var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px 
 ;
 var kocChatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
 
-var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.leader { background-color: #ACD1E9; }"
+var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor { background-color: #C3ECE4; }"
+		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor { background-color: #C7E3F7; }"
+		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer { background-color: #D5D2F7; }"
 ;
 
 (function($){
@@ -123,15 +125,18 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 				//gather the default conf
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						var mod = KOC.modules[i];
-						KOC.conf[mod] = KOC[mod].options;
+						KOC.defaultConf[mod] = KOC[mod].options;
 					}
+					KOC.conf = KOC.defaultConf;
 
+					console.log(KOC.defaultConf);
 				//get stored conf if present
 					try {
 						var storedConf = localStorage.getObject('koc_conf');
 						if( storedConf ){
 							$.extend(true, KOC.conf, storedConf);
 							console.log('used stored conf');
+							console.log(storedConf);
 						}
 					} catch( e ){
 						alert(e);
@@ -145,8 +150,8 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 					KOC.confPanel();
 
 				//modules init
-					if( KOC.conf.chat.active ){
-						KOC.chat.on();
+					for( var i = 0; i < KOC.modules.length; i++ ){
+						KOC[ KOC.modules[i] ].on();
 					}
 			},
 			'storeConf': function(){
@@ -167,8 +172,26 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 									this.addEventListener("load", function(){
 										var r = JSON.parse(this.responseText);
 										if( r.data && r.data.newChats && r.data.newChats['2'] && r.data.newChats['2'].length > 0 ){
-											KOC.chat.manageMessages(r.data.newChats[2]);
+											if( KOC.conf.chat.cleanHelp ) KOC.chat.manageMessages(r.data.newChats[2]);
+											if( KOC.conf.chat.highlightLeaders ) KOC.chat.highlightLeaders();
 										}
+									}, false);
+								}
+								break;
+							case 'allianceGetLeaders.php':
+								if( KOC.conf.chat.active && KOC.conf.chat.highlightLeaders ){
+									this.addEventListener("load", function(){
+										var r = JSON.parse(this.responseText);
+										if( r.officers ){
+											KOC.chat.leaders = {};
+											for( var o in r.officers ){
+												if( r.officers.hasOwnProperty(o) ){
+													KOC.chat.leaders[ r.officers[o].genderAndName ] = r.officers[o].type.toLowerCase();
+												}
+											}
+										}
+										console.log(KOC.chat.leaders);
+										KOC.chat.highlightLeaders();
 									}, false);
 								}
 								break;
@@ -192,7 +215,11 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						var mod = KOC.modules[i];
-						$tabs.append('<li class="koc-conf-panel-tab '+ (this[mod].active ? 'on' : 'off') +'"><a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a></li>');
+						$tabs.append(
+							'<li class="koc-conf-panel-tab '+ (this[mod].active ? 'on' : 'off') +'">'
+							+ '<a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a>'
+							+ '</li>'
+						);
 						$confPanel.append( this[mod].modPanel() );
 
 						this[mod].confPanel( $optionsSection );
@@ -204,17 +231,22 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 							var $this = $(this),
 								infos = this.id.split('-'),
 								mod = infos[0],
-								func = infos[1];
+								func = infos[1],
+								status = null;
 
 							if( $this.is(':checked') ){
+								status = 1;
 								if( func == 'active' ) func = 'on';
 								else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'On';
 							} else {
+								status = 0;
 								if( func == 'active' ) func = 'off';
 								else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'Off';
 							}
 
-							KOC[ mod ][ func ]();
+							KOC.conf[ mod ][ infos[1] ] = status;
+							KOC.storeConf();
+							if( typeof KOC[ mod ][ func ] != 'function' ) KOC[ mod ][ func ]();
 						})
 						.delegate('button', 'click', function(e){
 							e.preventDefault();
@@ -253,18 +285,21 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 							'left': KOC.conf.confPanel.position.left,
 							'width': KOC.conf.confPanel.size.width,
 							'height': KOC.conf.confPanel.size.height
+						})
+						.find('.ui-icon-close').click(function(e){
+							e.preventDefault();
+							$('#koc-conf-panel').hide();
 						});
 
 					var $kocConfPanelToggle = $('<button id="koc-conf-panel-toggle">').text('KOC');
 					$kocConfPanelToggle.click(function(){
 						console.log('$kocConfPanelToggle click');
-						console.log($('#koc-conf-panel'));
 						$('#koc-conf-panel').toggle();
 					});
 
-					$body
-						.append( $kocConfPanelToggle )
-						.append( $confPanel );
+					$body.append( $confPanel );
+					KOC.$buttons = $('<div id="koc-buttons">').append( $kocConfPanelToggle );
+					KOC.$buttons.insertBefore( $('#main_engagement_tabs') );
 				},
 				'generateOption': function(module, option, text, checked){
 					return '<p><input type="checkbox" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' /><label for="'+ module +'-'+ option +'">'+ text +'</label></p>';
@@ -283,8 +318,9 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 						'size': {'width': false, 'height': false},
 						'onRightPosition': {'top': '-562px', 'left': '761px'},
 						'highlightLeaders': 0,
-						'friendList': {},
 					},
+					'friendList': {},
+					'leaders': {},
 					'confPanel': function( $section ){
 						console.log('KOC chat confPanel function');
 						var $code = $('<p>').append( $('<h2>').text('Chat') );
@@ -293,6 +329,7 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 						$code.append( KOC.generateOption('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp) );
 						$code.append( KOC.generateButton('chat', 'onRight', 'Repositionner le chat à droite') );
 						$code.append( KOC.generateOption('chat', 'highlightLeaders', 'Mettre en avant les messages de la chancellerie', KOC.conf.chat.highlightLeaders) );
+						$code.append( KOC.generateButton('chat', 'highlightLeadersInit', 'Raffraîchir la liste des joueurs de la chancellerie') );
 
 						$section.append( $code );
 					},
@@ -373,25 +410,42 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 								KOC.chat.onRight();
 							}
 
-						//suppression du superflu (demande aide et son résultat)
+						//clean help
 							if( KOC.conf.chat.cleanHelp ){
 								KOC.chat.cleanHelpOn();
+								KOC.chat.cleanHelpInit();
 							} else {
-								//remove chat rules
-								var removeChatRules = function(){
+								var hideChatRules = function(){
 									var tmp = $chatAlliance.find('.noalliance');
 									if( tmp.length ){
-										tmp.first().remove();
+										tmp.first().hide();
 									} else {
-										setTimeout(removeChatRules(), 500);
+										setTimeout(function(){ hideChatRules(); }, 500);
 									}
 								};
-								setTimeout(removeChatRules(), 500);
+								setTimeout(function(){ hideChatRules(); }, 500);
+							}
+
+						//highlightleaders
+							if( KOC.conf.chat.highlightLeaders ){
+								KOC.chat.highlightLeadersOn();
+							}
+
+						//friendList
+							try{
+								var persistentFriendList = localStorage.getObject('koc_chat_fiend_list');
+								if( persistentFriendList ){
+									KOC.conf.chat.fiendList = persistentFriendList;
+								}
+							} catch(e){
+								alert(e);
 							}
 					},
 					'off': function(){
 						console.log('KOC chat off function');
-						KOC.movableOff();
+						KOC.chat.movableOff();
+						KOC.chat.cleanHelpOff();
+						KOC.chat.highlightLeadersOff();
 					},
 					'moveableOn': function(){
 						console.log('KOC chat movableOn function');
@@ -452,11 +506,12 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 					'moveableOff': function(){
 						console.log('KOC chat moveableOff function');
 						$('#koc-chat-moveable').remove();
+						$chat[0].style = '';
 						$chat
 							.draggable('destroy')
 							.resizable('destroy')
+							.css({'top': 0, 'left': 0})
 							.find('.drag-handle').remove();
-						$chat[0].style = '';
 						$chatInput.css('width', '')
 							.siblings('.button20').css('left', '');
 						$chat
@@ -467,10 +522,27 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 					},
 					'onRight': function(){
 						console.log('KOC chat onRight function');
-						$chat.css({
-								'top': KOC.conf.chat.onRightPosition.top,
-								'left': KOC.conf.chat.onRightPosition.left
-							});
+						KOC.conf.chat.position = {
+							'top': KOC.conf.chat.onRightPosition.top,
+							'left': KOC.conf.chat.onRightPosition.left
+						};
+						$chat.css(KOC.conf.chat.position);
+						KOC.storeConf();
+					},
+					'cleanHelpInit': function(){
+						console.log('KOC chat cleanHelpInit function');
+						setTimeout(function(){
+							$chatAlliance
+								.find('.chatwrap')
+								.find('.tx')
+								.find('a')
+								.filter('[onclick^=claimAllianceChatHelp]').each2(function(i, $helpLink){
+									$helpLink
+										.click() //clic auto sur les demandes d'aides
+										.closest('.chatwrap').remove(); //et suppression de la demande d'aide
+									//suppression du résultat -> masqué en css .noalliance
+								});
+						}, 2000);
 					},
 					'cleanHelpOn': function(){
 						console.log('KOC chat cleanHelpOn function');
@@ -482,36 +554,37 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 					},
 					'manageMessages': function(messages){
 						console.log('KOC chat manageMessages function');
-							for( var i = 0; i < messages.length; i++ ){
-								var msg = messages[i];
-								//suppression du superflu (demande aide et son résultat)
-								if( KOC.conf.chat.cleanHelp && msg[3].indexOf("__A_l_liance_Ch@tHelp__:helpType=building") == 0 ){
-									setTimeout(function(){
-										$chatAlliance
-											.find('.chatwrap')
-											.filter(':lt('+ messages.length +')')
-											.find('tx').find('a')
-											.filter('[onclick^=claimAllianceChatHelp]').each2(function(i, $helpLink){
+						//suppression du superflu (demande aide et son résultat)
+							if( KOC.conf.chat.active && KOC.conf.chat.cleanHelp ){
+								setTimeout(function(){
+									console.log('cleanHelp');
+									$chatAlliance
+										.find('.chatwrap')
+										.find('.tx')
+										.find('a').each2(function(i, $helpLink){
+											if( $helpLink.attr('onclick').indexOf('claimAllianceChatHelp') == 0 ){
+												console.log('link found');
 												$helpLink
 													.click() //clic auto sur les demandes d'aides
 													.closest('.chatwrap').remove(); //et suppression de la demande d'aide
 												//suppression du résultat -> masqué en css .noalliance
-											});
-									}, 250);
-								}
+											}
+										});
+								}, 250);
+							}
 
-								if( KOC.conf.chat.highlightLeaders ){
-									setTimeout(function(){
-										$chatAlliance
-											.find('.chatwrap')
-											.filter(':lt('+ messages.length +')')
-											.find('nm').each2(function(i, $nm){
-												if( $.inArray($nm.text(), KOC.chat.leaders) > -1 ){
-													$nm.closest('.chatwrap').addClass('leader');
-												}
-											});
-									}, 250);
-								}
+						//highlight leaders
+							if( KOC.conf.chat.active && KOC.conf.chat.highlightLeaders ){
+								setTimeout(function(){
+									$chatAlliance
+										.find('.chatwrap')
+										.find('nm').each2(function(i, $nm){
+											var name = $nm.text();
+											if( $.inArray(name, KOC.chat.leaders) > -1 ){
+												$nm.closest('.chatwrap').removeClass('chancellor vice-chancellor officer').addClass( KOC.chat.leaders[ name ] );
+											}
+										});
+								}, 250);
 							}
 					},
 					'generateFriendList': function(){
@@ -529,23 +602,46 @@ var kocChatHightlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.
 						KOC.conf.chat.friendList = friendList;
 						KOC.storeConf();
 					},
+					'highlightLeaders': function(){
+						console.log('KOC chat highlightLeaders function');
+						$chatAlliance
+							.find('.chatwrap')
+							.find('.nm').each2(function(i, $nm){
+								var name = $nm.text();
+								if( KOC.chat.leaders[ name ] ){
+									$nm.closest('.chatwrap').removeClass('chancellor vice_chancellor officer').addClass( KOC.chat.leaders[ name ] );
+								}
+							});
+					},
+					'highlightLeadersInit': function(){
+						//ajax call to get the leaders, highlighting will be done in the ajax response listener
+						getDirectoryTabAllianceMembers();
+					},
 					'highlightLeadersOn': function(){
 						console.log('KOC chat highlightLeadersOn function');
-						KOC.chat.leaders = $('#directory_tabs_2_members').find('.nm a').map(function(){ return $(this).text(); }).get();
-						$head.append( $('<style id="koc-chat-hightlight">').text(kocChatHightlightCss) );
+						KOC.chat.highlightLeadersInit();
+
+						$head.append( $('<style id="koc-chat-highlight">').text(kocChatHighlightCss) );
 					},
 					'highlightLeadersOff': function(){
 						console.log('KOC chat highlightLeadersOff function');
-						$('#koc-chat-hightlight').remove();
-						KOC.chat.leaders = [];
+						$('#koc-chat-highlight').remove();
+						KOC.chat.leaders = {};
+					},
+					'storeFriendList': function(){
+						console.log('KOC storeFriendList function');
+						console.log(KOC.conf);
+						localStorage.setObject('koc_chat_fiend_list', KOC.conf.chat.fiendList);
 					},
 				},
 			/* default configuration */
-			'conf': { // will contains all the modules default configuration options
+			'defaultConf': {
 				'confPanel': {
 					'position': {'top': 100, 'left': 100},
 					'size': {'width': 'auto', 'height': 'auto'},
 				}
+			},
+			'conf': { // will contains all the modules default configuration options
 			}
 		};
 

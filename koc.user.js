@@ -869,6 +869,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 	//Renforcement :
 	//- garder x miliciens dans la ville 1, le reste va à la ville 2
 	//- prise en compte des attaques (CB, ...)
+	//- envoyer de la nourriture avec les renforts
 
 
 	//Coordination :

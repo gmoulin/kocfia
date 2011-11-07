@@ -681,8 +681,13 @@ var kocChatHighlightCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.c
 	//- utilisation wagon ou cavalerie
 	//- approvisionnement ville x à partri de ville y si ressources < z
 	//- envoyez à x villes d'un joueur y ressources
+	//-combinaisons de ressources à transporter
 
 	//Coordination :
 	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des pourfendeurs connectés jusqu'à un point donné, pour un type d'unité à choisir)
+
+	//Laboratorie :
+	//-auto search
+	//-liste d'attente
 
 	//bloc note

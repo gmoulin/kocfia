@@ -143,7 +143,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 							console.log(storedConf);
 						}
 					} catch( e ){
-						alert(e);
+						console.error(e);
 					}
 					console.log(KOC.conf);
 
@@ -460,7 +460,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 									KOC.chat.friendsList = persistentFriendsList;
 								}
 							} catch(e){
-								alert(e);
+								console.error(e);
 							}
 
 							if( KOC.conf.chat.highlightFriends ){
@@ -474,7 +474,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 									KOC.chat.foesList = persistentFoesList;
 								}
 							} catch(e){
-								alert(e);
+								console.error(e);
 							}
 
 							if( KOC.conf.chat.highlightFoes ){
@@ -762,7 +762,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 								KOC.transport.automaticRules = persistentTransportAutomaticRules;
 							}
 						} catch(e){
-							alert(e);
+							console.error(e);
 						}
 
 						if( KOC.conf.transport.automatic ){
@@ -775,7 +775,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 								KOC.transport.temporaryRules = persistentTransportTemporaryRules;
 							}
 						} catch(e){
-							alert(e);
+							console.error(e);
 						}
 					},
 					'off': function(){

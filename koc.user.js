@@ -4,7 +4,7 @@
 // @namespace		KOC
 // @description		améliorations et automatisations diverses pour KOC
 // @require			http://userscripts.org/scripts/source/68059.user.js
-// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js
+// @require			http://code.jquery.com/jquery-1.7.min.js
 // @require			http://koc.kapok.fr/jquery-ui-1.8.16.custom.min.js
 // @include			*kingdomsofcamelot.com/*main_src.php*
 // ==/UserScript==
@@ -77,7 +77,8 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 						return this.getItem(key) && JSON.parse( this.getItem(key) );
 					}
 				} else {
-					alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !')
+					alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
+					return false;
 				}
 
 			/*
@@ -235,7 +236,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 							+ '<a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a>'
 							+ '</li>'
 						);
-						$confPanel.append( this[mod].modPanel() );
+						$confPanel.append( '<section id="koc-'+ mod +'"></section>' );
 
 						this[mod].confPanel( $optionsSection );
 					}
@@ -294,6 +295,18 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 						})
 						.tabs({
 							collapsible: true,
+							selected: KOC.conf.confPanel.selected,
+							select: function(event, ui){
+								//save the selected panel index
+								KOC.conf.confPanel.selected = ui.index;
+								KOC.storeConf();
+
+								//dynamic generation of the panel on first call
+								if( !ui.panel.find('h2').length ){
+									var mod = ui.panel.attr('id').split('-')[1];
+									KOC[mod].modPanel();
+								}
+							},
 						})
 						.css({
 							'top': KOC.conf.confPanel.position.top,
@@ -355,7 +368,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 					},
 					'modPanel': function(){
 						console.log('KOC chat modPanel function');
-						var $section = $('<section id="koc-chat">');
+						var $section = $('#koc-chat');
 
 						var friends = '';
 						for(var i = 0; i < KOC.chat.friendsList.length; i++ ){
@@ -419,8 +432,6 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 								//use "native" function
 								Chat.whisper( $(this).text() );
 							});
-
-						return $section;
 					},
 					'on': function(){
 						console.log('KOC chat on function');
@@ -801,6 +812,7 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 					'confPanel': {
 						'position': {'top': 100, 'left': 100},
 						'size': {'width': 'auto', 'height': 'auto'},
+						'selected': 0,
 					}
 				},
 			'conf': { // will contains all the modules default configuration options

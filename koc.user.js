@@ -98,15 +98,6 @@ String.prototype.capitalize = function(){
 };
 
 
-var kocFrame = parent.document.getElementById('kofc_iframe_0');
-//force koc iframe to width 100%
-kocFrame.style.width = '100%';
-
-//force wrapping iframe to width 100%
-var style = document.createElement('style')
-style.innerHTML = 'body { margin:0; width:100% !important;}';
-kocFrame.parentNode.appendChild(style);
-
 (function($){
 	try{
 		/* helpers */

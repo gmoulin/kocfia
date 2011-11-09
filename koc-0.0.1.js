@@ -1,22 +1,4 @@
-// ==UserScript==
-// @name			KOC
-// @version			0.1
-// @namespace		KOC
-// @description		améliorations et automatisations diverses pour KOC
-// @require			http://userscripts.org/scripts/source/68059.user.js
-// @require			http://code.jquery.com/jquery-1.7.min.js
-// @require			http://koc.kapok.fr/jquery-ui-1.8.16.custom.min.js
-// @include			*kingdomsofcamelot.com/*main_src.php*
-// ==/UserScript==
-
-/*
- * http://userscripts.org/scripts/source/68059.user.js -> used to run the whole script inside the page scope
- * else prototypes are not reachable (grease monkey sandbox limitation)
- */
-
 console.info('koc start');
-
-jQuery.noConflict(); //the iframe already have a jquery 1.4 and prototype libraries
 
 var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; }"
 		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
@@ -98,15 +80,6 @@ String.prototype.capitalize = function(){
 };
 
 
-var kocFrame = parent.document.getElementById('kofc_iframe_0');
-//force koc iframe to width 100%
-kocFrame.style.width = '100%';
-
-//force wrapping iframe to width 100%
-var style = document.createElement('style')
-style.innerHTML = 'body { margin:0; width:100% !important;}';
-kocFrame.parentNode.appendChild(style);
-
 (function($){
 	try{
 		/* helpers */
@@ -130,11 +103,13 @@ kocFrame.parentNode.appendChild(style);
 								.append( $('<style>').text(kocCss) );
 
 				//gather the default conf
+					console.time('default conf gathering');
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						var mod = KOC.modules[i];
 						KOC.defaultConf[mod] = KOC[mod].options;
 					}
 					KOC.conf = KOC.defaultConf;
+					console.timeEnd('default conf gathering');
 
 					console.log(KOC.defaultConf);
 				//get stored conf if present
@@ -151,15 +126,21 @@ kocFrame.parentNode.appendChild(style);
 					console.log(KOC.conf);
 
 				//ajax sniffer
+					console.time('sniffer');
 					KOC.ajaxSniffer();
+					console.timeEnd('sniffer');
 
 				//modules init
 					for( var i = 0; i < KOC.modules.length; i++ ){
+						console.time('koc '+ KOC.modules[i] +' on');
 						KOC[ KOC.modules[i] ].on();
+						console.timeEnd('koc '+ KOC.modules[i] +' on');
 					}
 
 				//configuration panel
+					console.time('confPanel');
 					KOC.confPanel();
+					console.timeEnd('confPanel');
 			},
 			'storeConf': function(){
 				console.info('KOC storeConf function', KOC.conf);
@@ -177,6 +158,7 @@ kocFrame.parentNode.appendChild(style);
 							case 'getChat.php':
 								if( KOC.conf.chat.active && ( KOC.conf.chat.cleanHelp || KOC.conf.chat.highlightLeaders || KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) ){
 									this.addEventListener("load", function(){
+										console.time('getChat load');
 										var r = JSON.parse(this.responseText);
 										if( r.data && r.data.newChats ){
 											if( r.data.newChats['2'] && r.data.newChats['2'].length > 0 ){
@@ -188,13 +170,14 @@ kocFrame.parentNode.appendChild(style);
 												if( KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) KOC.chat.highlightFriendsAndFoes( r.data.newChats['1'].length );
 											}
 										}
-
+										console.timeEnd('getChat load');
 									}, false);
 								}
 								break;
 							case 'allianceGetLeaders.php':
 								if( KOC.conf.chat.active && KOC.conf.chat.highlightLeaders ){
 									this.addEventListener("load", function(){
+										console.time('allianceGetLeaders load');
 										var r = JSON.parse(this.responseText);
 										if( r.officers ){
 											KOC.chat.leaders = {};
@@ -206,6 +189,7 @@ kocFrame.parentNode.appendChild(style);
 										}
 										KOC.chat.highlightLeaders( $chatAlliance, 0 );
 										KOC.chat.highlightLeaders( $chatGeneral, 0 );
+										console.timeEnd('allianceGetLeaders load');
 									}, false);
 								}
 								break;
@@ -237,7 +221,9 @@ kocFrame.parentNode.appendChild(style);
 						$confPanel.append( '<section id="koc-'+ mod +'"></section>' );
 					}
 
+					console.time('generic option panel');
 					KOC.generic.optionPanel( $optionsSection );
+					console.timeEnd('generic option panel');
 
 					//manage the checked status change of the options
 					$optionsSection
@@ -255,11 +241,11 @@ kocFrame.parentNode.appendChild(style);
 							if( $this.is(':checked') ){
 								status = 1;
 								if( func == 'active' ) func = 'on';
-								else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'On';
+								//else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'On';
 							} else {
 								status = 0;
 								if( func == 'active' ) func = 'off';
-								else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'Off';
+								//else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'Off';
 							}
 
 							KOC.conf[ mod ][ infos[1] ] = status;
@@ -355,7 +341,9 @@ kocFrame.parentNode.appendChild(style);
 					if( KOC.conf.confPanel.visible ){
 						if( KOC.conf.confPanel.selected > 0 ){
 							var mod = KOC.$confPanel.find('.ui-tabs-selected').find('a').attr('href').split('-')[1];
+							console.time('confPanel memorized tab load');
 							KOC[ mod ].modPanel();
+							console.timeEnd('confPanel memorized tab load');
 						}
 
 						KOC.$confPanel.show();
@@ -400,17 +388,19 @@ kocFrame.parentNode.appendChild(style);
 					'leaders': {},
 					'confPanel': function( $section ){
 						console.info('KOC chat confPanel function');
-						var $code = $('<p>').append( $('<h2>').text('Chat') );
-						$code.append( KOC.generateOption('chat', 'active', 'Activer le module', KOC.conf.chat.active) );
-						$code.append( KOC.generateOption('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable) );
-						$code.append( KOC.generateOption('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp) );
-						$code.append( KOC.generateButton('chat', 'onRight', 'Repositionner le chat à droite') );
-						$code.append( KOC.generateOption('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders) );
-						$code.append( KOC.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie') );
-						$code.append( KOC.generateOption('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends) );
-						$code.append( KOC.generateOption('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes) );
+						var code = '<p>'
+							+ '<h2>Chat</h2>'
+							+ KOC.generateOption('chat', 'active', 'Activer le module', KOC.conf.chat.active)
+							+ KOC.generateOption('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable)
+							+ KOC.generateOption('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp)
+							+ KOC.generateButton('chat', 'onRight', 'Repositionner le chat à droite')
+							+ KOC.generateOption('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders)
+							+ KOC.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie')
+							+ KOC.generateOption('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends)
+							+ KOC.generateOption('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes)
+							+ '</p>';
 
-						$section.append( $code );
+						$section.append( code );
 					},
 					'modPanel': function(){
 						console.info('KOC chat modPanel function');
@@ -755,10 +745,12 @@ kocFrame.parentNode.appendChild(style);
 					'temporaryRules': {},
 					'confPanel': function( $section ){
 						console.info('KOC transport confPanel function');
-						var $code = $('<p>').append( $('<h2>').text('Transport') );
-						$code.append( KOC.generateOption('transport', 'active', 'Activer le module', KOC.conf.transport.active) );
+						var code = '<p>'
+							+ '<h2>Transport</h2>'
+							+ KOC.generateOption('transport', 'active', 'Activer le module', KOC.conf.transport.active)
+							+ '</p>';
 
-						$section.append( $code );
+						$section.append( code );
 					},
 					'modPanel': function(){
 						console.info('KOC transport modPanel function');
@@ -846,7 +838,9 @@ kocFrame.parentNode.appendChild(style);
 			}
 		};
 
-		setTimeout(function(){ KOC.init(); }, 10000);
+		console.time('Koc init');
+		KOC.init();
+		console.timeEnd('Koc init');
 	} catch (e) {
 		console.error(e);
 	}

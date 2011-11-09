@@ -18,10 +18,6 @@ console.info('koc start');
 
 jQuery.noConflict(); //the iframe already have a jquery 1.4 and prototype libraries
 
-var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; }"
-		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
-;
-
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
 		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
@@ -115,10 +111,6 @@ String.prototype.capitalize = function(){
 		var KOC = {
 			'init': function(){
 				console.info('KOC init function');
-
-				//clean and arrange the window
-					$head.append( $('<link rel="stylesheet" href="http://koc.kapok.fr/jquery-ui-1.8.16.custom.css" type="text/css">') )
-								.append( $('<style>').text(kocCss) );
 
 				//gather the default conf
 					for( var i = 0; i < KOC.modules.length; i++ ){

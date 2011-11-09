@@ -1,9 +1,5 @@
 console.info('koc start');
 
-var kocCss = "#crossPromoBarContainer, #progressBar { display: none !important; }"
-		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
-;
-
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
 		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
@@ -72,7 +68,6 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 		}
 	} else {
 		alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
-		return false;
 	}
 
 String.prototype.capitalize = function(){
@@ -97,11 +92,6 @@ String.prototype.capitalize = function(){
 		var KOC = {
 			'init': function(){
 				console.info('KOC init function');
-
-				//clean and arrange the window
-					$head.append( $('<link rel="stylesheet" href="http://koc.kapok.fr/jquery-ui-1.8.16.custom.css" type="text/css">') )
-								.append( $('<style>').text(kocCss) );
-
 				//gather the default conf
 					console.time('default conf gathering');
 					for( var i = 0; i < KOC.modules.length; i++ ){
@@ -206,19 +196,16 @@ String.prototype.capitalize = function(){
 
 					var $confPanel = $('<div id="koc-conf-panel">');
 
-					var $tabs = $('<ul>'),
-						$optionsSection = $('<section id="koc-options">');
-
-					$tabs.append('<li><a href="#koc-options">Options</a></li>');
+					var $optionsSection = $('<section id="koc-options">'),
+						lis = '<li><a href="#koc-options">Options</a></li>',
+						sections = '';
 
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						var mod = KOC.modules[i];
-						$tabs.append(
-							'<li class="koc-conf-panel-tab '+ (this.conf[mod].active ? 'on' : 'off') +'">'
-							+ '<a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a>'
-							+ '</li>'
-						);
-						$confPanel.append( '<section id="koc-'+ mod +'"></section>' );
+						lis += '<li class="koc-conf-panel-tab '+ (this.conf[mod].active ? 'on' : 'off') +'">'
+							 + '<a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a>'
+							 + '</li>';
+						sections += '<section id="koc-'+ mod +'"></section>';
 					}
 
 					console.time('generic option panel');
@@ -262,10 +249,13 @@ String.prototype.capitalize = function(){
 						});
 
 					$confPanel
-						.prepend( $('<nav id="koc-conf-panel-tabs">').append( $tabs ) )
-						.prepend( $dragHandle.clone() )
-						.prepend( '<span class="ui-icon ui-icon-close"></span>' )
-						.append( $optionsSection )
+						.append(
+							  '<span class="ui-icon ui-icon-close"></span>'
+							+ $dragHandle.clone()
+							+ '<nav id="koc-conf-panel-tabs"><ul>' + lis + '</ul></nav>'
+							+ $optionsSection
+							+ sections
+						)
 						.draggable({
 							'helper': "original",
 							handle: '.drag-handle',
@@ -325,7 +315,7 @@ String.prototype.capitalize = function(){
 					});
 
 					$body.append( $confPanel );
-					KOC.$buttons = $('<div id="koc-buttons">').append( $kocConfPanelToggle );
+					KOC.$buttons = $('<div id="koc-buttons">').html( $kocConfPanelToggle );
 					KOC.$buttons.insertBefore( $('#main_engagement_tabs') );
 
 					KOC.$confPanel = $('#koc-conf-panel');
@@ -350,7 +340,10 @@ String.prototype.capitalize = function(){
 					}
 				},
 				'generateOption': function(module, option, text, checked){
-					return '<p><input type="checkbox" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' /><label for="'+ module +'-'+ option +'">'+ text +'</label></p>';
+					return '<p>'
+						 + '<input type="checkbox" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' />'
+						 + '<label for="'+ module +'-'+ option +'">'+ text +'</label>'
+						 + '</p>';
 				},
 				'generateButton': function(module, action, text){
 					return '<p><button rel="'+ module +'-'+ action +'">'+ text +'</button></p>';
@@ -913,16 +906,6 @@ String.prototype.capitalize = function(){
 	//bloc note
 
 /*
-updateSeed.php
-{"ok":true,"updateSeed":{"city":{"60115":{"production":{"ok":true,"mightInc":0,"reports":[],"fiscalUnixTime":1.32079439e+9,"happiness":"91","grievance":"0","population":"19656","laborPopulation":"8800","populationCap":"21600","gold":133088779,"goldUpkeep":"294","taxRate":"0","resourceUnixTime":1320794614,"resource1x3600":2.56759151e+12,"resource2x3600":6.17511239e+11,"resource3x3600":1.37605195e+11,"resource4x3600":1.10328477e+12,"resource1Productivity":"5750","resource2Productivity":"4040","resource3Productivity":"26400","resource4Productivity":"53900","resource1Capx3600":"2106000000","resource2Capx3600":"1490760000","resource3Capx3600":"9540000000","resource4Capx3600":"19440000000","resource1Upkeep":"324866","resource2Upkeep":"0","resource3Upkeep":"0","resource4Upkeep":"0","AETHERSTONE":"500"},"construction":{"eventUnixTime":"1320796869","constructionUnixTime":"1320793930","cityId":"60115","buildingId":"1498975","mayorPolitics":"72","techLevel":"6","constructionType":"4","constructionLevel":"7","constructionProgress":"0","constructionNeeded":"5760","constructionEta":"2011-11-08 16:01:09","constructionTicker":"2011-11-08 15:12:10","constructionStatus":"1","eventType":10},"research":{"eventUnixTime":"1320917411","researchUnixTime":"1320773902","cityId":"60115","playerId":null,"mayorInt":"72","techId":"10","researchLevel":"8","researchProgress":"9629","researchNeeded":"204800","researchEta":"2011-11-10 01:30:11","researchTicker":"2011-11-08 09:38:22","researchStatus":"1","eventType":20}},"60451":{"production":{"ok":true,"mightInc":0,"reports":[],"fiscalUnixTime":1.32079434e+9,"happiness":"91","grievance":"0","population":"19656","laborPopulation":"8770","populationCap":"21600","gold":29989267,"goldUpkeep":"240","taxRate":"0","resourceUnixTime":1320794614,"resource1x3600":3.66683956e+12,"resource2x3600":7.38384539e+11,"resource3x3600":3.03850095e+10,"resource4x3600":2.01605956e+10,"resource1Productivity":"5750","resource2Productivity":"4000","resource3Productivity":"25350","resource4Productivity":"56300","resource1Capx3600":"2106000000","resource2Capx3600":"1476000000","resource3Capx3600":"9162000000","resource4Capx3600":"20304000000","resource1Upkeep":"555795","resource2Upkeep":"0","resource3Upkeep":"0","resource4Upkeep":"0","AETHERSTONE":"0"},"construction":{"eventUnixTime":"1320795559","constructionUnixTime":"1320789681","cityId":"60451","buildingId":"1565574","mayorPolitics":"72","techLevel":"6","constructionType":"4","constructionLevel":"8","constructionProgress":"0","constructionNeeded":"11520","constructionEta":"2011-11-08 15:39:19","constructionTicker":"2011-11-08 14:01:21","constructionStatus":"1","eventType":10},"research":{"eventUnixTime":"1320816453","researchUnixTime":"1320792923","cityId":"60451","playerId":null,"mayorInt":"72","techId":"12","researchLevel":"5","researchProgress":"0","researchNeeded":"32000","researchEta":"2011-11-08 21:27:33","researchTicker":"2011-11-08 14:55:23","researchStatus":"1","eventType":20}},"63675":{"production":{"ok":true,"mightInc":0,"reports":[],"fiscalUnixTime":1.32079456e+9,"happiness":"91","grievance":"0","population":"15284","laborPopulation":"1630","populationCap":"16800","gold":9720366,"goldUpkeep":"118","taxRate":"0","resourceUnixTime":1320794614,"resource1x3600":6.14101562e+12,"resource2x3600":7.13453332e+11,"resource3x3600":3.726493e+11,"resource4x3600":2.77392587e+11,"resource1Productivity":"5750","resource2Productivity":"2800","resource3Productivity":"5750","resource4Productivity":"5750","resource1Capx3600":"2106000000","resource2Capx3600":"1044000000","resource3Capx3600":"2106000000","resource4Capx3600":"2106000000","resource1Upkeep":"1017164","resource2Upkeep":"0","resource3Upkeep":"0","resource4Upkeep":"0","AETHERSTONE":"0"},"construction":{"eventUnixTime":"1320794965","constructionUnixTime":"1320791972","cityId":"63675","buildingId":"1564639","mayorPolitics":"65","techLevel":"6","constructionType":"2","constructionLevel":"8","constructionProgress":"0","constructionNeeded":"5760","constructionEta":"2011-11-08 15:29:25","constructionTicker":"2011-11-08 14:39:32","constructionStatus":"1","eventType":10},"research":{"eventUnixTime":"1320798589","researchUnixTime":"1320793155","cityId":"63675","playerId":null,"mayorInt":"65","techId":"15","researchLevel":"3","researchProgress":"0","researchNeeded":"7200","researchEta":"2011-11-08 16:29:49","researchTicker":"2011-11-08 14:59:15","researchStatus":"1","eventType":20}}},"guardian":{"60115":{"cityId":60115,"level":"1","upgrade":false,"timeLeft":0,"type":"wood","troopBoost":"1","guardianCount":1,"resources":{"wood":40,"ore":0,"food":0,"stone":0}},"60451":{"cityId":60451,"level":"0","upgrade":false,"timeLeft":0,"type":"wood","troopBoost":0,"guardianCount":1,"resources":{"wood":0,"ore":0,"food":0,"stone":0}},"63675":{"cityId":63675,"level":"0","upgrade":false,"timeLeft":0,"type":"wood","troopBoost":0,"guardianCount":1,"resources":{"wood":0,"ore":0,"food":0,"stone":0}}}},"newReportCount":14,"newTradeReports":"0","newDisasterReportCount":"0","newMailCount":"0","allianceDiplomacies":{"friendly":{"a990":{"allianceId":"990","allianceName":"la fureur du MAGICIEN","relation":"1","membersCount":"8","rank":""},"a2039":{"allianceId":"2039","allianceName":"Le Moulin Rouge","relation":"1","membersCount":"18","rank":""},"a1670":{"allianceId":"1670","allianceName":"Les Chevaliers Normands","relation":"1","membersCount":"6","rank":""}},"hostile":null,"friendlyToThem":null,"friendlyToYou":{"a1034":{"allianceId":"1034","allianceName":"De_kaamelot","relation":"1","membersCount":"0"},"a1408":{"allianceId":"1408","allianceName":"FredFabElo68","relation":"1","membersCount":"1"},"a1602":{"allianceId":"1602","allianceName":"Les Pirates Poutreurs","relation":"1","membersCount":"0"},"a2006":{"allianceId":"2006","allianceName":"LeS PouTreUrS LeGenDaireS","relation":"1","membersCount":"0"}},"allianceId":"769","allianceName":"LES GAIS POUTREURS"},"updateMight":900293,"reqmicrotime":1.32079461e+9,"resmicrotime":1.32079462e+9}
-
-_dispatch.php
-{"ok":true,"settings":{"playerId":"16273562","cityId":"60115","autoDelReport":"0","troopMode":"0","pausePct":"100","raidStartTime":"1320793620","lastUpdated":"1320793620"},"queue":[{"botMarches":{"marchUnixTime":1320794467,"destinationUnixTime":1320794670,"returnUnixTime":1320794873,"lastUpdatedUnixTime":1320794671,"marchId":41191,"playerId":16273562,"cityId":60115,"botSettingsId":13396,"botMarchStatus":2,"botState":1,"modalState":0,"restPeriod":3194,"fromPlayerId":16273562,"fromCityId":60115,"fromAllianceId":769,"fromXCoord":95,"fromYCoord":538,"toPlayerId":0,"toCityId":0,"toTileId":329493,"toAllianceId":0,"toXCoord":96,"toYCoord":542,"toTileType":51,"toTileLevel":3,"marchType":9,"marchStatus":8,"marchTimestamp":1320794467,"destinationEta":1320794670,"returnEta":1320794873,"gold":3000,"resource1":300000,"resource2":30000,"resource3":3000,"resource4":300,"unit0Count":0,"unit1Count":0,"unit2Count":0,"unit3Count":0,"unit4Count":0,"unit5Count":0,"unit6Count":3500,"unit7Count":0,"unit8Count":0,"unit9Count":50,"unit10Count":0,"unit11Count":0,"unit12Count":0,"unit0Return":0,"unit1Return":0,"unit2Return":0,"unit3Return":0,"unit4Return":0,"unit5Return":0,"unit6Return":3500,"unit7Return":0,"unit8Return":0,"unit9Return":50,"unit10Return":0,"unit11Return":0,"unit12Return":0,"speed":252,"knightId":189766,"knightCombat":64,"knightCombatBoostExpiration":false,"knightLevel":1,"knightSkillPointsApplied":9,"fromInformatics":6,"fromLoadTech":6,"lastUpdated":1320794671},"cityMarches":{"marchUnixTime":1320794467,"destinationUnixTime":1320794670,"returnUnixTime":1320794873,"lastUpdatedUnixTime":1320794671,"marchId":41191,"playerId":16273562,"cityId":60115,"botSettingsId":13396,"botMarchStatus":2,"botState":1,"modalState":0,"restPeriod":3194,"fromPlayerId":16273562,"fromCityId":60115,"fromAllianceId":769,"fromXCoord":95,"fromYCoord":538,"toPlayerId":0,"toCityId":0,"toTileId":329493,"toAllianceId":0,"toXCoord":96,"toYCoord":542,"toTileType":51,"toTileLevel":3,"marchType":9,"marchStatus":8,"marchTimestamp":1320794467,"destinationEta":1320794670,"returnEta":1320794873,"gold":3000,"resource1":300000,"resource2":30000,"resource3":3000,"resource4":300,"unit0Count":0,"unit1Count":0,"unit2Count":0,"unit3Count":0,"unit4Count":0,"unit5Count":0,"unit6Count":3500,"unit7Count":0,"unit8Count":0,"unit9Count":50,"unit10Count":0,"unit11Count":0,"unit12Count":0,"unit0Return":0,"unit1Return":0,"unit2Return":0,"unit3Return":0,"unit4Return":0,"unit5Return":0,"unit6Return":3500,"unit7Return":0,"unit8Return":0,"unit9Return":50,"unit10Return":0,"unit11Return":0,"unit12Return":0,"speed":252,"knightId":189766,"knightCombat":64,"knightCombatBoostExpiration":false,"knightLevel":1,"knightSkillPointsApplied":9,"fromInformatics":6,"fromLoadTech":6,"lastUpdated":1320794671}},{"botMarches":{"marchUnixTime":1320794476,"destinationUnixTime":1320794679,"returnUnixTime":1320794882,"lastUpdatedUnixTime":1320794681,"marchId":41192,"playerId":16273562,"cityId":60115,"botSettingsId":13396,"botMarchStatus":2,"botState":1,"modalState":0,"restPeriod":3194,"fromPlayerId":16273562,"fromCityId":60115,"fromAllianceId":769,"fromXCoord":95,"fromYCoord":538,"toPlayerId":0,"toCityId":0,"toTileId":329943,"toAllianceId":0,"toXCoord":99,"toYCoord":542,"toTileType":51,"toTileLevel":4,"marchType":9,"marchStatus":8,"marchTimestamp":1320794476,"destinationEta":1320794679,"returnEta":1320794882,"gold":4000,"resource1":400000,"resource2":40000,"resource3":4000,"resource4":400,"unit0Count":0,"unit1Count":0,"unit2Count":0,"unit3Count":0,"unit4Count":0,"unit5Count":0,"unit6Count":7500,"unit7Count":0,"unit8Count":0,"unit9Count":75,"unit10Count":0,"unit11Count":0,"unit12Count":0,"unit0Return":0,"unit1Return":0,"unit2Return":0,"unit3Return":0,"unit4Return":0,"unit5Return":0,"unit6Return":7500,"unit7Return":0,"unit8Return":0,"unit9Return":75,"unit10Return":0,"unit11Return":0,"unit12Return":0,"speed":288,"knightId":189762,"knightCombat":64,"knightCombatBoostExpiration":false,"knightLevel":1,"knightSkillPointsApplied":9,"fromInformatics":6,"fromLoadTech":7,"lastUpdated":1320794681},"cityMarches":{"marchUnixTime":1320794476,"destinationUnixTime":1320794679,"returnUnixTime":1320794882,"lastUpdatedUnixTime":1320794681,"marchId":41192,"playerId":16273562,"cityId":60115,"botSettingsId":13396,"botMarchStatus":2,"botState":1,"modalState":0,"restPeriod":3194,"fromPlayerId":16273562,"fromCityId":60115,"fromAllianceId":769,"fromXCoord":95,"fromYCoord":538,"toPlayerId":0,"toCityId":0,"toTileId":329943,"toAllianceId":0,"toXCoord":99,"toYCoord":542,"toTileType":51,"toTileLevel":4,"marchType":9,"marchStatus":8,"marchTimestamp":1320794476,"destinationEta":1320794679,"returnEta":1320794882,"gold":4000,"resource1":400000,"resource2":40000,"resource3":4000,"resource4":400,"unit0Count":0,"unit1Count":0,"unit2Count":0,"unit3Count":0,"unit4Count":0,"unit5Count":0,"unit6Count":7500,"unit7Count":0,"unit8Count":0,"unit9Count":75,"unit10Count":0,"unit11Count":0,"unit12Count":0,"unit0Return":0,"unit1Return":0,"unit2Return":0,"unit3Return":0,"unit4Return":0,"unit5Return":0,"unit6Return":7500,"unit7Return":0,"unit8Return":0,"unit9Return":75,"unit10Return":0,"unit11Return":0,"unit12Return":0,"speed":288,"knightId":189762,"knightCombat":64,"knightCombatBoostExpiration":false,"knightLevel":1,"knightSkillPointsApplied":9,"fromInformatics":6,"fromLoadTech":7,"lastUpdated":1320794681}}],"_ctrl":"BotManager","_action":"getMarches"}
-
-march.php
-{"ok":true,"marchId":"899079","tileId":"328887","tileType":"51","tileLevel":"7","initTS":"1320794844","distance":3.60555128,"speed":5100,"eta":"1320794879","delay":30,"liftFog":false,"updateSeed":{"city":{"60115":{"production":{"fiscalUnixTime":"1320794748","resourceUnixTime":"1320794844","cityId":"60115","happiness":"92","grievance":"0","population":"19872","populationCap":"21600","laborPopulation":"8800","taxRate":"0","goldUpkeep":"294","gold":"133095485","leaderPolitics":"0","leaderResourcefulness":"72","resource1Productivity":"5750","resource2Productivity":"4040","resource3Productivity":"26400","resource4Productivity":"53900","resource1Upkeep":"325766","resource2Upkeep":"0","resource3Upkeep":"0","resource4Upkeep":"0","resource1Capx3600":"2106000000","resource2Capx3600":"1490760000","resource3Capx3600":"9540000000","resource4Capx3600":"19440000000","resource1x3600":"2569933305760","resource2x3600":"617637239072","resource3x3600":"137630394900","resource4x3600":"1103179291873","resourceTimestamp":"2011-11-08 15:27:24","fiscalTimestamp":"2011-11-08 15:25:48","leaderCombat":"0","unit0Count":"0","unit1Count":"28","unit2Count":"21646","unit3Count":"225","unit4Count":"298","unit5Count":"236","unit6Count":"3000","unit7Count":"5698","unit8Count":"175","unit9Count":"1375","unit10Count":"130","unit11Count":"0","unit12Count":"0","gateStatus":"0","trainingLock":"0","marchLock":"0","resourcefulnessKnightId":"186058","politicsKnightId":"186057","combatKnightId":"186054","intelligenceKnightId":"186056","levyTimestamp":"2011-11-08 13:44:08","appeaseTimestamp":"0000-00-00 00:00:00","ok":{"ok":true}}}}},"atkBoostTime":0,"atk2BoostTime":0,"defBoostTime":0,"def2BoostTime":0,"knightCombatBoostTime":0,"marchUnixTime":1320794844,"reqmicrotime":"1320794844.6557","resmicrotime":"1320794844.8385"}
-
-
 column-count: 3;
 column-gap: 3em;
 column-rule: 1px solid #CCC;

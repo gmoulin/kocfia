@@ -1,0 +1,165 @@
+  var metc = getClientCoords(document.getElementById('main_engagement_tabs'));
+  if (metc.width==null || metc.width==0){
+    BOStartupTimer = setTimeout (ptStartup, 1000);
+    return;
+  }
+_________________________
+
+  window.addEventListener('unload', onUnload, false);
+_________________________
+
+  var params = unsafeWindow.Object.clone(unsafeWindow.g_ajaxparams);
+  params.format=2;
+  params.tournyPos=0;
+  new AjaxRequest(unsafeWindow.g_ajaxpath+"ajax/getLeaderboard.php"+unsafeWindow.g_ajaxsuffix, {  method:"post",  parameters:params,
+_________________________
+
+ (loop, controls, autoplay, src, preload)
+<audio id="audio">
+	<source src="test.mp3" type="audio/mpeg" />
+	<source src="test.ogg" type="audio/ogg" />
+</audio>
+
+js play() pause()
+_________________________
+
+function getAlliance (aid){
+  if (Seed.allianceDiplomacies==null || Seed.allianceDiplomacies.allianceName==null)
+    return ['Neutre', 0, 'None'];
+  else if (Seed.allianceDiplomacies.friendly && Seed.allianceDiplomacies.friendly['a'+aid] != null)
+      return ['Amicale',Seed.allianceDiplomacies.allianceId, Seed.allianceDiplomacies.allianceName];
+  else if (Seed.allianceDiplomacies.hostile && Seed.allianceDiplomacies.hostile['a'+aid] != null)
+      return ['Hostile',Seed.allianceDiplomacies.hostile['a'+aid].allianceId, Seed.allianceDiplomacies.hostile['a'+aid].allianceName]; 
+}
+_________________________
+
+   if (Options.Smiley) {
+        msg = msg.replace(':-)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00100-smile.gif\">');
+        msg = msg.replace(':=)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00100-smile.gif\">');
+        msg = msg.replace('^^', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00100-smile.gif\">');
+        
+        msg = msg.replace(':=(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00101-sadsmile.gif\">');
+        msg = msg.replace(':-(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00101-sadsmile.gif\">');
+        
+        msg = msg.replace(':-D', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00102-bigsmile.gif\">');
+        msg = msg.replace(':=D', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00102-bigsmile.gif\">');
+        
+        msg = msg.replace(';-(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00106-crying.gif\">');
+        msg = msg.replace(';=(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00106-crying.gif\">');
+        
+        msg = msg.replace(';-)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00105-wink.gif\">');
+        msg = msg.replace(';=)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00105-wink.gif\">');
+       
+        msg = msg.replace(':-*', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00109-kiss.gif\">');
+        msg = msg.replace(':=*', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00109-kiss.gif\">');
+       
+        msg = msg.replace(":^)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00112-wondering.gif\">');
+    
+        msg = msg.replace("I=)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00113-sleepy.gif\">');
+        msg = msg.replace("I-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00113-sleepy.gif\">');
+        msg = msg.replace("|-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00113-sleepy.gif\">');
+        
+        msg = msg.replace("8-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
+        msg = msg.replace("8=)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
+        msg = msg.replace("B-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
+        msg = msg.replace("B=)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
+        
+        msg = msg.replace("(ci)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00176-smoke.gif\">');
+        msg = msg.replace("(smoke)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00176-smoke.gif\">');
+        msg = msg.replace("(smoking)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00176-smoke.gif\">');
+        
+        msg = msg.replace("(fubar)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00181-fubar.gif\">');
+      
+        msg = msg.replace(":-&", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00119-puke.gif\">');
+        msg = msg.replace(":=&", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00119-puke.gif\">');
+       
+        msg = msg.replace(">:)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00116-evilgrin.gif\">');
+        msg = msg.replace("]:)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00116-evilgrin.gif\">');
+        
+        msg = msg.replace("(:|", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00107-sweating.gif\">');
+     
+        msg = msg.replace(":=P", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00110-tongueout.gif\">');
+        msg = msg.replace(":-P", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00110-tongueout.gif\">');
+        msg = msg.replace(":=p", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00110-tongueout.gif\">');
+       
+       msg = msg.replace(":-$", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00111-blush.gif\">');
+       msg = msg.replace(":=$", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00111-blush.gif\">');
+       msg = msg.replace(':">', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00111-blush.gif\">');
+   
+       msg = msg.replace("(party)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00123-party.gif\">');
+    }   
+_________________________
+
+function displayReport (rptid, side){
+  var params = unsafeWindow.Object.clone(unsafeWindow.g_ajaxparams);
+  params.rid = rptid;
+  params.side = side;
+  
+  new MyAjaxRequest(unsafeWindow.g_ajaxpath + "ajax/fetchReport.php" + unsafeWindow.g_ajaxsuffix, {
+    method: "post",
+    parameters: params,
+    onSuccess: function (rslt) {   
+      if (notify)
+        notify (rslt.errorMsg);
+    },
+    onFailure: function () {
+      if (notify)
+        notify ('AJAX ERROR');
+    },
+  });
+} 
+_________________________
+
+/************************ Check Tournoi *************************/
+ var CheckTournoi = {
+   init : function (){
+    var f = CheckTournoi;
+    f.e_eachMinute();
+   },
+   minuteTimer : null,
+   e_eachMinute : function (){   
+     var f = CheckTournoi;
+     var now = unixTime();
+     row = [];
+     if (Options.enableCheckTournoi)  {
+      var params = unsafeWindow.Object.clone(unsafeWindow.g_ajaxparams);
+        params.format=2;
+        params.tournyPos=0;
+        new AjaxRequest(unsafeWindow.g_ajaxpath+"ajax/getLeaderboard.php"+unsafeWindow.g_ajaxsuffix, {  method:"post",  parameters:params,
+       onSuccess:function(transport){
+         var rslt=eval("("+transport.responseText+")");
+         if(rslt.ok){
+          if(rslt.data){
+	      ById('ptBoite2').innerHTML='<span style="color: #f66"><blink>TOURNOI</blink></span>';
+	      Options.enableCheckTournoi = false;
+	      saveOptions();
+          }
+          }
+         }
+        });
+       f.minuteTimer = setTimeout (f.e_eachMinute, 600000);
+     }
+   },  
+ } 
+_________________________
+
+            for (r=1; r<13; r++){
+   	     m += '<tr><td align=right><img height=20 title="'+unsafeWindow.unitcost['unt'+r][0]+'" src=http://cdn1.kingdomsofcamelot.com/fb/e2/src/img/units/unit_'+r+'_30_s34.jpg></td><td align=left><input style="border:1px solid black;height:16px;font-size:11px;" id="RAAnbunit'+r+'" type=text size=7 value="0" ></td><td><span id="BOEstimationTT'+r+'">&nbsp;</span></td><td><span id="BOEstimationTZ'+r+'">&nbsp;</span></td></tr>';
+      	}
+_________________________
+
+	for(var i=0;i<itemlist.length;i++){
+		 BOitems += "<img src='http://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/items/30/"+itemlist[i]+".jpg' /><input type=checkbox id='BOitem_"+itemlist[i]+"'><span id='BOitemSpan_"+itemlist[i]+"'>" + unsafeWindow.ksoItems[itemlist[i]].count + "</span>&nbsp;";
+        }
+_________________________
+
+         params.type = typemarche; // 5 = REASSIGNER - 4 = ATTAQUE - 2 = RENFORCER
+_________________________
+
+    new MyAjaxRequest(unsafeWindow.g_ajaxpath + "ajax/viewCourt.php" + unsafeWindow.g_ajaxsuffix, {
+_________________________
+
+    new MyAjaxRequest(unsafeWindow.g_ajaxpath + "ajax/courtDoAction.php" + unsafeWindow.g_ajaxsuffix, {
+_________________________
+
+  

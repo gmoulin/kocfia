@@ -44,6 +44,13 @@ var kocChatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .cha
 var kocChatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: #FAE4E4; }";
 var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
 
+var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal; }"
+		+ "\n#koc-overview #koc-overview-fixed-col { float:left; clear: left; margin-top: 20px; }"
+		+ "\n#koc-overview #koc-overview-data { overflow: auto; padding-right: 20px; padding-left: 20px; }"
+		+ "\n#koc-overview th, #koc-overview td { height: 20px; width: 20px; }"
+		+ "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F0ECEB; }"
+;
+
 /*
  * jQuery each2 - v0.2 - 8/02/2010
  * http://benalman.com/projects/jquery-misc-plugins/
@@ -74,7 +81,6 @@ String.prototype.capitalize = function(){
 	return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-
 (function($){
 	try{
 		/* helpers */
@@ -90,8 +96,22 @@ String.prototype.capitalize = function(){
 				var $dragHandle = $('<div class="drag-handle">');
 
 		var KOC = {
+			'serverId': null,
+			'modules': ['chat', 'transport', 'fb-wall-popup', 'overview'],
+			'stored': ['conf'],
+			'format': function( num ){
+
+			},
 			'init': function(){
 				console.info('KOC init function');
+				//get server id
+					KOC.serverId = KOC.generic.getServerId();
+					console.log('serverId', KOC.serverId);
+					if( KOC.serverId == null ){
+						console.error('wrong server id');
+						return;
+					}
+
 				//gather the default conf
 					console.time('default conf gathering');
 					for( var i = 0; i < KOC.modules.length; i++ ){
@@ -102,9 +122,10 @@ String.prototype.capitalize = function(){
 					console.timeEnd('default conf gathering');
 
 					console.log(KOC.defaultConf);
+
 				//get stored conf if present
 					try {
-						var storedConf = localStorage.getObject('koc_conf');
+						var storedConf = localStorage.getObject('koc_conf_' + KOC.serverId);
 						if( storedConf ){
 							$.extend(true, KOC.conf, storedConf);
 							console.info('used stored conf');
@@ -115,10 +136,35 @@ String.prototype.capitalize = function(){
 					}
 					console.log(KOC.conf);
 
+				//gather stored items list
+					for( var i = 0; i < KOC.modules.length; i++ ){
+						var mod = KOC.modules[i];
+						if( KOC[mod].stored ){
+							for( var j = 0; j < KOC[mod].stored.length; j++ ){
+								KOC.stored.push( mod + '_' + KOC[mod].stored[j] );
+							}
+						}
+					}
+
 				//ajax sniffer
 					console.time('sniffer');
 					KOC.ajaxSniffer();
 					console.timeEnd('sniffer');
+
+				//@todo
+				//fill 'static' data tables (icons)
+					console.time('cities');
+					//cities
+					console.timeEnd('cities');
+					console.time('population');
+					//population
+					console.timeEnd('population');
+					console.time('ressources');
+					//ressources
+					console.timeEnd('ressources');
+					console.time('troops');
+					//troops
+					console.timeEnd('troops');
 
 				//modules init
 					for( var i = 0; i < KOC.modules.length; i++ ){
@@ -134,10 +180,29 @@ String.prototype.capitalize = function(){
 			},
 			'storeConf': function(){
 				console.info('KOC storeConf function', KOC.conf);
-				localStorage.setObject('koc_conf', KOC.conf);
+				localStorage.setObject('koc_conf_' + KOC.serverId, KOC.conf);
 			},
-			'modules': ['chat', 'transport'],
-			'towns': {},
+			'cities': [],//[{'id','name','gps'}, ...]
+			'ressources': [
+				{'name': 'gold', 'label': 'or', 'icon': '', 'upkeep': 'goldUpkeep'},
+				{'name': 'resource1x3600', 'label': 'nourriture', 'icon': '', 'productivity': 'resource1Productivity', 'upkeep': 'resource1Upkeep', 'cap': 'resource1Capx3600'},
+				{'name': 'resource2x3600', 'label': 'bois', 'icon': '', 'productivity': 'resource2Productivity', 'upkeep': 'resource2Upkeep', 'cap': 'resource2Capx3600'},
+				{'name': 'resource3x3600', 'label': 'pierre', 'icon': '', 'productivity': 'resource3Productivity', 'upkeep': 'resource3Upkeep', 'cap': 'resource3Capx3600'},
+				{'name': 'resource4x3600', 'label': 'minerai', 'icon': '', 'productivity': 'resource4Productivity', 'upkeep': 'resource4Upkeep', 'cap': 'resource4Capx3600'},
+				{'name': 'AETHERSTONE', 'label': 'ether', 'icon': ''},
+			],
+			'population': [
+				{'name': 'population', 'label': 'population', 'icon': ''},
+				{'name': 'populationCap', 'label': 'plafond', 'icon': ''},
+				{'name': 'laborPopulation', 'label': 'péon', 'icon': ''},
+				{'name': 'availablePopulation', 'label': 'glandeur', 'icon': '', 'take': 'population', 'substract': 'laborPopulation'},
+				{'name': 'taxRate', 'label': 'taxation', 'icon': ''},
+				{'name': 'hapiness', 'label': 'bonheur', 'icon': ''},
+				{'name': 'grievance', 'label': 'grief', 'icon': ''},
+			],
+			'troops': [
+				{'name': '', 'label': '', 'icon': ''}
+			],
 			/* AJAX SNIFFER */
 				'ajaxSniffer': function(){
 					console.info('KOC ajaxSniffer function');
@@ -146,8 +211,8 @@ String.prototype.capitalize = function(){
 						var filename = url.substring(url.lastIndexOf('/')+1);
 						switch(filename){
 							case 'getChat.php':
-								if( KOC.conf.chat.active && ( KOC.conf.chat.cleanHelp || KOC.conf.chat.highlightLeaders || KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) ){
-									this.addEventListener("load", function(){
+								this.addEventListener("load", function(){
+									if( KOC.conf.chat.active && ( KOC.conf.chat.cleanHelp || KOC.conf.chat.highlightLeaders || KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) ){
 										console.time('getChat load');
 										var r = JSON.parse(this.responseText);
 										if( r.data && r.data.newChats ){
@@ -161,12 +226,12 @@ String.prototype.capitalize = function(){
 											}
 										}
 										console.timeEnd('getChat load');
-									}, false);
-								}
+									}
+								}, false);
 								break;
 							case 'allianceGetLeaders.php':
-								if( KOC.conf.chat.active && KOC.conf.chat.highlightLeaders ){
-									this.addEventListener("load", function(){
+								this.addEventListener("load", function(){
+									if( KOC.conf.chat.active && KOC.conf.chat.highlightLeaders ){
 										console.time('allianceGetLeaders load');
 										var r = JSON.parse(this.responseText);
 										if( r.officers ){
@@ -180,8 +245,44 @@ String.prototype.capitalize = function(){
 										KOC.chat.highlightLeaders( $chatAlliance, 0 );
 										KOC.chat.highlightLeaders( $chatGeneral, 0 );
 										console.timeEnd('allianceGetLeaders load');
-									}, false);
-								}
+									}
+								}, false);
+								break;
+							case 'march.php':
+								this.addEventListener("load", function(){
+									if( KOC.conf.overview.active ){
+										console.time('march load');
+										var r = JSON.parse(this.responseText);
+										if( r.updateSeed ){
+											KOC.overview.update(r.updateSeed);
+										}
+										console.timeEnd('march load');
+									}
+								}, false);
+								break;
+							case 'train.php':
+								this.addEventListener("load", function(){
+									if( KOC.conf.overview.active ){
+										console.time('train load');
+										var r = JSON.parse(this.responseText);
+										if( r.data ){
+											KOC.overview.update(r.data);
+										}
+										console.timeEnd('train load');
+									}
+								}, false);
+								break;
+							case 'updateSeed.php':
+								this.addEventListener("load", function(){
+									if( KOC.conf.overview.active ){
+										console.time('updateSeed load');
+										var r = JSON.parse(this.responseText);
+										if( r.updateSeed ){
+											KOC.overview.update(r.updateSeed);
+										}
+										console.timeEnd('updateSeed load');
+									}
+								}, false);
 								break;
 						}
 
@@ -239,7 +340,16 @@ String.prototype.capitalize = function(){
 							KOC.storeConf();
 
 							if( typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
-							else console.error(mod, func, typeof KOC[ mod ][ func ], KOC[ mod ][ func ]);
+							else console.warn('not a function', mod, func, typeof KOC[ mod ][ func ]);
+						})
+						.on('change', 'select', function(){
+							var $this = $(this),
+								infos = this.id.split('-'),
+								mod = infos[0],
+								option = infos[1];
+
+							KOC.conf[ mod ][ option ] = $this.val();
+							KOC.storeConf();
 						})
 						.on('click', 'button', function(e){
 							e.preventDefault();
@@ -339,7 +449,7 @@ String.prototype.capitalize = function(){
 						KOC.$confPanel.show();
 					}
 				},
-				'generateOption': function(module, option, text, checked){
+				'generateCheckbox': function(module, option, text, checked){
 					return '<p>'
 						 + '<input type="checkbox" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' />'
 						 + '<label for="'+ module +'-'+ option +'">'+ text +'</label>'
@@ -348,11 +458,36 @@ String.prototype.capitalize = function(){
 				'generateButton': function(module, action, text){
 					return '<p><button rel="'+ module +'-'+ action +'">'+ text +'</button></p>';
 				},
+				'generateRadio': function(module, name, values, labels, selected){
+					var code = '<p>';
+					if( values.length && labels.length && values.length == labels.length ){
+						for( var i = 0; i < values.length; i++ ){
+							code += '<input type="radio" id="'+ module +'-'+ values[i] +'" name="'+ module + '_' + name +'" '+ (selected[i] == 1 ? 'checked' : '') +' />'
+						 		  + '<label for="'+ module +'-'+ values[i] +'">'+ labels[i] +'</label>';
+						}
+					}
+					code += '</p>';
+					return code;
+				},
+				'generateSelect': function(module, name, label, selected, options){
+					var code = '<p><label for="'+ module + '_' + name +'">'+ label +'</label><select id="'+ module + '_' + name +'"><option value=""></option>';
+					if( options.values && options.labels && options.values.length == options.labels.length)
+						var values = options.values,
+							labels = options.labels;
+						for( var i = 0; i < values.length; i++ ){
+							code += '<option value="'+ values[i] +'" '+ (values[i] == selected ? 'selected' : '') +'>'+ labels[i] +'</option>';
+						}
+					}
+					code += '</select></p>';
+					return code;
+				},
 			/* GENERIC */
 				'generic': {
 					'cleanLocalStorage': function(){
 						console.info('KOC generic cleanLocalStorage function');
-						localStorage.clear();
+						for( var i = 0; i < KOC.storedObjects.length; i++ ){
+							localStorage.removeItem('koc_' + KOC.storedObjects[i] + '_' + KOC.serverId);
+						}
 					},
 					'optionPanel': function($optionsSection){
 						console.info('KOC generic optionPanel function');
@@ -360,6 +495,35 @@ String.prototype.capitalize = function(){
 						for( var i = 0; i < KOC.modules.length; i++ ){
 							KOC[ KOC.modules[i] ].confPanel( $optionsSection );
 						}
+					},
+					'getServerId': function(){
+						var regexp = new RegExp('^[a-zA-z]+([0-9]+)\.', 'i'),
+							match = regexp.exec(document.location.hostname);
+						if( match ){
+							return match[1];
+						}
+						return null;
+					},
+				},
+			/* FACEBOOK WALL POST POPUP */
+				'fbWallPopup': {
+					'options': {
+						'active': 0,
+						'cancel': 0,
+						'post': 0,
+						'privacyLevel': null,
+					},
+					'privacyLevelList': {'values': [80, 50, 40, 10], 'labels': ['public', 'amis d\'amis', 'amis', 'privé']},
+					'confPanel': function( $section ){
+						console.info('KOC fbWallPopup confPanel function');
+						var code = '<p>'
+							+ '<h2>Popup facebook pour poster sur le mur</h2>'
+							+ KOC.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOC.conf.fbWallPopup.active)
+							+ KOC.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOC.conf.fbWallPopup.cancel, KOC.conf.fbWallPopup.post])
+							+ KOC.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilité', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList)
+							+ '</p>';
+
+						$section.append( code );
 					},
 				},
 			/* CHAT */
@@ -376,6 +540,7 @@ String.prototype.capitalize = function(){
 						'highlightFriends': 0,
 						'highlightFoes': 0,
 					},
+					'stored': ['friends_list', 'foes_list'],
 					'friendsList': [],
 					'foesList': [],
 					'leaders': {},
@@ -383,14 +548,14 @@ String.prototype.capitalize = function(){
 						console.info('KOC chat confPanel function');
 						var code = '<p>'
 							+ '<h2>Chat</h2>'
-							+ KOC.generateOption('chat', 'active', 'Activer le module', KOC.conf.chat.active)
-							+ KOC.generateOption('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable)
-							+ KOC.generateOption('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp)
+							+ KOC.generateCheckbox('chat', 'active', 'Activer le module', KOC.conf.chat.active)
+							+ KOC.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable)
+							+ KOC.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp)
 							+ KOC.generateButton('chat', 'onRight', 'Repositionner le chat à droite')
-							+ KOC.generateOption('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders)
+							+ KOC.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders)
 							+ KOC.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie')
-							+ KOC.generateOption('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends)
-							+ KOC.generateOption('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes)
+							+ KOC.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends)
+							+ KOC.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes)
 							+ '</p>';
 
 						$section.append( code );
@@ -494,7 +659,7 @@ String.prototype.capitalize = function(){
 
 						//highlightFriendsAndFoes
 							try{
-								var persistentFriendsList = localStorage.getObject('koc_chat_friends_list');
+								var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.serverId);
 								if( persistentFriendsList ){
 									KOC.chat.friendsList = persistentFriendsList.split(',');
 								}
@@ -504,7 +669,7 @@ String.prototype.capitalize = function(){
 
 						//highlightFoes
 							try{
-								var persistentFoesList = localStorage.getObject('koc_chat_foes_list');
+								var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.serverId);
 								if( persistentFoesList ){
 									KOC.chat.foesList = persistentFoesList.split(',');
 								}
@@ -690,7 +855,7 @@ String.prototype.capitalize = function(){
 						},
 						'storeFriendsList': function(){
 							console.info('KOC storeFriendsList function');
-							localStorage.setObject('koc_chat_friends_list', KOC.chat.friendsList.join(','));
+							localStorage.setObject('koc_chat_friends_list_' + KOC.serverId, KOC.chat.friendsList.join(','));
 						},
 					/* highlight foes */
 						'highlightFoesOn': function(){
@@ -704,7 +869,7 @@ String.prototype.capitalize = function(){
 						},
 						'storeFoesList': function(){
 							console.info('KOC storeFoesList function');
-							localStorage.setObject('koc_chat_foes_list', KOC.chat.foesList.join(','));
+							localStorage.setObject('koc_chat_foes_list_' + KOC.serverId, KOC.chat.foesList.join(','));
 						},
 					/* highlight friends and foes */
 						'highlightFriendsAndFoes': function( nbMsg ){
@@ -734,13 +899,14 @@ String.prototype.capitalize = function(){
 						'active': 1,
 						'automatic': 0,
 					},
+					'stored': ['automatic_rules', 'temporary_rules'],
 					'automaticRules': {},
 					'temporaryRules': {},
 					'confPanel': function( $section ){
 						console.info('KOC transport confPanel function');
 						var code = '<p>'
 							+ '<h2>Transport</h2>'
-							+ KOC.generateOption('transport', 'active', 'Activer le module', KOC.conf.transport.active)
+							+ KOC.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
 							+ '</p>';
 
 						$section.append( code );
@@ -773,13 +939,12 @@ String.prototype.capitalize = function(){
 							//garder x minerais dans la ville 1, le reste va à la ville 2
 							//approvisionnement ville x à partri de ville y si ressources < z
 							//activation / désactivation par ville
-
 					},
 					'on': function(){
 						console.info('KOC transport on function');
 
 						try{
-							var persistentTransportAutomaticRules = localStorage.getObject('koc_transport_automatic_rules');
+							var persistentTransportAutomaticRules = localStorage.getObject('koc_transport_automatic_rules_' + KOC.serverId);
 							if( persistentTransportAutomaticRules ){
 								KOC.transport.automaticRules = persistentTransportAutomaticRules;
 							}
@@ -788,22 +953,26 @@ String.prototype.capitalize = function(){
 						}
 
 						if( KOC.conf.transport.automatic ){
-							KOC.conf.transport.automaticOn();
+							KOC.transport.automaticOn();
 						}
 
 						try{
-							var persistentTransportTemporaryRules = localStorage.getObject('koc_transport_temporary_rules');
+							var persistentTransportTemporaryRules = localStorage.getObject('koc_transport_temporary_rules_' + KOC.serverId);
 							if( persistentTransportTemporaryRules ){
 								KOC.transport.temporaryRules = persistentTransportTemporaryRules;
 							}
 						} catch(e){
 							console.error(e);
 						}
+
+						if( KOC.conf.transport.temporary ){
+							KOC.transport.temporaryOn();
+						}
 					},
 					'off': function(){
 						console.info('KOC transport off function');
-
-						KOC.conf.transport.automaticOff();
+						KOC.transport.automaticOff();
+						KOC.transport.temporaryOff();
 					},
 					'automaticOn': function(){
 						console.info('KOC transport automaticOn function');
@@ -817,6 +986,327 @@ String.prototype.capitalize = function(){
 					//getTroopsByTown
 					//getTransportDuration
 				},
+			/* OVERVIEW */
+				'overview': {
+					'options': {
+						'active': 1,
+						'position': {'top': 100, 'left': 100},
+						'size': {'width': false, 'height': false},
+						'replace': 0,
+						'moveable': 1,
+					},
+					'confPanel': function( $section ){
+						console.info('KOC overview confPanel function');
+						var code = '<p>'
+							+ '<h2>Vue globale</h2>'
+							+ KOC.generateCheckbox('overview', 'active', 'Activer le module', KOC.conf.overview.active)
+							+ KOC.generateRadio('overview', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable])
+							+ KOC.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position')
+							+ KOC.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions')
+							+ '</p>';
+
+						$section.append( code );
+					},
+					'on': function(){
+						console.info('KOC overview on function');
+						$head.append( $('<style id="koc-overview-css">').text(kocOverviewCss) );
+
+						var $overview = $('<section id="koc-overview">'),
+							fixed-headers = '<table id="overview-fixed-headers"><thead><tr>',
+							fixed-cols = '<table id="overview-fixed-cols">',
+							data-table = '<table id="overview-data">',
+							data-line = '';
+
+						//headers
+						for( var i = 0; i < KOC.cities.length; i++ ){
+							fixed-headers += '<th>'+ KOC.cities[i].name +'</th>';
+						}
+
+						//data line for cities
+						for( var j = 0; j < KOC.cities.length; j++ ){
+							data-line += '<td></td>';
+						}
+
+						//ressources
+						fixed-cols += '<tbody class="ressources">';
+						data-table += '<tbody class="ressources">';
+						for( var i = 0; i < KOC.ressources.length; i++ ){
+							fixed-cols += '<tr><td><img src="'+ KOC.ressources[i].icon +'" title="'+ KOC.ressources[i].label +'"></td><td></td></tr>';
+							data-table += '<tr>' + data-line + '</tr>';
+						}
+						fixed-cols += '</tbody>';
+						data-table += '</tbody>';
+
+						//troops
+						fixed-cols += '<tbody class="troops">';
+						data-table += '<tbody class="troops">';
+						for( var i = 0; i < KOC.troops.length; i++ ){
+							fixed-cols += '<tr><td><img src="'+ KOC.troops[i].icon +'" title="'+ KOC.troops[i].label +'"></td><td></td></tr>';
+							data-table += '<tr>' + data-line + '</tr>';
+						}
+						fixed-cols += '</tbody>';
+						data-table += '</tbody>';
+
+						//population
+						fixed-cols += '<tbody class="population">';
+						data-table += '<tbody class="popula)ion">';
+						for( var i = 0; i < KOC.population.length; i++ ){
+							fixed-cols += '<tr><td><img src="'+ KOC.population[i].icon +'" title="'+ KOC.population[i].label +'"></td><td></td></tr>';
+							data-table += '<tr>' + data-line + '</tr>';
+						}
+						fixed-cols += '</tbody>';
+						data-table += '</tbody>';
+
+						fixed-headers += '</tr></thead></table>';
+						fixed-cols += '</table>';
+						data-table += '</table>';
+
+						$overview
+							.append( fixed-headers + fixed-col + data-table )
+							//highlight from headers
+							.on('mouseenter', 'th', function(){
+								var line = KOC.overview.$fixed-headers-ths.index( $(this).addClass('highlight') );
+								KOC.overview.$data-table-tbodies.each2(function(i, $tbody){
+									$tbody.find('tr').each2(function(j, $tr){
+										$tr.eq(col).addClass('highlight');
+									});
+								});
+							})
+							.on('mouseleave', 'th', function(){
+								var line = KOC.overview.$fixed-headers-ths.index( $(this).removeClass('highlight') );
+								KOC.overview.$data-table-tbodies.each2(function(i, $tbody){
+									$tbody.find('tr').each2(function(j, $tr){
+										$tr.eq(col).removeClass('highlight');
+									});
+								});
+							})
+							//highlight from fixed cols
+							.on('mouseenter', '#overview-fixed-cols tr', function(){
+								var $this = $(this).addClass('highlight'),
+									c = '.' + $this.closest('tbody').attr('class'),
+									line = KOC.overview.$fixed-cols-tbodies.filter(c).find('tr').index( $this );
+								KOC.overview.$data-table-tbodies.filter(c).find('tr').eq(line).addClass('highlight');
+							})
+							.on('mouseleave', '#overview-fixed-cols tr', function(){
+								var $this = $(this).removeClass('highlight'),
+									c = '.' + $this.closest('tbody').attr('class'),
+									line = KOC.overview.$fixed-cols-tbodies.filter(c).find('tr').index( $this );
+								KOC.overview.$data-table-tbodies.filter(c).find('tr').eq(line).removeClass('highlight');
+							})
+							//highlight from body
+							.on('mouseenter', '#overview-data-table tr', function(){
+								var $this = $(this).addClass('highlight'),
+									c = '.' + $this.closest('tbody').attr('class'),
+									line = KOC.overview.$data-table-tbodies.filter(c).find('tr').index( $this );
+								KOC.overview.$fixed-cols-tbodies.filter(c).find('tr').eq(line).addClass('highlight');
+							})
+							.on('mouseleave', '#overview-data-table tr', function(){
+								var $this = $(this).removeClass('highlight'),
+									c = '.' + $this.closest('tbody').attr('class'),
+									line = KOC.overview.$data-table-tbodies.filter(c).find('tr').index( $this );
+								KOC.overview.$fixed-cols-tbodies.filter(c).find('tr').eq(line).removeClass('highlight');
+							})
+							.on('mouseenter', '#overview-data-table td', function(){
+								var $this = $(this),
+									col = $this.parent().find('td').index( $this );
+								KOC.overview.$fixed-headers-ths.eq(col).addClass('highlight');
+							})
+							.on('mouseleave', '#overview-data-table td', function(){
+								var $this = $(this),
+									col = $this.parent().find('td').index( $this );
+								KOC.overview.$fixed-headers-ths.eq(col).removeClass('highlight');
+							});
+
+						$('body').append( $overview );
+						KOC.$overview = $('#koc-overview');
+						KOC.overview.$fixed-headers = $('#koc-overview-fixed-headers');
+						KOC.overview.$fixed-headers-ths = KOC.overview.$fixed-headers.find('th');
+						KOC.overview.$fixed-cols = $('#koc-overview-fixed-cols');
+						KOC.overview.$fixed-cols-tbodies = KOC.overview.$fixed-cols.find('tbody');
+						KOC.overview.$data-table = $('#koc-overview-data');
+						KOC.overview.$data-table-tbodies = KOC.overview.$data-table.find('tbody');
+					},
+					'off': function(){
+						console.info('KOC overview off function');
+						$('#koc-overview-css').remove();
+						KOC.$overview.remove();
+						KOC.$overview = null;
+					},
+					'update': function( data ){
+						if( data.city ){
+							var popFixedTrs = KOC.overview.$fixed-cols-tbodies.filter('.population').find('tr'),
+								popDataTrs = KOC.overview.$data-table-tbodies.filter('.population').find('tr'),
+								resFixedTrs = KOC.overview.$fixed-cols-tbodies.filter('.ressources').find('tr'),
+								resDataTrs = KOC.overview.$data-table-tbodies.filter('.ressources').find('tr'),
+								troFixedTrs = KOC.overview.$fixed-cols-tbodies.filter('.troops').find('tr'),
+								troDataTrs = KOC.overview.$data-table-tbodies.filter('.troops').find('tr'),
+								sums = {'production': {}, 'ressources': {}, 'troops': {}};
+
+							for( var i = 0; i < KOC.cities.length; i++ ){
+								var city = data.city[ KOC.cities[i].id ];
+								if( city ){
+										var prod = city.production;
+										if( prod ){
+											//production
+												for( var j = 0; j < KOC.production.length; j++ ){
+													var type = KOC.production[i];
+													if( prod.hasOwnProperty(type.name) ){
+														resDataTrs.eq(j).find('td').eq(i)
+															.text(function(){
+																if( !sum.production.hasOwnProperty(type.name) ) sum.production[ type.name ] = 0;
+																sum.production[ type.name ] += prod[ type.name ];
+																return KOC.format( prod[ type.name ] );
+															})
+															.attr('title', function(){
+																var title = '';
+																if( type.upkeep && prod[ type.upkeep ] ){
+																	if( !sum.production.hasOwnProperty(type.upkeep) ) sum.production[ type.upkeep ] = 0;
+																	sum.production[ type.upkeep ] += prod[ type.upkeep ];
+																	title += 'dépense : ' + KOC.format( prod[ type.upkeep ] );
+																}
+																if( type.productivity && prod[ type.productivity ] ){
+																	if( title.length ) title += ' | ';
+																	if( !sum.production.hasOwnProperty(type.productivity) ) sum.production[ type.productivity ] = 0;
+																	sum.production[ type.productivity ] += prod[ type.productivity ];
+																	title += 'production : ' + KOC.format( prod[ type.productivity ] );
+																}
+																if( type.cap && prod[ type.cap ] ){
+																	if( title.length ) title += ' | ';
+																	if( !sum.production.hasOwnProperty(type.cap) ) sum.production[ type.cap ] = 0;
+																	sum.production[ type.cap ] += prod[ type.cap ];
+																	title += 'plafond : ' + KOC.format( prod[ type.cap ] );
+																}
+																return title;
+															});
+													}
+												}
+
+											//population
+												for( var j = 0; j < KOC.population.length; j++ ){
+													var type = KOC.population[i];
+													if( prod.hasOwnProperty(type.name) ){
+														resDataTrs.eq(j).find('td').eq(i)
+															.text(function(){
+																if( !sum.population.hasOwnProperty(type.name) ) sum.population[ type.name ] = 0;
+																sum.population[ type.name ] += prod[ type.name ];
+																return KOC.format( prod[ type.name ] );
+															});
+													} else if( type.name == 'availablePopulation' ) {
+														if( prod.hasOwnProperty(type.take) && prod.hasOwnProperty(type.substract) ){
+															resDataTrs.eq(j).find('td').eq(i)
+																.text(function(){
+																	if( !sum.population.hasOwnProperty(type.name) ) sum.population[ type.name ] = 0;
+																	var n = prod[ type.take ] - prod[ type.substract ];
+																	sum.population[ type.name ] += n;
+																	return KOC.format( n );
+																});
+														}
+													}
+												}
+										}
+								}
+							}
+
+							if( sums.production ){
+								for( var j = 0; j < KOC.production.length; j++ ){
+									var type = KOC.production[i];
+									resFixedTrs.eq(j).find('td').eq(1)
+										.text(function(){
+											return sum.production[ type.name ].kocFormat();
+										})
+										.attr('title', function(){
+											var title = '';
+											if( type.upkeep && prod[ type.upkeep ] ){
+												title += 'dépense : ' + KOC.format( sum.production[ type.upkeep ] );
+											}
+											if( type.productivity && prod[ type.productivity ] ){
+												title += 'production : ' + KOC.format( sum.production[ type.productivity ] );
+											}
+											if( type.cap && prod[ type.cap ] ){
+												title += 'plafond : ' + KOC.format( sum.production[ type.cap ] );
+											}
+											return title;
+										});
+								}
+							}
+							if( sums.population ){
+								for( var j = 0; j < KOC.population.length; j++ ){
+									var type = KOC.population[i];
+									resFixedTrs.eq(j).find('td').eq(1)
+										.text(function(){
+											return KOC.format( sum.population[ type.name ] );
+										});
+								}
+							}
+						}
+					},
+					/* moveable */
+						'moveableOn': function(){
+							console.info('KOC overview movableOn function');
+							KOC.overview.replaceOff();
+
+							KOC.$overview
+								.draggable({
+									'helper': "original",
+									handle: '.drag-handle',
+									'stop': function(event, ui){
+										KOC.conf.overview.position = ui.position;
+										KOC.storeConf();
+									}
+								})
+								.resizable({
+									minWidth: 250,
+									minHeight: 250,
+									stop: function(event, ui){
+										KOC.conf.overview.size = ui.size;
+										KOC.storeConf();
+									}
+								})
+								.css({
+									'top': KOC.conf.overview.position.top,
+									'left': KOC.conf.overview.position.left,
+								})
+								.prepend( $dragHandle.clone() );
+						},
+						'moveableOff': function(){
+							console.info('KOC overview moveableOff function');
+							$('#koc-overview-moveable').remove();
+							KOC.$overview
+								.draggable('destroy')
+								.resizable('destroy')
+								.find('.drag-handle').remove();
+						},
+					/* replace */
+						'replaceOn': function(){
+							//@toto
+							var $b = $('#'),
+								p = $b.offset();
+							KOC.$overview.css({
+								'height': $b.outerHeight(),
+								'width': $b.outerWidth(),
+								'top': p.top,
+								'left': p.left
+							});
+						},
+						'replaceOff': function(){
+							console.info('KOC overview moveableOff function');
+							$('#koc-overview-moveable').remove();
+							KOC.$overview
+								.draggable('destroy')
+								.resizable('destroy')
+								.find('.drag-handle').remove();
+						},
+						'resetPlacement': function(){
+							KOC.$overview.css( KOC.overview.conf.position );
+							KOC.conf.overview.position = KOC.overview.options.position;
+							KOC.storeConf();
+						},
+						'resetDimensions': function(){
+							KOC.$overview.css( KOC.overview.conf.size );
+							KOC.conf.overview.size = KOC.overview.options.size;
+							KOC.storeConf();
+						},
+				}
 			/* default configuration */
 				//each module has its own default conf
 				'defaultConf': {
@@ -827,8 +1317,6 @@ String.prototype.capitalize = function(){
 						'visible': 0,
 					}
 				},
-			'conf': { // will contains all the modules default configuration options
-			}
 		};
 
 		console.time('Koc init');

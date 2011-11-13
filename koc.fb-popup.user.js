@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name			KOC-FB
+// @name			KOC-FB-POPUP
 // @version			0.1
 // @namespace		KOC
 // @description		facebook popup management
@@ -17,6 +17,7 @@ if( typeof window.Storage != "undefined" ){
 	var kocConf = localStorage.getObject('koc_conf');
 	if( kocConf && kocConf.fb-wall-popup.active ){
 		var channel = document.querySelector('#uiserver_form input[name=channel]');
+		console.log('channel', channel);
 		if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
 			if( kocConf.fb-wall-popup.cancel ){
 				document.getElementById('uvsplj_8').click();

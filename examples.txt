@@ -4538,4 +4538,7 @@ fetchMapTiles.php
 		"a198": "les phenomen poutreur",
 		"a595": "LeS GueRRierS LeGenDaireS"
 	}
-}*/
+}
+viewCourt.php
+{"ok":true,"courtItems":["893"],"dailyActionFlag":"0","playerInfo":{"datejoinUnixTime":"1311433237","truceExpireUnixTime":"0","userId":"8333758","displayName":"Jeanpaul9cnlm","email":"","fbuid":"1639410901","playerSex":"M","usertype":"1","status":"1","dateJoined":"2011-07-23 08:00:37","lastLogin":"2011-11-13 07:02:15","eventTimestamp":"0000-00-00 00:00:00","eventStatus":"1","warStatus":"1","allianceId":"769","might":4106052,"title":"73","truceExpireTimestamp":"0000-00-00 00:00:00","fogExpireTimestamp":"2011-07-30 08:00:37","cnt_newmsg":"0","cnt_friendreq":"0","cnt_logins":"3872","cnt_passreset":"0","cnt_connections":"0","avatarId":"11","photo_host":null,"photo_dir":null,"photo_subdir":null,"photo_name":null,"allianceName":"LES GAIS POUTREURS"},"cityCount":7}
+*/

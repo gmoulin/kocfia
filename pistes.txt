@@ -29,7 +29,7 @@ function getAlliance (aid){
   else if (Seed.allianceDiplomacies.friendly && Seed.allianceDiplomacies.friendly['a'+aid] != null)
       return ['Amicale',Seed.allianceDiplomacies.allianceId, Seed.allianceDiplomacies.allianceName];
   else if (Seed.allianceDiplomacies.hostile && Seed.allianceDiplomacies.hostile['a'+aid] != null)
-      return ['Hostile',Seed.allianceDiplomacies.hostile['a'+aid].allianceId, Seed.allianceDiplomacies.hostile['a'+aid].allianceName]; 
+      return ['Hostile',Seed.allianceDiplomacies.hostile['a'+aid].allianceId, Seed.allianceDiplomacies.hostile['a'+aid].allianceName];
 }
 _________________________
 
@@ -37,68 +37,68 @@ _________________________
         msg = msg.replace(':-)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00100-smile.gif\">');
         msg = msg.replace(':=)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00100-smile.gif\">');
         msg = msg.replace('^^', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00100-smile.gif\">');
-        
+
         msg = msg.replace(':=(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00101-sadsmile.gif\">');
         msg = msg.replace(':-(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00101-sadsmile.gif\">');
-        
+
         msg = msg.replace(':-D', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00102-bigsmile.gif\">');
         msg = msg.replace(':=D', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00102-bigsmile.gif\">');
-        
+
         msg = msg.replace(';-(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00106-crying.gif\">');
         msg = msg.replace(';=(', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00106-crying.gif\">');
-        
+
         msg = msg.replace(';-)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00105-wink.gif\">');
         msg = msg.replace(';=)', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00105-wink.gif\">');
-       
+
         msg = msg.replace(':-*', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00109-kiss.gif\">');
         msg = msg.replace(':=*', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00109-kiss.gif\">');
-       
+
         msg = msg.replace(":^)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00112-wondering.gif\">');
-    
+
         msg = msg.replace("I=)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00113-sleepy.gif\">');
         msg = msg.replace("I-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00113-sleepy.gif\">');
         msg = msg.replace("|-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00113-sleepy.gif\">');
-        
+
         msg = msg.replace("8-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
         msg = msg.replace("8=)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
         msg = msg.replace("B-)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
         msg = msg.replace("B=)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00103-cool.gif\">');
-        
+
         msg = msg.replace("(ci)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00176-smoke.gif\">');
         msg = msg.replace("(smoke)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00176-smoke.gif\">');
         msg = msg.replace("(smoking)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00176-smoke.gif\">');
-        
+
         msg = msg.replace("(fubar)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00181-fubar.gif\">');
-      
+
         msg = msg.replace(":-&", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00119-puke.gif\">');
         msg = msg.replace(":=&", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00119-puke.gif\">');
-       
+
         msg = msg.replace(">:)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00116-evilgrin.gif\">');
         msg = msg.replace("]:)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00116-evilgrin.gif\">');
-        
+
         msg = msg.replace("(:|", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00107-sweating.gif\">');
-     
+
         msg = msg.replace(":=P", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00110-tongueout.gif\">');
         msg = msg.replace(":-P", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00110-tongueout.gif\">');
         msg = msg.replace(":=p", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00110-tongueout.gif\">');
-       
+
        msg = msg.replace(":-$", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00111-blush.gif\">');
        msg = msg.replace(":=$", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00111-blush.gif\">');
        msg = msg.replace(':">', '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00111-blush.gif\">');
-   
+
        msg = msg.replace("(party)", '<img class=emoicon src=\"http://www.skype-emoticons.com/images/emoticon-00123-party.gif\">');
-    }   
+    }
 _________________________
 
 function displayReport (rptid, side){
   var params = unsafeWindow.Object.clone(unsafeWindow.g_ajaxparams);
   params.rid = rptid;
   params.side = side;
-  
+
   new MyAjaxRequest(unsafeWindow.g_ajaxpath + "ajax/fetchReport.php" + unsafeWindow.g_ajaxsuffix, {
     method: "post",
     parameters: params,
-    onSuccess: function (rslt) {   
+    onSuccess: function (rslt) {
       if (notify)
         notify (rslt.errorMsg);
     },
@@ -107,7 +107,7 @@ function displayReport (rptid, side){
         notify ('AJAX ERROR');
     },
   });
-} 
+}
 _________________________
 
 /************************ Check Tournoi *************************/
@@ -117,7 +117,7 @@ _________________________
     f.e_eachMinute();
    },
    minuteTimer : null,
-   e_eachMinute : function (){   
+   e_eachMinute : function (){
      var f = CheckTournoi;
      var now = unixTime();
      row = [];
@@ -139,8 +139,8 @@ _________________________
         });
        f.minuteTimer = setTimeout (f.e_eachMinute, 600000);
      }
-   },  
- } 
+   },
+ }
 _________________________
 
             for (r=1; r<13; r++){
@@ -161,5 +161,21 @@ _________________________
 
     new MyAjaxRequest(unsafeWindow.g_ajaxpath + "ajax/courtDoAction.php" + unsafeWindow.g_ajaxsuffix, {
 _________________________
+window.fortcost -> prix des défenses
+window.fortstats ->
 
-  
+window.itemlist
+
+window.kocRecipes
+
+window.provincenames
+
+window.recipelist
+
+window.resourceinfo
+
+window.seed
+
+window.unitcost
+
+window.unitmight

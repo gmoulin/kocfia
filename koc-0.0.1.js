@@ -1,12 +1,12 @@
 console.info('koc start');
 
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
-		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}";
-		+ "\n#koc-conf-panel { max-height: 700px; }"
+		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
+		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
+		+ "\n#koc-conf-panel { max-height: 700px; display: none; position: absolute; z-index: 99999; }"
 		+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
 		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
 		+ "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }"
-		+ "\n#koc-conf-panel { display: none; position: absolute; z-index: 99999; }"
 		+ "\n#koc-conf-panel-tabs { padding-left: 10px; }"
 		+ "\n.koc-conf-panel-tab.on:after, .koc-conf-panel-tab.off:after { content: ''; position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-width: 10px; border-style: solid; }"
 		+ "\n.koc-conf-panel-tab.on:after { border-color: transparent green green transparent; }"
@@ -47,16 +47,19 @@ var kocChatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .cha
 var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
 
 var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 99998; display: none; }"
-		+ "\n#koc-overview .overview-parts-toggle { float: left; }"
-		+ "\n#koc-overview #koc-overview-fixed-col { float:left; clear: left; margin-top: 20px; }"
-		+ "\n#koc-overview #koc-overview-data { overflow: auto; padding-right: 20px; padding-bottom: 20px; float:left; }"
-		+ "\n#koc-overview th, #koc-overview td { height: 20px; width: 35px; }"
-		+ "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F0ECEB; }"
-		+ "\n#koc-overview-fixedHeaders { float: left; }"
-		+ "\n#koc-overview-fixedCols { clear: left; float: left; margin-top: 22px; }"
-		+ "\n#koc-overview-fixedCols tr td:first-child { width:20px; }"
-		+ "\n#koc-overview-fixedCols img { width:20px; }"
-		+ "\n#koc-overview-data td { text-align: right; }"
+		+ "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }"
+		+ "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }"
+		+ "\n#koc-overview table { width: 100%; }"
+		+ "\n#koc-overview thead { height: 20px; }"
+		+ "\n#koc-overview thead tr { display: block; position: relative; height: 20px; }"
+		+ "\n#koc-overview tbody { margin-right: 20px; }"
+		+ "\n#koc-overview tbody { display: block; overflow: auto; width: 100%; }"
+		+ "\n#koc-overview th, #koc-overview td { height: 20px; width: 45px; }"
+		+ "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F8E0A8; }"
+		+ "\n#koc-overview tr td.sum { background-color: #D9F4F1; }"
+		+ "\n#koc-overview tr td:first-child, #koc-overview tr th:first-child { width:20px; }"
+		+ "\n#koc-overview img { width:20px; }"
+		+ "\n#koc-overview tr td:not(:first-child) { text-align: right; }"
 ;
 
 /*
@@ -112,18 +115,35 @@ String.prototype.capitalize = function(){
 				if( typeof num != 'string' ){
 					num = '' + Math.floor(num);
 				}
-				var l = num.length;
+				var l = num.length,
+					suffix = '',
+					decimal;
 				num = parseFloat(num);
 				if( l <= 3 ){
 					return num;
 				} else if( l <= 6 ){
-					return Math.floor(num /          1000) + 'K';
+					num = (num / 1000).toFixed(2);
+					suffix = 'K';
 				} else if( l <= 9 ){
-					return Math.floor(num /       1000000) + 'M';
+					num = (num / 1000000).toFixed(2);
+					suffix = 'M';
 				} else if( l <= 12 ){
-					return Math.floor(num /    1000000000) + 'G';
+					num = (num / 1000000000).toFixed(2);
+					suffix = 'G';
 				} else {
-					return Math.floor(num /    1000000000) + 'G';
+					num = (num / 1000000000).toFixed(2);
+					suffix = 'G';
+				}
+
+				var s = '' + num,
+					decimal = s.substr(s.length - 3, 2),
+					s = s.substr(0, s.length - 3);
+				if( s.length == 1 ){
+					return num + suffix;
+				} else if( s.length == 2 ){
+					return parseFloat(num).toFixed(1) + suffix;
+				} else {
+					return Math.floor( num ) + suffix;
 				}
 			},
 			'decodeFormat': function( num ){
@@ -161,7 +181,7 @@ String.prototype.capitalize = function(){
 				time = Math.floor( parseFloat( time ) );
 				if( time > 86400 ){ //1 day
 					time = time / 3600; //get time in days
-					return Math.floor(time / 24)+'d';
+					return Math.floor(time / 24)+'j';
 				} else {
 					if( time < 61 ){
 						return time + 's';
@@ -171,7 +191,6 @@ String.prototype.capitalize = function(){
 						return Math.floor( time / 60 ) + 'm';
 					}
 				}
-
 			},
 			'init': function(){
 				console.info('KOC init function');
@@ -249,7 +268,7 @@ String.prototype.capitalize = function(){
 				{'name': 'resource2x3600', 'label': 'bois', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'name': 'resource3x3600', 'label': 'pierre', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'name': 'resource4x3600', 'label': 'minerai', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'AETHERSTONE', 'label': 'pierre d\'éther', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
+				{'name': 'resource5', 'label': 'pierre d\'éther', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
 			],
 			/*'resources_productivity': [
 				{'name': 'resource1Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
@@ -271,11 +290,11 @@ String.prototype.capitalize = function(){
 				{'name': 'resource4Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_autonomy': [
-				{'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'population': [
 				{'name': 'population', 'label': 'population', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
@@ -328,7 +347,7 @@ String.prototype.capitalize = function(){
 					'resource4Productivity': {'index': 2, 'type': 'rec4', 'var': 'res'},
 				},*/
 				'resources_upkeep': {
-					'upkeep': {'index': 3, 'var': 'gold'},
+					'upkeep': {'index': 2, 'var': 'gold'},
 					'resource1Upkeep': {'index': 3, 'type': 'rec1', 'var': 'res'},
 					'resource2Upkeep': {'index': 3, 'type': 'rec2', 'var': 'res'},
 					'resource3Upkeep': {'index': 3, 'type': 'rec3', 'var': 'res'},
@@ -869,15 +888,15 @@ String.prototype.capitalize = function(){
 							$chat
 								.draggable({
 									'helper': "original",
-									handle: '.drag-handle',
+									'handle': '.drag-handle',
 									'stop': function(event, ui){
 										KOC.conf.chat.position = ui.position;
 										KOC.storeConf();
 									}
 								})
 								.resizable({
-									minWidth: 250,
-									resize: function(event, ui){
+									'minWidth': 250,
+									'resize': function(event, ui){
 										$chat
 											.find('.comm_body')
 												.css('height', function(){ return ui.size.height - 20;})
@@ -888,7 +907,7 @@ String.prototype.capitalize = function(){
 											.width(function(){ return ui.size.width - 65; })
 											.siblings('.button20').css('left', function(){ return ui.size.width - 55; });
 									},
-									stop: function(event, ui){
+									'stop': function(event, ui){
 										KOC.conf.chat.size = ui.size;
 										KOC.storeConf();
 									}
@@ -1159,11 +1178,19 @@ String.prototype.capitalize = function(){
 					'options': {
 						'active': 1,
 						'position': {'top': 100, 'left': 100},
-						'size': {'width': false, 'height': false},
+						'size': {'width': 500, 'height': 300},
 						'replace': 0,
 						'moveable': 1,
 						'visible': 0,
-						'parts_visible': ['population', 'troops', 'resources', /*'resources_productivity',*/ 'resources_cap', 'resources_upkeep', 'resources_autonomy'],
+						'parts_visible': {
+							'population': 1,
+							'troops': 1,
+							'resources': 1,
+							/*'resources_productivity': 1,*/
+							'resources_cap': 1,
+							'resources_upkeep': 1,
+							'resources_autonomy': 1,
+						},
 					},
 					'parts': {
 						'population': 'population',
@@ -1191,7 +1218,7 @@ String.prototype.capitalize = function(){
 						$head.append( $('<style id="koc-overview-css">').text(kocOverviewCss) );
 
 						var dataTable = '<table id="koc-overview-data">',
-							headers = '<thead><tr><th>&nbsp;</th>',
+							headers = '<thead><tr><th>&nbsp;</th><th>&nbsp;</th>',
 							dataLine = '',
 							$overview = $('<section id="koc-overview" class="ui-widget ui-widget-content ui-corner-all">');
 
@@ -1199,8 +1226,8 @@ String.prototype.capitalize = function(){
 							var toggles = '<p class="overview-parts-toggles">';
 							for( var p in KOC.overview.parts ){
 								if( KOC.overview.parts.hasOwnProperty(p) ){
-									toggles += '<label for="overview-'+ p +'">'+ KOC.overview.parts[p] +'</label>'
-										+ '<input type="checkbox" id="overview-'+ p +'" name="'+ p +'" '+ ($.inArray(p, KOC.conf.overview.parts_visible) > -1 ? 'checked' : '' ) +'>';
+									toggles += '<input type="checkbox" id="overview-'+ p +'" name="'+ p +'" '+ (KOC.conf.overview.parts_visible[p] ? 'checked' : '' ) +'>'
+											+  '<label for="overview-'+ p +'">'+ KOC.overview.parts[p] +'</label>';
 								}
 							}
 							toggles += '</p>';
@@ -1213,71 +1240,77 @@ String.prototype.capitalize = function(){
 							}
 							headers += '</tr></thead>';
 
-						dataTable += headers;
+						dataTable += headers + '<tbody>';
 
 						//bodies
-							for( var i = 0; i < KOC.overview.parts.length; i++ ){
-								var p = KOC.overview.parts[i];
-								dataTable += '<tbody class="'+ p +'">';
-								for( var i = 0; i < KOC[p].length; i++ ){
-									dataTable += '<tr><td><img src="'+ KOC[p][i].icon +'" title="'+ KOC[p][i].label +'"></td>' + dataLine + '</tr>';
+							for( var p in KOC.overview.parts ){
+								if( KOC.overview.parts.hasOwnProperty(p) ){
+									for( var i = 0; i < KOC[p].length; i++ ){
+										dataTable += '<tr class="'+ p +'">'
+												  +  '<td><img src="'+ KOC[p][i].icon +'" title="'+ KOC[p][i].label +'"></td>'
+												  +  '<td class="sum"></td>'
+												  +  dataLine + '</tr>';
+									}
 								}
-								dataTable += '</tbody>';
 							}
 
-							dataTable += '</table>';
+						dataTable += '</tbody></table>';
 
-						$overview
-							.append( toggles + dataTable )
+						$overview.append( toggles + dataTable );
+
+						$body.append( $overview );
+						KOC.$overview = $('#koc-overview');
+						KOC.overview.$toggles = KOC.$overview.find('.overview-parts-toggles');
+						KOC.overview.$table = $('#koc-overview-data');
+						KOC.overview.$header = KOC.overview.$table.find('thead');
+						KOC.overview.$headersThs = KOC.overview.$header.find('th');
+						KOC.overview.$tbody = KOC.overview.$table.find('tbody');
+						KOC.overview.$tbodyTrs = KOC.overview.$tbody.find('tr');
+
+						KOC.$overview
 							//highlight from headers
 								.on('mouseenter', 'th', function(){
 									var col = KOC.overview.$headersThs.index( $(this).addClass('highlight') );
-									KOC.overview.$tbodies.each2(function(i, $tbody){
-										$tbody.find('tr').each2(function(j, $tr){
-											$tr.find('td').eq(col).addClass('highlight');
-										});
+									KOC.overview.$tbodyTrs.find('tr').each2(function(j, $tr){
+										$tr.find('td').eq(col).addClass('highlight');
 									});
 								})
 								.on('mouseleave', 'th', function(){
 									var col = KOC.overview.$headersThs.index( $(this).removeClass('highlight') );
-									KOC.overview.$tbodies.each2(function(i, $tbody){
-										$tbody.find('tr').each2(function(j, $tr){
-											$tr.find('td').eq(col).removeClass('highlight');
-										});
+									KOC.overview.$tbodyTrs.find('tr').each2(function(j, $tr){
+										$tr.find('td').eq(col).removeClass('highlight');
 									});
 								})
 							//highlight from body
-								.on('mouseenter', 'tbody tr', function(){
-									$(this).addClass('highlight');
-								})
-								.on('mouseleave', 'tbody tr', function(){
-									$(this).removeClass('highlight');
-								})
 								.on('mouseenter', 'tbody td', function(){
 									var $this = $(this),
-										col = $this.parent().find('td').index( $this );
+										col = $this.parent().addClass('highlight').find('td').index( $this );
 									KOC.overview.$headersThs.eq(col).addClass('highlight');
 								})
 								.on('mouseleave', 'tbody td', function(){
 									var $this = $(this),
-										col = $this.parent().find('td').index( $this );
+										col = $this.parent().removeClass('highlight').find('td').index( $this );
 									KOC.overview.$headersThs.eq(col).removeClass('highlight');
 								})
-								.delegate('click', '.overview-parts-toggles input', function(e){
-									e.preventDefault();
+							//toggles
+								.on('click', '.overview-parts-toggles input', function(e){
 									var $this = $(this),
-										c = '.' + this.name;
+										name = this.name,
+										checked = $this.is(':checked');
 
-									KOC.$overview.find( c ).toggle( $this.is(':checked') );
+									KOC.overview.$tbodyTrs.filter( '.' + name ).toggle( checked );
 
-									KOC.conf.overview.parts_visible = $this.parent().find('input').filter(':checked').map(function(){ return this.name; }).get();
+									KOC.conf.overview.parts_visible[ name ] = checked;
+
 									KOC.storeConf();
 								});
 
-						$body.append( $overview );
-						KOC.$overview = $('#koc-overview');
-						KOC.overview.$headersThs = KOC.$overview.find('thead').find('th');
-						KOC.overview.$tbodies = KOC.$overview.find('tbody');
+						KOC.overview.$toggles.find('input').each(function(){
+							var $this = $(this),
+								name = this.name,
+								checked = $this.is(':checked');
+							KOC.overview.$tbodyTrs.filter( '.' + name ).toggle( checked );
+						});
 
 						KOC.overview.updateFromSeed();
 
@@ -1294,15 +1327,16 @@ String.prototype.capitalize = function(){
 						KOC.$overview = null;
 					},
 					'update': function data(){
+						return;
 						console.info('KOC overview update function');
 						if( data.city ){
-							var popDataTrs = KOC.overview.$dataTableTbodies.filter('.population').find('tr'),
-								resDataTrs = KOC.overview.$dataTableTbodies.filter('.resources').find('tr'),
-								/*resPDataTrs = KOC.overview.$dataTableTbodies.filter('.resources_productivity').find('tr'),*/
-								resCDataTrs = KOC.overview.$dataTableTbodies.filter('.resources_cap').find('tr'),
-								resUDataTrs = KOC.overview.$dataTableTbodies.filter('.resources_upkeep').find('tr'),
-								resADataTrs = KOC.overview.$dataTableTbodies.filter('.resources_autonomy').find('tr'),
-								troDataTrs = KOC.overview.$dataTableTbodies.filter('.troops').find('tr');
+							var popDataTrs = KOC.overview.$tbodyTrs.filter('.population'),
+								resDataTrs = KOC.overview.$tbodyTrs.filter('.resources'),
+								/*resPDataTrs = KOC.overview.$tbodyTrs.filter('.resources_productivity'),*/
+								resCDataTrs = KOC.overview.$tbodyTrs.filter('.resources_cap'),
+								resUDataTrs = KOC.overview.$tbodyTrs.filter('.resources_upkeep'),
+								resADataTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy'),
+								troDataTrs = KOC.overview.$tbodyTrs.filter('.troops');
 
 							for( var i = 0; i < KOC.cityIds.length; i++ ){
 								var c = data.city[ KOC.cityIds[i] ];
@@ -1335,6 +1369,9 @@ String.prototype.capitalize = function(){
 									//resources
 										for( var j = 0; j < KOC.resources.length; j++ ){
 											var type = KOC.resources[j];
+											if( type.name == 'resource5' && !p.hasOwnProperty( type.name ) ){
+												type.name = 'AETHERSTONE';
+											}
 											if( p.hasOwnProperty( type.name ) ){
 												var n = p[ type.name ];
 
@@ -1435,17 +1472,19 @@ String.prototype.capitalize = function(){
 										}
 								}
 							}
+
+							KOC.overview.sums();
 						}
 					},
 					'updateFromSeed': function(){
 						console.info('KOC overview updateFromSeed function');
-						var popDataTrs = KOC.overview.$dataTableTbodies.filter('.population').find('tr'),
-							resDataTrs = KOC.overview.$dataTableTbodies.filter('.resources').find('tr'),
-							/*resPDataTrs = KOC.overview.$dataTableTbodies.filter('.resources_productivity').find('tr'),*/
-							resCDataTrs = KOC.overview.$dataTableTbodies.filter('.resources_cap').find('tr'),
-							resUDataTrs = KOC.overview.$dataTableTbodies.filter('.resources_upkeep').find('tr'),
-							resADataTrs = KOC.overview.$dataTableTbodies.filter('.resources_autonomy').find('tr'),
-							troDataTrs = KOC.overview.$dataTableTbodies.filter('.troops').find('tr');
+						var popDataTrs = KOC.overview.$tbodyTrs.filter('.population'),
+							resDataTrs = KOC.overview.$tbodyTrs.filter('.resources'),
+							/*resPDataTrs = KOC.overview.$tbodyTrs.filter('.resources_productivity'),*/
+							resCDataTrs = KOC.overview.$tbodyTrs.filter('.resources_cap'),
+							resUDataTrs = KOC.overview.$tbodyTrs.filter('.resources_upkeep'),
+							resADataTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy'),
+							troDataTrs = KOC.overview.$tbodyTrs.filter('.troops');
 
 						for( var i = 0; i < KOC.cityIds.length; i++ ){
 							var stats = window.seed.citystats[ 'city' + KOC.cityIds[i] ],
@@ -1463,23 +1502,26 @@ String.prototype.capitalize = function(){
 									if( inSeed ){
 										var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 
-										popDataTrs.eq(j).find('td').eq(i)
+										popDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable( n ));
+											.attr('title', KOC.readable( n ))
+											.data('ori', n);
 
 									} else if( type.name == 'availablePopulation' ){
 										var take = KOC.inSeed.population[ type.take ],
 											substract = KOC.inSeed.population[ type.substract ],
 											n = parseFloat( seed[ take.var ][ take.index ] ) - parseFloat( seed[ substract.var ][ substract.index ] );
 
-										popDataTrs.eq(j).find('td').eq(i)
+										popDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable( n ));
+											.attr('title', KOC.readable( n ))
+											.data('ori', n);
 
 									} else {
-										popDataTrs.eq(j).find('td').eq(i)
+										popDataTrs.eq(j).find('td').eq(i + 2)
 											.html('&nbsp;')
-											.attr('title', KOC.readable( n ));
+											.attr('title', KOC.readable( n ))
+											.data('ori', 0);
 									}
 								}
 							//resources
@@ -1495,13 +1537,15 @@ String.prototype.capitalize = function(){
 
 										if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-										resDataTrs.eq(j).find('td').eq(i)
+										resDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable(n));
+											.attr('title', KOC.readable(n))
+											.data('ori', n);
 									} else {
-										resDataTrs.eq(j).find('td').eq(i)
+										resDataTrs.eq(j).find('td').eq(i + 2)
 											.html('&nbsp;')
-											.attr('title', '');
+											.attr('title', '')
+											.data('ori', 0);
 									}
 								}
 							//resources productivity
@@ -1515,13 +1559,15 @@ String.prototype.capitalize = function(){
 											var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 										}
 
-										resPDataTrs.eq(j).find('td').eq(i)
+										resPDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable(n));
+											.attr('title', KOC.readable(n))
+											.data('ori', n);
 									} else {
-										resPDataTrs.eq(j).find('td').eq(i)
+										resPDataTrs.eq(j).find('td').eq(i + 2)
 											.html('&nbsp;')
-											.attr('title', '');
+											.attr('title', '')
+											.data('ori', 0);
 									}
 								}*/
 							//resources cap
@@ -1537,13 +1583,15 @@ String.prototype.capitalize = function(){
 
 										if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-										resCDataTrs.eq(j).find('td').eq(i)
+										resCDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable(n));
+											.attr('title', KOC.readable(n))
+											.data('ori', n);
 									} else {
-										resCDataTrs.eq(j).find('td').eq(i)
+										resCDataTrs.eq(j).find('td').eq(i + 2)
 											.html('&nbsp;')
-											.attr('title', '');
+											.attr('title', '')
+											.data('ori', 0);
 									}
 								}
 							//resources upkeep
@@ -1559,13 +1607,15 @@ String.prototype.capitalize = function(){
 
 										if( type.name == 'upkeep' ) n = n * 10;
 
-										resUDataTrs.eq(j).find('td').eq(i)
+										resUDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable(n));
+											.attr('title', KOC.readable(n))
+											.data('ori', n);
 									} else {
-										resUDataTrs.eq(j).find('td').eq(i)
+										resUDataTrs.eq(j).find('td').eq(i + 2)
 											.html('&nbsp;')
-											.attr('title', '');
+											.attr('title', '')
+											.data('ori', 0);
 									}
 								}
 							//resources autonomy
@@ -1579,17 +1629,22 @@ String.prototype.capitalize = function(){
 										if( upkeepInSeed.hasOwnProperty('type') ){
 											var u = parseFloat( seed[ upkeepInSeed.var ][ upkeepInSeed.type ][ upkeepInSeed.index ] ),
 												s = parseFloat( seed[ stockInSeed.var ][ stockInSeed.type ][ stockInSeed.index ] );
+											if( s > 0 ) s = s / 3600;
 										} else {
-											var u = parseFloat( seed[ upkeepInSeed.var ][ upkeepInSeed.index ] ),
+											var u = parseFloat( seed[ upkeepInSeed.var ][ upkeepInSeed.index ] ) * 10,
 												s = parseFloat( seed[ stockInSeed.var ][ stockInSeed.index ] );
 										}
 
-										var a = s / 3600 / u * 3600;
-
-										resADataTrs.eq(j).find('td').eq(i)
-											.text( KOC.readableDuration( a ) );
+										if( s == 0 || u == 0 ){
+											resADataTrs.eq(j).find('td').eq(i + 2)
+												.text('-');
+										} else {
+											var a = s / u * 3600;
+											resADataTrs.eq(j).find('td').eq(i + 2)
+												.text( KOC.readableDuration( a ) );
+										}
 									} else {
-										resADataTrs.eq(j).find('td').eq(i)
+										resADataTrs.eq(j).find('td').eq(i + 1)
 											.html('&nbsp;');
 									}
 								}
@@ -1598,17 +1653,36 @@ String.prototype.capitalize = function(){
 									var type = KOC.troops[j];
 									if( seed.units[ type.name ] ){
 										var n = parseFloat( seed.units[ type.name ] );
-										troDataTrs.eq(j).find('td').eq(i)
+										troDataTrs.eq(j).find('td').eq(i + 2)
 											.text( KOC.format( n ) )
-											.attr('title', KOC.readable(n));
+											.attr('title', KOC.readable(n))
+											.data('ori', n);
 									} else {
-										troDataTrs.eq(j).find('td').eq(i)
+										troDataTrs.eq(j).find('td').eq(i + 2)
 											.html('&nbsp;')
-											.attr('title', '');
+											.attr('title', '')
+											.data('ori', 0);
 									}
 								}
 						}
 
+						KOC.overview.sums();
+					},
+					'sums': function(){
+						KOC.overview.$tbodyTrs.each2(function(i, $tr){
+							if( !$tr.hasClass('resources_autonomy') ){
+								var sum = 0,
+									$tds = $tr.find('td');
+
+								$tds.filter(':gt(1)').each2(function(j, $tr){
+									sum += parseFloat( $tr.data('ori') );
+								});
+
+								$tds.eq(1)
+									.text( KOC.format( sum ) )
+									.attr('title', KOC.readable(sum));
+							}
+						});
 					},
 					/* moveable */
 						'moveableOn': function(){
@@ -1616,18 +1690,25 @@ String.prototype.capitalize = function(){
 							KOC.overview.replaceOff();
 
 							KOC.$overview
+								.prepend( $dragHandle.clone() )
+								.prepend( '<span class="ui-icon ui-icon-close"></span>' )
 								.draggable({
 									'helper': "original",
-									handle: '.drag-handle',
+									'handle': '.drag-handle',
 									'stop': function(event, ui){
 										KOC.conf.overview.position = ui.position;
 										KOC.storeConf();
 									}
 								})
 								.resizable({
-									minWidth: 250,
-									minHeight: 250,
-									stop: function(event, ui){
+									'minWidth': 250,
+									'minHeight': 250,
+									'resize': function(event, ui){
+										var tableH = ui.size.height - KOC.overview.$toggles.height() - 5;
+										KOC.overview.$table.css('height', tableH);
+										KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+									},
+									'stop': function(event, ui){
 										KOC.conf.overview.size = ui.size;
 										KOC.storeConf();
 									}
@@ -1635,17 +1716,33 @@ String.prototype.capitalize = function(){
 								.css({
 									'top': KOC.conf.overview.position.top,
 									'left': KOC.conf.overview.position.left,
+									'width': KOC.conf.overview.size.width,
+									'height': KOC.conf.overview.size.height,
 								})
-								.prepend( $dragHandle.clone() );
+								.on('click', '.ui-icon-close', function(e){
+									e.preventDefault();
+									KOC.$overview.hide();
+									KOC.conf.overview.visible = 0;
+									KOC.storeConf();
+								});
 
 							if( KOC.conf.overview.visible ){
 								KOC.$overview.show();
+
+								var tableH = KOC.conf.overview.size.height - KOC.overview.$toggles.height() - 5;
+								KOC.overview.$table.css('height', tableH);
+								KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
 							}
 
 							var $kocOverviewToggle = $('<button id="koc-overview-toggle">').text('OVERVIEW');
 							$kocOverviewToggle.click(function(){
 								console.info('$kocOverviewToggle click');
 								KOC.$overview.toggle();
+
+								var tableH = KOC.conf.overview.size.height - KOC.overview.$toggles.height() - 5;
+								KOC.overview.$table.css('height', tableH);
+								KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+
 								KOC.conf.overview.visible = (KOC.$overview.is(':visible') ? 1 : 0);
 								KOC.storeConf();
 							});
@@ -1657,7 +1754,7 @@ String.prototype.capitalize = function(){
 							KOC.$overview
 								.draggable('destroy')
 								.resizable('destroy')
-								.find('.drag-handle').remove();
+								.find('.drag-handle, .ui-icon-close').remove();
 						},
 					/* replace */
 						'replaceOn': function(){
@@ -1669,7 +1766,7 @@ String.prototype.capitalize = function(){
 								'height': $b.outerHeight(),
 								'width': $b.outerWidth(),
 								'top': p.top,
-								'left': p.left
+								'left': p.left,
 							});
 							$('#koc-overview-toggle').remove();
 						},

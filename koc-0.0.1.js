@@ -125,18 +125,17 @@ String.prototype.capitalize = function(){
 				}
 			},
 			'readable': function( num ){
-				if( typeof num == 'undefined' || num == null ) return '&nbsp;';
-				if( typeof num != 'string' ){
-					num = '' + Math.floor(num);
-				}
-				var l = num.length;
-				num = parseFloat(num);
+				if( typeof num == 'undefined' || num == null ) return '';
+				num = '' + Math.floor( parseFloat(num) );
+				var length = num.length;
 				var s = '';
-				for( var i = 0; i < num.length; i ++ ){
-					if( i > 0 && i % 3 == 0 ) s = "'" + s;
-					s = num[i] + s;
+
+				while( length > 3 ){
+					s = "'" + num.substr(length - 3, 3) + s;
+					length -= 3;
 				}
-				return s;
+
+				return num.substr(0, length) + s;
 			},
 			'init': function(){
 				console.info('KOC init function');
@@ -208,26 +207,26 @@ String.prototype.capitalize = function(){
 			},
 			'cities': [],//[{'id','name','coords': {x,y}}, ...]
 			'cityIds': [],
-			'ressources': [
+			'resources': [
 				{'name': 'gold', 'label': 'or', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
 				{'name': 'upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
 				{'name': 'resource1x3600', 'label': 'nourriture', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource1Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource1Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource1Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
 				{'name': 'resource2x3600', 'label': 'bois', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource2Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource2Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'name': 'resource3x3600', 'label': 'pierre', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource3Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource3Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource3Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'name': 'resource4x3600', 'label': 'minerai', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'resource4Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'resource4Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'resource4Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 				{'name': 'AETHERSTONE', 'label': 'pierre d\'éther', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
+				{'name': 'resource1Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource1Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource1Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'population': [
 				{'name': 'population', 'label': 'population', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
@@ -259,26 +258,26 @@ String.prototype.capitalize = function(){
 					'taxRate': {'index': 1, 'var': 'gold'},
 					'hapiness': {'index': 2, 'var': 'pop'},
 				},
-				'ressources': {
+				'resources': {
 					'gold': {'index': 0, 'var': 'gold'},
 					'upkeep': {'index': 3, 'var': 'gold'},
 					'resource1x3600': {'index': 0, 'type': 'rec1', 'var': 'res'},
-					'resource1Productivity': {'index': 2, 'type': 'rec1', 'var': 'res'},
-					'resource1Capx3600': {'index': 1, 'type': 'rec1', 'var': 'res'},
-					'resource1Upkeep': {'index': 3, 'type': 'rec1', 'var': 'res'},
 					'resource2x3600': {'index': 0, 'type': 'rec2', 'var': 'res'},
-					'resource2Productivity': {'index': 2, 'type': 'rec2', 'var': 'res'},
-					'resource2Capx3600': {'index': 1, 'type': 'rec2', 'var': 'res'},
-					'resource2Upkeep': {'index': 3, 'type': 'rec2', 'var': 'res'},
 					'resource3x3600': {'index': 0, 'type': 'rec3', 'var': 'res'},
-					'resource3Productivity': {'index': 2, 'type': 'rec3', 'var': 'res'},
-					'resource3Capx3600': {'index': 1, 'type': 'rec3', 'var': 'res'},
-					'resource3Upkeep': {'index': 3, 'type': 'rec3', 'var': 'res'},
 					'resource4x3600': {'index': 0, 'type': 'rec4', 'var': 'res'},
-					'resource4Productivity': {'index': 2, 'type': 'rec4', 'var': 'res'},
+					'resource1Capx3600': {'index': 1, 'type': 'rec1', 'var': 'res'},
+					'resource2Capx3600': {'index': 1, 'type': 'rec2', 'var': 'res'},
+					'resource3Capx3600': {'index': 1, 'type': 'rec3', 'var': 'res'},
 					'resource4Capx3600': {'index': 1, 'type': 'rec4', 'var': 'res'},
-					'resource4Upkeep': {'index': 3, 'type': 'rec4', 'var': 'res'},
 					'resource5': {'index': 0, 'type': 'rec5', 'var': 'res'},
+					'resource2Productivity': {'index': 2, 'type': 'rec2', 'var': 'res'},
+					'resource1Productivity': {'index': 2, 'type': 'rec1', 'var': 'res'},
+					'resource3Productivity': {'index': 2, 'type': 'rec3', 'var': 'res'},
+					'resource4Productivity': {'index': 2, 'type': 'rec4', 'var': 'res'},
+					'resource2Upkeep': {'index': 3, 'type': 'rec2', 'var': 'res'},
+					'resource1Upkeep': {'index': 3, 'type': 'rec1', 'var': 'res'},
+					'resource3Upkeep': {'index': 3, 'type': 'rec3', 'var': 'res'},
+					'resource4Upkeep': {'index': 3, 'type': 'rec4', 'var': 'res'},
 				}
 			},
 			/* AJAX SNIFFER */
@@ -334,28 +333,53 @@ String.prototype.capitalize = function(){
 							case 'march.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.overview.active ){
-										setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										console.time('march load');
+										var r = JSON.parse(this.responseText);
+										if( r.updateSeed ){
+											KOC.overview.update(r.updateSeed);
+										}
+										console.timeEnd('march load');
 									}
 								}, false);
 								break;
 							case 'levyGold.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.overview.active ){
-										setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										console.time('levyGold load');
+										var r = JSON.parse(this.responseText);
+										if( r.updateSeed ){
+											KOC.overview.update(r.updateSeed);
+										}
+										console.timeEnd('levyGold load');
 									}
 								}, false);
 								break;
 							case 'train.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.overview.active ){
-										setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										console.time('train load');
+										var r = JSON.parse(this.responseText);
+										if( r.data ){
+											KOC.overview.update(r.data);
+										}
+										console.timeEnd('train load');
 									}
 								}, false);
 								break;
 							case 'updateSeed.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.overview.active ){
-										setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										console.time('updateSeed load');
+										try{
+											var r = JSON.parse(this.responseText);
+										} catch(e){
+											console.error(e);
+											console.log(this.responseText);
+										}
+										if( r.updateSeed ){
+											KOC.overview.update(r.updateSeed);
+										}
+										console.timeEnd('updateSeed load');
 									}
 								}, false);
 								break;
@@ -1114,14 +1138,14 @@ String.prototype.capitalize = function(){
 
 						//data line for cities
 							for( var j = 0; j < KOC.cities.length; j++ ){
-								dataLine += '<td></td>';
+								dataLine += '<td>&nbsp;</td>';
 							}
 
-						//ressources
-							fixedCols += '<tbody class="ressources">';
-							dataTable += '<tbody class="ressources">';
-							for( var i = 0; i < KOC.ressources.length; i++ ){
-								fixedCols += '<tr><td><img src="'+ KOC.ressources[i].icon +'" title="'+ KOC.ressources[i].label +'"></td><td></td></tr>';
+						//resources
+							fixedCols += '<tbody class="resources">';
+							dataTable += '<tbody class="resources">';
+							for( var i = 0; i < KOC.resources.length; i++ ){
+								fixedCols += '<tr><td><img src="'+ KOC.resources[i].icon +'" title="'+ KOC.resources[i].label +'"></td><td></td></tr>';
 								dataTable += '<tr>' + dataLine + '</tr>';
 							}
 							fixedCols += '</tbody>';
@@ -1233,12 +1257,115 @@ String.prototype.capitalize = function(){
 						KOC.$overview.remove();
 						KOC.$overview = null;
 					},
+					'update': function( data ){
+						console.info('KOC overview update function', data);
+return;
+						if( data.city ){
+							var popFixedTrs = KOC.overview.$fixedColsTbodies.filter('.population').find('tr'),
+								popDataTrs = KOC.overview.$dataTableTbodies.filter('.population').find('tr'),
+								resFixedTrs = KOC.overview.$fixedColsTbodies.filter('.resources').find('tr'),
+								resDataTrs = KOC.overview.$dataTableTbodies.filter('.resources').find('tr'),
+								troFixedTrs = KOC.overview.$fixedColsTbodies.filter('.troops').find('tr'),
+								troDataTrs = KOC.overview.$dataTableTbodies.filter('.troops').find('tr'),
+								sums = {};
+
+							for( var i = 0; i < KOC.cityIds.length; i++ ){
+								var city = data.city[ KOC.cityIds[i] ];
+								if( city ){
+									var prod = city.production;
+									if( prod ){
+										//resources
+											if( !sums.hasOwnProperty('resources') ) sums.resources = {};
+											for( var j = 0; j < KOC.resources.length; j++ ){
+												var type = KOC.resources[j];
+												if( prod.hasOwnProperty(type.name) ){
+													resDataTrs.eq(j).find('td').eq(i)
+														.text(function(){
+															if( !sums.resources.hasOwnProperty(type.name) ) sums.resources[ type.name ] = 0;
+															var n = parseFloat(prod[ type.name ]);
+															if( type.name.indexOf('x3600') > -1 ) n = Math.floor( n / 3600 );
+															else if( type.name == 'upkeep' ) n *= 10;
+															sums.resources[ type.name ] += n;
+															return KOC.format( n );
+														})
+														.attr('title', function(){
+															var n = parseFloat(prod[ type.name ]);
+															if( type.name.indexOf('x3600') > -1 ) n = Math.floor( n / 3600 );
+															else if( type.name == 'upkeep' ) n *= 10;
+															return KOC.readable(n);
+														});
+												}
+											}
+
+										//population
+											if( !sums.population ) sums.population = {};
+											for( var j = 0; j < KOC.population.length; j++ ){
+												var type = KOC.population[j];
+												if( prod.hasOwnProperty(type.name) ){
+													popDataTrs.eq(j).find('td').eq(i)
+														.text(function(){
+															if( !sums.population.hasOwnProperty(type.name) ) sums.population[ type.name ] = 0;
+															var n = parseFloat(prod[ type.name ]);
+															sums.population[ type.name ] += n;
+															return KOC.format( n );
+														});
+												} else if( type.name == 'availablePopulation' ) {
+													if( prod.hasOwnProperty(type.take) && prod.hasOwnProperty(type.substract) ){
+														popDataTrs.eq(j).find('td').eq(i)
+															.text(function(){
+																if( !sums.population.hasOwnProperty(type.name) ) sums.population[ type.name ] = 0;
+																var n = parseFloat(prod[ type.take ]) - parseFloat(prod[ type.substract ]);
+																sums.population[ type.name ] += n;
+																return KOC.format( n );
+															});
+													}
+												}
+											}
+									}
+								}
+							}
+
+							if( sums.resources ){
+								for( var j = 0; j < KOC.resources.length; j++ ){
+									var type = KOC.resources[j];
+									resFixedTrs.eq(j).find('td').eq(1)
+										.text(function(){
+											return KOC.format( sums.resources[ type.name ] );
+										})
+										.attr('title', function(){
+											var n = parseFloat(prod[ type.name ]);
+											if( type.name.indexOf('x3600') > -1 ) n = Math.floor( n / 3600 );
+											var title = KOC.readable( n );
+											if( type.upkeep && prod[ type.upkeep ] ){
+												title += ' ; dépense : ' + KOC.format( sums.resources[ type.upkeep ] );
+											}
+											if( type.productivity && prod[ type.productivity ] ){
+												title += ' ; production : ' + KOC.format( sums.resources[ type.productivity ] );
+											}
+											if( type.cap && prod[ type.cap ] ){
+												title += ' ; plafond : ' + KOC.format( sums.resources[ type.cap ] );
+											}
+											return title;
+										});
+								}
+							}
+							if( sums.population ){
+								for( var j = 0; j < KOC.population.length; j++ ){
+									var type = KOC.population[j];
+									resFixedTrs.eq(j).find('td').eq(1)
+										.text(function(){
+											return KOC.format( sums.population[ type.name ] );
+										});
+								}
+							}
+						}
+					},
 					'updateFromSeed': function(){
 						console.info('KOC overview updateFromSeed function');
 						var popFixedTrs = KOC.overview.$fixedColsTbodies.filter('.population').find('tr'),
 							popDataTrs = KOC.overview.$dataTableTbodies.filter('.population').find('tr'),
-							resFixedTrs = KOC.overview.$fixedColsTbodies.filter('.ressources').find('tr'),
-							resDataTrs = KOC.overview.$dataTableTbodies.filter('.ressources').find('tr'),
+							resFixedTrs = KOC.overview.$fixedColsTbodies.filter('.resources').find('tr'),
+							resDataTrs = KOC.overview.$dataTableTbodies.filter('.resources').find('tr'),
 							troFixedTrs = KOC.overview.$fixedColsTbodies.filter('.troops').find('tr'),
 							troDataTrs = KOC.overview.$dataTableTbodies.filter('.troops').find('tr'),
 							sums = {};
@@ -1250,124 +1377,125 @@ String.prototype.capitalize = function(){
 									'gold': stats.gold,
 									'res': window.seed.resources[ 'city' + KOC.cityIds[i] ],
 									'units': window.seed.units[ 'city' + KOC.cityIds[i] ]
-								},
-								sums = {};
+								};
 
 							//population
-								if( !sums.population ) sums.population = {};
+								if( !sums.hasOwnProperty('pop') ) sums['pop'] = {};
 								for( var j = 0; j < KOC.population.length; j++ ){
 									var type = KOC.population[j],
 										inSeed = KOC.inSeed.population[ type.name ];
+									if( !sums.pop.hasOwnProperty(type.name) ) sums.pop[ type.name ] = 0;
 									if( inSeed ){
+										var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
+
 										popDataTrs.eq(j).find('td').eq(i)
-											.text(function(){
-												if( !sums.population.hasOwnProperty(type.name) ) sums.population[ type.name ] = 0;
-												var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
-												sums.population[ type.name ] += n;
-												return KOC.format( n );
-											});
+											.text( KOC.format( n ) )
+											.attr('title', KOC.readable( n ));
+
+										sums.pop[ type.name ] = sums.pop[ type.name ] + n;
 									} else if( type.name == 'availablePopulation' ){
+										var take = KOC.inSeed.population[ type.take ],
+											substract = KOC.inSeed.population[ type.substract ],
+											n = parseFloat( seed[ take.var ][ take.index ] ) - parseFloat( seed[ substract.var ][ substract.index ] );
+
 										popDataTrs.eq(j).find('td').eq(i)
-											.text(function(){
-												if( !sums.population.hasOwnProperty(type.name) ) sums.population[ type.name ] = 0;
-												var take = KOC.inSeed.pop[ type.take ],
-													substract = KOC.inSeed.pop[ type.substract ],
-													n = parseFloat( seed[ take.var ][ take.index ] ) - parseFloat( seed[ substract.var ][ substract.index ] );
-												sums.population[ type.name ] += n;
-												return KOC.format( n );
-											});
+											.text( KOC.format( n ) )
+											.attr('title', KOC.readable( n ));
+
+										sums.pop[ type.name ] = sums.pop[ type.name ] + n;
 									} else {
 										popDataTrs.eq(j).find('td').eq(i)
-											.text('&nbsp;');
+											.html('&nbsp;')
+											.attr('title', KOC.readable( n ));
 									}
 								}
-							//ressources
-								if( !sums.ressources ) sums.ressources = {};
-								for( var j = 0; j < KOC.ressources.length; j++ ){
-									var type = KOC.ressources[j],
-										inSeed = KOC.inSeed.res[ type.name ];
+							//resources
+								if( !sums.hasOwnProperty('res') ) sums['res'] = {};
+								for( var j = 0; j < KOC.resources.length; j++ ){
+									var type = KOC.resources[j],
+										inSeed = KOC.inSeed.resources[ type.name ];
+									if( !sums.res.hasOwnProperty(type.name) ) sums.res[ type.name ] = 0;
 									if( inSeed ){
+										if( inSeed.hasOwnProperty('type') ){
+											var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
+										} else {
+											var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
+										}
+
+										if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
+										else if( type.name == 'upkeep' ) n *= 10;
+
+										sums.res[ type.name ] = sums.res[ type.name ] + n;
+
 										resDataTrs.eq(j).find('td').eq(i)
-											.text(function(){
-												if( !sums.ressources.hasOwnProperty(type.name) ) sums.ressources[ type.name ] = 0;
-
-												if( inSeed.type ){
-													var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
-												} else {
-													var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
-												}
-
-												if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
-												else if( type.name == 'upkeep' ) n *= 10;
-
-												sums.ressources[ type.name ] += n;
-
-												return KOC.format( n );
-											});
+											.text( KOC.format( n ) )
+											.attr('title', KOC.readable(n));
 									} else {
-										resDataTrs.eq(j).find('td').eq(i).text('&nbsp;');
+										resDataTrs.eq(j).find('td').eq(i)
+											.html('&nbsp;')
+											.attr('title', '');
 									}
 								}
 							//troops
-								if( !sums.troops ) sums.troops = {};
+								if( !sums.hasOwnProperty('tro') ) sums['tro'] = {};
 								for( var j = 0; j < KOC.troops.length; j++ ){
 									var type = KOC.troops[j];
+									if( !sums.tro.hasOwnProperty(type.name) ) sums.tro[ type.name ] = 0;
 									if( seed.units[ type.name ] ){
+										var n = parseFloat( seed.units[ type.name ] );
 										troDataTrs.eq(j).find('td').eq(i)
-											.text(function(){
-												if( !sums.troops.hasOwnProperty(type.name) ) sums.troops[ type.name ] = 0;
-												var n = parseFloat( seed.units[ type.name ] );
-												sums.troops[ type.name ] += n;
-												return KOC.format( n );
-											});
+											.text( KOC.format( n ) )
+											.attr('title', KOC.readable(n));
+										sums.tro[ type.name ] = sums.tro[ type.name ] + n;
 									} else {
 										troDataTrs.eq(j).find('td').eq(i)
-											.text('&nbsp;');
+											.html('&nbsp;')
+											.attr('title', '');
 									}
 								}
 						}
 
-						if( sums.ressources ){
-							for( var j = 0; j < KOC.ressources.length; j++ ){
-								var type = KOC.ressources[j];
-								if( sums.ressources[ type.name ] ){
+						if( sums.res ){
+							for( var j = 0; j < KOC.resources.length; j++ ){
+								var type = KOC.resources[j];
+								if( sums.res[ type.name ] ){
 									resFixedTrs.eq(j).find('td').eq(1)
-										.text(function(){
-											return KOC.format( sums.ressources[ type.name ] );
-										});
+										.text( KOC.format( sums.res[ type.name ] ) )
+										.attr('title', KOC.readable( sums.res[ type.name ] ));
 								} else {
 									resFixedTrs.eq(j).find('td').eq(1)
-										.text('&nbsp;');
+										.html('&nbsp;')
+										.attr('title', '');
 								}
 							}
 						}
 
-						if( sums.population ){
+						if( sums.pop ){
 							for( var j = 0; j < KOC.population.length; j++ ){
 								var type = KOC.population[j];
-								if( sums.population[ type.name ] ){
+								if( sums.pop[ type.name ] ){
 									popFixedTrs.eq(j).find('td').eq(1)
-										.text(function(){
-											return KOC.format( sums.population[ type.name ] );
-										});
+										.text( KOC.format( sums.pop[ type.name ] ) )
+										.attr('title', KOC.readable( sums.pop[ type.name ] ));
 								} else {
 									popFixedTrs.eq(j).find('td').eq(1)
-										.text('&nbsp;');
+										.html('&nbsp;')
+										.attr('title', '');
 								}
 							}
 						}
 
-						if( sums.troops ){
+						if( sums.tro ){
 							for( var j = 0; j < KOC.troops.length; j++ ){
 								var type = KOC.troops[j];
-								if( sums.troops[ type.name ] ){
+								if( sums.tro[ type.name ] ){
 									troFixedTrs.eq(j).find('td').eq(1)
-										.text(function(){
-											return KOC.format( sums.troops[ type.name ] );
-										});
+										.text( KOC.format( sums.tro[ type.name ] )
+										.attr('title', KOC.readable( sums.tro[ type.name ] ));
 								} else {
 									troFixedTrs.eq(j).find('td').eq(1)
-										.text('&nbsp;');
+										.html('&nbsp;')
+										.attr('title', '');
 								}
 							}
 						}
@@ -1469,7 +1597,6 @@ String.prototype.capitalize = function(){
 		function load(){
 			if( window.seed && window.seed.cities ){
 				console.log(window.seed);
-				console.log(JSON.stringify( window.seed ));
 				setTimeout(function(){
 					console.time('Koc init');
 					console.log('Koc init');

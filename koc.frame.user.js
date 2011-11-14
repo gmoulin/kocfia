@@ -23,8 +23,7 @@ try{
 	kocFrame.parentNode.appendChild(style);
 
 	var koccss = document.createElement('style');
-	koccss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }"
-			+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}";
+	koccss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 
 	//inject the scripts
 	var jqui = document.createElement('script');

@@ -1,5 +1,6 @@
 console.info('koc start');
 
+
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
 		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
@@ -1705,6 +1706,7 @@ String.prototype.capitalize = function(){
 									$tds.eq(1)
 										.text( KOC.generic.format( sum ) )
 										.attr('title', KOC.generic.readable(sum));
+								}
 							}
 						});
 					},
@@ -1858,7 +1860,7 @@ String.prototype.capitalize = function(){
 
 								for( var u in units ){
 									if( units.hasOwnProperty(u) ){
-										autoCode += '<option value="'+ u '">'+ units[u] +'</option>';
+										autoCode += '<option value="'+ u +'">'+ units[u] +'</option>';
 									}
 								}
 								autoCode += '</select>';
@@ -1915,7 +1917,7 @@ String.prototype.capitalize = function(){
 							}
 							autoCode += '</p>'
 									 +  '</div>';
-
+						}
 
 						//manual formation
 

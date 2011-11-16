@@ -165,6 +165,19 @@ String.prototype.capitalize = function(){
 					KOC.confPanel();
 					console.timeEnd('confPanel');
 
+				//refresh button
+					KOC.$buttons.append(
+						$('<button id="koc-refresh-seed">')
+							.text('Raffraîchir')
+							.title('Force la mise à jour des données du jeux.')
+							.click(function(e){
+								$(this).attr('disabled', 'disabled');
+								window.update_seed_ajax(true);
+								setTimeout(function(){ KOC.$refreshButton.attr('disabled', ''); }, 10000);
+							});
+					);
+					KOC.$refreshButton = $('#koc-refresh-seed');
+
 				//get player cities
 					KOC.generic.getCities();
 
@@ -178,31 +191,56 @@ String.prototype.capitalize = function(){
 			'cities': [],//[{'id','name','coords': {x,y}}, ...]
 			'citiesId': [],
 			'resources': [
-				{'name': 'gold', 'label': 'or', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'name': 'resource1x3600', 'label': 'nourriture', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2x3600', 'label': 'bois', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3x3600', 'label': 'pierre', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4x3600', 'label': 'minerai', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'resource5', 'label': 'pierre d\'éther', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
+				{'name': 'gold', 'key': 'rec0', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+				{'name': 'resource1x3600', 'key': 'rec1', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2x3600', 'key': 'rec2', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3x3600', 'key': 'rec3', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4x3600', 'key': 'rec4', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource7', 'key': '7', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
 			],
-			/*'resources_productivity': [
-				{'name': 'resource1Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4Productivity', 'label': 'production', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],*/
 			'resources_cap': [
 				{'name': 'resource1Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
 				{'name': 'resource2Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'name': 'resource3Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'name': 'resource4Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
-			'resources_upkeep': [
-				{'name': 'upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+			'resources_production': [
+				{'name': 'resource1Base', 'label': 'base', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Guardian', 'label': 'bonus gardien', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Knight', 'label': 'bonus chevalier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Tech', 'label': 'bonus technologie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Wild', 'label': 'bonus terres sauvages', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Item', 'label': 'bonus objet', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Barbarian', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
 				{'name': 'resource1Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource1Total', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2Base', 'label': 'base', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Guardian', 'label': 'bonus gardien', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Knight', 'label': 'bonus chevalier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Tech', 'label': 'bonus technologie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Wild', 'label': 'bonus terres sauvages', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Item', 'label': 'bonus objet', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Barbarian', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'name': 'resource2Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource2Total', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3Base', 'label': 'base', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Guardian', 'label': 'bonus gardien', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Knight', 'label': 'bonus chevalier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Tech', 'label': 'bonus technologie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Wild', 'label': 'bonus terres sauvages', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Item', 'label': 'bonus objet', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Barbarian', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'name': 'resource3Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource3Total', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4Base', 'label': 'base', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Guardian', 'label': 'bonus gardien', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Knight', 'label': 'bonus chevalier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Tech', 'label': 'bonus technologie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Wild', 'label': 'bonus terres sauvages', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Item', 'label': 'bonus objet', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Barbarian', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 				{'name': 'resource4Upkeep', 'label': 'dépense', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource4Total', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_autonomy': [
 				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
@@ -247,7 +285,7 @@ String.prototype.capitalize = function(){
 					'resource2x3600': {'index': 0, 'type': 'rec2', 'var': 'res'},
 					'resource3x3600': {'index': 0, 'type': 'rec3', 'var': 'res'},
 					'resource4x3600': {'index': 0, 'type': 'rec4', 'var': 'res'},
-					'resource5': {'index': 0, 'type': 'rec5', 'var': 'res'},
+					'resource7': {'index': 0, 'type': 'rec5', 'var': 'res'},
 				},
 				'resources_cap': {
 					'resource1Capx3600': {'index': 1, 'type': 'rec1', 'var': 'res'},
@@ -255,19 +293,6 @@ String.prototype.capitalize = function(){
 					'resource3Capx3600': {'index': 1, 'type': 'rec3', 'var': 'res'},
 					'resource4Capx3600': {'index': 1, 'type': 'rec4', 'var': 'res'},
 				},
-				/*'resources_productivity': {
-					'resource1Productivity': {'index': 2, 'type': 'rec1', 'var': 'res'},
-					'resource2Productivity': {'index': 2, 'type': 'rec2', 'var': 'res'},
-					'resource3Productivity': {'index': 2, 'type': 'rec3', 'var': 'res'},
-					'resource4Productivity': {'index': 2, 'type': 'rec4', 'var': 'res'},
-				},*/
-				'resources_upkeep': {
-					'upkeep': {'index': 2, 'var': 'gold'},
-					'resource1Upkeep': {'index': 3, 'type': 'rec1', 'var': 'res'},
-					'resource2Upkeep': {'index': 3, 'type': 'rec2', 'var': 'res'},
-					'resource3Upkeep': {'index': 3, 'type': 'rec3', 'var': 'res'},
-					'resource4Upkeep': {'index': 3, 'type': 'rec4', 'var': 'res'},
-				}
 			},
 			/* AJAX SNIFFER */
 				'ajaxSniffer': function(){
@@ -321,54 +346,40 @@ String.prototype.capitalize = function(){
 								break;
 							case 'march.php':
 								this.addEventListener("load", function(){
-									if( KOC.conf.overview.active ){
-										console.time('march load');
-										var r = JSON.parse(this.responseText);
-										if( r.updateSeed ){
-											KOC.overview.update( r.updateSeed );
-										}
-										console.timeEnd('march load');
-									}
+									setTimeout(function(){ KOC.overview.updateFromSeed() }, 500);
 								}, false);
 								break;
 							case 'levyGold.php':
 								this.addEventListener("load", function(){
-									if( KOC.conf.overview.active ){
-										console.time('levyGold load');
-										var r = JSON.parse(this.responseText);
-										if( r.updateSeed ){
-											KOC.overview.update( r.updateSeed );
-										}
-										console.timeEnd('levyGold load');
-									}
+									setTimeout(function(){ KOC.overview.updateFromSeed() }, 500);
 								}, false);
 								break;
 							case 'train.php':
 								this.addEventListener("load", function(){
-									if( KOC.conf.overview.active ){
-										console.time('train load');
-										var r = JSON.parse(this.responseText);
-										if( r.data ){
-											KOC.overview.update( r.data );
-										}
-										console.timeEnd('train load');
-									}
+									setTimeout(function(){ KOC.overview.updateFromSeed() }, 500);
 								}, false);
 								break;
 							case 'updateSeed.php':
 								this.addEventListener("load", function(){
-									if( KOC.conf.overview.active ){
-										console.time('updateSeed load');
-										try{
-											var r = JSON.parse(this.responseText);
-										} catch(e){
-											console.error(e);
-											console.log(this.responseText);
+									setTimeout(function(){ KOC.overview.updateFromSeed() }, 500);
+									KOC.$refreshButton.attr('disabled', '');
+								}, false);
+								break;
+							case '_dispatch.php':
+								this.addEventListener("load", function(){
+									setTimeout(function(){ KOC.overview.updateFromSeed() }, 500);
+									try {
+										var r = JSON.parse(this.responseText);
+										if( r && r.settings.cityId ){
+											var trace = [];
+											for( var i = 0; i < r.queue; i++ ){
+												trace.push( r.queue[i].botMarches );
+											}
+
+											localStorage.setObject('koc_dispatch_trace_' + KOC.server + '_' + r.settings.cityId, trace);
 										}
-										if( r.updateSeed ){
-											KOC.overview.update( r.updateSeed );
-										}
-										console.timeEnd('updateSeed load');
+									} catch(e){
+
 									}
 								}, false);
 								break;
@@ -1193,9 +1204,9 @@ String.prototype.capitalize = function(){
 							'population': 1,
 							'troops': 1,
 							'resources': 1,
-							/*'resources_productivity': 1,*/
 							'resources_cap': 1,
 							'resources_upkeep': 1,
+							'resources_production': 1,
 							'resources_autonomy': 1,
 						},
 					},
@@ -1203,16 +1214,15 @@ String.prototype.capitalize = function(){
 						'population': 'population',
 						'troops': 'unités',
 						'resources': 'ressources',
-						/*'resources_productivity': 'productivité',*/
 						'resources_cap': 'plafond',
 						'resources_upkeep': 'dépense',
+						'resources_production': 'production',
 						'resources_autonomy': 'autonomie',
 					},
 					'confPanel': function( $section ){
 						console.info('KOC overview confPanel function');
 						var code = '<p>'
 							+ '<h2>Vue globale</h2>'
-							+ KOC.generateCheckbox('overview', 'active', 'Activer le module', KOC.conf.overview.active)
 							+ KOC.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable])
 							+ KOC.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position')
 							+ KOC.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions')
@@ -1222,6 +1232,18 @@ String.prototype.capitalize = function(){
 					},
 					'on': function(){
 						console.info('KOC overview on function');
+
+						//get marches for each cities, result will be local stored via the ajax sniffer
+						for( var i = 0; i < KOC.citiesId.length; i++ ){
+							var cityId = KOC.citiesId[i],
+								params = window.g_ajaxparams;
+							params.action = 'getMarches';
+							params.ctrl = 'BotManager';
+							params['settings[cityId]'] = cityId;
+
+							$.post(window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix, params);
+						}
+
 						$head.append( $('<style id="koc-overview-css">').text(kocOverviewCss) );
 
 						var dataTable = '<table id="koc-overview-data">',
@@ -1259,6 +1281,9 @@ String.prototype.capitalize = function(){
 											  + '</th>'
 											  +  '</tr>';
 									for( var i = 0; i < KOC[p].length; i++ ){
+										if( !KOC[p][i].hasOwnProperty('label') && KOC[p][i].hasOwnProperty('key') ){
+											KOC[p][i].label = window.resourceinfo[ KOC[p][i].key ];
+										}
 										dataTable += '<tr class="'+ p +'">'
 												  +  '<td><img src="'+ KOC[p][i].icon +'" title="'+ KOC[p][i].label +'"></td>'
 												  +  '<td class="sum"></td>'
@@ -1339,172 +1364,11 @@ String.prototype.capitalize = function(){
 						KOC.$overview.remove();
 						KOC.$overview = null;
 					},
-					'update': function data(){
-						console.info('KOC overview update function');
-						if( data.city ){
-							var popDataTrs = KOC.overview.$tbodyTrs.filter('.population').filter(':not(:first)'),
-								resDataTrs = KOC.overview.$tbodyTrs.filter('.resources').filter(':not(:first)'),
-								/*resPDataTrs = KOC.overview.$tbodyTrs.filter('.resources_productivity').filter(':not(:first)'),*/
-								resCDataTrs = KOC.overview.$tbodyTrs.filter('.resources_cap').filter(':not(:first)'),
-								resUDataTrs = KOC.overview.$tbodyTrs.filter('.resources_upkeep').filter(':not(:first)'),
-								resADataTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
-								troDataTrs = KOC.overview.$tbodyTrs.filter('.troops').filter(':not(:first)');
-
-							for( var i = 0; i < KOC.citiesId.length; i++ ){
-								var c = data.city[ KOC.citiesId[i] ];
-								if( c && c.production ){
-									var p = c.production;
-
-									//population
-										for( var j = 0; j < KOC.popuplation.length; j++ ){
-											var type = KOC.population[j];
-											if( p.hasOwnProperty( type.name ) ){
-												var n = p[ type.name ];
-
-												popDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable( n ))
-													.data('ori', n);
-											} else if( type.name == 'availablePopulation' && p.hasOwnProperty( type.take ) && p.hasOwnProperty( type.substract ) ){
-												var n = parseFloat( p[ type.take ] ) - parseFloat( p[ type.substract ] );
-
-												popDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable( n ))
-													.data('ori', n);
-
-											} else {
-												popDataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;')
-													.attr('title', '')
-													.data('ori', 0);
-											}
-										}
-									//resources
-										for( var j = 0; j < KOC.resources.length; j++ ){
-											var type = KOC.resources[j];
-											if( type.name == 'resource5' && !p.hasOwnProperty( type.name ) ){
-												type.name = 'AETHERSTONE';
-											}
-											if( p.hasOwnProperty( type.name ) ){
-												var n = p[ type.name ];
-
-												if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
-
-												resDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable(n))
-													.data('ori', n);
-											} else {
-												resDataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;')
-													.attr('title', '')
-													.data('ori', 0);
-											}
-										}
-									//resources productivity
-										/*for( var j = 0; j < KOC.resources_productivity.length; j++ ){
-											var type = KOC.resources_productivity[j],
-												inSeed = KOC.inSeed.resources_productivity[ type.name ];
-											if( inSeed ){
-												if( inSeed.hasOwnProperty('type') ){
-													var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
-												} else {
-													var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
-												}
-
-												resPDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable(n))
-													.data('ori', n);
-											} else {
-												resPDataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;')
-													.attr('title', '')
-													.data('ori', 0);
-											}
-										}*/
-									//resources cap
-										for( var j = 0; j < KOC.resources_cap.length; j++ ){
-											var type = KOC.resources_cap[j];
-											if( p.hasOwnProperty( type.name ) ){
-												var n = p[ type.name ];
-
-												if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
-
-												resCDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable(n))
-													.data('ori', n);
-											} else {
-												resCDataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;')
-													.attr('title', '')
-													.data('ori', 0);
-											}
-										}
-									//resources upkeep
-										for( var j = 0; j < KOC.resources_upkeep.length; j++ ){
-											var type = KOC.resources_upkeep[j];
-											if( p.hasOwnProperty( type.name ) ){
-												var n = p[ type.name ];
-
-												if( type.name == 'upkeep' ) n = n * 10;
-
-												resUDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable(n))
-													.data('ori', n);
-											} else {
-												resUDataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;')
-													.attr('title', '')
-													.data('ori', 0);
-											}
-										}
-									//resources autonomy
-										for( var j = 0; j < KOC.resources_autonomy.length; j++ ){
-											var upkeep = KOC.resources_upkeep[j],
-												stock = KOC.resources[j];
-
-											if( p.hasOwnProperty( upkeep.name ) && p.hasOwnProperty( stock.name ) ){
-												var a = p[ stock.name ] / 3600 / p[ upkeep.name ] * 3600;
-
-												resADataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.readableDuration( a ) );
-											} else {
-												resADataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;');
-											}
-										}
-									//troops
-										for( var j = 0; j < KOC.troops.length; j++ ){
-											var type = KOC.troops[j];
-											if( p.hasOwnProperty( type.name ) ){
-												var n = p[ type.name ];
-
-												troDataTrs.eq(j).find('td').eq(i)
-													.text( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable(n))
-													.data('ori', n);
-											} else {
-												troDataTrs.eq(j).find('td').eq(i)
-													.html('&nbsp;')
-													.attr('title', '')
-													.data('ori', 0);
-											}
-										}
-								}
-							}
-
-							KOC.overview.sums();
-						}
-					},
 					'updateFromSeed': function(){
 						console.info('KOC overview updateFromSeed function');
 						var popDataTrs = KOC.overview.$tbodyTrs.filter('.population').filter(':not(:first)'),
 							resDataTrs = KOC.overview.$tbodyTrs.filter('.resources').filter(':not(:first)'),
-							/*resPDataTrs = KOC.overview.$tbodyTrs.filter('.resources_productivity').filter(':not(:first)'),*/
+							resPDataTrs = KOC.overview.$tbodyTrs.filter('.resources_production').filter(':not(:first)'),
 							resCDataTrs = KOC.overview.$tbodyTrs.filter('.resources_cap').filter(':not(:first)'),
 							resUDataTrs = KOC.overview.$tbodyTrs.filter('.resources_upkeep').filter(':not(:first)'),
 							resADataTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
@@ -1517,7 +1381,10 @@ String.prototype.capitalize = function(){
 									'pop': stats.pop,
 									'gold': stats.gold,
 									'res': window.seed.resources[ cityId ],
-									'units': window.seed.units[ cityId ]
+									'units': window.seed.units[ cityId ],
+									'guardian': window.seed.guardian[cityId],
+									'knights': window.seed.knights[cityId],
+									'wilds': window.seed.wilderness[cityId]
 								};
 
 							//population
@@ -1573,28 +1440,7 @@ String.prototype.capitalize = function(){
 											.data('ori', 0);
 									}
 								}
-							//resources productivity
-								/*for( var j = 0; j < KOC.resources_productivity.length; j++ ){
-									var type = KOC.resources_productivity[j],
-										inSeed = KOC.inSeed.resources_productivity[ type.name ];
-									if( inSeed ){
-										if( inSeed.hasOwnProperty('type') ){
-											var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
-										} else {
-											var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
-										}
 
-										resPDataTrs.eq(j).find('td').eq(i + 2)
-											.text( KOC.generic.format( n ) )
-											.attr('title', KOC.generic.readable(n))
-											.data('ori', n);
-									} else {
-										resPDataTrs.eq(j).find('td').eq(i + 2)
-											.html('&nbsp;')
-											.attr('title', '')
-											.data('ori', 0);
-									}
-								}*/
 							//resources cap
 								for( var j = 0; j < KOC.resources_cap.length; j++ ){
 									var type = KOC.resources_cap[j],
@@ -1619,6 +1465,7 @@ String.prototype.capitalize = function(){
 											.data('ori', 0);
 									}
 								}
+
 							//resources upkeep
 								for( var j = 0; j < KOC.resources_upkeep.length; j++ ){
 									var type = KOC.resources_upkeep[j],
@@ -1643,6 +1490,196 @@ String.prototype.capitalize = function(){
 											.data('ori', 0);
 									}
 								}
+
+							//resources production
+								var base = [],
+									total = [0, 0, 0, 0, 0],
+									tr = 0,
+									nbLine = 9,
+									d = new Date(),
+									timestamp = parseInt(d.getTime() / 1000, 10);
+								//population modifier
+									var populationModifier = 1,
+										population = parseFloat(seed.pop[0]),
+										hapiness = parseFloat(seed.pop[3]);
+									if( hapiness > population ){
+										populationModifier = population / hapiness;
+									}
+								//base production
+									for( var j = 1; j < 5; j++ ){
+										base[j] = total[j] = parseFloat(seed.res["rec" + j][2] * populationModifier);
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( KOC.generic.format( base[j] ) )
+											.attr('title', KOC.generic.readable( base[j] ))
+											.data('ori', base[j]);
+									}
+									tr++;
+								//guardian bonus
+									var keys = ['gold', 'food', 'wood', 'stone', 'ore'],
+										guardianBase = { 'gold': 0, 'food': 0, 'wood': 0, 'stone': 0, 'ore': 0 },
+										guardianBonus = ( seed.guardian ? seed.guardian[0] : {} );
+									if( guardianBonus.hasOwnProperty('type') && guardianBonus.type == -1 ) guardian.type = 'wood';
+
+									var bonus = $.extend({}, guardianBase, guardianBonus);
+									for( var j = 1; j < 5; j++ ){
+										var n = parseFloat( bonus[ keys[j] ] );
+										total[j] += n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( KOC.generic.format( n ) )
+											.attr('title', KOC.generic.readable( n ))
+											.data('ori', n);
+									}
+									tr++;
+								//knight bonus
+									var bonus = 0;
+									if( seed.knights ){
+										var k = seed.knights[ "knt" + window.seed.leaders[cityId].resourcefulnessKnightId ];
+										if( k ){
+											bonus = parseFloat(k.resourcefulness);
+											if( k.resourcefulnessBoostExpireUnixtime > timestamp ){
+												bonus *= 1.25;
+											}
+										}
+									}
+									for(var j = 1; j < 5; j++ ){
+										var n = parseFloat(base[j] * (bonus / 100));
+										total[j] += n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( KOC.generic.format( n ) )
+											.attr('title', KOC.generic.readable( n ))
+											.data('ori', n );
+									}
+									tr++;
+								//tech bonus
+									for( var j = 1; j < 5; j++) {
+										var n= parseFloat(base[j] * (parseFloat(window.seed.tech["tch" + j]) / 10));
+										f[j] += n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( KOC.generic.format( n ) )
+											.attr('title', KOC.generic.readable( n ))
+											.data('ori', n );
+									}
+									tr++;
+								//wild bonus
+									var bonus = [0, 0, 0, 0, 0];
+									if( seed.wilds ){
+										for( var j = 0; j < seed.wilds.length; j++ ){
+											var b = seed.wilds[ j ].tileType[0];
+											bonus[ b ] += parseInt( seed.wilds[ j ].tileLevel, 10);
+										}
+									}
+									for( var j = 1; j < 5; j++ ){
+										var n = parseFloat(base[j] * 0.05 * bonus[j]);
+										total[j] += n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( KOC.generic.format( n ) )
+											.attr('title', KOC.generic.readable( n ))
+											.data('ori', n );
+									}
+									tr++;
+								//item bonus
+									for( var j = 1; j < 5; j++ ){
+										var n = 0;
+										if( parseInt( window.seed.playerEffects["r" + j + "BstExp"]) > timestamp ){
+											n = parseFloat(base[j] * 0.25);
+										}
+										total[j] += n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( KOC.generic.format( n ) )
+											.attr('title', KOC.generic.readable( n ))
+											.data('ori', n );
+									}
+									tr++;
+								//barbarian camps
+									//get barbarian attacks for the city
+									var trace = localStorage.getObject(''),
+										barbarians = [];
+
+									if( trace ){
+										for( var k = 0; k < trace.length; k++ ){
+											var marche = trace[k];
+											//check march status
+												/*
+													BOT_MARCH_UNDEFINED: 0,
+													BOT_MARCH_MARCHING: 1,
+													BOT_MARCH_RETURNING: 2,
+													BOT_MARCH_STOPPED: 3,
+													BOT_MARCH_INSUFFICIENT_TROOPS: 4,
+													BOT_MARCH_MAX_RAIDS_EXCEEDED: 5,
+													BOT_MARCH_TIMED_OUT: 6,
+													BOT_MARCH_RESTING: 7,
+													BOT_MARCH_UNAVAILABLE_KNIGHT: 8,
+													BOT_MARCH_RALLY_POINT_LIMIT_REACHED: 9,
+													BOT_MARCH_STOPPING: 200
+												*/
+											if( marche.botMarchStatus == 1 || marche.botMarchStatus == 2 || marche.botMarchStatus == 7 ){
+												//get attack duration
+												var time = marche.returnUnixTime - marche.marchUnixTime + marche.restPeriod;
+
+												//how many attacks in one hour
+												var factor = 3600 / time;
+
+												//get resources in one hour
+												var barbarian = [ factor * marche.gold, factor * marche.resource1, factor * marche.resource2, factor * marche.resource3, factor * marche.resource4 ];
+
+												barbarians.push( barbarian );
+											}
+										}
+									}
+
+									for (var j = 1; j < 5; j++) {
+										var n = 0;
+										if( barbarians.length ){
+											for( var k = 0; k < barbarians.lengh; k++ ){
+												n += barbarians[k][j];
+											}
+										}
+
+										total[j] += n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( '-' + KOC.generic.format( n ) )
+											.attr('title', '-' + KOC.generic.readable( n ))
+											.data('ori', n );
+									}
+									tr++;
+								//upkeep
+									for( var j = 1; j < 5; j++ ){
+										var n = parseInt(seed.res["rec" + j][3]);
+										total[j] -= n;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.text( '-' + KOC.generic.format( n ) )
+											.attr('title', '-' + KOC.generic.readable( n ))
+											.data('ori', n );
+									}
+									tr++;
+								//total prod
+									for( var j = 1; j < 5; j++ ){
+										total[j] += 100;
+
+										var row = tr + (j - 1) * nbLine;
+										resPDataTrs.eq(row).find('td').eq(i + 2)
+											.toggleClass('neg', total[j] < 0)
+											.text( (total[j] < 0 ? '-' : '') + KOC.generic.format( total[j] ) )
+											.attr('title', (total[j] < 0 ? '-' : '') + KOC.generic.readable( total[j] ))
+											.data('ori', total[j] );
+									}
+
 							//resources autonomy
 								for( var j = 0; j < KOC.resources_autonomy.length; j++ ){
 									var upkeep = KOC.resources_upkeep[j],
@@ -1673,6 +1710,7 @@ String.prototype.capitalize = function(){
 											.html('&nbsp;');
 									}
 								}
+
 							//troops
 								for( var j = 0; j < KOC.troops.length; j++ ){
 									var type = KOC.troops[j];
@@ -1709,6 +1747,10 @@ String.prototype.capitalize = function(){
 								}
 							}
 						});
+					},
+					'getAutonomy': function(cityId){
+						console.info('koc overview getAutonomy function');
+
 					},
 					/* moveable */
 						'moveableOn': function(){

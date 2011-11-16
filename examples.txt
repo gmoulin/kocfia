@@ -13,7 +13,51 @@ koc-0....6272483 (ligne 5)
 
 console.log(JSON.stringify(window.ksoItems));
 console.log(JSON.stringify(window.unitcost));
-{"unt1":"[\"Unité de Ravitaillement\", 50, 150, 0, 10, 0, 1, 50, {\"b13\": [1, 1]}, [], \"Les Unités de Ravitaillement n'excellent pas au combat mais transportent les ressources vers tes villes et celles de tes amis ou ramènent le butin pris dans des villes ennemies.\"]","unt2":"[\"Milicien\", 80, 100, 0, 50, 0, 1, 25, {\"b13\": [1, 1]}, [], \"Les Miliciens sont des citoyens de ta ville qui sont formés. C'est bien pour débuter, mais ils ne représentent pas un vrai danger face à des unités bien entraînées\"]","unt3":"[\"Eclaireur\", 120, 200, 0, 150, 0, 1, 100, {\"b13\": [1, 2]}, {\"t6\": [1, 1]}, \"Les Eclaireurs se déplacent vite et ramènent des informations sur les forces et les positions ennemies mais ne sont pas des combattants.\"]","unt4":"[\"Piquier\", 150, 500, 0, 100, 0, 1, 150, {\"b13\": [1, 2]}, {\"t8\": [1, 1]}, \"Les piquiers sont les unités les mieux entraînées. Leurs longues lances sont très efficaces contre les chevaux.\"]","unt5":"[\"Paladin\", 200, 150, 0, 400, 0, 1, 225, {\"b13\": [1, 3], \"b15\": [1, 1]}, {\"t9\": [1, 1]}, \"Les Paladins sont bien armés et les plus forts dans la mêlée. Leur bouclier les rend efficace contre les Archers.\"]","unt6":"[\"Archer\", 300, 350, 0, 300, 0, 2, 350, {\"b13\": [1, 4]}, {\"t13\": [1, 1]}, \"Les Archers détruisent les unités ennemies éloignées mais ils sont vulnérables de près.\"]","unt7":"[\"Cavalerie\", 1000, 600, 0, 500, 0, 3, 500, {\"b13\": [1, 5], \"b17\": [1, 1]}, {\"t12\": [1, 1]}, \"La Cavalerie se déplace très vite à cheval et leurs attaques sont dévastatrices.\"]","unt8":"[\"Cavalerie Lourde\", 2000, 500, 0, 2500, 0, 6, 1500, {\"b13\": [1, 7], \"b15\": [1, 5], \"b17\": [1, 5]}, {\"t12\": [1, 5]}, \"La Cavalerie Lourde est bien plus résistante que la Cavalerie. Cette armure fournit une défense aux attaquants et plus de puissance, mais les ralentit.\"]","unt9":"[\"Wagon de Ravitaillement\", 600, 1500, 0, 350, 0, 4, 1000, {\"b13\": [1, 6], \"b17\": [1, 1], \"b16\": [1, 3]}, {\"t10\": [1, 1], \"t5\": [1, 3]}, \"Les Wagons de Ravitaillement sont renforcés pour assurer le transport en pleine bataille et ne pas perdre le chargement.\"]","unt10":"[\"Baliste\", 2500, 3000, 0, 1800, 0, 5, 3000, {\"b13\": [1, 8], \"b17\": [1, 2], \"b16\": [1, 5]}, {\"t5\": [1, 5], \"t13\": [1, 6]}, \"Une Baliste tire de lourdes flèches à longue distance. Elle est efficace contre les autres armes d'assaut.\"]","unt11":"[\"Bélier\", 4000, 6000, 0, 1500, 0, 8, 4500, {\"b13\": [1, 9], \"b15\": [1, 5], \"b17\": [1, 3], \"b16\": [1, 7]}, {\"t9\": [1, 8], \"t5\": [1, 7]}, \"Un Bélier est un genre de grand rondin, utilisé pour enfoncer les défenses de l'ennemi.\"]","unt12":"[\"Catapulte\", 5000, 5000, 8000, 1200, 0, 10, 6000, {\"b13\": [1, 10], \"b17\": [1, 2], \"b16\": [1, 9]}, {\"t5\": [1, 10], \"t13\": [1, 10]}, \"Les Catapultes envoient d'énormes pierres de très loin. Elles sont plus efficaces contre les défenses de l'ennemi.\"]"}
+{
+    "unt1": "[
+		\"Unité de Ravitaillement\",
+		50,
+		150,
+		0,
+		10,
+		0,
+		1,
+		50,
+		{\"b13\": [1, 1]},
+		[],
+		\"Les Unités de Ravitaillement n'excellent pas au combat mais transportent les ressources vers tes villes et celles de tes amis ou ramènent le butin pris dans des villes ennemies.\"
+	]",
+    "unt2": "[\"Milicien\", 80, 100, 0, 50, 0, 1, 25, {\"b13\": [1, 1]}, [], \"Les Miliciens sont des citoyens de ta ville qui sont formés. C'est bien pour débuter, mais ils ne représentent pas un vrai danger face à des unités bien entraînées\"]",
+    "unt3": "[\"Eclaireur\", 120, 200, 0, 150, 0, 1, 100, {\"b13\": [1, 2]}, {\"t6\": [1, 1]}, \"Les Eclaireurs se déplacent vite et ramènent des informations sur les forces et les positions ennemies mais ne sont pas des combattants.\"]",
+    "unt4": "[\"Piquier\", 150, 500, 0, 100, 0, 1, 150, {\"b13\": [1, 2]}, {\"t8\": [1, 1]}, \"Les piquiers sont les unités les mieux entraînées. Leurs longues lances sont très efficaces contre les chevaux.\"]",
+    "unt5": "[\"Paladin\", 200, 150, 0, 400, 0, 1, 225, {\"b13\": [1, 3], \"b15\": [1, 1]}, {\"t9\": [1, 1]}, \"Les Paladins sont bien armés et les plus forts dans la mêlée. Leur bouclier les rend efficace contre les Archers.\"]",
+    "unt6": "[\"Archer\", 300, 350, 0, 300, 0, 2, 350, {\"b13\": [1, 4]}, {\"t13\": [1, 1]}, \"Les Archers détruisent les unités ennemies éloignées mais ils sont vulnérables de près.\"]",
+    "unt7": "[\"Cavalerie\", 1000, 600, 0, 500, 0, 3, 500, {\"b13\": [1, 5], \"b17\": [1, 1]}, {\"t12\": [1, 1]}, \"La Cavalerie se déplace très vite à cheval et leurs attaques sont dévastatrices.\"]",
+    "unt8": "[\"Cavalerie Lourde\", 2000, 500, 0, 2500, 0, 6, 1500, {\"b13\": [1, 7], \"b15\": [1, 5], \"b17\": [1, 5]}, {\"t12\": [1, 5]}, \"La Cavalerie Lourde est bien plus résistante que la Cavalerie. Cette armure fournit une défense aux attaquants et plus de puissance, mais les ralentit.\"]",
+    "unt9": "[\"Wagon de Ravitaillement\", 600, 1500, 0, 350, 0, 4, 1000, {\"b13\": [1, 6], \"b17\": [1, 1], \"b16\": [1, 3]}, {\"t10\": [1, 1], \"t5\": [1, 3]}, \"Les Wagons de Ravitaillement sont renforcés pour assurer le transport en pleine bataille et ne pas perdre le chargement.\"]",
+    "unt10": "[\"Baliste\", 2500, 3000, 0, 1800, 0, 5, 3000, {\"b13\": [1, 8], \"b17\": [1, 2], \"b16\": [1, 5]}, {\"t5\": [1, 5], \"t13\": [1, 6]}, \"Une Baliste tire de lourdes flèches à longue distance. Elle est efficace contre les autres armes d'assaut.\"]",
+    "unt11": "[\"Bélier\", 4000, 6000, 0, 1500, 0, 8, 4500, {\"b13\": [1, 9], \"b15\": [1, 5], \"b17\": [1, 3], \"b16\": [1, 7]}, {\"t9\": [1, 8], \"t5\": [1, 7]}, \"Un Bélier est un genre de grand rondin, utilisé pour enfoncer les défenses de l'ennemi.\"]",
+    "unt12": "[
+		\"Catapulte\",
+		5000,
+		5000,
+		8000,
+		1200,
+		0,
+		10,
+		6000,
+		{
+			\"b13\": [1, 10],
+			\"b17\": [1, 2],
+			\"b16\": [1, 9]
+		},
+		{
+			\"t5\": [1, 10],
+			\"t13\": [1, 10]
+		},
+		\"Les Catapultes envoient d'énormes pierres de très loin. Elles sont plus efficaces contre les défenses de l'ennemi.\"
+	]"
+}
 console.log(JSON.stringify(window.unitstats));
 {"unt1":"[200, 10, 3, 180, 10, 200]","unt2":"[400, 100, 13, 200, 20, 20]","unt3":"[20, 6, 1, 3000, 20, 5]","unt4":"[600, 300, 33, 300, 50, 40]","unt5":"[700, 200, 63, 275, 30, 30]","unt6":"[500, 240, 25, 250, 1200, 25]","unt7":"[1000, 500, 45, 1000, 100, 100]","unt8":"[2000, 700, 87, 750, 80, 80]","unt9":"[1400, 20, 15, 150, 10, 5000]","unt10":"[640, 900, 40, 100, 1400, 35]","unt11":"[10000, 500, 40, 120, 600, 45]","unt12":"[960, 1200, 50, 80, 1500, 75]"}
 console.log(JSON.stringify(window.unitmight));

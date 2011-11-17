@@ -48,18 +48,23 @@ var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwr
 var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 99998; display: none; }"
 		+ "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }"
 		+ "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }"
-		+ "\n#koc-overview table { width: 100%; }"
-		+ "\n#koc-overview thead { height: 20px; }"
-		+ "\n#koc-overview thead tr { display: block; position: relative; height: 20px; }"
-		+ "\n#koc-overview tbody { display: block; overflow: auto; width: 100%; }"
-		+ "\n#koc-overview th, #koc-overview td { height: 20px; }"
+		+ "\n#koc-overview .wrap { width: 100%; overflow: hidden; }"
+		+ "\n#koc-overview table { width: 100%; float: left; }"
+		+ "\n#koc-overview thead tr { display: block; position: relative; }"
+		+ "\n#koc-overview tbody { overflow: auto; display: block; width: 100%; }"
 		+ "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F8E0A8; }"
 		+ "\n#koc-overview tr td.sum { background-color: #D9F4F1; }"
-		+ "\n#koc-overview tbody tr td:first-child, #koc-overview thead tr th:first-child { width: 20px; }"
-		+ "\n#koc-overview tbody td, #koc-overview thead tr th { min-width: 45px; }"
 		+ "\n#koc-overview img { width:20px; }"
-		+ "\n#koc-overview tr td:not(:first-child) { text-align: right; }"
+		+ "\n#koc-overview tr td.sum, #koc-overview tr td.sum ~ td { text-align: right; }"
+		+ "\n#koc-overview th[colspan] { width: auto; }"
+		+ "\n#koc-overview .img { width: 20px; }"
+		+ "\n#koc-overview .label { width: 100px; text-overflow: ellipsis; }"
+		+ "\n#koc-overview .sum { width: 55px; }"
+		+ "\n#koc-overview thead tr th:last-child, #koc-overview thead tr td:last-child { width: auto; }"
+		+ "\n#koc-overview .sizer td, #koc-overview .sizer td.sum, #koc-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }"
 ;
+
+
 
 /*
  * jQuery each2 - v0.2 - 8/02/2010
@@ -208,28 +213,32 @@ $(document).ready(function(){
 				{'rows': 6, 'name': 'resource4', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_production_barbarian': [
+				{'name': 'gold', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
 				{'name': 'resource1', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
 				{'name': 'resource2', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'name': 'resource3', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'name': 'resource4', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_consumption': [
+				{'rows': 2, 'name': 'gold', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
 				{'rows': 2, 'name': 'resource1', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
 				{'rows': 2, 'name': 'resource2', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'rows': 2, 'name': 'resource3', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'rows': 2, 'name': 'resource4', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_production_total': [
+				{'name': 'gold', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
 				{'name': 'resource1', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
 				{'name': 'resource2', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
 				{'name': 'resource3', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
 				{'name': 'resource4', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_autonomy': [
-				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'gold', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+				{'name': 'resource1x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'population': [
 				{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'péon', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
@@ -271,6 +280,13 @@ $(document).ready(function(){
 					'resource2Capx3600': {'index': 1, 'type': 'rec2', 'var': 'res'},
 					'resource3Capx3600': {'index': 1, 'type': 'rec3', 'var': 'res'},
 					'resource4Capx3600': {'index': 1, 'type': 'rec4', 'var': 'res'},
+				},
+				'resources_consumption': {
+					'gold': {'index': 2, 'var': 'gold'},
+					'resource1': {'index': 3, 'type': 'rec1', 'var': 'res'},
+					'resource2': {'index': 3, 'type': 'rec2', 'var': 'res'},
+					'resource3': {'index': 3, 'type': 'rec3', 'var': 'res'},
+					'resource4': {'index': 3, 'type': 'rec4', 'var': 'res'},
 				},
 			},
 			/* AJAX SNIFFER */
@@ -1223,8 +1239,10 @@ $(document).ready(function(){
 						$head.append( $('<style id="koc-overview-css">').text(kocOverviewCss) );
 
 						var dataTable = '<table id="koc-overview-data">',
-							headers = '<thead><tr><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th>',
+							headers = '<thead><tr><th class="img">&nbsp;</th><th class="label">&nbsp;</th><th class="sum">&nbsp;</th>',
 							dataLine = '',
+							sizer = '<tr class="sizer"><td class="img"></td><td class="label"></td><td class="sum"></td>';
+							cols = 3,
 							$overview = $('<div id="koc-overview" class="ui-widget ui-widget-content ui-corner-all">');
 
 						//parts toggles checkboxes
@@ -1242,17 +1260,20 @@ $(document).ready(function(){
 							for( var i = 0; i < KOC.cities.length; i++ ){
 								headers += '<th title="'+ KOC.cities[i].name +'">'+ window.roman[i] +'</th>';
 								dataLine += '<td>&nbsp;</td>';
+								sizer += '<td></td>';
 							}
 							headers += '</tr></thead>';
+							cols += i;
+							sizer += '</tr>';
 
-						dataTable += headers + '<tbody>';
+						dataTable += headers + '<tbody>' + sizer;
 
 						//bodies
 							var left = 0;
 							for( var p in KOC.overview.parts ){
 								if( KOC.overview.parts.hasOwnProperty(p) ){
 									dataTable += '<tr class="'+ p +'">'
-											  +  '<th colspan="99" class="'+ p +'">'
+											  +  '<th colspan="'+ cols +'" class="'+ p +'">'
 											  +  KOC.overview.parts[p]
 											  + '</th>'
 											  +  '</tr>';
@@ -1264,15 +1285,15 @@ $(document).ready(function(){
 										if( rowspan ){
 											for( var j = 0; j < rowspan; j++ ){
 												dataTable += '<tr class="'+ p +'">'
-														  +  (j == 0 ? '<td rowspan="'+ rowspan +'"><img src="'+ KOC[p][i].icon +'"></td>' : '')
-														  +  '<td>'+ KOC[p][i].label[j] +'</td>'
+														  +  (j == 0 ? '<td class="img" rowspan="'+ rowspan +'"><img src="'+ KOC[p][i].icon +'"></td>' : '')
+														  +  '<td class="label">'+ KOC[p][i].label[j] +'</td>'
 														  +  '<td class="sum"></td>'
 														  +  dataLine + '</tr>';
 											}
 										} else {
 											dataTable += '<tr class="'+ p +'">'
-													  +  '<td><img src="'+ KOC[p][i].icon +'"></td>'
-													  +  '<td>'+ KOC[p][i].label +'</td>'
+													  +  '<td class="img"><img src="'+ KOC[p][i].icon +'"></td>'
+													  +  '<td class="label">'+ KOC[p][i].label +'</td>'
 													  +  '<td class="sum"></td>'
 													  +  dataLine + '</tr>';
 										}
@@ -1282,16 +1303,18 @@ $(document).ready(function(){
 
 						dataTable += '</tbody></table>';
 
-						$overview.append( toggles + dataTable );
+						$overview.append( toggles + '<div class="wrap">' + dataTable + '</div>' );
 
 						$body.append( $overview );
 						KOC.$overview = $('#koc-overview');
 						KOC.overview.$toggles = KOC.$overview.find('.overview-parts-toggles');
+						KOC.overview.$wrap = KOC.$overview.find('.wrap');
 						KOC.overview.$table = $('#koc-overview-data');
 						KOC.overview.$header = KOC.overview.$table.find('thead');
 						KOC.overview.$headersThs = KOC.overview.$header.find('th');
 						KOC.overview.$tbody = KOC.overview.$table.find('tbody');
-						KOC.overview.$tbodyTrs = KOC.overview.$tbody.find('tr');
+						KOC.overview.$cityTds = KOC.overview.$tbody.find('.sizer').find('td');
+						KOC.overview.$tbodyTrs = KOC.overview.$tbody.find('tr').filter(':not(.sizer)');
 
 						KOC.$overview
 							//highlight from headers
@@ -1388,7 +1411,7 @@ $(document).ready(function(){
 											//cm.BOT_STATUS.BOT_MARCH_MARCHING: 1,
 											//cm.BOT_STATUS.BOT_MARCH_RETURNING: 2,
 											//cm.BOT_STATUS.BOT_MARCH_RESTING: 7,
-											if( marche.marchType == 9 && marche.botMarchStatus == 1  && marche.botMarchStatus == 2 && marche.botMarchStatus == 7 ){
+											if( marche.marchType == 9 && (marche.botMarchStatus == 1  || marche.botMarchStatus == 2 || marche.botMarchStatus == 7) ){
 												//get attack duration (go, fight, return, unload, repeat)
 												var time = parseFloat(marche.returnUnixTime) - parseFloat(marche.marchUnixTime) + (parseFloat(marche.restPeriod) / 60);
 
@@ -1398,13 +1421,12 @@ $(document).ready(function(){
 												//get resources in one hour
 												var barbarianRes = [ factor * parseFloat(marche.gold), factor * parseFloat(marche.resource1), factor * parseFloat(marche.resource2), factor * parseFloat(marche.resource3), factor * parseFloat(marche.resource4) ];
 
-												for( var j = 0; j < KOC.troops.length; j++ ){
-													if( !barbariansTroops[j] ) barbariansTroops[j] = 0;
-													barbariansTroops[j] += parseFloat(marches['unit'+ j +'Count']);
-												}
-
 												barbariansRes.push( barbarianRes );
 
+												for( var j = 0; j < KOC.troops.length; j++ ){
+													if( !barbariansTroops[j] ) barbariansTroops[j] = 0;
+													barbariansTroops[j] += parseFloat(marche['unit'+ ( j + 1 ) +'Count']);
+												}
 											}
 										}
 									}
@@ -1418,18 +1440,19 @@ $(document).ready(function(){
 										for( var k = 0; k < type.rows; k++ ){
 											var inSeed = KOC.inSeed.population[ type.name[k] ],
 												$tds = $popTrs.eq(line).find('td'),
-												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 ),
+												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
 											if( inSeed ){
 												n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
-											} else if( type.name == 'availablePopulation' ){
+											} else if( type.name[k] == 'availablePopulation' ){
 												var take = KOC.inSeed.population[ type.name[0] ],
 													substract = KOC.inSeed.population[ type.name[2] ];
+
 												n = parseFloat( seed[ take.var ][ take.index ] ) - parseFloat( seed[ substract.var ][ substract.index ] );
 											}
 
 											if( n != null ){
-												$td.text( KOC.generic.format( n ) )
+												$td.html( KOC.generic.format( n ) )
 													.attr('title', KOC.generic.readable( n ))
 													.data('ori', n);
 											} else {
@@ -1443,12 +1466,12 @@ $(document).ready(function(){
 
 									} else {
 										var inSeed = KOC.inSeed.population[ type.name ],
-										$tds = $popTrs.eq(j).find('td'),
-										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 );
+											$tds = $popTrs.eq(line).find('td'),
+											$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 										if( inSeed ){
 											var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 
-											$td.text( KOC.generic.format( n ) )
+											$td.html( KOC.generic.format( n ) )
 												.attr('title', KOC.generic.readable( n ))
 												.data('ori', n);
 
@@ -1457,9 +1480,9 @@ $(document).ready(function(){
 												.attr('title', KOC.generic.readable( n ))
 												.data('ori', 0);
 										}
-									}
 
-									line++;
+										line++;
+									}
 								}
 
 							//resources
@@ -1467,7 +1490,7 @@ $(document).ready(function(){
 									var type = KOC.resources[j],
 										inSeed = KOC.inSeed.resources[ type.name ],
 										$tds = $resTrs.eq(j).find('td'),
-										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 );
+										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 									if( inSeed ){
 										if( inSeed.hasOwnProperty('type') ){
 											var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
@@ -1477,7 +1500,7 @@ $(document).ready(function(){
 
 										if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-										$td.text( KOC.generic.format( n ) )
+										$td.html( KOC.generic.format( n ) )
 											.attr('title', KOC.generic.readable(n))
 											.data('ori', n);
 									} else {
@@ -1492,12 +1515,12 @@ $(document).ready(function(){
 									var type = KOC.resources_cap[j],
 										inSeed = KOC.inSeed.resources_cap[ type.name ],
 										$tds = $resCapTrs.eq(j).find('td'),
-										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 );
+										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 									if( inSeed ){
 										var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
 										if( n > 0 ) n = n / 3600;
 
-										$td.text( KOC.generic.format( n ) )
+										$td.html( KOC.generic.format( n ) )
 											.attr('title', KOC.generic.readable(n))
 											.data('ori', n);
 									} else {
@@ -1554,16 +1577,18 @@ $(document).ready(function(){
 
 								for( var j = 0; j < KOC.resources_production_detail.length; j++ ){
 									var type = KOC.resources_production_detail[j],
-										r = j + 1; //resource index for base and total arrays
+										r = j + 1; //no gold
 									if( type.rows ){
 										for( var k = 0; k < type.rows; k++ ){
 											var $tds = $resProdDetailTrs.eq(line).find('td'),
-												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 ),
+												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
 											//'base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'
 											switch( type.label[k] ){
 												case 'base':
-														n = base[r] = total[r] = parseFloat(seed.res["rec" + r][2] * populationModifier);
+														n = parseFloat(seed.res["rec" + r][2] * populationModifier);
+														base[r] = n;
+														total[r] = n;
 													break;
 												case 'gardien':
 														n = parseFloat( bonusG[ keys[r] ] );
@@ -1590,9 +1615,9 @@ $(document).ready(function(){
 											}
 
 											if( n != null ){
-												$td.text( KOC.generic.format( base[j] ) )
-													.attr('title', KOC.generic.readable( base[j] ))
-													.data('ori', base[j]);
+												$td.html( KOC.generic.format( n ) )
+													.attr('title', KOC.generic.readable( n ))
+													.data('ori', n);
 											} else {
 												$td.html( '&nbsp;' )
 													.attr('title', '')
@@ -1607,15 +1632,15 @@ $(document).ready(function(){
 							//resources from barbarian camps
 								for( var j = 0; j < KOC.resources_production_barbarian.length; j++ ){
 									var $tds = $resProdBarbarianTrs.eq(j).find('td'),
-										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 ),
+										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 										n = 0;
 									if( barbariansRes.length ){
-										for( var k = 0; k < barbariansRes.lengh; k++ ){
+										for( var k = 0; k < barbariansRes.length; k++ ){
 											n += barbariansRes[k][j];
 										}
 										total[j] += n;
 
-										$td.text( KOC.generic.format( n ) )
+										$td.html( KOC.generic.format( n ) )
 											.attr('title', KOC.generic.readable( n ))
 											.data('ori', n );
 									} else {
@@ -1628,29 +1653,35 @@ $(document).ready(function(){
 							//resources consumption
 								var line = 0;
 								for( var j = 0; j < KOC.resources_consumption.length; j++ ){
-									var type = KOC.resources_consumption[j],
-										r = j + 1; //resource index for base and total arrays
+									var type = KOC.resources_consumption[j];
 									if( type.rows ){
 										for( var k = 0; k < type.rows; k++ ){
 											var $tds = $resConsoTrs.eq(line).find('td'),
-												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 ),
+												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
 											//'dépense', 'formation'
 											switch( type.label[k] ){
 												case 'dépense':
-														n = parseInt(seed.res["rec" + r][3]);
-														total[r] -= n;
+													var inSeed = KOC.inSeed.resources_consumption[ type.name ];
+													if( inSeed ){
+														if( inSeed.hasOwnProperty('type') ){
+															n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
+														} else {
+															n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
+														}
+														total[j] -= n;
+													}
 													break;
 												case 'formation':
 														n = 0;
-														total[r] -= n;
+														total[j] -= n;
 													break;
 											}
 
 											if( n != null ){
-												$td.text( KOC.generic.format( base[j] ) )
-													.attr('title', KOC.generic.readable( base[j] ))
-													.data('ori', base[j]);
+												$td.html( KOC.generic.format( n ) )
+													.attr('title', KOC.generic.readable( n ))
+													.data('ori', n);
 											} else {
 												$td.html( '&nbsp;' )
 													.attr('title', '')
@@ -1662,15 +1693,14 @@ $(document).ready(function(){
 									}
 								}
 
-
 							//resources production total
 								for( var j = 0; j < KOC.resources_production_total.length; j++ ){
 									var $tds = $resProdTotalTrs.eq(j).find('td'),
-										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 );
+										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 
 									if( total[j] ){
 										total[j] += 100;
-										$td.text( KOC.generic.format( total[j] ) )
+										$td.html( KOC.generic.format( total[j] ) )
 											.attr('title', KOC.generic.readable( total[j] ))
 											.data('ori', total[j] );
 									} else {
@@ -1683,22 +1713,23 @@ $(document).ready(function(){
 									var stock = KOC.resources[j],
 										stockInSeed = KOC.inSeed.resources[ stock.name ],
 										$tds = $resAutonomyTrs.eq(j).find('td'),
-										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 );
+										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
+										s = 0;
 									if( stockInSeed ){
-										if( inSeed.hasOwnProperty('type') ){
-											var s = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
+										if( stockInSeed.hasOwnProperty('type') ){
+											s = parseFloat( seed[ stockInSeed.var ][ stockInSeed.type ][ stockInSeed.index ] );
 											if( s > 0 ) s = s / 3600;
 										} else {
-											var s = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
+											s = parseFloat( seed[ stockInSeed.var ][ stockInSeed.index ] );
 										}
 
-										if( total[j] == 0 ){
-											$td.text('-');
+										if( total[j] >= 0 ){
+											$td.html('-');
 										} else if( s == 0 ){
-											$td.text('0s')
+											$td.html('0s')
 										} else {
 											var n = s / total[j] * 3600;
-											$td.text( KOC.generic.readableDuration( n ) );
+											$td.html( KOC.generic.readableDuration( n ) );
 										}
 									} else {
 										$td.html('-');
@@ -1712,17 +1743,17 @@ $(document).ready(function(){
 									if( type.rows ){
 										for( var k = 0; k < type.rows; k++ ){
 											var $tds = $troopsTrs.eq( line ).find('td'),
-												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 ),
+												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
 
-											if( type.label[k] == 'CB' ){
-												var n = parseFloat( barbariansTroops[j] );
-											} else if( seed.units[ type.name[k] ] ){
-												var n = parseFloat( seed.units[ type.name[k] ] );
+											if( type.label[k] == 'en CB' && barbariansTroops.length ){
+												n = ( barbariansTroops[j] ? parseFloat( barbariansTroops[j] ) : 0 );
+											} else if( seed.units[ type.name ] ){
+												n = parseFloat( seed.units[ type.name ] );
 											}
 
 											if( n != null ){
-												$td.text( KOC.generic.format( n ) )
+												$td.html( KOC.generic.format( n ) )
 													.attr('title', KOC.generic.readable(n))
 													.data('ori', n);
 											} else {
@@ -1734,8 +1765,6 @@ $(document).ready(function(){
 											line++;
 										}
 									}
-
-									line++;
 								}
 						}
 
@@ -1745,19 +1774,33 @@ $(document).ready(function(){
 						KOC.overview.$tbodyTrs.each2(function(i, $tr){
 							if( !$tr.hasClass('resources_autonomy') ){
 								var sum = 0,
-									$tds = $tr.find('td'),
-									$sumTd = $tds.filter('.sum'),
-									col = $sumTd.index( $tds );
+									$tds = $tr.find('td');
 								if( $tds.length ){
-									$tds.filter(':gt('+ col +')').each2(function(j, $tr){
-										sum += parseFloat( $tr.data('ori') );
+									var $sumTd = $tds.filter('.sum'),
+										col = $tds.index( $sumTd );
+									$tds.filter(':gt('+ col +')').each2(function(j, $td){
+										sum += parseFloat( $td.data('ori') );
 									});
 
-									$sumTd.text( KOC.generic.format( sum ) )
-										.attr('title', KOC.generic.readable(sum));
+									if( sum == NaN ){
+										$sumTd.html( '-' )
+											.attr('title', '');
+									} else {
+										$sumTd.html( KOC.generic.format( sum ) )
+											.attr('title', KOC.generic.readable(sum));
+									}
 								}
 							}
 						});
+					},
+					'getCityColWidth': function( tableWidth ){
+						var cityColWidth = tableWidth - 25;
+						cityColWidth -= KOC.overview.$cityTds.eq(0).width();
+						cityColWidth -= KOC.overview.$cityTds.eq(1).width();
+						cityColWidth -= KOC.overview.$cityTds.eq(2).width();
+						cityColWidth /= KOC.cities.length;
+
+						return Math.floor(cityColWidth);
 					},
 					/* moveable */
 						'moveableOn': function(){
@@ -1779,15 +1822,18 @@ $(document).ready(function(){
 									'minWidth': 250,
 									'minHeight': 250,
 									'resize': function(event, ui){
+										KOC.overview.$cityTds.filter(':gt(2)').css('width', '');
 										var tableH = ui.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-										KOC.overview.$table.css('height', tableH);
-										KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
-									},
-									'stop': function(event, ui){
-										var tableH = ui.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-										KOC.overview.$table.css('height', tableH);
+										KOC.overview.$wrap.css('height', tableH);
 										KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
 
+										KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( ui.size.width ) + 'px');
+
+										KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
+											$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
+										});
+									},
+									'stop': function(event, ui){
 										KOC.conf.overview.size = ui.size;
 										KOC.generic.storeConf();
 									}
@@ -1809,8 +1855,14 @@ $(document).ready(function(){
 								KOC.$overview.show();
 
 								var tableH = KOC.conf.overview.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-								KOC.overview.$table.css('height', tableH);
+								KOC.overview.$wrap.css('height', tableH);
 								KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+
+								KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( KOC.conf.overview.size.width ) + 'px');
+
+								KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
+									$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
+								});
 							}
 
 							var $kocOverviewToggle = $('<button id="koc-overview-toggle">').text('Vue Globale');
@@ -1819,8 +1871,14 @@ $(document).ready(function(){
 								KOC.$overview.toggle();
 
 								var tableH = KOC.conf.overview.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-								KOC.overview.$table.css('height', tableH);
+								KOC.overview.$wrap.css('height', tableH);
 								KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+
+								KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( KOC.conf.overview.size.width ) + 'px');
+
+								KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
+									$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
+								});
 
 								KOC.conf.overview.visible = (KOC.$overview.is(':visible') ? 1 : 0);
 								KOC.generic.storeConf();
@@ -1862,9 +1920,15 @@ $(document).ready(function(){
 								'left': p.left,
 							});
 
-							var tableH = KOC.$overview.height() - KOC.overview.$toggles.height() - 5;
-							KOC.overview.$table.css('height', tableH);
+							var tableH = KOC.$overview.height() - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
+							KOC.overview.$wrap.css('height', tableH);
 							KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+
+							KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( KOC.$overview.width() ) + '%');
+
+							KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
+								$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
+							});
 
 							$('#koc-overview-toggle').remove();
 						},
@@ -2207,6 +2271,7 @@ $(document).ready(function(){
 		console.error(e);
 	}
 })(jQuery);
+
 });
 /*
 	//Construction :

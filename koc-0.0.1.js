@@ -96,6 +96,28 @@ String.prototype.capitalize = function(){
 	return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
+// Return new array with duplicate values removed
+Array.prototype.unique = function(){
+	var a = [];
+	var l = this.length;
+	for( var i = 0; i < l; i++ ){
+		for( var j= i + 1; j < l; j++ ){
+			// If this[i] is found later in the array
+			if( this[i] === this[j] ) j = ++i;
+		}
+		a.push(this[i]);
+	}
+	return a;
+};
+
+Array.max = function( array ){
+    return Math.max.apply( Math, array );
+};
+
+Array.min = function( array ){
+    return Math.min.apply( Math, array );
+};
+
 $(document).ready(function(){
 
 (function($){
@@ -114,12 +136,12 @@ $(document).ready(function(){
 
 		var KOC = {
 			'server': null,
-			'modules': ['chat', 'transport', 'fbWallPopup', 'overview'],
+			'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt'],
 			'stored': ['conf'],
 			'init': function(){
 				console.info('KOC init function');
 				//get server id
-					KOC.server = KOC.generic.getServer();
+					KOC.server = KOC.shared.getServer();
 					console.log('server', KOC.server);
 					if( KOC.server == null ){
 						console.error('wrong server id');
@@ -162,6 +184,9 @@ $(document).ready(function(){
 					KOC.ajaxSniffer();
 					console.timeEnd('sniffer');
 
+				//get player cities
+					KOC.shared.getCities();
+
 				//configuration panel
 					console.time('confPanel');
 					KOC.confPanel();
@@ -180,9 +205,6 @@ $(document).ready(function(){
 					);
 					KOC.$refreshButton = $('#koc-refresh-seed');
 
-				//get player cities
-					KOC.generic.getCities();
-
 				//modules init
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						console.time('koc '+ KOC.modules[i] +' on');
@@ -190,105 +212,106 @@ $(document).ready(function(){
 						console.timeEnd('koc '+ KOC.modules[i] +' on');
 					}
 			},
-			'cities': [],//[{'id','name','coords': {x,y}}, ...]
-			'citiesId': [],
-			'resources': [
-				{'name': 'gold', 'key': 'rec0', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'name': 'resource1x3600', 'key': 'rec1', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2x3600', 'key': 'rec2', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3x3600', 'key': 'rec3', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4x3600', 'key': 'rec4', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'resource7', 'key': '7', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
-			],
-			'resources_cap': [
-				{'name': 'resource1Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],
-			'resources_production_detail': [
-				{'rows': 6, 'name': 'resource1', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'rows': 6, 'name': 'resource2', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'rows': 6, 'name': 'resource3', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'rows': 6, 'name': 'resource4', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],
-			'resources_production_barbarian': [
-				{'name': 'gold', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'name': 'resource1', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],
-			'resources_consumption': [
-				{'rows': 2, 'name': 'gold', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'rows': 2, 'name': 'resource1', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'rows': 2, 'name': 'resource2', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'rows': 2, 'name': 'resource3', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'rows': 2, 'name': 'resource4', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],
-			'resources_production_total': [
-				{'name': 'gold', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'name': 'resource1', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],
-			'resources_autonomy': [
-				{'name': 'gold', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'name': 'resource1x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-			],
-			'population': [
-				{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'péon', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
-				{'name': 'taxRate', 'label': 'taxation', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/taxes.png'},
-				{'name': 'hapiness', 'label': 'bonheur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
-			],
-			'troops': [
-				{'rows': 2, 'name': 'unt1', 'label': ['Unité', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt2', 'label': ['Milicien', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt3', 'label': ['Eclaireur', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt4', 'label': ['Piquier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt5', 'label': ['Paladin', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt6', 'label': ['Archer', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt7', 'label': ['Cavalerie', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt8', 'label': ['Cavalerie Lourde', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt9', 'label': ['Wagon', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt10', 'label': ['Baliste', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt11', 'label': ['Bélier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt12', 'label': ['Catapulte', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
-			],
-			'inSeed': {
-				'population': {
-					'population': {'index': 0, 'var': 'pop'},
-					'populationCap': {'index': 1, 'var': 'pop'},
-					'laborPopulation': {'index': 3, 'var': 'pop'},
-					'taxRate': {'index': 1, 'var': 'gold'},
-					'hapiness': {'index': 2, 'var': 'pop'},
+			/* DATA */
+				'cities': [],//[{'id','name','coords': {x,y}}, ...]
+				'citiesId': [],
+				'resources': [
+					{'name': 'gold', 'key': 'rec0', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+					{'name': 'resource1x3600', 'key': 'rec1', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'name': 'resource2x3600', 'key': 'rec2', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'name': 'resource3x3600', 'key': 'rec3', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'name': 'resource4x3600', 'key': 'rec4', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+					{'name': 'resource7', 'key': '7', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
+				],
+				'resources_cap': [
+					{'name': 'resource1Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'name': 'resource2Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'name': 'resource3Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'name': 'resource4Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				],
+				'resources_production_detail': [
+					{'rows': 6, 'name': 'resource1', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'rows': 6, 'name': 'resource2', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'rows': 6, 'name': 'resource3', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'rows': 6, 'name': 'resource4', 'label': ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				],
+				'resources_production_barbarian': [
+					{'name': 'gold', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+					{'name': 'resource1', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'name': 'resource2', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'name': 'resource3', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'name': 'resource4', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				],
+				'resources_consumption': [
+					{'rows': 2, 'name': 'gold', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+					{'rows': 2, 'name': 'resource1', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'rows': 2, 'name': 'resource2', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'rows': 2, 'name': 'resource3', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'rows': 2, 'name': 'resource4', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				],
+				'resources_production_total': [
+					{'name': 'gold', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+					{'name': 'resource1', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'name': 'resource2', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'name': 'resource3', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'name': 'resource4', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				],
+				'resources_autonomy': [
+					{'name': 'gold', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+					{'name': 'resource1x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+					{'name': 'resource2x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+					{'name': 'resource3x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+					{'name': 'resource4x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				],
+				'population': [
+					{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'péon', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
+					{'name': 'taxRate', 'label': 'taxation', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/taxes.png'},
+					{'name': 'hapiness', 'label': 'bonheur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
+				],
+				'troops': [
+					{'rows': 2, 'name': 'unt1', 'label': ['Unité', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt2', 'label': ['Milicien', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt3', 'label': ['Eclaireur', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt4', 'label': ['Piquier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt5', 'label': ['Paladin', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt6', 'label': ['Archer', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt7', 'label': ['Cavalerie', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt8', 'label': ['Cavalerie Lourde', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt9', 'label': ['Wagon', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt10', 'label': ['Baliste', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt11', 'label': ['Bélier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+					{'rows': 2, 'name': 'unt12', 'label': ['Catapulte', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
+				],
+				'inSeed': {
+					'population': {
+						'population': {'index': 0, 'var': 'pop'},
+						'populationCap': {'index': 1, 'var': 'pop'},
+						'laborPopulation': {'index': 3, 'var': 'pop'},
+						'taxRate': {'index': 1, 'var': 'gold'},
+						'hapiness': {'index': 2, 'var': 'pop'},
+					},
+					'resources': {
+						'gold': {'index': 0, 'var': 'gold'},
+						'resource1x3600': {'index': 0, 'type': 'rec1', 'var': 'res'},
+						'resource2x3600': {'index': 0, 'type': 'rec2', 'var': 'res'},
+						'resource3x3600': {'index': 0, 'type': 'rec3', 'var': 'res'},
+						'resource4x3600': {'index': 0, 'type': 'rec4', 'var': 'res'},
+						'resource7': {'index': 0, 'type': 'rec5', 'var': 'res'},
+					},
+					'resources_cap': {
+						'resource1Capx3600': {'index': 1, 'type': 'rec1', 'var': 'res'},
+						'resource2Capx3600': {'index': 1, 'type': 'rec2', 'var': 'res'},
+						'resource3Capx3600': {'index': 1, 'type': 'rec3', 'var': 'res'},
+						'resource4Capx3600': {'index': 1, 'type': 'rec4', 'var': 'res'},
+					},
+					'resources_consumption': {
+						'gold': {'index': 2, 'var': 'gold'},
+						'resource1': {'index': 3, 'type': 'rec1', 'var': 'res'},
+						'resource2': {'index': 3, 'type': 'rec2', 'var': 'res'},
+						'resource3': {'index': 3, 'type': 'rec3', 'var': 'res'},
+						'resource4': {'index': 3, 'type': 'rec4', 'var': 'res'},
+					},
 				},
-				'resources': {
-					'gold': {'index': 0, 'var': 'gold'},
-					'resource1x3600': {'index': 0, 'type': 'rec1', 'var': 'res'},
-					'resource2x3600': {'index': 0, 'type': 'rec2', 'var': 'res'},
-					'resource3x3600': {'index': 0, 'type': 'rec3', 'var': 'res'},
-					'resource4x3600': {'index': 0, 'type': 'rec4', 'var': 'res'},
-					'resource7': {'index': 0, 'type': 'rec5', 'var': 'res'},
-				},
-				'resources_cap': {
-					'resource1Capx3600': {'index': 1, 'type': 'rec1', 'var': 'res'},
-					'resource2Capx3600': {'index': 1, 'type': 'rec2', 'var': 'res'},
-					'resource3Capx3600': {'index': 1, 'type': 'rec3', 'var': 'res'},
-					'resource4Capx3600': {'index': 1, 'type': 'rec4', 'var': 'res'},
-				},
-				'resources_consumption': {
-					'gold': {'index': 2, 'var': 'gold'},
-					'resource1': {'index': 3, 'type': 'rec1', 'var': 'res'},
-					'resource2': {'index': 3, 'type': 'rec2', 'var': 'res'},
-					'resource3': {'index': 3, 'type': 'rec3', 'var': 'res'},
-					'resource4': {'index': 3, 'type': 'rec4', 'var': 'res'},
-				},
-			},
 			/* AJAX SNIFFER */
 				'ajaxSniffer': function(){
 					console.info('KOC ajaxSniffer function');
@@ -386,20 +409,24 @@ $(document).ready(function(){
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						var mod = KOC.modules[i];
 						if( typeof KOC[mod].modPanel == 'function' ){
-							lis += '<li class="koc-conf-panel-tab '+ (this.conf[mod].active ? 'on' : 'off') +'">'
+							var active = this.conf[mod].active;
+							if( mod == 'crestHunt' ){
+								active = this.conf[mod].automatic;
+							}
+							lis += '<li class="koc-conf-panel-tab '+ (active ? 'on' : 'off') +'">'
 								 + '<a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a>'
 								 + '</li>';
 							sections += '<div id="koc-'+ mod +'"></div>';
 						}
 					}
 
-					console.time('generic option panel');
-					KOC.generic.optionPanel( $optionsSection );
-					console.timeEnd('generic option panel');
+					console.time('shared option panel');
+					KOC.shared.optionPanel( $optionsSection );
+					console.timeEnd('shared option panel');
 
 					//manage the checked status change of the options
-					$optionsSection
-						.on('change', 'input', function(){
+					$confPanel
+						.on('change', '.conf-toggle', function(){
 							var $this = $(this),
 								infos = this.id.split('-'),
 								mod = infos[0],
@@ -421,21 +448,21 @@ $(document).ready(function(){
 							}
 
 							KOC.conf[ mod ][ infos[1] ] = status;
-							KOC.generic.storeConf();
+							KOC.shared.storeConf();
 
 							if( typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
 							else console.warn('not a function', mod, func, typeof KOC[ mod ][ func ]);
 						})
-						.on('change', 'select', function(){
+						.on('change', '.conf-choice', function(){
 							var $this = $(this),
 								infos = this.id.split('-'),
 								mod = infos[0],
 								option = infos[1];
 
 							KOC.conf[ mod ][ option ] = $this.val();
-							KOC.generic.storeConf();
+							KOC.shared.storeConf();
 						})
-						.on('click', 'button', function(e){
+						.on('click', '.conf-action', function(e){
 							e.preventDefault();
 							var $this = $(this),
 								infos = $this.attr('rel').split('-');
@@ -452,7 +479,7 @@ $(document).ready(function(){
 							handle: '.ui-tabs-nav',
 							'stop': function(event, ui){
 								KOC.conf.confPanel.position = ui.position;
-								KOC.generic.storeConf();
+								KOC.shared.storeConf();
 							}
 						})
 						.resizable({
@@ -467,7 +494,7 @@ $(document).ready(function(){
 							},
 							stop: function(event, ui){
 								KOC.conf.confPanel.size = ui.size;
-								KOC.generic.storeConf();
+								KOC.shared.storeConf();
 
 								KOC.$confPanelTabs.css({
 									'max-width': KOC.conf.confPanel.size.width,
@@ -481,7 +508,7 @@ $(document).ready(function(){
 							select: function(event, ui){
 								//save the selected panel index
 								KOC.conf.confPanel.selected = ui.index;
-								KOC.generic.storeConf();
+								KOC.shared.storeConf();
 
 								//dynamic generation of the panel on first call
 								if( !$(ui.panel).find('h2').length ){
@@ -500,7 +527,7 @@ $(document).ready(function(){
 							e.preventDefault();
 							KOC.$confPanel.hide();
 							KOC.conf.confPanel.visible = 0;
-							KOC.generic.storeConf();
+							KOC.shared.storeConf();
 						});
 
 					var $kocConfPanelToggle = $('<button id="koc-conf-panel-toggle">').text('KOC');
@@ -508,7 +535,7 @@ $(document).ready(function(){
 						console.info('$kocConfPanelToggle click');
 						KOC.$confPanel.toggle();
 						KOC.conf.confPanel.visible = (KOC.$confPanel.is(':visible') ? 1 : 0);
-						KOC.generic.storeConf();
+						KOC.shared.storeConf();
 
 						KOC.$confPanelTabs.css({
 							'max-width': KOC.$confPanel.innerWidth() - 10,
@@ -550,54 +577,21 @@ $(document).ready(function(){
 						});
 					}
 				},
-				'generateCheckbox': function(module, option, text, checked){
-					return '<p>'
-						 + '<input type="checkbox" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' />'
-						 + '<label for="'+ module +'-'+ option +'">'+ text +'</label>'
-						 + '</p>';
-				},
-				'generateButton': function(module, action, text){
-					return '<p><button rel="'+ module +'-'+ action +'">'+ text +'</button></p>';
-				},
-				'generateRadio': function(module, name, values, labels, selected){
-					var code = '<p>';
-					if( values.length && labels.length && values.length == labels.length ){
-						for( var i = 0; i < values.length; i++ ){
-							if( i > 0 ) code += '<br />';
-							code += '<input type="radio" id="'+ module +'-'+ values[i] +'" name="'+ module + '_' + name +'" '+ (selected[i] == 1 ? 'checked' : '') +' />'
-						 		  + '<label for="'+ module +'-'+ values[i] +'">'+ labels[i] +'</label>';
-						}
-					}
-					code += '</p>';
-					return code;
-				},
-				'generateSelect': function(module, name, label, selected, options){
-					var code = '<p><label for="'+ module + '_' + name +'">'+ label +'</label><select id="'+ module + '_' + name +'"><option value=""></option>';
-					if( options.values && options.labels && options.values.length == options.labels.length){
-						var values = options.values,
-							labels = options.labels;
-						for( var i = 0; i < values.length; i++ ){
-							code += '<option value="'+ values[i] +'" '+ (values[i] == selected ? 'selected' : '') +'>'+ labels[i] +'</option>';
-						}
-					}
-					code += '</select></p>';
-					return code;
-				},
-			/* GENERIC */
-				'generic': {
+			/* SHARED */
+				'shared': {
 					'storeConf': function(){
 						console.info('KOC storeConf function', KOC.conf);
 						localStorage.setObject('koc_conf_' + KOC.server, KOC.conf);
 					},
 					'cleanLocalStorage': function(){
-						console.info('KOC generic cleanLocalStorage function');
-						for( var i = 0; i < KOC.storedObjects.length; i++ ){
-							localStorage.removeItem('koc_' + KOC.storedObjects[i] + '_' + KOC.server);
+						console.info('KOC shared cleanLocalStorage function');
+						for( var i = 0; i < KOC.stored.length; i++ ){
+							localStorage.removeItem('koc_' + KOC.stored[i] + '_' + KOC.server);
 						}
 					},
 					'optionPanel': function($optionsSection){
-						console.info('KOC generic optionPanel function');
-						$optionsSection.append( KOC.generateButton('generic', 'cleanLocalStorage', 'Remise à zèro des données persistantes') );
+						console.info('KOC shared optionPanel function');
+						$optionsSection.append( KOC.shared.generateButton('shared', 'cleanLocalStorage', 'Remise à zèro des données persistantes') );
 						for( var i = 0; i < KOC.modules.length; i++ ){
 							KOC[ KOC.modules[i] ].confPanel( $optionsSection );
 						}
@@ -609,10 +603,33 @@ $(document).ready(function(){
 						console.time('cities');
 						for( var i = 0; i < window.seed.cities.length; i++ ){
 							var c = window.seed.cities[i];
-							KOC.cities.push( {'id': c[0], 'name': c[1], 'coords': {'x': c[2], 'y': c[3]}} );
+							KOC.cities.push( {'id': c[0], 'name': c[1], 'coords': {'x': c[2], 'y': c[3]}, 'roman': window.roman[i]} );
 							KOC.citiesId.push( c[0] );
 						}
 						console.timeEnd('cities');
+					},
+					'getCityById': function( id ){
+						for( var i = 0; i < KOC.cities.length; i++ ){
+							if( KOC.cities[i].id == id ){
+								return KOC.cities[i];
+							}
+						}
+						return false;
+					},
+					'getKnightStatText': function( knight ){
+						var stat = Math.max(parseFloat(knight.resourcefulness), parseFloat(knight.politics), parseFloat(knight.combat), parseFloat(knight.intelligence));
+
+						if( knight.resourcefulness == knight.politics && knight.resourcefulness == knight.politics && knight.resourcefulness == knight.intelligence )
+							return 'pas de statistique principale';
+						if( knight.resourcefulness == stat ){
+							return 'R'+stat;
+						} else if( knight.politics == stat ){
+							return 'P'+stat;
+						} else if( knight.combat == stat ){
+							return 'C'+stat;
+						} else if( knight.intelligence == stat ){
+							return 'I'+stat;
+						}
 					},
 					'format': function( num ){
 						if( typeof num == 'undefined' || num == null ) return '&nbsp;';
@@ -696,6 +713,39 @@ $(document).ready(function(){
 							}
 						}
 					},
+					'generateCheckbox': function(module, option, text, checked){
+						return '<p>'
+							 + '<input type="checkbox" class="conf-toggle" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' />'
+							 + '<label for="'+ module +'-'+ option +'">'+ text +'</label>'
+							 + '</p>';
+					},
+					'generateButton': function(module, action, text){
+						return '<p><button rel="'+ module +'-'+ action +'" class="conf-action">'+ text +'</button></p>';
+					},
+					'generateRadio': function(module, name, values, labels, selected){
+						var code = '<p>';
+						if( values.length && labels.length && values.length == labels.length ){
+							for( var i = 0; i < values.length; i++ ){
+								if( i > 0 ) code += '<br />';
+								code += '<input type="radio" class="conf-toggle" id="'+ module +'-'+ values[i] +'" name="'+ module + '_' + name +'" '+ (selected[i] == 1 ? 'checked' : '') +' />'
+									  + '<label for="'+ module +'-'+ values[i] +'">'+ labels[i] +'</label>';
+							}
+						}
+						code += '</p>';
+						return code;
+					},
+					'generateSelect': function(module, name, label, selected, options){
+						var code = '<p><label for="'+ module + '_' + name +'">'+ label +'</label><select id="'+ module + '_' + name +'" class="conf-choice"><option value=""></option>';
+						if( options.values && options.labels && options.values.length == options.labels.length){
+							var values = options.values,
+								labels = options.labels;
+							for( var i = 0; i < values.length; i++ ){
+								code += '<option value="'+ values[i] +'" '+ (values[i] == selected ? 'selected' : '') +'>'+ labels[i] +'</option>';
+							}
+						}
+						code += '</select></p>';
+						return code;
+					},
 				},
 			/* FACEBOOK WALL POST POPUP */
 				'fbWallPopup': {
@@ -710,9 +760,9 @@ $(document).ready(function(){
 						console.info('KOC fbWallPopup confPanel function');
 						var code = '<p>'
 							+ '<h2>Popup facebook pour poster sur le mur</h2>'
-							+ KOC.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOC.conf.fbWallPopup.active)
-							+ KOC.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOC.conf.fbWallPopup.cancel, KOC.conf.fbWallPopup.post])
-							+ KOC.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilité', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList)
+							+ KOC.shared.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOC.conf.fbWallPopup.active)
+							+ KOC.shared.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOC.conf.fbWallPopup.cancel, KOC.conf.fbWallPopup.post])
+							+ KOC.shared.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilité', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList)
 							+ '</p>';
 
 						$section.append( code );
@@ -746,14 +796,14 @@ $(document).ready(function(){
 						console.info('KOC chat confPanel function');
 						var code = '<p>'
 							+ '<h2>Chat</h2>'
-							+ KOC.generateCheckbox('chat', 'active', 'Activer le module', KOC.conf.chat.active)
-							+ KOC.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable)
-							+ KOC.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp)
-							+ KOC.generateButton('chat', 'onRight', 'Repositionner le chat à droite')
-							+ KOC.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders)
-							+ KOC.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie')
-							+ KOC.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends)
-							+ KOC.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes)
+							+ KOC.shared.generateCheckbox('chat', 'active', 'Activer le module', KOC.conf.chat.active)
+							+ KOC.shared.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable)
+							+ KOC.shared.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp)
+							+ KOC.shared.generateButton('chat', 'onRight', 'Repositionner le chat à droite')
+							+ KOC.shared.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders)
+							+ KOC.shared.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie')
+							+ KOC.shared.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends)
+							+ KOC.shared.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes)
 							+ '</p>';
 
 						$section.append( code );
@@ -902,7 +952,7 @@ $(document).ready(function(){
 									'handle': '.drag-handle',
 									'stop': function(event, ui){
 										KOC.conf.chat.position = ui.position;
-										KOC.generic.storeConf();
+										KOC.shared.storeConf();
 									}
 								})
 								.resizable({
@@ -920,7 +970,7 @@ $(document).ready(function(){
 									},
 									'stop': function(event, ui){
 										KOC.conf.chat.size = ui.size;
-										KOC.generic.storeConf();
+										KOC.shared.storeConf();
 									}
 								})
 								.css({
@@ -972,7 +1022,7 @@ $(document).ready(function(){
 								'left': KOC.conf.chat.onRightPosition.left
 							};
 							$chat.css(KOC.conf.chat.position);
-							KOC.generic.storeConf();
+							KOC.shared.storeConf();
 						},
 					/* cleanHelp */
 						'cleanHelpOn': function(){
@@ -1097,14 +1147,13 @@ $(document).ready(function(){
 						'active': 1,
 						'automatic': 0,
 					},
-					'stored': ['automatic_rules', 'temporary_rules'],
-					'automaticRules': {},
-					'temporaryRules': {},
+					'stored': ['rules'],
+					'rules': {},
 					'confPanel': function( $section ){
 						console.info('KOC transport confPanel function');
 						var code = '<p>'
 							+ '<h2>Transport</h2>'
-							+ KOC.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
+							+ KOC.shared.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
 							+ '</p>';
 
 						$section.append( code );
@@ -1141,48 +1190,41 @@ $(document).ready(function(){
 					'on': function(){
 						console.info('KOC transport on function');
 
-						try{
-							var persistentTransportAutomaticRules = localStorage.getObject('koc_transport_automatic_rules_' + KOC.server);
-							if( persistentTransportAutomaticRules ){
-								KOC.transport.automaticRules = persistentTransportAutomaticRules;
-							}
-						} catch(e){
-							console.error(e);
-						}
-
-						if( KOC.conf.transport.automatic ){
-							KOC.transport.automaticOn();
-						}
-
-						try{
-							var persistentTransportTemporaryRules = localStorage.getObject('koc_transport_temporary_rules_' + KOC.server);
-							if( persistentTransportTemporaryRules ){
-								KOC.transport.temporaryRules = persistentTransportTemporaryRules;
-							}
-						} catch(e){
-							console.error(e);
-						}
-
-						if( KOC.conf.transport.temporary ){
-							KOC.transport.temporaryOn();
-						}
+						KOC.conf.transport.active = 1;
+						KOC.shared.storeConf();
 					},
 					'off': function(){
 						console.info('KOC transport off function');
+
+						KOC.conf.transport.active = 0;
+						KOC.conf.transport.automatic = 0;
+						KOC.shared.storeConf();
+
 						KOC.transport.automaticOff();
-						KOC.transport.temporaryOff();
 					},
 					'automaticOn': function(){
 						console.info('KOC transport automaticOn function');
+
+						KOC.conf.transport.automatic = 1;
+						KOC.shared.storeConf();
+
+						try{
+							var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.server);
+							if( persistentTransportRules ){
+								KOC.transport.rules = persistentTransportRules;
+							}
+						} catch(e){
+							console.error(e);
+						}
 					},
 					'automaticOff': function(){
 						console.info('KOC transport automaticOff function');
+
+						KOC.conf.transport.automatic = 0;
+						KOC.shared.storeConf();
 					},
 					'storeAutomaticRules': function(){
-						localStorage.setObject('koc_transport_automatic_rules_' + KOC.server, KOC.transport.automaticRules);
-					},
-					'storeTemporaryRules': function(){
-						localStorage.setObject('koc_transport_temporary_rules_' + KOC.server, KOC.transport.temporaryRules);
+						localStorage.setObject('koc_transport_rules_' + KOC.server, KOC.transport.rules);
 					},
 					//'generateTransport': function(origin, destination, troops, ressources)
 					//getCitiesForPlayer
@@ -1226,9 +1268,9 @@ $(document).ready(function(){
 						console.info('KOC overview confPanel function');
 						var code = '<p>'
 							+ '<h2>Vue globale</h2>'
-							+ KOC.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable])
-							+ KOC.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position')
-							+ KOC.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions')
+							+ KOC.shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable])
+							+ KOC.shared.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position')
+							+ KOC.shared.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions')
 							+ '</p>';
 
 						$section.append( code );
@@ -1351,7 +1393,7 @@ $(document).ready(function(){
 
 									KOC.conf.overview.parts_visible[ name ] = checked;
 
-									KOC.generic.storeConf();
+									KOC.shared.storeConf();
 								});
 
 						KOC.overview.$toggles.find('input').each(function(){
@@ -1452,12 +1494,12 @@ $(document).ready(function(){
 											}
 
 											if( n != null ){
-												$td.html( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable( n ))
+												$td.html( KOC.shared.format( n ) )
+													.attr('title', KOC.shared.readable( n ))
 													.data('ori', n);
 											} else {
 												$td.html('&nbsp;')
-													.attr('title', KOC.generic.readable( n ))
+													.attr('title', KOC.shared.readable( n ))
 													.data('ori', 0);
 											}
 
@@ -1471,13 +1513,13 @@ $(document).ready(function(){
 										if( inSeed ){
 											var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 
-											$td.html( KOC.generic.format( n ) )
-												.attr('title', KOC.generic.readable( n ))
+											$td.html( KOC.shared.format( n ) )
+												.attr('title', KOC.shared.readable( n ))
 												.data('ori', n);
 
 										} else {
 											$td.html('&nbsp;')
-												.attr('title', KOC.generic.readable( n ))
+												.attr('title', KOC.shared.readable( n ))
 												.data('ori', 0);
 										}
 
@@ -1500,8 +1542,8 @@ $(document).ready(function(){
 
 										if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-										$td.html( KOC.generic.format( n ) )
-											.attr('title', KOC.generic.readable(n))
+										$td.html( KOC.shared.format( n ) )
+											.attr('title', KOC.shared.readable(n))
 											.data('ori', n);
 									} else {
 										$td.html('&nbsp;')
@@ -1520,8 +1562,8 @@ $(document).ready(function(){
 										var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
 										if( n > 0 ) n = n / 3600;
 
-										$td.html( KOC.generic.format( n ) )
-											.attr('title', KOC.generic.readable(n))
+										$td.html( KOC.shared.format( n ) )
+											.attr('title', KOC.shared.readable(n))
 											.data('ori', n);
 									} else {
 										$td.html('&nbsp;')
@@ -1615,8 +1657,8 @@ $(document).ready(function(){
 											}
 
 											if( n != null ){
-												$td.html( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable( n ))
+												$td.html( KOC.shared.format( n ) )
+													.attr('title', KOC.shared.readable( n ))
 													.data('ori', n);
 											} else {
 												$td.html( '&nbsp;' )
@@ -1640,8 +1682,8 @@ $(document).ready(function(){
 										}
 										total[j] += n;
 
-										$td.html( KOC.generic.format( n ) )
-											.attr('title', KOC.generic.readable( n ))
+										$td.html( KOC.shared.format( n ) )
+											.attr('title', KOC.shared.readable( n ))
 											.data('ori', n );
 									} else {
 										$td.html( '&nbsp;' )
@@ -1679,8 +1721,8 @@ $(document).ready(function(){
 											}
 
 											if( n != null ){
-												$td.html( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable( n ))
+												$td.html( KOC.shared.format( n ) )
+													.attr('title', KOC.shared.readable( n ))
 													.data('ori', n);
 											} else {
 												$td.html( '&nbsp;' )
@@ -1700,8 +1742,8 @@ $(document).ready(function(){
 
 									if( total[j] ){
 										total[j] += 100;
-										$td.html( KOC.generic.format( total[j] ) )
-											.attr('title', KOC.generic.readable( total[j] ))
+										$td.html( KOC.shared.format( total[j] ) )
+											.attr('title', KOC.shared.readable( total[j] ))
 											.data('ori', total[j] );
 									} else {
 										$td.html('&nbsp;');
@@ -1729,7 +1771,7 @@ $(document).ready(function(){
 											$td.html('0s')
 										} else {
 											var n = s / total[j] * 3600;
-											$td.html( KOC.generic.readableDuration( n ) );
+											$td.html( KOC.shared.readableDuration( n ) );
 										}
 									} else {
 										$td.html('-');
@@ -1753,8 +1795,8 @@ $(document).ready(function(){
 											}
 
 											if( n != null ){
-												$td.html( KOC.generic.format( n ) )
-													.attr('title', KOC.generic.readable(n))
+												$td.html( KOC.shared.format( n ) )
+													.attr('title', KOC.shared.readable(n))
 													.data('ori', n);
 											} else {
 												$td.html('&nbsp;')
@@ -1786,8 +1828,8 @@ $(document).ready(function(){
 										$sumTd.html( '-' )
 											.attr('title', '');
 									} else {
-										$sumTd.html( KOC.generic.format( sum ) )
-											.attr('title', KOC.generic.readable(sum));
+										$sumTd.html( KOC.shared.format( sum ) )
+											.attr('title', KOC.shared.readable(sum));
 									}
 								}
 							}
@@ -1835,7 +1877,7 @@ $(document).ready(function(){
 									},
 									'stop': function(event, ui){
 										KOC.conf.overview.size = ui.size;
-										KOC.generic.storeConf();
+										KOC.shared.storeConf();
 									}
 								})
 								.css({
@@ -1848,7 +1890,7 @@ $(document).ready(function(){
 									e.preventDefault();
 									KOC.$overview.hide();
 									KOC.conf.overview.visible = 0;
-									KOC.generic.storeConf();
+									KOC.shared.storeConf();
 								});
 
 							if( KOC.conf.overview.visible ){
@@ -1881,7 +1923,7 @@ $(document).ready(function(){
 								});
 
 								KOC.conf.overview.visible = (KOC.$overview.is(':visible') ? 1 : 0);
-								KOC.generic.storeConf();
+								KOC.shared.storeConf();
 							});
 
 							KOC.$buttons.append($kocOverviewToggle);
@@ -1897,13 +1939,13 @@ $(document).ready(function(){
 							console.info('KOC overview resetPlacement function');
 							KOC.$overview.css( KOC.overview.conf.position );
 							KOC.conf.overview.position = KOC.overview.options.position;
-							KOC.generic.storeConf();
+							KOC.shared.storeConf();
 						},
 						'resetDimensions': function(){
 							console.info('KOC overview resetDimensions function');
 							KOC.$overview.css( KOC.overview.conf.size );
 							KOC.conf.overview.size = KOC.overview.options.size;
-							KOC.generic.storeConf();
+							KOC.shared.storeConf();
 						},
 					/* replace */
 						'replaceOn': function(){
@@ -1948,7 +1990,7 @@ $(document).ready(function(){
 						console.info('KOC formation confPanel function');
 						var code = '<p>'
 							+ '<h2>Formation</h2>'
-							+ KOC.generateCheckbox('formation', 'active', 'Activer le module', KOC.conf.formation.active)
+							+ KOC.shared.generateCheckbox('formation', 'active', 'Activer le module', KOC.conf.formation.active)
 							+ '</p>';
 
 						$section.append( code );
@@ -1967,14 +2009,14 @@ $(document).ready(function(){
 							//unsafeWindow.unitcost
 
 							autoCode += '<div class="city">'
-									 +  '<p>'
-									 +  '<input type="checkbox" id="koc-formation-auto-city-'+ cityId +'" name="city" '+ ( rule && rule.active ? 'checked' : '' ) +' value="'+ cityId +'">'
-									 +  '<label for="koc-formation-auto-'+ cityId +'">'+ city.name +'</label>';
+									 +	'<p>'
+									 +	'<input type="checkbox" id="koc-formation-auto-city-'+ cityId +'" name="city" '+ ( rule && rule.active ? 'checked' : '' ) +' value="'+ cityId +'">'
+									 +	'<label for="koc-formation-auto-'+ cityId +'">'+ city.name +'</label>';
 
 							//choose unit (check building requirements and tech requirements)
 								autoCode += '<label for="koc-formation-auto-city-'+ cityId +'-unit">Unités</label>'
-										 +  '<select id="koc-formation-auto-city-'+ cityId +'-unit" name="unit">'
-										 +  '<option value=""></option>';
+										 +	'<select id="koc-formation-auto-city-'+ cityId +'-unit" name="unit">'
+										 +	'<option value=""></option>';
 
 								for( var u in units ){
 									if( units.hasOwnProperty(u) ){
@@ -1985,56 +2027,56 @@ $(document).ready(function(){
 
 							//choose pack size min and max
 								autoCode += '<label for="koc-formation-auto-city-'+ cityId +'-min">min</label>'
-										 +  '<input type="text" id="koc-formation-auto-'+ cityId +'-min" name="min">'
-										 +  '<label for="koc-formation-auto-city-'+ cityId +'-max">max</label>'
-										 +  '<input type="text" id="koc-formation-auto-'+ cityId +'-max" name="max">'
-										 +  '<button>max</button>';
+										 +	'<input type="text" id="koc-formation-auto-'+ cityId +'-min" name="min">'
+										 +	'<label for="koc-formation-auto-city-'+ cityId +'-max">max</label>'
+										 +	'<input type="text" id="koc-formation-auto-'+ cityId +'-max" name="max">'
+										 +	'<button>max</button>';
 
 							//choose speed
 								autoCode += '<label for="koc-formation-auto-city-'+ cityId +'-speed">Vitesse</label>'
-										 +  '<select id="koc-formation-auto-city-'+ cityId +'-speed" name="speed">'
-										 +  '<option value="0">Normal</option>'
-										 +  '<option value="1">5-15% (coût x2)</option>'
-										 +  '<option value="2">10-25% (coût x4)</option>'
-										 +  '</select>';
+										 +	'<select id="koc-formation-auto-city-'+ cityId +'-speed" name="speed">'
+										 +	'<option value="0">Normal</option>'
+										 +	'<option value="1">5-15% (coût x2)</option>'
+										 +	'<option value="2">10-25% (coût x4)</option>'
+										 +	'</select>';
 
 							//choose boost
 							// /!\ boost incompatible avec speed
 							/*
 								autoCode += '<label for="koc-formation-auto-city-'+ cityId +'-item">Objet ?</label>'
-										 +  '<select id="koc-formation-auto-city-'+ cityId +'-item" name="item">'
-										 +  '<option value="">Non</option>'
-										 +  '<option value="36">"+ window.itemlist.i36.name + '(' + (window.seed.items.i36 ? window.seed.items.i36 : 0) + ')</option>'
-										 +  '<option value="37">"+ window.itemlist.i37.name + '(' + (window.seed.items.i37 ? window.seed.items.i37 : 0) + ')</option>'
-										 +  '<option value="38">"+ window.itemlist.i38.name + '(' + (window.seed.items.i38 ? window.seed.items.i38 : 0) + ')</option>'
-										 +  '</select>';
+										 +	'<select id="koc-formation-auto-city-'+ cityId +'-item" name="item">'
+										 +	'<option value="">Non</option>'
+										 +	'<option value="36">"+ window.itemlist.i36.name + '(' + (window.seed.items.i36 ? window.seed.items.i36 : 0) + ')</option>'
+										 +	'<option value="37">"+ window.itemlist.i37.name + '(' + (window.seed.items.i37 ? window.seed.items.i37 : 0) + ')</option>'
+										 +	'<option value="38">"+ window.itemlist.i38.name + '(' + (window.seed.items.i38 ? window.seed.items.i38 : 0) + ')</option>'
+										 +	'</select>';
 							*/
 
 							//choose workforce percentage
 								autoCode += '<label for="koc-formation-auto-city-'+ cityId +'-labor">Travailleurs</label>'
-										 +  '<select id="koc-formation-auto-city-'+ cityId +'-labor" name="labor">'
-										 +  '<option value=""></option>'
-										 +  '</select>';
+										 +	'<select id="koc-formation-auto-city-'+ cityId +'-labor" name="labor">'
+										 +	'<option value=""></option>'
+										 +	'</select>';
 
 							//nice to have
 								/*
 								autoCode += '<label>Durée</label>'
-										 +  '<output></output>';
+										 +	'<output></output>';
 								*/
 							autoCode += '</p>';
 							//keep resources ? (in easy format, with validation)
 							autoCode += '<p>'
-									 +  '<label>Garder</label>';
+									 +	'<label>Garder</label>';
 
 							for( var j = 0; j < KOC.resources.length; j++ ){
 								var r = KOC.resources[j];
 								autoCode += '<label for="koc-formation-auto-city-keep-'+ r.name +'">'
-										 +  '<img src="'+ r.icon +'" title="'+ r.label +'">'
-										 +  '</label>'
-										 +  '<input type="text" id="koc-formation-auto-city-keep-'+ r.name +'" name="'+ r.name +'">';
+										 +	'<img src="'+ r.icon +'" title="'+ r.label +'">'
+										 +	'</label>'
+										 +	'<input type="text" id="koc-formation-auto-city-keep-'+ r.name +'" name="'+ r.name +'">';
 							}
 							autoCode += '</p>'
-									 +  '</div>';
+									 +	'</div>';
 						}
 
 						//manual formation
@@ -2089,7 +2131,7 @@ $(document).ready(function(){
 									if( typeof unitc[8] == 'object' ){
 										for( building in unitc[8] ){
 											if( unitc[8].hasOwnProperty( building ) ){
-												if( KOC.generic.buildingHighestLevel( cityId, building.substr(1) ) < unitc[8][building][1] ){
+												if( KOC.shared.buildingHighestLevel( cityId, building.substr(1) ) < unitc[8][building][1] ){
 													continue;
 												}
 											}
@@ -2237,6 +2279,394 @@ $(document).ready(function(){
 						//
 
 					}
+				},
+			/* CREST HUNT */
+				'crestHunt': {
+					'options': {
+						'active': 1,
+						'automatic': 0,
+					},
+					'stored': ['attacks'],
+					'attacks': {}, //by city
+					'confPanel': function( $section ){
+						console.info('KOC crestHunt confPanel function');
+						/*var code = '<p>'
+							+ '<h2>Armoiries</h2>'
+							+ KOC.shared.generateCheckbox('crestHunt', 'active', 'Activer le module', KOC.conf.crestHunt.active)
+							+ '</p>';
+
+						$section.append( code );*/
+					},
+					'modPanel': function(){
+						console.info('KOC crestHunt modPanel function');
+						var $section = KOC.$confPanel.find('#koc-crestHunt').html('');
+
+						var code = '<h2>Attaques <span>'
+							+ KOC.shared.generateCheckbox('crestHunt', 'automatic', 'automatique', KOC.conf.crestHunt.automatic)
+							+ '</span></h2>'
+							+ '<h2>Configurer une attaque</h2>'
+							+ '<div class="attack-form">'
+							+ '<ul class="message"></ul>'
+							+ '<input type="hidden" class="edit-attackId" name="attackId" value="" />'
+							+ '<input type="hidden" class="edit-cityId" name="cityId" value="" />'
+							+ '<fieldset>'
+							+ '<legend>Ville</legend>';
+						for( var i = 0; i < KOC.cities.length; i++ ){
+							var city = KOC.cities[i];
+							console.log(city);
+							code += '<input id="koc-crestHunt-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" />'
+								 +  '<label for="koc-crestHunt-'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
+						}
+
+						code += '</fieldset>'
+							 +	'<fieldset>'
+							 +	'<legend>Coordonnées</legend>'
+							 +	'<small>format: x,y x,y x,y ...</small>'
+							 +	'<textarea name="coords"></textarea>'
+							 +	'</fieldset>';
+
+						KOC.crestHunt.$waveSkeleton = $('<fieldset class="wave">'
+							 +	'<legend>Vague</legend>'
+							 +	'<select class="knight-choice" name="knight">'
+							 +	'<option value="">N\'importe lequel</option>'
+							 +	'</select>'
+							 +	'<div class="unit-block">'
+							 +	'<select class="unit-choice" name="unit">'
+							 +	'<option value="">Unité</option>'
+							 +	'</select>'
+							 +	'<input class="unit-qty" name="qantity" type="" />'
+							 +	'</div>'
+							 +	'<button class="add-unit">Ajouter une autre unité</button>'
+							 +	'</fieldset>');
+
+						code += '<button class="add-wave">Ajouter une vague</button>'
+							 +	'<button type="submit" class="launch">Lancer (une coordonnée seulement)</button>'
+							 +	'<button type="submit" class="save" title="Cette attaque sera lancée si les attaques automatiques sont activées">Sauvegarder dans les attaques automatiques</button>'
+							 +	'<button type="reset" class="reset">Annuler</button>'
+							 +	'</div>';
+
+						//attacks list
+						code += '<h2>Attaques enregistrées</h2>'
+							 +  '<div class="attack-list">';
+
+						for( var c in KOC.crestHunt.attacks ){
+							if( KOC.crestHunt.attacks.hasOwnProperty(c) ){
+								var attacks = KOC.crestHunt.attacks[c],
+									city = KOC.shared.getCityById( c );
+								code += '<h3>' + city.roman + city.name + '</h3>',
+									 +  '<ul data-city="'+ c +'">'
+								for( var i = 0; i < attacks.length; i++ ){
+									var attack = attacks[i];
+									code += KOC.crestHunt.attackInfo( attack, city );
+								}
+								code += '</ul>';
+							}
+						}
+						code += '</div>';
+
+						$section.append(code)
+							.on('change', '.conf-toggle', function(){
+								KOC.$confPanelNav.find('#koc-crestHunt').parent().toggleClass('on off');
+							})
+							//load knights and units on city change )
+							.on('change', '.city-choice', function(){
+								console.info('city choice');
+								var $waves = KOC.crestHunt.$form.find('.wave'),
+									id = $(this).val(),
+									cityId = 'city' + id;
+								if( $waves.length ){
+									$waves.remove();
+								}
+
+								var $clone = KOC.crestHunt.$waveSkeleton.clone();
+								$clone.insertBefore( $clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') ) );
+							})
+							//add unit button
+							.on('click', '.add-unit', function(){
+								var $this = $(this),
+									$b = $this.siblings('.unit-block').eq(0).clone();
+
+								$b.find('input, select').val('');
+								$b.append('<button class="remove">Supprimer cette unité</button>')
+								  .insertBefore( $this );
+							})
+							//remove unit button
+							.on('click', '.remove', function(){
+								$(this).parent().remove();
+							})
+							//add wave button
+							.on('click', '.add-wave', function(){
+								var $clone = KOC.crestHunt.$waveSkeleton.clone();
+								$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+							})
+							//reset form
+							.on('click', '.reset', KOC.crestHunt.resetForm)
+							//launch
+							.on('clik', '.launch', function(){
+								var result = KOC.crestHunt.planAttack();
+								if( result.errors.length ){
+									KOC.crestHunt.$form.find('.message').html( '<li>' + errors.join('</li><li>') + '</li>' );
+								} else {
+									KOC.crestHunt.launchAttack( result.attack );
+								}
+							})
+							//save
+							.on('click', '.save', function(){
+								var result = KOC.crestHunt.planAttack();
+								if( result.errors.length ){
+									KOC.crestHunt.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								} else {
+									if( !KOC.crestHunt.attacks[ result.attack.cityId ] ) KOC.crestHunt.attacks[ result.attack.cityId ] = [];
+
+									var editAttackId = KOC.crestHunt.$form.find('.edit-attackId').val(),
+										editCityId = KOC.crestHunt.$form.find('.edit-cityId').val();
+									if( editAttackId != '' && editCityId != '' ){
+										KOC.crestHunt.deletePlan( editAttackId, editCityId );
+									}
+									var d = new Date();
+									result.attack.id = Math.floor(d.getTime() / 1000);
+									KOC.crestHunt.attacks[ result.attack.cityId ].push(result.attack);
+									KOC.crestHunt.$list.find('ul').filter('[data-city='+ result.attack.cityId +']').append( KOC.crestHunt.attackInfo( attack, null ) );
+									KOC.crestHunt.storeAttacks();
+								}
+							})
+							//attack plan delete
+							.on('click', '.delete', function(){
+								var $this = $(this),
+									$li = $(this).parent(),
+									isEdit = $this.hasClass('edit'),
+									attackId = $li.data('attack'),
+									cityId = $li.data('city');
+
+								KOC.crestHunt.deletePlan( attackId, cityId );
+								$li.remove();
+							})
+							//attack plan edit and duplication
+							.on('click', '.edit, .duplicate', function(){
+								KOC.crestHunt.resetForm();
+								var $li = $(this).parent(),
+									attackId = $li.data('attack'),
+									cityId = $li.data('city'),
+									attack = null,
+									cityAttacks = KOC.crestHunt.attacks[ 'city' + Id ];
+
+								if( cityAttacks ){
+									for( var i = 0; i < cityAttacks.length; i++ ){
+										if( cityAttacks[i].id == attackId ){
+											attack = cityAttacks[i];
+											break;
+										}
+									}
+
+									if( attack ){
+										if( isEdit ){
+											KOC.crestHunt.$form.find('.edit-attackId').val( attack.id );
+											KOC.crestHunt.$form.find('.edit-cityId').val( attack.cityId );
+										}
+										KOC.crestHunt.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
+										KOC.crestHunt.$form.find('textarea').val(attack.coords.join(' '));
+										if( attack.waves.length > 2 ){
+											for( var i = 2; i < attack.waves.length; i++ ){
+												KOC.crestHunt.$form.find('.add-wave').trigger('click');
+											}
+										}
+										var $waves = KOC.crestHunt.$form.find('.wave');
+										for( var i = 0; i < attack.waves.length; i++ ){
+											var $wave = $waves.eq(i),
+												wave = attack.waves[i];
+
+											$wave.find('.knight-choice').val( wave.knight );
+
+											if( wave.units.length > 1 ){
+												for( var j = 1; j < wave.units.length; j++ ){
+													$wave.find('.add-unit').trigger('click');
+												}
+											}
+											var $blocks = $wave.find('.unit-block');
+											for( var j = 0; j < wave.units.length; j++ ){
+												var $b = $blocks.eq(j),
+													unit = wave.units[j];
+												$b.find('.unit-choice').val( unit.id );
+												$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
+											}
+										}
+									} else {
+										alert('Plan d\'attaque introuvable.')
+									}
+								} else {
+									alert('Plan d\'attaque introuvable.')
+								}
+							});
+
+						KOC.crestHunt.$form = $section.find('.attack-form');
+						KOC.crestHunt.$list = $section.find('.attack-list');
+
+						KOC.crestHunt.$list.accordion({collapsible: true});
+					},
+					'on': function(){
+						console.info('KOC crestHunt on function');
+
+						if( KOC.conf.crestHunt.automatic ){
+							KOC.crestHunt.automaticOn();
+						}
+					},
+					'off': function(){
+						console.info('KOC crestHunt off function');
+
+						KOC.conf.crestHunt.active = 0;
+
+						KOC.crestHunt.automaticOff();
+					},
+					'automaticOn': function(){
+						console.info('KOC crestHunt automaticOn function');
+
+						KOC.conf.crestHunt.automatic = 1;
+						KOC.shared.storeConf();
+
+						try{
+							var persistentcrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
+							if( persistentcrestHuntAttacks ){
+								KOC.crestHunt.attacks = persistentCrestHuntAttacks;
+							}
+						} catch(e){
+							console.error(e);
+						}
+					},
+					'automaticOff': function(){
+						console.info('KOC crestHunt automaticOff function');
+
+						KOC.conf.crestHunt.automatic = 0;
+						KOC.shared.storeConf();
+					},
+					'storeAttacks': function(){
+						console.info('KOC crestHunt storeAttacks function');
+						localStorage.setObject('koc_crestHunt_attacks_' + KOC.server, KOC.crestHunt.attacks);
+					},
+					'planAttack': function(){
+						console.info('KOC crestHunt buildRule function');
+						var $waves = KOC.crestHunt.$form.find('.wave'),
+							$cityChoice = KOC.crestHunt.$form.find('.city-choice').filter(':checked'),
+							coords = $.trim( KOC.crestHunt.$form.find('textarea').val() ),
+							errors = [],
+							regexp = /[^0-9, ]/,
+							rule = { 'waves':[] };
+
+						//check form
+							//city
+							if( !$cityChoice.length ){
+								errors.push('Ville de départ obligatoire.');
+							} else {
+								rule.cityId = $cityChoice.val();
+							}
+
+							//coords
+							if( coords.length == 0 ){
+								errors.push('Au moins une coordonnée est requise.');
+							} else if( regexp.test( coords ) ){
+								errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un espace entre deux coordonnées.');
+							} else {
+								rule.coords = coords.split(' ');
+							}
+
+							//waves
+							$waves.each2(function(i, $wave){
+								var w = {},
+									valid = true;
+								w.units = [];
+
+								//knight
+									w.knight = $wave.find('.knight-choice').val();
+
+								//troops
+									$wave.find('.unit-block').each2(function(i, $b){
+										var u = $.trim( $b.find('.unit-choice').val() ),
+											q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+
+										if( u.length == 0 ){
+											errors.push('Chaque unité de l\'attaque doit être spécifiée.');
+											valid = false;
+										}
+
+										if( q == false || q < 1 ){
+											errors.push('Chaque unité de l\'attaque doit avoir une quantité valide.');
+											valid = false;
+										}
+
+										if( valid ) w.units.push({'id': u, 'qty': q});
+									});
+
+								if( valid ) rule.waves.push(w)
+							});
+
+							if( errors.length ){
+								errors = errors.unique();
+							}
+
+						return {'rule': rule, 'errors': errors};
+					},
+					'launchAttack': function( rule ){
+						console.info('KOC crestHunt launchAttack function');
+					},
+					'resetForm': function(){
+						console.info('KOC crestHunt resetForm function');
+						KOC.crestHunt.$form.find('.wave').remove();
+						var $inputs = KOC.crestHunt.$form.find('input');
+						$inputs.filter('[type="text"], [type="hidden"]').val('');
+						$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
+						KOC.crestHunt.$form.find('select').val('');
+						KOC.crestHunt.$form.find('.message').empty();
+					},
+					'deletePlan': function( attackId, cityId ){
+						console.info('KOC crestHunt deletePlan function');
+						var cityAttacks = KOC.crestHunt.attacks[ 'city' + Id ];
+
+						if( cityAttacks ){
+							for( var i = 0; i < cityAttacks.length; i++ ){
+								if( cityAttacks[i].id == attackId ){
+									KOC.crestHunt.attacks[ 'city' + Id ].splice(i, 1);
+									KOC.crestHunt.storeAttacks();
+									break;
+								}
+							}
+						}
+					},
+					'attackInfo': function( attack, city ){
+						console.info('KOC crestHunt attackInfo function');
+						if( city == null ){
+							city = KOC.shared.getCityById( attack.cityId );
+						}
+
+						var code = '<li data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">'
+							 +  '<span class="form">depuis ' + city.roman + city.name + '</span>'
+							 +  '<span class="to">vers ' + attack.coords.join('  ') +'</span>';
+						for( var j = 0; j < attack.waves.length; j++ ){
+							var wave = attack.waves[j],
+								knights = window.seed.knights[ 'city' + city.id ];
+
+							code += '<span class="wave">'
+								 +  '<span class="knight">chevalier : '
+								 +  ( attack.knight == '' ? 'n\'importe lequel' : knights[ attack.knigth ].knightName + '('+ knights[ attack.knigth ].knightLevel +', '+ KOC.shared.getKnightStatText( knight ) +')' )
+								 +  '</span>'
+								 +  '<span class="troops">Vague '+ j + ': ';
+
+							var unitsCode = '';
+							for( var k = 0; k < wave.units.length; k++ ){
+								var unit = wave.units[k];
+								if( unitsCode.length ) unitsCode += ', ';
+
+								unitsCode += '<img src="'+ window.stimgUrl + 'img/units/unit_' + unit.id + '_50_s34.jpg" title="'+ window.unitcost['unt'+ unit.id][0] +'">'
+										  +  KOC.shared.format( unit.qty );
+							}
+
+							code += '</span>';
+						}
+						code += '<button class="edit">Modifier</button>'
+							 +  '<button class="duplicate">Dupliquer</button>'
+							 +  '<button class="delete">Supprimer</button>'
+							 +  '</li>';
+
+						return code;
+					},
 				},
 			/* default configuration */
 				//each module has its own default conf

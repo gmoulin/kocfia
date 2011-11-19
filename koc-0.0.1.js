@@ -12,6 +12,23 @@ var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n.koc-conf-panel-tab.off:after { border-color: transparent red red transparent; }"
 		+ "\n#koc-chat ul { padding-left: 0; }"
 		+ "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 5px; }"
+		+ "\n.ui-tabs-panel h2 p { float: right; font-size: 11px; margin: 0;}"
+		+ "\n.attack-form fieldset { clear: both; }"
+		+ "\n.attack-form fieldset small { display: block; }"
+		+ "\n.attack-form .builds { display: none; float: right; max-width: 200px; }"
+		+ "\n.attack-form .add-wave, .attack-form .launch, .attack-form .save { display: none; }"
+		+ "\n.attack-form { counter-reset: waves; }"
+		+ "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }"
+		+ "\n.attack-form .wave label { display: inline-block; }"
+		+ "\n.attack-form .wave > label, .attack-form .unit-block label:first-child { min-width: 80px; }"
+		+ "\n.attack-form .unit-block select + label { margin-left: 10px; }"
+		+ "\n.attack-form .unit-qty { width: 60px; }"
+		+ "\n.attack-form textarea { width: 150px; height: 120px; }"
+		+ "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }"
+		+ "\n.attack-list li { display: block; margin-bottom: 8px; }"
+		+ "\n.attack-list li span { display: inline-block; padding-right: 5px; }"
+		+ "\n.attack-list li img { width: 18px; }"
+		+ "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }"
 ;
 
 var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }"
@@ -63,8 +80,6 @@ var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana
 		+ "\n#koc-overview thead tr th:last-child, #koc-overview thead tr td:last-child { width: auto; }"
 		+ "\n#koc-overview .sizer td, #koc-overview .sizer td.sum, #koc-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }"
 ;
-
-
 
 /*
  * jQuery each2 - v0.2 - 8/02/2010
@@ -118,7 +133,7 @@ Array.min = function( array ){
     return Math.min.apply( Math, array );
 };
 
-$(document).ready(function(){
+jQuery(document).ready(function(){
 
 (function($){
 	try{
@@ -137,6 +152,9 @@ $(document).ready(function(){
 		var KOC = {
 			'server': null,
 			'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt'],
+			'modulesLabel': {
+				'crestHunt': 'Armoiries',
+			},
 			'stored': ['conf'],
 			'init': function(){
 				console.info('KOC init function');
@@ -211,7 +229,27 @@ $(document).ready(function(){
 						KOC[ KOC.modules[i] ].on();
 						console.timeEnd('koc '+ KOC.modules[i] +' on');
 					}
+
+				//map links
+					$body.on('click', '.mapLink', function(){
+						var coord = $(this).text().split(',');
+						window.Modal.hideModalAll();
+						window.changeview_map( $('<a>')[0] );
+						$('#mapXCoor').val( coord[0] );
+						$('#mapYCoor').val( coord[1] );
+						window.reCenterMapWithCoor()
+					});
 			},
+			/* default configuration */
+				//each module has its own default conf
+				'defaultConf': {
+					'confPanel': {
+						'position': {'top': 100, 'left': 100},
+						'size': {'width': 'auto', 'height': 'auto'},
+						'selected': 0,
+						'visible': 0,
+					}
+				},
 			/* DATA */
 				'cities': [],//[{'id','name','coords': {x,y}}, ...]
 				'citiesId': [],
@@ -282,6 +320,13 @@ $(document).ready(function(){
 					{'rows': 2, 'name': 'unt11', 'label': ['Bélier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
 					{'rows': 2, 'name': 'unt12', 'label': ['Catapulte', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 				],
+				'defenses': [
+					{'name': 'frt53', 'label': 'Arbalètes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
+					{'name': 'frt55', 'label': 'Trébuchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
+					{'name': 'frt60', 'label': 'Pièges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
+					{'name': 'frt61', 'label': 'Chausse-trapes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_61_30.jpg'},
+					{'name': 'frt62', 'label': 'Palissades', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_62_30.jpg'},
+				],
 				'inSeed': {
 					'population': {
 						'population': {'index': 0, 'var': 'pop'},
@@ -323,7 +368,7 @@ $(document).ready(function(){
 							case 'getChat.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.chat.active && ( KOC.conf.chat.cleanHelp || KOC.conf.chat.highlightLeaders || KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) ){
-										console.time('getChat load');
+										console.info('getChat');
 										try{
 											var r = JSON.parse(this.responseText);
 										} catch(e){
@@ -340,7 +385,6 @@ $(document).ready(function(){
 												if( KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) KOC.chat.highlightFriendsAndFoes( r.data.newChats['1'].length );
 											}
 										}
-										console.timeEnd('getChat load');
 									}
 								}, false);
 								break;
@@ -413,8 +457,9 @@ $(document).ready(function(){
 							if( mod == 'crestHunt' ){
 								active = this.conf[mod].automatic;
 							}
+							var name = ( KOC.modulesLabel[mod] ? KOC.modulesLabel[mod] : mod.capitalize() );
 							lis += '<li class="koc-conf-panel-tab '+ (active ? 'on' : 'off') +'">'
-								 + '<a href="#koc-'+ mod +'">'+ mod.capitalize() +'</a>'
+								 + '<a href="#koc-'+ mod +'">'+ name +'</a>'
 								 + '</li>';
 							sections += '<div id="koc-'+ mod +'"></div>';
 						}
@@ -608,9 +653,10 @@ $(document).ready(function(){
 						}
 						console.timeEnd('cities');
 					},
-					'getCityById': function( id ){
+					'getCityById': function( cityId ){
+						if( cityId.indexOf('city') != 0 ) cityId = cityId.replace(/city/, '');
 						for( var i = 0; i < KOC.cities.length; i++ ){
-							if( KOC.cities[i].id == id ){
+							if( KOC.cities[i].id == cityId ){
 								return KOC.cities[i];
 							}
 						}
@@ -619,9 +665,9 @@ $(document).ready(function(){
 					'getKnightStatText': function( knight ){
 						var stat = Math.max(parseFloat(knight.resourcefulness), parseFloat(knight.politics), parseFloat(knight.combat), parseFloat(knight.intelligence));
 
-						if( knight.resourcefulness == knight.politics && knight.resourcefulness == knight.politics && knight.resourcefulness == knight.intelligence )
+						if( knight.resourcefulness == knight.politics || knight.resourcefulness == knight.combat || knight.resourcefulness == knight.intelligence ){
 							return 'pas de statistique principale';
-						if( knight.resourcefulness == stat ){
+						} else if( knight.resourcefulness == stat ){
 							return 'R'+stat;
 						} else if( knight.politics == stat ){
 							return 'P'+stat;
@@ -633,9 +679,9 @@ $(document).ready(function(){
 					},
 					'format': function( num ){
 						if( typeof num == 'undefined' || num == null ) return '&nbsp;';
-						if( typeof num != 'string' ){
-							num = '' + Math.floor(num);
-						}
+						num = '' + num;
+						if( num.indexOf(',') > -1 ) num.replace(/,/, '.');
+						num = '' + parseFloat(num);
 						var l = num.length,
 							suffix = '',
 							decimal;
@@ -744,6 +790,90 @@ $(document).ready(function(){
 							}
 						}
 						code += '</select></p>';
+						return code;
+					},
+					'marchTimeCalculator': function(cityId, troops, from_x, from_y, is_round_trip, items_applied){
+						var speed = 99999,
+							total_troops = 0,
+							time = 0,
+							city = KOC.shared.getCityById( cityId ),
+							d = new Date(),
+							ts = parseInt(d.getTime() / 1000, 10);
+
+						for( var i = 0; i < troops.length; i++ ){
+							if( troops.length <= 0 ) continue;
+							total_troops += troops[i];
+							var troop_speed = parseInt(window.unitstats["unt" + i][3]) * (1 + 0.1 * parseInt(window.seed.tech.tch11));
+							if (i > 6) {
+								troop_speed = troop_speed * (1 + 0.05 * parseInt(window.seed.tech.tch12))
+							}
+							if( troop_speed < speed ){
+								speed = troop_speed;
+							}
+						}
+
+						if( 0 == speed ) return "";
+
+						var x = Math.abs(parseInt(city.coords.x, 10) - parseInt(from_x, 10));
+						if (x > 375) x = 750 - x;
+						var y = Math.abs(parseInt(city.coords.y, 10) - parseInt(from_y, 10));
+						if (y > 375) y = 750 - y;
+
+						time = parseInt(Math.sqrt((x * x) + (y * y)) * 6000 / speed);
+						if( items_applied["57"] && window.seed.items.i57 > 0 ){
+							time = parseInt(time * 0.5);
+						} else if( items_applied["55"] && window.seed.items.i55 > 0 ){
+							time = parseInt(time * 0.75);
+						}
+						time += 30;
+
+						if( window.seed.playerEffects.returnExpire > ts ){
+							time = parseInt(time * 0.75);
+						}
+						if( is_round_trip ) time *= 2;
+
+						var gi = cm.guardianModalModel.getMarchBonus();
+						var multiplier = 100 / (100 + gi);
+
+						time = parseInt(time * multiplier, 10);
+
+						return time;
+					},
+					'getRallyPointLevel': function( cityId ){
+						var level = 0;
+						for( var b in window.seed.buildings[cityId] ){
+							if( window.seed.buildings[cityId].hasOwnProperty(b) ){
+								var building = window.seed.buildings[cityId][b];
+
+								if( building[0] == 12 ) level = parseInt(building[1], 10);
+							}
+						}
+						return level;
+					},
+					'getAvailableKnights': function( cityId ){
+						if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
+						var leaders = window.seed.leaders[cityId],
+							knights = [];
+						for( var k in window.seed.knights[cityId] ){
+							if( window.seed.knights[cityId].hasOwnProperty(k) ){
+								var knight = window.seed.knights[cityId][k];
+								if( knight.knightStatus == 1
+									&& leaders.resourcefulnessKnightId != knight.knightId
+									&& leaders.politicsKnightId != knight.knightId
+									&& leaders.combatKnightId != knight.knightId
+									&& leaders.intelligenceKnightId != knight.knightId
+								){
+									knights.push( knight );
+								}
+							}
+						}
+						return knights;
+					},
+					'mapLink': function( coords ){
+						var code = '';
+						for( var i = 0; i < coords.length; i++ ){
+							code += '<span class="mapLink">'+ coords[i] +'</span>';
+						}
 						return code;
 					},
 				},
@@ -1141,97 +1271,6 @@ $(document).ready(function(){
 							});
 						},
 				},
-			/* TRANSPORT */
-				'transport': {
-					'options': {
-						'active': 1,
-						'automatic': 0,
-					},
-					'stored': ['rules'],
-					'rules': {},
-					'confPanel': function( $section ){
-						console.info('KOC transport confPanel function');
-						var code = '<p>'
-							+ '<h2>Transport</h2>'
-							+ KOC.shared.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
-							+ '</p>';
-
-						$section.append( code );
-					},
-					'modPanel': function(){
-						console.info('KOC transport modPanel function');
-						var $section = KOC.$confPanel.find('#koc-transport').html('');
-
-						//envoie manuel
-							//ville expéditrice
-							//ville destinataire
-								//une par défaut
-								//plusieurs possibles (*)
-									//un ou plusieurs envoies
-									//-> règle automatique temporaire
-							//ou coordonnées
-								//manuelle
-								//via liste
-								//plusieurs possibles (*)
-							//choix troupes
-								//une par défaut
-								//plusieurs possible
-							//-> capacité totale
-							//choix des ressources
-								//une par défaut
-								//plusieurs possible
-							//temps du trajet (recalculé à chaque changement de troupe)
-							//bouton envoie
-						//envoie automatique
-							//garder x minerais dans la ville 1, le reste va à la ville 2
-							//approvisionnement ville x à partri de ville y si ressources < z
-							//activation / désactivation par ville
-					},
-					'on': function(){
-						console.info('KOC transport on function');
-
-						KOC.conf.transport.active = 1;
-						KOC.shared.storeConf();
-					},
-					'off': function(){
-						console.info('KOC transport off function');
-
-						KOC.conf.transport.active = 0;
-						KOC.conf.transport.automatic = 0;
-						KOC.shared.storeConf();
-
-						KOC.transport.automaticOff();
-					},
-					'automaticOn': function(){
-						console.info('KOC transport automaticOn function');
-
-						KOC.conf.transport.automatic = 1;
-						KOC.shared.storeConf();
-
-						try{
-							var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.server);
-							if( persistentTransportRules ){
-								KOC.transport.rules = persistentTransportRules;
-							}
-						} catch(e){
-							console.error(e);
-						}
-					},
-					'automaticOff': function(){
-						console.info('KOC transport automaticOff function');
-
-						KOC.conf.transport.automatic = 0;
-						KOC.shared.storeConf();
-					},
-					'storeAutomaticRules': function(){
-						localStorage.setObject('koc_transport_rules_' + KOC.server, KOC.transport.rules);
-					},
-					//'generateTransport': function(origin, destination, troops, ressources)
-					//getCitiesForPlayer
-					//getCitiesForSelf
-					//getTroopsByTown
-					//getTransportDuration
-				},
 			/* OVERVIEW */
 				'overview': {
 					'options': {
@@ -1244,6 +1283,7 @@ $(document).ready(function(){
 						'parts_visible': {
 							'population': 1,
 							'troops': 1,
+							'defenses': 1,
 							'resources': 1,
 							'resources_cap': 1,
 							'resources_production_detail': 1,
@@ -1256,6 +1296,7 @@ $(document).ready(function(){
 					'parts': {
 						'population': 'population',
 						'troops': 'unités',
+						'defenses': 'fortifications',
 						'resources': 'ressources',
 						'resources_cap': 'plafond',
 						'resources_production_detail': 'détail production',
@@ -1427,7 +1468,8 @@ $(document).ready(function(){
 							$resConsoTrs = KOC.overview.$tbodyTrs.filter('.resources_consumption').filter(':not(:first)'),
 							$resProdTotalTrs = KOC.overview.$tbodyTrs.filter('.resources_production_total').filter(':not(:first)'),
 							$resAutonomyTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
-							$troopsTrs = KOC.overview.$tbodyTrs.filter('.troops').filter(':not(:first)');
+							$troopsTrs = KOC.overview.$tbodyTrs.filter('.troops').filter(':not(:first)'),
+							$defensesTrs = KOC.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)');
 
 						for( var i = 0; i < KOC.citiesId.length; i++ ){
 							var cityId = 'city' + KOC.citiesId[i];
@@ -1439,8 +1481,10 @@ $(document).ready(function(){
 									'units': window.seed.units[ cityId ],
 									'guardian': window.seed.guardian[cityId],
 									'knights': window.seed.knights[cityId],
-									'wilds': window.seed.wilderness[cityId]
+									'wilds': window.seed.wilderness[cityId],
+									'fortifications': window.seed.fortifications[cityId]
 								};
+
 							//barbarian camps
 								var barbariansRes = [],
 									barbariansTroops = [],
@@ -1808,6 +1852,32 @@ $(document).ready(function(){
 										}
 									}
 								}
+
+							//defenses
+								for( var j = 0; j < KOC.defenses.length; j++ ){
+									var type = KOC.defenses[j];
+									if( type.rows ){
+										for( var k = 0; k < type.rows; k++ ){
+											var $tds = $defensesTrs.eq( j ).find('td'),
+												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
+												n = null;
+
+											if( seed.defenses[ type.name ] ){
+												n = parseFloat( seed.defenses[ type.name ] );
+											}
+
+											if( n != null ){
+												$td.html( KOC.shared.format( n ) )
+													.attr('title', KOC.shared.readable(n))
+													.data('ori', n);
+											} else {
+												$td.html('&nbsp;')
+													.attr('title', '')
+													.data('ori', 0);
+											}
+										}
+									}
+								}
 						}
 
 						KOC.overview.sums();
@@ -1821,10 +1891,10 @@ $(document).ready(function(){
 									var $sumTd = $tds.filter('.sum'),
 										col = $tds.index( $sumTd );
 									$tds.filter(':gt('+ col +')').each2(function(j, $td){
-										sum += parseFloat( $td.data('ori') );
+										if( $td.data('ori') ) sum += parseFloat( $td.data('ori') );
 									});
 
-									if( sum == NaN ){
+									if( sum == Number.NaN ){
 										$sumTd.html( '-' )
 											.attr('title', '');
 									} else {
@@ -1857,7 +1927,7 @@ $(document).ready(function(){
 									'handle': '.drag-handle',
 									'stop': function(event, ui){
 										KOC.conf.overview.position = ui.position;
-										KOC.nnnstoreConf();
+										KOC.shared.storeConf();
 									}
 								})
 								.resizable({
@@ -1977,6 +2047,847 @@ $(document).ready(function(){
 						'replaceOff': function(){
 							console.info('KOC overview replaceOff function');
 						},
+				},
+			/* CREST HUNT */
+				'crestHunt': {
+					'options': {
+						'active': 1,
+						'automatic': 0,
+					},
+					'stored': ['attacks'],
+					'attacks': {}, //by city id and attack id
+					'confPanel': function( $section ){
+						console.info('KOC crestHunt confPanel function');
+						/*var code = '<p>'
+							+ '<h2>Armoiries</h2>'
+							+ KOC.shared.generateCheckbox('crestHunt', 'active', 'Activer le module', KOC.conf.crestHunt.active)
+							+ '</p>';
+
+						$section.append( code );*/
+					},
+					'modPanel': function(){
+						console.info('KOC crestHunt modPanel function');
+						var $section = KOC.$confPanel.find('#koc-crestHunt').html('');
+
+						var form = '<h2>Configurer une attaque</h2>'
+							+ '<div class="attack-form">'
+							+ '<ul class="message"></ul>'
+							+ '<input type="hidden" class="edit-attackId" name="attackId" value="" />'
+							+ '<input type="hidden" class="edit-cityId" name="cityId" value="" />'
+							+ '<fieldset>'
+							+ '<legend>Ville</legend>';
+
+						for( var i = 0; i < KOC.cities.length; i++ ){
+							var city = KOC.cities[i];
+							form += '<input id="koc-crestHunt-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" />'
+								 +  '<label for="koc-crestHunt-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
+						}
+
+						form += '</fieldset><fieldset>'
+							 +  '<legend>Coordonnées</legend>'
+							 +  '<div class="builds">Attaques types&nbsp;:&nbsp;<br />'
+							 +  '<button class="build" rel="5">TS5 (emp5)</button>'
+							 +  '<button class="build" rel="6">TS6 (emp7)</button>'
+							 +  '<button class="build" rel="7">TS7 (emp8)</button>'
+							 +  '<button class="build" rel="8">TS8 (emp9)</button>'
+							 +  '<button class="build" rel="9">TS9 (emp 9)</button>'
+							 +  '<button class="build" rel="9bis">TS9 (emp10)</button>'
+							 +  '<button class="build" rel="10">TS10 (emp10)</button>'
+							 +  '</div>'
+							 +  '<small>format: x,y x,y x,y ...</small>'
+							 +  '<textarea name="coords"></textarea>'
+							 +  '</fieldset>';
+
+						KOC.crestHunt.$waveSkeleton = $('<fieldset class="wave">'
+							 +	'<legend>Vague</legend>'
+							 +	'<label>Chevalier&nbsp;:&nbsp;</label><select class="knight-choice" name="knight">'
+							 +	'<option value="">N\'importe lequel</option>'
+							 +	'</select>'
+							 +	'<div class="unit-block">'
+							 +	'<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" name="unit">'
+							 +	'<option value="">Choisir</option>'
+							 +	'</select>'
+							 +	'<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" name="qantity" type="" />'
+							 +	'</div>'
+							 +	'<button class="add-unit">Ajouter une autre unité</button>'
+							 +	'</fieldset>');
+
+						form += '<button class="add-wave">Ajouter une vague</button>'
+							 +	'<button class="launch">Lancer</button>'
+							 +	'<button class="save">Sauvegarder et Lancer</button>'
+							 +	'<button class="reset">Annuler</button>'
+							 +	'</div>';
+
+						//attacks list
+						var list = '<h2>'
+							 +  KOC.shared.generateCheckbox('crestHunt', 'automatic', 'mode automatique', KOC.conf.crestHunt.automatic)
+							 +  'Attaques enregistrées</h2>'
+							 +  '<div class="attack-list">';
+
+						for( var i = 0; i < KOC.cities.length; i++ ){
+							var city = KOC.cities[i];
+							list += '<h3>' + city.roman + ' ' + city.name + '</h3>'
+								 +  '<ul data-city="'+ city.id +'"></ul>';
+						}
+						list += '</div>';
+
+						$section.append( form + list )
+							//automatic toggle (function call will be done by $confPanel event listener
+							.on('change', '.conf-toggle', function(){
+								KOC.$confPanelNav.find('#koc-crestHunt').parent().toggleClass('on off');
+								KOC.crestHunt.$list.find('.charge').toggle();
+							})
+							//load knights and units on city change )
+							.on('change', '.city-choice', function(){
+								var $waves = KOC.crestHunt.$form.find('.wave');
+								if( $waves.length ) $waves.remove();
+
+								KOC.crestHunt.$form.find('.add-wave, .save, .launch, .builds').show();
+
+								KOC.crestHunt.addWaves(2, $(this).val());
+							})
+							//add unit button
+							.on('click', '.add-unit', function(){
+								var $this = $(this),
+									$b = $this.siblings('.unit-block').eq(0).clone();
+
+								$b.find('input, select').val('');
+								$b.append('<button class="remove">Supprimer cette unité</button>')
+								  .insertBefore( $this );
+							})
+							//remove unit button
+							.on('click', '.remove', function(){
+								$(this).parent().remove();
+							})
+							//add wave button
+							.on('click', '.add-wave', function(){
+								var $clone = KOC.crestHunt.$form.find('.wave').eq(0).clone();
+								$clone.find('input, select').val('');
+								$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+							})
+							//reset form
+							.on('click', '.reset', KOC.crestHunt.resetForm)
+							//launch
+							.on('click', '.launch', function(){
+								console.info('attack launch click');
+								var result = KOC.crestHunt.planAttack();
+								if( result.errors.length ){
+									KOC.crestHunt.$form.find('.message').html( '<li>' + errors.join('</li><li>') + '</li>' );
+								} else {
+									KOC.crestHunt.launchAttack( result.attack );
+								}
+							})
+							//save
+							.on('click', '.save', function(){
+								console.info('attack save click');
+								var result = KOC.crestHunt.planAttack();
+								if( result.errors.length ){
+									KOC.crestHunt.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								} else {
+									KOC.crestHunt.$form.find('.message').empty();
+
+									if( !KOC.crestHunt.attacks[ result.attack.cityId ] ){
+										KOC.crestHunt.attacks[ result.attack.cityId ] = {};
+									}
+
+									var editAttackId = KOC.crestHunt.$form.find('.edit-attackId').val(),
+										editCityId = KOC.crestHunt.$form.find('.edit-cityId').val();
+									if( editAttackId != '' && editCityId != '' ){
+										KOC.crestHunt.deletePlan( editAttackId, editCityId, false );
+										KOC.crestHunt.$list.find('li')
+											.filter('[data-city='+ editCityId +'][data-attack='+ editAttackId +']')
+											.remove();
+									}
+
+									var d = new Date();
+									result.attack.id = Math.floor(d.getTime() / 1000);
+
+									KOC.crestHunt.attacks[ result.attack.cityId ][ result.attack.id ] = result.attack;
+
+									KOC.crestHunt.$list.find('ul').filter('[data-city='+ result.attack.cityId +']')
+										.append( KOC.crestHunt.attackInfo( result.attack, null ) );
+
+									KOC.crestHunt.storeAttacks();
+
+									KOC.crestHunt.launchAttack( result.attack );
+								}
+							})
+							//attack plan delete
+							.on('click', '.delete', function(){
+								var $this = $(this),
+									$li = $(this).parent(),
+									isEdit = $this.hasClass('edit'),
+									attackId = $li.data('attack'),
+									cityId = $li.data('city');
+
+								KOC.crestHunt.deletePlan( attackId, cityId, true );
+								$li.remove();
+							})
+							//attack plan edit and duplication
+							.on('click', '.edit, .duplicate', function(){
+								KOC.crestHunt.resetForm();
+								var $this = $(this),
+									$li = $this.parent(),
+									attackId = $li.data('attack'),
+									cityId = $li.data('city'),
+									attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
+
+								if( attack ){
+									KOC.crestHunt.$form.find('.add-wave, .save, .launch').show();
+
+									if( $this.hasClass('edit') ){
+										KOC.crestHunt.$form.find('.edit-attackId').val( attack.id );
+										KOC.crestHunt.$form.find('.edit-cityId').val( attack.cityId );
+									}
+
+									KOC.crestHunt.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
+									KOC.crestHunt.$form.find('textarea').val(attack.coords.join("\n"));
+
+									KOC.crestHunt.addWaves( attack.waves.length, attack.cityId );
+
+									var $waves = KOC.crestHunt.$form.find('.wave');
+									for( var i = 0; i < attack.waves.length; i++ ){
+										var $wave = $waves.eq(i),
+											wave = attack.waves[i];
+
+										$wave.find('.knight-choice').val( wave.knight );
+
+										if( wave.units.length > 1 ){
+											for( var j = 1; j < wave.units.length; j++ ){
+												$wave.find('.add-unit').trigger('click');
+											}
+										}
+
+										var $blocks = $wave.find('.unit-block');
+										for( var j = 0; j < wave.units.length; j++ ){
+											var $b = $blocks.eq(j),
+												unit = wave.units[j];
+											$b.find('.unit-choice').val( unit.id );
+											$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
+										}
+									}
+								} else {
+									alert('Plan d\'attaque introuvable.')
+								}
+							})
+							//knight choice change
+							.on('change', '.knight-choice', function(){
+								var id = $(this).val();
+								if( id != '' ){
+									KOC.crestHunt.$form.find('.knight-choice').not( this ).each2(function(i, $kc){
+										if( $kc.val() == id ) $kc.val('');
+									});
+								}
+							})
+							//manual launch
+							.on('click', '.charge', function(){
+								var $li = $(this).parent(),
+									attackId = $li.data('attack'),
+									cityId = $li.data('city'),
+									attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
+								if( attack ){
+									KOC.crestHunt.launchAttack( attack );
+								} else {
+									alert('Plan d\'attaque introuvable.')
+								}
+							})
+							//attack templates
+							.on('click', '.build', function(){
+								var rel = $(this).attr('rel');
+								KOC.crestHunt.$form.find('.wave').remove();
+								KOC.crestHunt.addWaves(2, 'city' + KOC.crestHunt.$form.find('.city-choice').filter(':checked').val());
+
+								var $addUnit = KOC.crestHunt.$form.find('.add-unit');
+								$addUnit.eq(1).trigger('click')
+								if( rel == '8' || rel == '9' || rel == '9bis' ){
+									$addUnit.eq(0).trigger('click');
+								}
+								var $uChoices = KOC.crestHunt.$form.find('.unit-choice'),
+									$uQuantity = KOC.crestHunt.$form.find('.unit-qty');
+
+								switch( rel ){
+									case '5':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('50');
+											//wave 2
+											$uChoices.eq(1).val('unt2');
+											$uQuantity.eq(1).val('1');
+											$uChoices.eq(2).val('unt6');
+											$uQuantity.eq(2).val('2.5k');
+										break;
+									case '6':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('100');
+											//wave 2
+											$uChoices.eq(1).val('unt2');
+											$uQuantity.eq(1).val('1');
+											$uChoices.eq(2).val('unt6');
+											$uQuantity.eq(2).val('4.2k');
+										break;
+									case '7':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('150');
+											//wave 2
+											$uChoices.eq(1).val('unt2');
+											$uQuantity.eq(1).val('1');
+											$uChoices.eq(2).val('unt6');
+											$uQuantity.eq(2).val('6k');
+										break;
+									case '8':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('299');
+											$uChoices.eq(1).val('unt10');
+											$uQuantity.eq(1).val('1');
+
+											//wave 2
+											$uChoices.eq(2).val('unt10');
+											$uQuantity.eq(2).val('800');
+											$uChoices.eq(3).val('unt6');
+											$uQuantity.eq(3).val('10k');
+										break;
+									case '9':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('599');
+											$uChoices.eq(1).val('unt10');
+											$uQuantity.eq(1).val('1');
+
+											//wave 2
+											$uChoices.eq(2).val('unt10');
+											$uQuantity.eq(2).val('2.5k');
+											$uChoices.eq(3).val('unt6');
+											$uQuantity.eq(3).val('40k');
+										break;
+									case '9bis':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('599');
+											$uChoices.eq(1).val('unt10');
+											$uQuantity.eq(1).val('1');
+
+											//wave 2
+											$uChoices.eq(2).val('unt10');
+											$uQuantity.eq(2).val('1.6k');
+											$uChoices.eq(3).val('unt6');
+											$uQuantity.eq(3).val('15k');
+										break;
+									case '10':
+											//wave 1
+											$uChoices.eq(0).val('unt2');
+											$uQuantity.eq(0).val('1199');
+
+											//wave 2
+											$uChoices.eq(1).val('unt2');
+											$uQuantity.eq(1).val('1');
+											$uChoices.eq(2).val('unt6');
+											$uQuantity.eq(2).val('69999');
+										break;
+								}
+							});
+
+						KOC.crestHunt.$form = $section.find('.attack-form');
+						KOC.crestHunt.$list = $section.find('.attack-list');
+
+						KOC.crestHunt.$list.accordion({collapsible: true, autoHeight: false}).find('h3').eq(0).click().blur();
+					},
+					'on': function(){
+						console.info('KOC crestHunt on function');
+
+						if( KOC.conf.crestHunt.automatic ){
+							KOC.crestHunt.automaticOn();
+						}
+
+						try{
+							var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
+							if( persistentCrestHuntAttacks ){
+								KOC.crestHunt.attacks = persistentCrestHuntAttacks;
+
+								for( var i = 0; i < KOC.citiesId.length; i++ ){
+									KOC.crestHunt.refreshCityAttacks( KOC.citiesId[i] );
+								}
+
+								KOC.crestHunt.$list.find('.charge').toggle( KOC.conf.crestHunt.automatic );
+							}
+						} catch(e){
+							console.error(e);
+						}
+					},
+					'off': function(){
+						console.info('KOC crestHunt off function');
+
+						KOC.conf.crestHunt.active = 0;
+
+						KOC.crestHunt.automaticOff();
+					},
+					'automaticOn': function(){
+						console.info('KOC crestHunt automaticOn function');
+
+						KOC.conf.crestHunt.automatic = 1;
+						KOC.shared.storeConf();
+
+						//launching stored attacks
+						for( var c in KOC.crestHunt.attacks ){
+							if( KOC.crestHunt.attacks.hasOwnProperty(c) ){
+								var attacks = KOC.crestHunt.attacks[c];
+								for( a in attacks ){
+									if( attacks.hasOwnProperty(a) ){
+										KOC.crestHunt.launchAttack( attacks[a] );
+									}
+								}
+							}
+						}
+					},
+					'automaticOff': function(){
+						console.info('KOC crestHunt automaticOff function');
+
+						KOC.conf.crestHunt.automatic = 0;
+						KOC.shared.storeConf();
+					},
+					'storeAttacks': function(){
+						console.info('KOC crestHunt storeAttacks function');
+						try{
+							localStorage.setObject('koc_crestHunt_attacks_' + KOC.server, KOC.crestHunt.attacks);
+						} catch(e){
+							alert(e);
+						}
+					},
+					'planAttack': function(){
+						console.info('KOC crestHunt buildRule function');
+						var $waves = KOC.crestHunt.$form.find('.wave'),
+							$cityChoice = KOC.crestHunt.$form.find('.city-choice').filter(':checked'),
+							coords = $.trim( KOC.crestHunt.$form.find('textarea').val().replace(/\n/g, ' ') ),
+							errors = [],
+							regexp = /[^0-9, ]/,
+							rule = { 'waves':[], 'abort': 0, 'aborts': [], 'marching': {}, 'lastCoordIndex': 0 };
+
+						//check form
+							//city
+							if( !$cityChoice.length ){
+								errors.push('Ville de départ obligatoire.');
+							} else {
+								rule.cityId = $cityChoice.val();
+							}
+
+							//coords
+							if( coords.length == 0 ){
+								errors.push('Au moins une coordonnée est requise.');
+							} else if( regexp.test( coords ) ){
+								errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnées.');
+							} else {
+								coords = coords.split(' ');
+								var wrongGPS = false;
+								for( var i = 0; i < coords.length; i++ ){
+									var coord = coords[i].split(',');
+									if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
+										wrongGPS = true;
+									}
+								}
+								if( wrongGPS ){
+									errors.push('Une des coordonnées est erronée.');
+								} else {
+									rule.coords = coords;
+								}
+							}
+
+							//waves
+							$waves.each2(function(i, $wave){
+								var w = {'units': []};
+
+								//knight
+									w.knight = $wave.find('.knight-choice').val();
+
+								//troops
+									$wave.find('.unit-block').each2(function(i, $b){
+										var valid = true;
+										var u = $.trim( $b.find('.unit-choice').val() ),
+											q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+
+										if( u.length == 0 ){
+											valid = false;
+										}
+
+										if( q == false || q < 1 ){
+											valid = false;
+										}
+
+										if( valid ){
+											w.units.push({'id': u, 'qty': q});
+										}
+									});
+
+								if( w.units.length ) rule.waves.push(w);
+							});
+
+							if( !rule.waves.length ){
+								errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
+								errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
+							}
+
+							if( errors.length ){
+								errors = errors.unique();
+							}
+
+						console.log(rule);
+						console.log(errors);
+						return {'attack': rule, 'errors': errors};
+					},
+					'launchAttack': function( attack ){
+						console.info('KOC crestHunt launchAttack function', attack);
+						if( attack.abort > 10 ){
+							attack.aborts.push('Trop d\'erreurs détectées.');
+							KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
+							KOC.crestHunt.storeAttacks();
+							return;
+						}
+						var abort = false;
+
+						var defaultParams = window.g_ajaxparams;
+						if( defaultParams == null ){
+							alert('Paramètres ajax manquant');
+							return;
+						}
+
+						defaultParams.cid = attack.cityId;
+						defaultParams.type = 4; //MARCH_TYPE_ATTACK
+
+						//check rally point slots
+						var slots = KOC.shared.getRallyPointLevel(attack.cityId);
+						if( slots == 12 ) slots--; //eleven armies at level 12
+						for( a in window.seed.queue_atkp[attack.cityId] ){
+							if( window.seed.queue_atkp[attack.cityId].hasOwnProperty(a) ) slots--;
+						}
+
+						if( slots < attack.waves ){
+							abort = true;
+							attack.aborts.push('Pas assez de place dans le point de ralliement.');
+						} else {
+							if( attack.lastCoordIndex == attack.coords.length ) attack.lastCoordIndex = 0;
+
+							var coord = null;
+							for( var i = 0; i < attack.coords.length; i++ ){
+								//check claim on the target
+								var params = window.g_ajaxparams,
+									gps = attack.coords[ attack.lastCoordIndex ].split(',');
+									blocks = [],
+									validCoord = false;
+
+								var x = Math.floor(parseInt(gps[0], 10) / 5) * 5;
+								var y = Math.floor(parseInt(gps[1], 10) / 5) * 5;
+
+								//@todo to test for block reduction
+								blocks.push("bl_" + x + "_bt_" + y);
+								blocks.push("bl_" + x + "_bt_" + (y + 5));
+								blocks.push("bl_" + (x + 5) + "_bt_" + y);
+								blocks.push("bl_" + (x + 5) + "_bt_" + (y + 5));
+
+								params.blocks = blocks.join(',');
+
+								$.ajax({
+									url: window.g_ajaxpath + "ajax/fetchMapTiles.php" + window.g_ajaxsuffix,
+									async: false,
+									method: "post",
+									data: params,
+									success: function(result){
+										if( result.data ){
+											var info = result.data['l_'+ gps[0] +'_t_'+ gps[1]];
+											if( info ){
+												if( info.tileType < 10 || info.tileType > 40 ){
+													attack.aborts.push('Coordonnées '+ attack.coords[ attack.lastCoordIndex ] +' n\'est pas une terre sauvage.');
+													abort = true;
+												} else if( info.tileUserId != null ){
+													attack.aborts.push('Coordonnées '+ attack.coords[ attack.lastCoordIndex ] +' occupées.');
+													abort = true;
+												} else {
+													validCoord = true;
+												}
+											} else {
+												attack.aborts.push('Informations sur '+ attack.coords[ lastCoordIndex ] +' manquantes.');
+												abort = true;
+											}
+										}
+									},
+									error: function(){
+										attack.aborts.push('Informations sur '+ attack.coords[ lastCoordIndex ] +' introuvables.');
+										abort = true;
+									},
+								});
+
+								if( validCoord ){
+									coord = gps;
+									break;
+								} else {
+									abort = true;
+									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
+								}
+							}
+							if( !abort && coord ){
+								defaultParams.xcoord = coord[0];
+								defaultParams.ycoord = coord[1];
+
+								defaultParams.gold = 0;
+								defaultParams.r1 = 0;
+								defaultParams.r2 = 0;
+								defaultParams.r3 = 0;
+								defaultParams.r4 = 0;
+								defaultParams.r5 = 0;
+								defaultParams.items = '';
+
+								var params = defaultParams;
+
+								for( var i = 0; i < attack.waves.length; i++ ){
+									var resources = [0, 0, 0, 0, 0];
+									var wave = attack.waves[i],
+										knights = KOC.shared.getAvailableKnights( cityId );
+
+									if( !knights.length ){
+										attack.aborts.push('Aucun chevalier disponible.');
+										abort = true;
+									} else {
+										//check knight
+										if( wave.knight == '' ){
+											wave.knight = knights[0].knightId;
+										} else {
+											var knightOk = false;
+											for( var k in knights ){
+												if( knights.hasOwnProperty(k) ){
+													if( wave.knight == knights[k].knightId ){
+														knightOk = true;
+														break;
+													}
+												}
+											}
+											if( !knightOk ){
+												attack.aborts.push('Chevalier indisponible.');
+												abort = true;
+											} else {
+												params.kid = wave.knight;
+
+												var unitsarr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+													units = window.seed.units[cityId];
+												for( var j = 0; j < wave.units.length; j++ ){
+													var unit = wave.units[j];
+													params["u" + unit.id] = unit.qty;
+													unitsarr[unit.id] = unit.qty;
+
+													//check troops
+													if( parseFloat(units[ unit.id ]) < unit.qty ){
+														attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
+														abort = true;
+														break;
+													}
+												}
+
+												if( !abort ){
+													$.ajax({
+														url: window.g_ajaxpath + "ajax/march.php" + window.g_ajaxsuffix,
+														async: false,
+														data: params,
+														success: function(result){
+															if( result.ok ){
+																attack.marching.push(result.marchId);
+																var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
+																	d = new Date();
+																	ts = parseInt(d.getTime() / 1000, 10);
+																window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ut + timediff, params.xcoord, params.ycoord, unitsarr, params.type, params.kid, resources, result.tileId, result.tileType, result.tileLevel, params.cid, true);
+
+																window.updateBoosts(result);
+
+																if( result.data ){
+																	window.update_boosts();
+																	window.seed.playerEffects.fogExpire = 0;
+																}
+															} else {
+																attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (capcha ?).');
+																abort = true;
+																if( attack.marching.length ){
+																	//recall previous waves
+																	for( var j = 0; j < attack.marching.length; j++ ){
+																		var params = window.g_ajaxparams;
+																		params.cid = attack.cityId;
+																		params.mid = attack.marching[j];
+																		$.post(g_ajaxpath + "ajax/cancelMarch.php" + g_ajaxsuffix, params, function(result){
+																			if( result.ok ){
+																				var c = 'city' + attack.cityId,
+																					m = "m" + attack.marching[j];
+																				if( result.updateSeed ){
+																					window.seed.queue_atkp[c][m].marchStatus = 8;
+																					var marchtime = parseFloat(window.seed.queue_atkp[c][m].returnUnixTime) - parseFloat(seed.queue_atkp[c][m].destinationUnixTime);
+																					var d = new Date(),
+																						ts = parseInt(d.getTime() / 1000, 10);
+																					if( window.seed.playerEffects.returnExpire > ts ) marchtime *= 0.5;
+																					window.seed.queue_atkp[c][m].destinationUnixTime = result.destinationUnixTime || ts;
+																					window.seed.queue_atkp[c][m].returnUnixTime = result.returnUnixTime || ts + marchtime * result.returnMultiplier;
+																					window.seed.queue_atkp[c][m].marchStatus = 8;
+
+																					window.update_seed(result.updateSeed)
+																				}
+																				for( var j = 1; j < 13; j++ ){
+																					window.seed.queue_atkp[c][m]["unit" + j + "Return"] = parseInt(window.seed.queue_atkp[c][m]["unit" + j + "Count"], 10);
+																				}
+																			}
+																		});
+																	}
+																}
+															}
+														},
+														error: function(){
+															attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (requête KO).');
+															abort = true;
+														},
+													});
+												}
+											}
+										}
+									}
+								}
+							}
+
+							if( !abort ){
+								attack.lastCoordIndex = attack.lastCoordIndex + 1;
+
+								//get estimated time
+								var time = KOC.shared.marchTimeCalculator(attack.cityId, unitsarr, coord[0], coord[1], true, {});
+							}
+						}
+
+						if( abort ){
+							var time = 0;
+							attack.abort = attack.abort + 1;
+						}
+
+						attack.marching = [];
+						attack.abords = attack.abords.unique();
+
+						if( KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
+							KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
+							KOC.crestHunt.storeAttacks();
+							KOC.crestHunt.refreshCityAttacks( attack.cityId );
+						}
+
+						//force resfresh
+						setTimeout(function(){ window.update_seed_ajax(true, null) }, time + 10000);
+
+						//next round
+						setTimeout(function(){ KOC.crestHunt.launchAttack( attack ); }, time + 20000);
+					},
+					'resetForm': function(){
+						console.info('KOC crestHunt resetForm function');
+						KOC.crestHunt.$form.find('.add-wave, .save, .launch, .builds').hide();
+						KOC.crestHunt.$form.find('.wave').remove();
+						var $inputs = KOC.crestHunt.$form.find('input');
+						$inputs.filter('[type="text"], [type="hidden"]').val('');
+						$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
+						KOC.crestHunt.$form.find('select, textarea').val('');
+						KOC.crestHunt.$form.find('.message').empty();
+					},
+					'deletePlan': function( attackId, cityId, save ){
+						console.info('KOC crestHunt deletePlan function');
+						delete KOC.crestHunt.attacks[ cityId ][ attackId ];
+
+						if( save ) KOC.crestHunt.storeAttacks();
+					},
+					'attackInfo': function( attack, city ){
+						console.info('KOC crestHunt attackInfo function', attack, city);
+						if( city == null ){
+							city = KOC.shared.getCityById( attack.cityId );
+						} else if( !city.id ){
+							city = KOC.shared.getCityById( city );
+						}
+
+						var code = '<li data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">'
+							 +  '<span class="form">Depuis ' + city.roman + ' ' + city.name + '</span>'
+							 +  '<span class="to">Vers ' + KOC.shared.mapLink( attack.coords ) +'</span>';
+
+						var knights = window.seed.knights[ 'city' + city.id ];
+						for( var j = 0; j < attack.waves.length; j++ ){
+							var wave = attack.waves[j];
+
+							code += '<div class="wave">Vague '+ j + '&nbsp;:&nbsp;'
+								 +  '<span class="knight">chevalier&nbsp;:&nbsp;'
+								 +  ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].knightLevel +', '+ KOC.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' )
+								 +  '</span>'
+								 +  '<span class="troops">';
+
+							var unitsCode = '';
+							for( var k = 0; k < wave.units.length; k++ ){
+								var unit = wave.units[k];
+								if( unitsCode.length ) unitsCode += ', ';
+
+								unitsCode += KOC.shared.format( unit.qty )
+										  +  '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_'
+										  +  unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
+							}
+
+							code += unitsCode + '</span></div>';
+						}
+
+						if( attack.aborts.length ){
+							code += '<div class="attack-errors">'
+								 +  attack.aborts.join('<br />');
+								 +  '</div>';
+						}
+
+						code += '<button class="charge">Lancer</button>'
+							 +  '<button class="edit">Modifier</button>'
+							 +  '<button class="duplicate">Dupliquer</button>'
+							 +  '<button class="delete">Supprimer</button>'
+							 +  '</li>';
+
+						return code;
+					},
+					'refreshCityAttacks': function( cityId ){
+						var $ul = KOC.crestHunt.$list.find('ul').filter('[data-city='+ cityId +']');
+						$ul.empty();
+
+						var attacks = KOC.crestHunt.attacks[ cityId ],
+							code = '';
+						if( attacks ){
+							for( var a in attacks ){
+								if( attacks.hasOwnProperty(a) ){
+									code += KOC.crestHunt.attackInfo( attacks[a], cityId );
+								}
+							}
+						}
+
+						$ul.append( code );
+					},
+					'addWaves': function( num, cityId ){
+						if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
+						var $clone = KOC.crestHunt.$waveSkeleton.clone();
+						$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+						for( var i = 1; i < num; i++ ){
+							$clone.clone().insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+						}
+
+						var knights = KOC.shared.getAvailableKnights( cityId ),
+							choices = '';
+						for( var i = 0; i < knights.length; i++ ){
+							var knight = knights[i];
+							choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.knightLevel + ', ' + KOC.shared.getKnightStatText( knight ) +')</option>';
+						}
+
+						KOC.crestHunt.$form.find('.knight-choice').each2(function(i, $kc){
+							$kc.append( choices );
+						});
+
+						var units = window.seed.units[ cityId ],
+							choices = '';
+						for( var u in units ){
+							if( units.hasOwnProperty(u) ){
+								var name = window.unitcost[u][0];
+								if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
+								choices += '<option value="'+ u +'">'+ name + '('+ units[u] +')</option>';
+							}
+						}
+
+						KOC.crestHunt.$form.find('.unit-choice').each2(function(i, $uc){
+							$uc.append( choices );
+						});
+					},
 				},
 			/* FORMATION */
 					/*cancelTraining(f + "," + currentcityid + "," + seed.queue_unt["city" + currentcityid][f][0] + "," + seed.queue_unt["city" + currentcityid][f][1] + "," + seed.queue_unt["city" + currentcityid][f][3] + "," + seed.queue_unt["city" + currentcityid][f][2] + "," + seed.queue_unt["city" + currentcityid][f][5]));*/
@@ -2280,403 +3191,96 @@ $(document).ready(function(){
 
 					}
 				},
-			/* CREST HUNT */
-				'crestHunt': {
+			/* TRANSPORT */
+				'transport': {
 					'options': {
 						'active': 1,
 						'automatic': 0,
 					},
-					'stored': ['attacks'],
-					'attacks': {}, //by city
+					'stored': ['rules'],
+					'rules': {},
 					'confPanel': function( $section ){
-						console.info('KOC crestHunt confPanel function');
-						/*var code = '<p>'
-							+ '<h2>Armoiries</h2>'
-							+ KOC.shared.generateCheckbox('crestHunt', 'active', 'Activer le module', KOC.conf.crestHunt.active)
+						console.info('KOC transport confPanel function');
+						var code = '<p>'
+							+ '<h2>Transport</h2>'
+							+ KOC.shared.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
 							+ '</p>';
 
-						$section.append( code );*/
+						$section.append( code );
 					},
 					'modPanel': function(){
-						console.info('KOC crestHunt modPanel function');
-						var $section = KOC.$confPanel.find('#koc-crestHunt').html('');
+						console.info('KOC transport modPanel function');
+						var $section = KOC.$confPanel.find('#koc-transport').html('');
 
-						var code = '<h2>Attaques <span>'
-							+ KOC.shared.generateCheckbox('crestHunt', 'automatic', 'automatique', KOC.conf.crestHunt.automatic)
-							+ '</span></h2>'
-							+ '<h2>Configurer une attaque</h2>'
-							+ '<div class="attack-form">'
-							+ '<ul class="message"></ul>'
-							+ '<input type="hidden" class="edit-attackId" name="attackId" value="" />'
-							+ '<input type="hidden" class="edit-cityId" name="cityId" value="" />'
-							+ '<fieldset>'
-							+ '<legend>Ville</legend>';
-						for( var i = 0; i < KOC.cities.length; i++ ){
-							var city = KOC.cities[i];
-							console.log(city);
-							code += '<input id="koc-crestHunt-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" />'
-								 +  '<label for="koc-crestHunt-'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
-						}
-
-						code += '</fieldset>'
-							 +	'<fieldset>'
-							 +	'<legend>Coordonnées</legend>'
-							 +	'<small>format: x,y x,y x,y ...</small>'
-							 +	'<textarea name="coords"></textarea>'
-							 +	'</fieldset>';
-
-						KOC.crestHunt.$waveSkeleton = $('<fieldset class="wave">'
-							 +	'<legend>Vague</legend>'
-							 +	'<select class="knight-choice" name="knight">'
-							 +	'<option value="">N\'importe lequel</option>'
-							 +	'</select>'
-							 +	'<div class="unit-block">'
-							 +	'<select class="unit-choice" name="unit">'
-							 +	'<option value="">Unité</option>'
-							 +	'</select>'
-							 +	'<input class="unit-qty" name="qantity" type="" />'
-							 +	'</div>'
-							 +	'<button class="add-unit">Ajouter une autre unité</button>'
-							 +	'</fieldset>');
-
-						code += '<button class="add-wave">Ajouter une vague</button>'
-							 +	'<button type="submit" class="launch">Lancer (une coordonnée seulement)</button>'
-							 +	'<button type="submit" class="save" title="Cette attaque sera lancée si les attaques automatiques sont activées">Sauvegarder dans les attaques automatiques</button>'
-							 +	'<button type="reset" class="reset">Annuler</button>'
-							 +	'</div>';
-
-						//attacks list
-						code += '<h2>Attaques enregistrées</h2>'
-							 +  '<div class="attack-list">';
-
-						for( var c in KOC.crestHunt.attacks ){
-							if( KOC.crestHunt.attacks.hasOwnProperty(c) ){
-								var attacks = KOC.crestHunt.attacks[c],
-									city = KOC.shared.getCityById( c );
-								code += '<h3>' + city.roman + city.name + '</h3>',
-									 +  '<ul data-city="'+ c +'">'
-								for( var i = 0; i < attacks.length; i++ ){
-									var attack = attacks[i];
-									code += KOC.crestHunt.attackInfo( attack, city );
-								}
-								code += '</ul>';
-							}
-						}
-						code += '</div>';
-
-						$section.append(code)
-							.on('change', '.conf-toggle', function(){
-								KOC.$confPanelNav.find('#koc-crestHunt').parent().toggleClass('on off');
-							})
-							//load knights and units on city change )
-							.on('change', '.city-choice', function(){
-								console.info('city choice');
-								var $waves = KOC.crestHunt.$form.find('.wave'),
-									id = $(this).val(),
-									cityId = 'city' + id;
-								if( $waves.length ){
-									$waves.remove();
-								}
-
-								var $clone = KOC.crestHunt.$waveSkeleton.clone();
-								$clone.insertBefore( $clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') ) );
-							})
-							//add unit button
-							.on('click', '.add-unit', function(){
-								var $this = $(this),
-									$b = $this.siblings('.unit-block').eq(0).clone();
-
-								$b.find('input, select').val('');
-								$b.append('<button class="remove">Supprimer cette unité</button>')
-								  .insertBefore( $this );
-							})
-							//remove unit button
-							.on('click', '.remove', function(){
-								$(this).parent().remove();
-							})
-							//add wave button
-							.on('click', '.add-wave', function(){
-								var $clone = KOC.crestHunt.$waveSkeleton.clone();
-								$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
-							})
-							//reset form
-							.on('click', '.reset', KOC.crestHunt.resetForm)
-							//launch
-							.on('clik', '.launch', function(){
-								var result = KOC.crestHunt.planAttack();
-								if( result.errors.length ){
-									KOC.crestHunt.$form.find('.message').html( '<li>' + errors.join('</li><li>') + '</li>' );
-								} else {
-									KOC.crestHunt.launchAttack( result.attack );
-								}
-							})
-							//save
-							.on('click', '.save', function(){
-								var result = KOC.crestHunt.planAttack();
-								if( result.errors.length ){
-									KOC.crestHunt.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
-								} else {
-									if( !KOC.crestHunt.attacks[ result.attack.cityId ] ) KOC.crestHunt.attacks[ result.attack.cityId ] = [];
-
-									var editAttackId = KOC.crestHunt.$form.find('.edit-attackId').val(),
-										editCityId = KOC.crestHunt.$form.find('.edit-cityId').val();
-									if( editAttackId != '' && editCityId != '' ){
-										KOC.crestHunt.deletePlan( editAttackId, editCityId );
-									}
-									var d = new Date();
-									result.attack.id = Math.floor(d.getTime() / 1000);
-									KOC.crestHunt.attacks[ result.attack.cityId ].push(result.attack);
-									KOC.crestHunt.$list.find('ul').filter('[data-city='+ result.attack.cityId +']').append( KOC.crestHunt.attackInfo( attack, null ) );
-									KOC.crestHunt.storeAttacks();
-								}
-							})
-							//attack plan delete
-							.on('click', '.delete', function(){
-								var $this = $(this),
-									$li = $(this).parent(),
-									isEdit = $this.hasClass('edit'),
-									attackId = $li.data('attack'),
-									cityId = $li.data('city');
-
-								KOC.crestHunt.deletePlan( attackId, cityId );
-								$li.remove();
-							})
-							//attack plan edit and duplication
-							.on('click', '.edit, .duplicate', function(){
-								KOC.crestHunt.resetForm();
-								var $li = $(this).parent(),
-									attackId = $li.data('attack'),
-									cityId = $li.data('city'),
-									attack = null,
-									cityAttacks = KOC.crestHunt.attacks[ 'city' + Id ];
-
-								if( cityAttacks ){
-									for( var i = 0; i < cityAttacks.length; i++ ){
-										if( cityAttacks[i].id == attackId ){
-											attack = cityAttacks[i];
-											break;
-										}
-									}
-
-									if( attack ){
-										if( isEdit ){
-											KOC.crestHunt.$form.find('.edit-attackId').val( attack.id );
-											KOC.crestHunt.$form.find('.edit-cityId').val( attack.cityId );
-										}
-										KOC.crestHunt.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
-										KOC.crestHunt.$form.find('textarea').val(attack.coords.join(' '));
-										if( attack.waves.length > 2 ){
-											for( var i = 2; i < attack.waves.length; i++ ){
-												KOC.crestHunt.$form.find('.add-wave').trigger('click');
-											}
-										}
-										var $waves = KOC.crestHunt.$form.find('.wave');
-										for( var i = 0; i < attack.waves.length; i++ ){
-											var $wave = $waves.eq(i),
-												wave = attack.waves[i];
-
-											$wave.find('.knight-choice').val( wave.knight );
-
-											if( wave.units.length > 1 ){
-												for( var j = 1; j < wave.units.length; j++ ){
-													$wave.find('.add-unit').trigger('click');
-												}
-											}
-											var $blocks = $wave.find('.unit-block');
-											for( var j = 0; j < wave.units.length; j++ ){
-												var $b = $blocks.eq(j),
-													unit = wave.units[j];
-												$b.find('.unit-choice').val( unit.id );
-												$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
-											}
-										}
-									} else {
-										alert('Plan d\'attaque introuvable.')
-									}
-								} else {
-									alert('Plan d\'attaque introuvable.')
-								}
-							});
-
-						KOC.crestHunt.$form = $section.find('.attack-form');
-						KOC.crestHunt.$list = $section.find('.attack-list');
-
-						KOC.crestHunt.$list.accordion({collapsible: true});
+						//envoie manuel
+							//ville expéditrice
+							//ville destinataire
+								//une par défaut
+								//plusieurs possibles (*)
+									//un ou plusieurs envoies
+									//-> règle automatique temporaire
+							//ou coordonnées
+								//manuelle
+								//via liste
+								//plusieurs possibles (*)
+							//choix troupes
+								//une par défaut
+								//plusieurs possible
+							//-> capacité totale
+							//choix des ressources
+								//une par défaut
+								//plusieurs possible
+							//temps du trajet (recalculé à chaque changement de troupe)
+							//bouton envoie
+						//envoie automatique
+							//garder x minerais dans la ville 1, le reste va à la ville 2
+							//approvisionnement ville x à partri de ville y si ressources < z
+							//activation / désactivation par ville
 					},
 					'on': function(){
-						console.info('KOC crestHunt on function');
+						console.info('KOC transport on function');
 
-						if( KOC.conf.crestHunt.automatic ){
-							KOC.crestHunt.automaticOn();
-						}
+						KOC.conf.transport.active = 1;
+						KOC.shared.storeConf();
 					},
 					'off': function(){
-						console.info('KOC crestHunt off function');
+						console.info('KOC transport off function');
 
-						KOC.conf.crestHunt.active = 0;
+						KOC.conf.transport.active = 0;
+						KOC.conf.transport.automatic = 0;
+						KOC.shared.storeConf();
 
-						KOC.crestHunt.automaticOff();
+						KOC.transport.automaticOff();
 					},
 					'automaticOn': function(){
-						console.info('KOC crestHunt automaticOn function');
+						console.info('KOC transport automaticOn function');
 
-						KOC.conf.crestHunt.automatic = 1;
+						KOC.conf.transport.automatic = 1;
 						KOC.shared.storeConf();
 
 						try{
-							var persistentcrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
-							if( persistentcrestHuntAttacks ){
-								KOC.crestHunt.attacks = persistentCrestHuntAttacks;
+							var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.server);
+							if( persistentTransportRules ){
+								KOC.transport.rules = persistentTransportRules;
 							}
 						} catch(e){
 							console.error(e);
 						}
 					},
 					'automaticOff': function(){
-						console.info('KOC crestHunt automaticOff function');
+						console.info('KOC transport automaticOff function');
 
-						KOC.conf.crestHunt.automatic = 0;
+						KOC.conf.transport.automatic = 0;
 						KOC.shared.storeConf();
 					},
-					'storeAttacks': function(){
-						console.info('KOC crestHunt storeAttacks function');
-						localStorage.setObject('koc_crestHunt_attacks_' + KOC.server, KOC.crestHunt.attacks);
+					'storeAutomaticRules': function(){
+						localStorage.setObject('koc_transport_rules_' + KOC.server, KOC.transport.rules);
 					},
-					'planAttack': function(){
-						console.info('KOC crestHunt buildRule function');
-						var $waves = KOC.crestHunt.$form.find('.wave'),
-							$cityChoice = KOC.crestHunt.$form.find('.city-choice').filter(':checked'),
-							coords = $.trim( KOC.crestHunt.$form.find('textarea').val() ),
-							errors = [],
-							regexp = /[^0-9, ]/,
-							rule = { 'waves':[] };
-
-						//check form
-							//city
-							if( !$cityChoice.length ){
-								errors.push('Ville de départ obligatoire.');
-							} else {
-								rule.cityId = $cityChoice.val();
-							}
-
-							//coords
-							if( coords.length == 0 ){
-								errors.push('Au moins une coordonnée est requise.');
-							} else if( regexp.test( coords ) ){
-								errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un espace entre deux coordonnées.');
-							} else {
-								rule.coords = coords.split(' ');
-							}
-
-							//waves
-							$waves.each2(function(i, $wave){
-								var w = {},
-									valid = true;
-								w.units = [];
-
-								//knight
-									w.knight = $wave.find('.knight-choice').val();
-
-								//troops
-									$wave.find('.unit-block').each2(function(i, $b){
-										var u = $.trim( $b.find('.unit-choice').val() ),
-											q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
-
-										if( u.length == 0 ){
-											errors.push('Chaque unité de l\'attaque doit être spécifiée.');
-											valid = false;
-										}
-
-										if( q == false || q < 1 ){
-											errors.push('Chaque unité de l\'attaque doit avoir une quantité valide.');
-											valid = false;
-										}
-
-										if( valid ) w.units.push({'id': u, 'qty': q});
-									});
-
-								if( valid ) rule.waves.push(w)
-							});
-
-							if( errors.length ){
-								errors = errors.unique();
-							}
-
-						return {'rule': rule, 'errors': errors};
-					},
-					'launchAttack': function( rule ){
-						console.info('KOC crestHunt launchAttack function');
-					},
-					'resetForm': function(){
-						console.info('KOC crestHunt resetForm function');
-						KOC.crestHunt.$form.find('.wave').remove();
-						var $inputs = KOC.crestHunt.$form.find('input');
-						$inputs.filter('[type="text"], [type="hidden"]').val('');
-						$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
-						KOC.crestHunt.$form.find('select').val('');
-						KOC.crestHunt.$form.find('.message').empty();
-					},
-					'deletePlan': function( attackId, cityId ){
-						console.info('KOC crestHunt deletePlan function');
-						var cityAttacks = KOC.crestHunt.attacks[ 'city' + Id ];
-
-						if( cityAttacks ){
-							for( var i = 0; i < cityAttacks.length; i++ ){
-								if( cityAttacks[i].id == attackId ){
-									KOC.crestHunt.attacks[ 'city' + Id ].splice(i, 1);
-									KOC.crestHunt.storeAttacks();
-									break;
-								}
-							}
-						}
-					},
-					'attackInfo': function( attack, city ){
-						console.info('KOC crestHunt attackInfo function');
-						if( city == null ){
-							city = KOC.shared.getCityById( attack.cityId );
-						}
-
-						var code = '<li data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">'
-							 +  '<span class="form">depuis ' + city.roman + city.name + '</span>'
-							 +  '<span class="to">vers ' + attack.coords.join('  ') +'</span>';
-						for( var j = 0; j < attack.waves.length; j++ ){
-							var wave = attack.waves[j],
-								knights = window.seed.knights[ 'city' + city.id ];
-
-							code += '<span class="wave">'
-								 +  '<span class="knight">chevalier : '
-								 +  ( attack.knight == '' ? 'n\'importe lequel' : knights[ attack.knigth ].knightName + '('+ knights[ attack.knigth ].knightLevel +', '+ KOC.shared.getKnightStatText( knight ) +')' )
-								 +  '</span>'
-								 +  '<span class="troops">Vague '+ j + ': ';
-
-							var unitsCode = '';
-							for( var k = 0; k < wave.units.length; k++ ){
-								var unit = wave.units[k];
-								if( unitsCode.length ) unitsCode += ', ';
-
-								unitsCode += '<img src="'+ window.stimgUrl + 'img/units/unit_' + unit.id + '_50_s34.jpg" title="'+ window.unitcost['unt'+ unit.id][0] +'">'
-										  +  KOC.shared.format( unit.qty );
-							}
-
-							code += '</span>';
-						}
-						code += '<button class="edit">Modifier</button>'
-							 +  '<button class="duplicate">Dupliquer</button>'
-							 +  '<button class="delete">Supprimer</button>'
-							 +  '</li>';
-
-						return code;
-					},
-				},
-			/* default configuration */
-				//each module has its own default conf
-				'defaultConf': {
-					'confPanel': {
-						'position': {'top': 100, 'left': 100},
-						'size': {'width': 'auto', 'height': 'auto'},
-						'selected': 0,
-						'visible': 0,
-					}
+					//'generateTransport': function(origin, destination, troops, ressources)
+					//getCitiesForPlayer
+					//getCitiesForSelf
+					//getTroopsByTown
+					//getTransportDuration
 				},
 		};
 

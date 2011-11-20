@@ -1,5 +1,4 @@
 console.info('koc start');
-
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
 		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
@@ -16,7 +15,7 @@ var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n.attack-form fieldset { clear: both; }"
 		+ "\n.attack-form fieldset small { display: block; }"
 		+ "\n.attack-form .builds { display: none; float: right; max-width: 200px; }"
-		+ "\n.attack-form .add-wave, .attack-form .launch, .attack-form .save { display: none; }"
+		+ "\n.attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }"
 		+ "\n.attack-form { counter-reset: waves; }"
 		+ "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }"
 		+ "\n.attack-form .wave label { display: inline-block; }"
@@ -28,6 +27,7 @@ var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 		+ "\n.attack-list li { display: block; margin-bottom: 8px; }"
 		+ "\n.attack-list li span { display: inline-block; padding-right: 5px; }"
 		+ "\n.attack-list li img { width: 18px; }"
+		+ "\n.attack-list .attack-errors { display: block; }"
 		+ "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }"
 ;
 
@@ -126,14 +126,23 @@ Array.prototype.unique = function(){
 };
 
 Array.max = function( array ){
-    return Math.max.apply( Math, array );
+	return Math.max.apply( Math, array );
 };
 
 Array.min = function( array ){
-    return Math.min.apply( Math, array );
+	return Math.min.apply( Math, array );
 };
 
+
 jQuery(document).ready(function(){
+
+//prototype json.stringify bug with array
+if(window.Prototype) {
+	delete Object.prototype.toJSON;
+	delete Array.prototype.toJSON;
+	delete Hash.prototype.toJSON;
+	delete String.prototype.toJSON;
+}
 
 (function($){
 	try{
@@ -1039,7 +1048,7 @@ jQuery(document).ready(function(){
 							try{
 								var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.server);
 								if( persistentFriendsList ){
-									KOC.chat.friendsList = persistentFriendsList.split(',');
+									KOC.chat.friendsList = persistentFriendsList;
 								}
 							} catch(e){
 								console.error(e);
@@ -1049,7 +1058,7 @@ jQuery(document).ready(function(){
 							try{
 								var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.server);
 								if( persistentFoesList ){
-									KOC.chat.foesList = persistentFoesList.split(',');
+									KOC.chat.foesList = persistentFoesList;
 								}
 							} catch(e){
 								console.error(e);
@@ -1233,7 +1242,7 @@ jQuery(document).ready(function(){
 						},
 						'storeFriendsList': function(){
 							console.info('KOC storeFriendsList function');
-							localStorage.setObject('koc_chat_friends_list_' + KOC.server, KOC.chat.friendsList.join(','));
+							localStorage.setObject('koc_chat_friends_list_' + KOC.server, KOC.chat.friendsList);
 						},
 					/* highlight foes */
 						'highlightFoesOn': function(){
@@ -1247,7 +1256,7 @@ jQuery(document).ready(function(){
 						},
 						'storeFoesList': function(){
 							console.info('KOC storeFoesList function');
-							localStorage.setObject('koc_chat_foes_list_' + KOC.server, KOC.chat.foesList.join(','));
+							localStorage.setObject('koc_chat_foes_list_' + KOC.server, KOC.chat.foesList);
 						},
 					/* highlight friends and foes */
 						'highlightFriendsAndFoes': function( nbMsg ){
@@ -2114,7 +2123,8 @@ jQuery(document).ready(function(){
 
 						form += '<button class="add-wave">Ajouter une vague</button>'
 							 +	'<button class="launch">Lancer</button>'
-							 +	'<button class="save">Sauvegarder et Lancer</button>'
+							 +	'<button class="save">Sauvegarder</button>'
+							 +	'<button class="saveAndLaunch">Sauvegarder et Lancer</button>'
 							 +	'<button class="reset">Annuler</button>'
 							 +	'</div>';
 
@@ -2142,7 +2152,7 @@ jQuery(document).ready(function(){
 								var $waves = KOC.crestHunt.$form.find('.wave');
 								if( $waves.length ) $waves.remove();
 
-								KOC.crestHunt.$form.find('.add-wave, .save, .launch, .builds').show();
+								KOC.crestHunt.$form.find('.add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
 								KOC.crestHunt.addWaves(2, $(this).val());
 							})
@@ -2178,7 +2188,7 @@ jQuery(document).ready(function(){
 								}
 							})
 							//save
-							.on('click', '.save', function(){
+							.on('click', '.save, .saveAndLaunch', function(){
 								console.info('attack save click');
 								var result = KOC.crestHunt.planAttack();
 								if( result.errors.length ){
@@ -2209,7 +2219,7 @@ jQuery(document).ready(function(){
 
 									KOC.crestHunt.storeAttacks();
 
-									KOC.crestHunt.launchAttack( result.attack );
+									if( $(this).hasClass('saveAndLaunch') ) KOC.crestHunt.launchAttack( result.attack );
 								}
 							})
 							//attack plan delete
@@ -2233,7 +2243,7 @@ jQuery(document).ready(function(){
 									attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
 
 								if( attack ){
-									KOC.crestHunt.$form.find('.add-wave, .save, .launch').show();
+									KOC.crestHunt.$form.find('.add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
 									if( $this.hasClass('edit') ){
 										KOC.crestHunt.$form.find('.edit-attackId').val( attack.id );
@@ -2281,11 +2291,13 @@ jQuery(document).ready(function(){
 							})
 							//manual launch
 							.on('click', '.charge', function(){
-								var $li = $(this).parent(),
-									attackId = $li.data('attack'),
-									cityId = $li.data('city'),
-									attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
+								var $li = $(this).parent();
+								var attack = KOC.crestHunt.attacks[ $li.data('city') ][ $li.data('attack') ];
 								if( attack ){
+									attack.lastCoordIndex = 0;
+									attack.abort = 0;
+									attack.aborts = [];
+									attack.marching = [];
 									KOC.crestHunt.launchAttack( attack );
 								} else {
 									alert('Plan d\'attaque introuvable.')
@@ -2456,20 +2468,20 @@ jQuery(document).ready(function(){
 						}
 					},
 					'planAttack': function(){
-						console.info('KOC crestHunt buildRule function');
+						console.info('KOC crestHunt planAttack function');
 						var $waves = KOC.crestHunt.$form.find('.wave'),
 							$cityChoice = KOC.crestHunt.$form.find('.city-choice').filter(':checked'),
 							coords = $.trim( KOC.crestHunt.$form.find('textarea').val().replace(/\n/g, ' ') ),
 							errors = [],
 							regexp = /[^0-9, ]/,
-							rule = { 'waves':[], 'abort': 0, 'aborts': [], 'marching': {}, 'lastCoordIndex': 0 };
+							attack = { 'waves':[], 'abort': 0, 'aborts': [], 'marching': {}, 'lastCoordIndex': 0 };
 
 						//check form
 							//city
 							if( !$cityChoice.length ){
 								errors.push('Ville de départ obligatoire.');
 							} else {
-								rule.cityId = $cityChoice.val();
+								attack.cityId = $cityChoice.val();
 							}
 
 							//coords
@@ -2489,7 +2501,7 @@ jQuery(document).ready(function(){
 								if( wrongGPS ){
 									errors.push('Une des coordonnées est erronée.');
 								} else {
-									rule.coords = coords;
+									attack.coords = coords;
 								}
 							}
 
@@ -2519,10 +2531,10 @@ jQuery(document).ready(function(){
 										}
 									});
 
-								if( w.units.length ) rule.waves.push(w);
+								if( w.units.length ) attack.waves.push(w);
 							});
 
-							if( !rule.waves.length ){
+							if( !attack.waves.length ){
 								errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
 								errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
 							}
@@ -2531,9 +2543,7 @@ jQuery(document).ready(function(){
 								errors = errors.unique();
 							}
 
-						console.log(rule);
-						console.log(errors);
-						return {'attack': rule, 'errors': errors};
+						return {'attack': attack, 'errors': errors};
 					},
 					'launchAttack': function( attack ){
 						console.info('KOC crestHunt launchAttack function', attack);
@@ -2568,21 +2578,20 @@ jQuery(document).ready(function(){
 							if( attack.lastCoordIndex == attack.coords.length ) attack.lastCoordIndex = 0;
 
 							var coord = null;
-							for( var i = 0; i < attack.coords.length; i++ ){
+							for( var i = attack.lastCoordIndex; i < attack.coords.length; i++ ){
 								//check claim on the target
 								var params = window.g_ajaxparams,
-									gps = attack.coords[ attack.lastCoordIndex ].split(',');
+									gps = attack.coords[ i ].split(',');
 									blocks = [],
 									validCoord = false;
 
 								var x = Math.floor(parseInt(gps[0], 10) / 5) * 5;
 								var y = Math.floor(parseInt(gps[1], 10) / 5) * 5;
 
-								//@todo to test for block reduction
 								blocks.push("bl_" + x + "_bt_" + y);
-								blocks.push("bl_" + x + "_bt_" + (y + 5));
-								blocks.push("bl_" + (x + 5) + "_bt_" + y);
-								blocks.push("bl_" + (x + 5) + "_bt_" + (y + 5));
+								//blocks.push("bl_" + x + "_bt_" + (y + 5));
+								//blocks.push("bl_" + (x + 5) + "_bt_" + y);
+								//blocks.push("bl_" + (x + 5) + "_bt_" + (y + 5));
 
 								params.blocks = blocks.join(',');
 
@@ -2591,27 +2600,29 @@ jQuery(document).ready(function(){
 									async: false,
 									method: "post",
 									data: params,
+									dataType: 'json',
 									success: function(result){
 										if( result.data ){
 											var info = result.data['l_'+ gps[0] +'_t_'+ gps[1]];
 											if( info ){
-												if( info.tileType < 10 || info.tileType > 40 ){
-													attack.aborts.push('Coordonnées '+ attack.coords[ attack.lastCoordIndex ] +' n\'est pas une terre sauvage.');
+												console.log('fetchMapTiles info', info);
+												if( info.tileType != 10 && info.tileType != 11 && info.tileType != 20 && info.tileType != 30 && info.tileType != 40 ){
+													attack.aborts.push('Coordonnées '+ attack.coords[ i ] +' n\'est pas une terre sauvage.');
 													abort = true;
 												} else if( info.tileUserId != null ){
-													attack.aborts.push('Coordonnées '+ attack.coords[ attack.lastCoordIndex ] +' occupées.');
+													attack.aborts.push('Coordonnées '+ attack.coords[ i ] +' occupées.');
 													abort = true;
 												} else {
 													validCoord = true;
 												}
 											} else {
-												attack.aborts.push('Informations sur '+ attack.coords[ lastCoordIndex ] +' manquantes.');
+												attack.aborts.push('Informations sur '+ attack.coords[ i ] +' manquantes.');
 												abort = true;
 											}
 										}
 									},
 									error: function(){
-										attack.aborts.push('Informations sur '+ attack.coords[ lastCoordIndex ] +' introuvables.');
+										attack.aborts.push('Informations sur '+ attack.coords[ i ] +' introuvables.');
 										abort = true;
 									},
 								});
@@ -2624,6 +2635,7 @@ jQuery(document).ready(function(){
 									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 								}
 							}
+
 							if( !abort && coord ){
 								defaultParams.xcoord = coord[0];
 								defaultParams.ycoord = coord[1];
@@ -2686,6 +2698,7 @@ jQuery(document).ready(function(){
 														url: window.g_ajaxpath + "ajax/march.php" + window.g_ajaxsuffix,
 														async: false,
 														data: params,
+														dataType: 'json',
 														success: function(result){
 															if( result.ok ){
 																attack.marching.push(result.marchId);
@@ -2760,7 +2773,7 @@ jQuery(document).ready(function(){
 						}
 
 						attack.marching = [];
-						attack.abords = attack.abords.unique();
+						attack.aborts = attack.aborts.unique();
 
 						if( KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
 							KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
@@ -2776,7 +2789,7 @@ jQuery(document).ready(function(){
 					},
 					'resetForm': function(){
 						console.info('KOC crestHunt resetForm function');
-						KOC.crestHunt.$form.find('.add-wave, .save, .launch, .builds').hide();
+						KOC.crestHunt.$form.find('.add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
 						KOC.crestHunt.$form.find('.wave').remove();
 						var $inputs = KOC.crestHunt.$form.find('input');
 						$inputs.filter('[type="text"], [type="hidden"]').val('');
@@ -2785,7 +2798,7 @@ jQuery(document).ready(function(){
 						KOC.crestHunt.$form.find('.message').empty();
 					},
 					'deletePlan': function( attackId, cityId, save ){
-						console.info('KOC crestHunt deletePlan function');
+						console.info('KOC crestHunt deletePlan function', attackId, cityId, save);
 						delete KOC.crestHunt.attacks[ cityId ][ attackId ];
 
 						if( save ) KOC.crestHunt.storeAttacks();
@@ -2805,8 +2818,7 @@ jQuery(document).ready(function(){
 						var knights = window.seed.knights[ 'city' + city.id ];
 						for( var j = 0; j < attack.waves.length; j++ ){
 							var wave = attack.waves[j];
-
-							code += '<div class="wave">Vague '+ j + '&nbsp;:&nbsp;'
+							code += '<div class="wave">Vague '+ (j + 1) + '&nbsp;:&nbsp;'
 								 +  '<span class="knight">chevalier&nbsp;:&nbsp;'
 								 +  ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].knightLevel +', '+ KOC.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' )
 								 +  '</span>'
@@ -2826,9 +2838,8 @@ jQuery(document).ready(function(){
 						}
 
 						if( attack.aborts.length ){
-							code += '<div class="attack-errors">'
-								 +  attack.aborts.join('<br />');
-								 +  '</div>';
+							attack.aborts = attack.aborts.unique();
+							code += '<div class="attack-errors">' + attack.aborts.join('<br />') + '</div>';
 						}
 
 						code += '<button class="charge">Lancer</button>'
@@ -2840,6 +2851,7 @@ jQuery(document).ready(function(){
 						return code;
 					},
 					'refreshCityAttacks': function( cityId ){
+						console.info('KOC crestHunt refreshCityAttacks function', cityId);
 						var $ul = KOC.crestHunt.$list.find('ul').filter('[data-city='+ cityId +']');
 						$ul.empty();
 
@@ -2856,6 +2868,7 @@ jQuery(document).ready(function(){
 						$ul.append( code );
 					},
 					'addWaves': function( num, cityId ){
+						console.info('KOC crestHunt addWaves function', num, cityId);
 						if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
 						var $clone = KOC.crestHunt.$waveSkeleton.clone();
 						$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
@@ -3300,7 +3313,6 @@ jQuery(document).ready(function(){
 			}
 		}
 		load();
-
 	} catch (e) {
 		console.error(e);
 	}

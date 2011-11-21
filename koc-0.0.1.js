@@ -1,84 +1,100 @@
 console.info('koc start');
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
-		+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
-		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
-		+ "\n#koc-conf-panel { max-height: 700px; display: none; position: absolute; z-index: 99999; }"
-		+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
-		+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
-		+ "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }"
-		+ "\n.koc-conf-panel-tab.on:after, .koc-conf-panel-tab.off:after { content: ''; position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-width: 10px; border-style: solid; }"
-		+ "\n.koc-conf-panel-tab.on:after { border-color: transparent green green transparent; }"
-		+ "\n.koc-conf-panel-tab.off:after { border-color: transparent red red transparent; }"
-		+ "\n#koc-chat ul { padding-left: 0; }"
-		+ "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 5px; }"
-		+ "\n.ui-tabs-panel h2 p { float: right; font-size: 11px; margin: 0;}"
-		+ "\n.attack-form fieldset { clear: both; }"
-		+ "\n.attack-form fieldset small { display: block; }"
-		+ "\n.attack-form .builds { display: none; float: right; max-width: 200px; }"
-		+ "\n.attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }"
-		+ "\n.attack-form { counter-reset: waves; }"
-		+ "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }"
-		+ "\n.attack-form .wave label { display: inline-block; }"
-		+ "\n.attack-form .wave > label, .attack-form .unit-block label:first-child { min-width: 80px; }"
-		+ "\n.attack-form .unit-block select + label { margin-left: 10px; }"
-		+ "\n.attack-form .unit-qty { width: 60px; }"
-		+ "\n.attack-form textarea { width: 150px; height: 120px; }"
-		+ "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }"
-		+ "\n.attack-list li { display: block; margin-bottom: 8px; }"
-		+ "\n.attack-list li span { display: inline-block; padding-right: 5px; }"
-		+ "\n.attack-list li img { width: 18px; }"
-		+ "\n.attack-list .attack-errors { display: block; }"
-		+ "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }"
+	+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
+	+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
+	+ "\n#koc-conf-panel { max-height: 700px; display: none; position: absolute; z-index: 99999; }"
+	+ "\n#koc-conf-panel label + select { margin-left: 5px; }"
+	+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
+	+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
+	+ "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }"
+	+ "\n.koc-conf-panel-tab.on:after, .koc-conf-panel-tab.off:after { content: ''; position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-width: 10px; border-style: solid; }"
+	+ "\n.koc-conf-panel-tab.on:after { border-color: transparent green green transparent; }"
+	+ "\n.koc-conf-panel-tab.off:after { border-color: transparent red red transparent; }"
+	+ "\n#koc-options p { margin: 3px 0; }"
+	+ "\n#koc-chat ul { padding-left: 0; }"
+	+ "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 5px; }"
+	+ "\n.ui-tabs-panel h3 p { float: right; font-size: 11px; margin: 0;}"
+	+ "\n.attack-form fieldset { clear: both; }"
+	+ "\n.attack-form fieldset small { display: block; }"
+	+ "\n.attack-form .builds { display: none; float: right; max-width: 200px; }"
+	+ "\n.attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }"
+	+ "\n.attack-form { counter-reset: waves; }"
+	+ "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }"
+	+ "\n.attack-form .wave label { display: inline-block; }"
+	+ "\n.attack-form .wave > label, .attack-form .unit-block label:first-child { min-width: 80px; }"
+	+ "\n.attack-form .unit-block select + label { margin-left: 10px; }"
+	+ "\n.attack-form .unit-qty { width: 60px; }"
+	+ "\n.attack-form textarea { width: 150px; height: 120px; }"
+	+ "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }"
+	+ "\n.attack-list li { display: block; margin-bottom: 8px; }"
+	+ "\n.attack-list li span { display: inline-block; padding-right: 5px; }"
+	+ "\n.attack-list li img { width: 18px; }"
+	+ "\n.attack-list .attack-errors { display: block; }"
+	+ "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }"
 ;
 
 var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }"
-		+ "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }"
-		+ "\n.kocmain .mod_comm .comm_body { top: 20px; }"
-		+ "\n.kocmain .mod_comm .comm_body form { height: 25px; }"
-		+ "\n.kocmain .mod_comm .mod_comm_forum { padding-left: 0; }"
-		+ "\n.kocmain .mod_comm .comm_global .postaction .button20 { top: 2px; }"
-		+ "\n.kocmain .mod_comm .comm_global .postaction { width: auto; padding: 3px 5px; }"
-		+ "\n.kocmain .mod_comm .comm_global .postaction #mod_comm_input { position: absolute; top: 5px; left: 5px; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist { width: auto; margin-left: 0; border: none; }"
-		+ "\n.kocmain .mod_comm .kocMerlinSmall { float: right; padding: 4px; font-size: 10px; }"
-		+ "\n.kocmain .mod_comm .seltab1 a.tab2, .kocmain .mod_comm .seltab2 a.tab1 { height: 20px; line-height: 20px; padding: 0 5px; }"
-		+ "\n.kocmain .mod_comm .seltab1 a.tab1, .kocmain .mod_comm .seltab2 a.tab2 { background: #FCF8DD; height: 20px; line-height: 20px; padding-right: 5px; }"
-		+ "\n.kocmain .mod_comm .seltab1 a.tab1 span, .kocmain .mod_comm .seltab2 a.tab2 span { background: none; height: 20px; line-height: 20px; padding-left: 5px; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content { width: auto; float: none; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info { width: auto; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info .nm { padding-left: 18px; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info b { display: none; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .tx { width: auto; float: none; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .flag { display: none; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap img { margin-right: 0; width: 15px; height: 15px; float: none; position: absolute; top: 2px; left: 2px; }"
+	+ "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }"
+	+ "\n.kocmain .mod_comm .comm_body { top: 20px; }"
+	+ "\n.kocmain .mod_comm .comm_body form { height: 25px; }"
+	+ "\n.kocmain .mod_comm .mod_comm_forum { padding-left: 0; }"
+	+ "\n.kocmain .mod_comm .comm_global .postaction .button20 { top: 2px; }"
+	+ "\n.kocmain .mod_comm .comm_global .postaction { width: auto; padding: 3px 5px; }"
+	+ "\n.kocmain .mod_comm .comm_global .postaction #mod_comm_input { position: absolute; top: 5px; left: 5px; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist { width: auto; margin-left: 0; border: none; }"
+	+ "\n.kocmain .mod_comm .kocMerlinSmall { float: right; padding: 4px; font-size: 10px; }"
+	+ "\n.kocmain .mod_comm .seltab1 a.tab2, .kocmain .mod_comm .seltab2 a.tab1 { height: 20px; line-height: 20px; padding: 0 5px; }"
+	+ "\n.kocmain .mod_comm .seltab1 a.tab1, .kocmain .mod_comm .seltab2 a.tab2 { background: #FCF8DD; height: 20px; line-height: 20px; padding-right: 5px; }"
+	+ "\n.kocmain .mod_comm .seltab1 a.tab1 span, .kocmain .mod_comm .seltab2 a.tab2 span { background: none; height: 20px; line-height: 20px; padding-left: 5px; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content { width: auto; float: none; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info { width: auto; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info .nm { padding-left: 18px; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info b { display: none; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .tx { width: auto; float: none; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .flag { display: none; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap img { margin-right: 0; width: 15px; height: 15px; float: none; position: absolute; top: 2px; left: 2px; }"
 ;
 var kocChatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
 
 var kocChatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: #C3ECE4; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }"
-		+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: #D5D2F7; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }"
+	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: #D5D2F7; }"
 ;
 
 var kocChatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: #FAE4E4; }";
 var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
 
 var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 99998; display: none; }"
-		+ "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }"
-		+ "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }"
-		+ "\n#koc-overview .wrap { width: 100%; overflow: hidden; }"
-		+ "\n#koc-overview table { width: 100%; float: left; }"
-		+ "\n#koc-overview thead tr { display: block; position: relative; }"
-		+ "\n#koc-overview tbody { overflow: auto; display: block; width: 100%; }"
-		+ "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F8E0A8; }"
-		+ "\n#koc-overview tr td.sum { background-color: #D9F4F1; }"
-		+ "\n#koc-overview img { width:20px; }"
-		+ "\n#koc-overview tr td.sum, #koc-overview tr td.sum ~ td { text-align: right; }"
-		+ "\n#koc-overview th[colspan] { width: auto; }"
-		+ "\n#koc-overview .img { width: 20px; }"
-		+ "\n#koc-overview .label { width: 100px; text-overflow: ellipsis; }"
-		+ "\n#koc-overview .sum { width: 55px; }"
-		+ "\n#koc-overview thead tr th:last-child, #koc-overview thead tr td:last-child { width: auto; }"
-		+ "\n#koc-overview .sizer td, #koc-overview .sizer td.sum, #koc-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }"
+	+ "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }"
+	+ "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }"
+	+ "\n#koc-overview .wrap { width: 100%; overflow: hidden; }"
+	+ "\n#koc-overview table { width: 100%; float: left; }"
+	+ "\n#koc-overview thead tr { display: block; position: relative; }"
+	+ "\n#koc-overview tbody { overflow: auto; display: block; width: 100%; }"
+	+ "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F8E0A8; }"
+	+ "\n#koc-overview tr td.sum { background-color: #D9F4F1; }"
+	+ "\n#koc-overview img { width:20px; }"
+	+ "\n#koc-overview tr td.sum, #koc-overview tr td.sum ~ td { text-align: right; }"
+	+ "\n#koc-overview th[colspan] { width: auto; }"
+	+ "\n#koc-overview .img { width: 20px; }"
+	+ "\n#koc-overview .label { width: 100px; text-overflow: ellipsis; }"
+	+ "\n#koc-overview .sum { width: 55px; }"
+	+ "\n#koc-overview thead tr th:last-child, #koc-overview thead tr td:last-child { width: auto; }"
+	+ "\n#koc-overview .sizer td, #koc-overview .sizer td.sum, #koc-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }"
+;
+
+var kocNotepadCss = "#koc-notepad { padding: 2px 3px; }"
+	+ "\n#koc-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 99998; display: none; }"
+	+ "\n#koc-notepad .ui-icon-close { float: right; cursor: pointer; }"
+	+ "\n#koc-notepad .wrap { width: 100%; overflow: hidden; }"
+	+ "\n#koc-notepad textarea { width: 100%; height: 150px; }"
+	+ "\n#koc-notepad .wrap input + label { display: block; }"
+	+ "\n#koc-notepad .charsLeft { float: right; }"
+	+ "\n#koc-notepad ul { display: block; -moz-column-count: 3; -moz-column-gap: 1em; -webkit-column-count: 3; -webkit-column-gap: 1em; column-count: 3; column-gap: 1em; }"
+	+ "\n#koc-notepad .handle { margin-top: 0; }"
+	+ "\n#koc-notepad li .ui-icon { display: inline-block; }"
+	+ "\n#koc-notepad li { white-space: nowrap; }"
+	+ "\n#koc-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }"
 ;
 
 /*
@@ -160,7 +176,7 @@ if(window.Prototype) {
 
 		var KOC = {
 			'server': null,
-			'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt'],
+			'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt', 'notepad'],
 			'modulesLabel': {
 				'crestHunt': 'Armoiries',
 			},
@@ -463,9 +479,6 @@ if(window.Prototype) {
 						var mod = KOC.modules[i];
 						if( typeof KOC[mod].modPanel == 'function' ){
 							var active = this.conf[mod].active;
-							if( mod == 'crestHunt' ){
-								active = this.conf[mod].automatic;
-							}
 							var name = ( KOC.modulesLabel[mod] ? KOC.modulesLabel[mod] : mod.capitalize() );
 							lis += '<li class="koc-conf-panel-tab '+ (active ? 'on' : 'off') +'">'
 								 + '<a href="#koc-'+ mod +'">'+ name +'</a>'
@@ -494,26 +507,23 @@ if(window.Prototype) {
 							if( $this.is(':checked') ){
 								status = 1;
 								if( func == 'active' ) func = 'on';
-								//else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'On';
+								else func += 'On';
 							} else {
 								status = 0;
 								if( func == 'active' ) func = 'off';
-								//else if( typeof KOC[ mod ][ func ] != 'function' ) func += 'Off';
+								else func += 'Off';
 							}
 
 							KOC.conf[ mod ][ infos[1] ] = status;
 							KOC.shared.storeConf();
 
 							if( typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
-							else console.warn('not a function', mod, func, typeof KOC[ mod ][ func ]);
+							else console.warn('not a function', mod, func);
 						})
 						.on('change', '.conf-choice', function(){
 							var $this = $(this),
-								infos = this.id.split('-'),
-								mod = infos[0],
-								option = infos[1];
-
-							KOC.conf[ mod ][ option ] = $this.val();
+								infos = this.id.split('_');
+							KOC.conf[ infos[0] ][ infos[1] ] = $this.val();
 							KOC.shared.storeConf();
 						})
 						.on('click', '.conf-action', function(e){
@@ -565,7 +575,7 @@ if(window.Prototype) {
 								KOC.shared.storeConf();
 
 								//dynamic generation of the panel on first call
-								if( !$(ui.panel).find('h2').length ){
+								if( !$(ui.panel).find('h3').length ){
 									var mod = ui.panel.id.split('-')[1];
 									KOC[mod].modPanel();
 								}
@@ -598,6 +608,7 @@ if(window.Prototype) {
 					});
 
 					$body.append( $confPanel );
+					$('#koc-options').accordion({collapsible: true, autoHeight: false});
 
 					$('<div id="koc-buttons">')
 						.html( $kocConfPanelToggle )
@@ -615,20 +626,14 @@ if(window.Prototype) {
 						});
 					}
 
+					for( var i = 0; i < KOC.modules.length; i++ ){
+						var mod = KOC.modules[i];
+						if( typeof KOC[ mod ].modPanel == 'function' ) KOC[ mod ].modPanel();
+					}
+
+
 					if( KOC.conf.confPanel.visible ){
-						if( KOC.conf.confPanel.selected > 0 ){
-							var mod = KOC.$confPanel.find('.ui-tabs-selected').find('a').attr('href').split('-')[1];
-							console.time('confPanel memorized tab load');
-							if( typeof KOC[ mod ].modPanel == 'function' ) KOC[ mod ].modPanel();
-							console.timeEnd('confPanel memorized tab load');
-						}
-
 						KOC.$confPanel.show();
-
-						KOC.$confPanelTabs.css({
-							'max-width': KOC.$confPanel.innerWidth() - 10,
-							'max-height': KOC.$confPanel.innerHeight() - KOC.$confPanelNav.height() - 15,
-						});
 					}
 				},
 			/* SHARED */
@@ -645,12 +650,17 @@ if(window.Prototype) {
 					},
 					'optionPanel': function($optionsSection){
 						console.info('KOC shared optionPanel function');
-						$optionsSection.append( KOC.shared.generateButton('shared', 'cleanLocalStorage', 'Remise à zèro des données persistantes') );
+						var code = '<h3>Global</h3>'
+							+ '<div>'
+							+ KOC.shared.generateButton('shared', 'cleanLocalStorage', 'Remise à zèro des données persistantes')
+							+ '</div>';
+						$optionsSection.append( code );
 						for( var i = 0; i < KOC.modules.length; i++ ){
 							KOC[ KOC.modules[i] ].confPanel( $optionsSection );
 						}
 					},
 					'getServer': function(){
+						console.info('koc shared getServer function');
 						return window.domainName;
 					},
 					'getCities': function(){
@@ -783,7 +793,7 @@ if(window.Prototype) {
 							for( var i = 0; i < values.length; i++ ){
 								if( i > 0 ) code += '<br />';
 								code += '<input type="radio" class="conf-toggle" id="'+ module +'-'+ values[i] +'" name="'+ module + '_' + name +'" '+ (selected[i] == 1 ? 'checked' : '') +' />'
-									  + '<label for="'+ module +'-'+ values[i] +'">'+ labels[i] +'</label>';
+									 +  '<label for="'+ module +'-'+ values[i] +'">'+ labels[i] +'</label>';
 							}
 						}
 						code += '</p>';
@@ -897,12 +907,12 @@ if(window.Prototype) {
 					'privacyLevelList': {'values': [80, 50, 40, 10], 'labels': ['public', 'amis d\'amis', 'amis', 'privé']},
 					'confPanel': function( $section ){
 						console.info('KOC fbWallPopup confPanel function');
-						var code = '<p>'
-							+ '<h2>Popup facebook pour poster sur le mur</h2>'
+						var code = '<h3>Popup facebook pour poster sur le mur</h3>'
+							+ '<div>'
 							+ KOC.shared.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOC.conf.fbWallPopup.active)
 							+ KOC.shared.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOC.conf.fbWallPopup.cancel, KOC.conf.fbWallPopup.post])
 							+ KOC.shared.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilité', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList)
-							+ '</p>';
+							+ '</div>';
 
 						$section.append( code );
 					},
@@ -933,8 +943,8 @@ if(window.Prototype) {
 					'leaders': {},
 					'confPanel': function( $section ){
 						console.info('KOC chat confPanel function');
-						var code = '<p>'
-							+ '<h2>Chat</h2>'
+						var code = '<h3>Chat</h3>'
+							+ '<div>'
 							+ KOC.shared.generateCheckbox('chat', 'active', 'Activer le module', KOC.conf.chat.active)
 							+ KOC.shared.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable)
 							+ KOC.shared.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp)
@@ -943,7 +953,9 @@ if(window.Prototype) {
 							+ KOC.shared.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie')
 							+ KOC.shared.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends)
 							+ KOC.shared.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes)
-							+ '</p>';
+							+ KOC.shared.generateButton('chat', 'cleanFriendsList', 'Vider la liste d\'amis')
+							+ KOC.shared.generateButton('chat', 'cleanFoesList', 'Vider la liste d\'ennemis')
+							+ '</div>';
 
 						$section.append( code );
 					},
@@ -961,12 +973,12 @@ if(window.Prototype) {
 							foes += '<li><a href="#">'+ KOC.chat.foesList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 						}
 
-						$section.append('<h2>Liste d\'amis</h2>'
+						$section.append('<h3>Liste d\'amis</h3>'
 								+ '<p><label for="koc-friend">Joueur : </label>'
 								+ '<input type="text" name="koc-friend" id="koc-friend" />'
 								+ '<button rel="friends">Ajouter</button></p>'
 								+ '<ul class="koc-chat-list" rel="friends">' + friends + '</ul>'
-								+ '<h2>Liste d\'ennemis</h2>'
+								+ '<h3>Liste d\'ennemis</h3>'
 								+ '<p><label for="koc-foe">Joueur : </label>'
 								+ '<input type="text" name="koc-foe" id="koc-foe" />'
 								+ '<button rel="foes">Ajouter</button></p>'
@@ -1074,7 +1086,7 @@ if(window.Prototype) {
 					},
 					'off': function(){
 						console.info('KOC chat off function');
-						KOC.chat.movableOff();
+						KOC.chat.moveableOff();
 						KOC.chat.cleanHelpOff();
 						KOC.chat.highlightLeadersOff();
 						KOC.chat.highlightFriendsOff();
@@ -1082,7 +1094,7 @@ if(window.Prototype) {
 					},
 					/* moveable */
 						'moveableOn': function(){
-							console.info('KOC chat movableOn function');
+							console.info('KOC chat moveableOn function');
 							$head.append( $('<style id="koc-chat-moveable">').text(kocChatMoveableCss) );
 
 							$chat
@@ -1196,6 +1208,7 @@ if(window.Prototype) {
 						},
 					/* highlight leaders */
 						'highlightLeaders': function( $targetChat, nbMsg ){
+							console.info('koc chat highlightLeaders function');
 							if( $targetChat == null ){
 								KOC.chat.highlightLeadersReset();
 								KOC.chat.highlightLeaders( $chatAlliance, 0 );
@@ -1216,8 +1229,9 @@ if(window.Prototype) {
 							}
 						},
 						'getLeadersList': function(){
+							console.info('koc chat getLeadersList function');
 							//ajax call to get the leaders, highlighting will be done in the ajax response listener
-							getDirectoryTabAllianceMembers();
+							window.getDirectoryTabAllianceMembers();
 						},
 						'highlightLeadersOn': function(){
 							console.info('KOC chat highlightLeadersOn function');
@@ -1244,6 +1258,12 @@ if(window.Prototype) {
 							console.info('KOC storeFriendsList function');
 							localStorage.setObject('koc_chat_friends_list_' + KOC.server, KOC.chat.friendsList);
 						},
+						'cleanFriendsList': function(){
+							console.info('KOC cleanFriendsList function');
+							KOC.chat.friendsList = [];
+							localStorage.setObject('koc_chat_friends_list_' + KOC.server, '');
+							$('#koc-chat').find('ul').filter('[rel=friends]').empty();
+						},
 					/* highlight foes */
 						'highlightFoesOn': function(){
 							console.info('KOC chat highlightFoesOn function');
@@ -1257,6 +1277,12 @@ if(window.Prototype) {
 						'storeFoesList': function(){
 							console.info('KOC storeFoesList function');
 							localStorage.setObject('koc_chat_foes_list_' + KOC.server, KOC.chat.foesList);
+						},
+						'cleanFoesList': function(){
+							console.info('KOC cleanFoesList function');
+							KOC.chat.foesList = [];
+							localStorage.setObject('koc_chat_foes_list_' + KOC.server, '');
+							$('#koc-chat').find('ul').filter('[rel=foes]').empty();
 						},
 					/* highlight friends and foes */
 						'highlightFriendsAndFoes': function( nbMsg ){
@@ -1316,12 +1342,12 @@ if(window.Prototype) {
 					},
 					'confPanel': function( $section ){
 						console.info('KOC overview confPanel function');
-						var code = '<p>'
-							+ '<h2>Vue globale</h2>'
+						var code = '<h3>Vue globale</h3>'
+							+ '<div>'
 							+ KOC.shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable])
 							+ KOC.shared.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position')
 							+ KOC.shared.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions')
-							+ '</p>';
+							+ '</div>';
 
 						$section.append( code );
 					},
@@ -1915,6 +1941,7 @@ if(window.Prototype) {
 						});
 					},
 					'getCityColWidth': function( tableWidth ){
+						console.info('koc overview getCityColWidth function');
 						var cityColWidth = tableWidth - 25;
 						cityColWidth -= KOC.overview.$cityTds.eq(0).width();
 						cityColWidth -= KOC.overview.$cityTds.eq(1).width();
@@ -1925,7 +1952,7 @@ if(window.Prototype) {
 					},
 					/* moveable */
 						'moveableOn': function(){
-							console.info('KOC overview movableOn function');
+							console.info('KOC overview moveableOn function');
 							KOC.overview.replaceOff();
 
 							KOC.$overview
@@ -2016,13 +2043,13 @@ if(window.Prototype) {
 						},
 						'resetPlacement': function(){
 							console.info('KOC overview resetPlacement function');
-							KOC.$overview.css( KOC.overview.conf.position );
+							KOC.$overview.css( KOC.overview.options.position );
 							KOC.conf.overview.position = KOC.overview.options.position;
 							KOC.shared.storeConf();
 						},
 						'resetDimensions': function(){
 							console.info('KOC overview resetDimensions function');
-							KOC.$overview.css( KOC.overview.conf.size );
+							KOC.$overview.css( KOC.overview.options.size );
 							KOC.conf.overview.size = KOC.overview.options.size;
 							KOC.shared.storeConf();
 						},
@@ -2031,8 +2058,8 @@ if(window.Prototype) {
 							console.info('KOC overview replaceOn function');
 							KOC.overview.moveableOff();
 
-							var $b = $('#kocmain_bottom'),
-								p = $b.offset();
+							var $b = $('#kocmain_bottom');
+							var p = $b.offset();
 
 							KOC.$overview.css({
 								'height': $b.outerHeight(),
@@ -2067,18 +2094,20 @@ if(window.Prototype) {
 					'attacks': {}, //by city id and attack id
 					'confPanel': function( $section ){
 						console.info('KOC crestHunt confPanel function');
-						/*var code = '<p>'
-							+ '<h2>Armoiries</h2>'
+						var code = '<h3>Armoiries</h3>'
+							+ '<div>'
 							+ KOC.shared.generateCheckbox('crestHunt', 'active', 'Activer le module', KOC.conf.crestHunt.active)
-							+ '</p>';
+							+ KOC.shared.generateCheckbox('crestHunt', 'automatic', 'Lancer les attaques automatiques', KOC.conf.crestHunt.automatic)
+							+ KOC.shared.generateButton('crestHunt', 'deleteAllPlans', 'Supprimer toutes les attaques enregistrées')
+							+ '</div>';
 
-						$section.append( code );*/
+						$section.append( code );
 					},
 					'modPanel': function(){
 						console.info('KOC crestHunt modPanel function');
 						var $section = KOC.$confPanel.find('#koc-crestHunt').html('');
 
-						var form = '<h2>Configurer une attaque</h2>'
+						var form = '<h3>Configurer une attaque</h3>'
 							+ '<div class="attack-form">'
 							+ '<ul class="message"></ul>'
 							+ '<input type="hidden" class="edit-attackId" name="attackId" value="" />'
@@ -2129,9 +2158,9 @@ if(window.Prototype) {
 							 +	'</div>';
 
 						//attacks list
-						var list = '<h2>'
+						var list = '<h3>'
 							 +  KOC.shared.generateCheckbox('crestHunt', 'automatic', 'mode automatique', KOC.conf.crestHunt.automatic)
-							 +  'Attaques enregistrées</h2>'
+							 +  'Attaques enregistrées</h3>'
 							 +  '<div class="attack-list">';
 
 						for( var i = 0; i < KOC.cities.length; i++ ){
@@ -2144,7 +2173,7 @@ if(window.Prototype) {
 						$section.append( form + list )
 							//automatic toggle (function call will be done by $confPanel event listener
 							.on('change', '.conf-toggle', function(){
-								KOC.$confPanelNav.find('#koc-crestHunt').parent().toggleClass('on off');
+								//KOC.$confPanelNav.find('#koc-crestHunt').parent().toggleClass('on off');
 								KOC.crestHunt.$list.find('.charge').toggle();
 							})
 							//load knights and units on city change )
@@ -2180,11 +2209,17 @@ if(window.Prototype) {
 							//launch
 							.on('click', '.launch', function(){
 								console.info('attack launch click');
-								var result = KOC.crestHunt.planAttack();
-								if( result.errors.length ){
-									KOC.crestHunt.$form.find('.message').html( '<li>' + errors.join('</li><li>') + '</li>' );
+								if( KOC.conf.crestHunt.active ){
+									var result = KOC.crestHunt.planAttack();
+									if( result.errors.length ){
+										KOC.crestHunt.$form.find('.message').html( '<li>' + errors.join('</li><li>') + '</li>' );
+									} else {
+										var d = new Date();
+										attack.id = Math.floor(d.getTime() / 1000);
+										KOC.crestHunt.launchAttack( result.attack );
+									}
 								} else {
-									KOC.crestHunt.launchAttack( result.attack );
+									alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
 								}
 							})
 							//save
@@ -2291,16 +2326,24 @@ if(window.Prototype) {
 							})
 							//manual launch
 							.on('click', '.charge', function(){
-								var $li = $(this).parent();
-								var attack = KOC.crestHunt.attacks[ $li.data('city') ][ $li.data('attack') ];
-								if( attack ){
-									attack.lastCoordIndex = 0;
-									attack.abort = 0;
-									attack.aborts = [];
-									attack.marching = [];
-									KOC.crestHunt.launchAttack( attack );
+								if( KOC.conf.crestHunt.active ){
+									if( KOC.conf.crestHunt.automatic ){
+										var $li = $(this).parent();
+										var attack = KOC.crestHunt.attacks[ $li.data('city') ][ $li.data('attack') ];
+										if( attack ){
+											attack.lastCoordIndex = 0;
+											attack.abort = 0;
+											attack.aborts = [];
+											attack.marching = [];
+											KOC.crestHunt.launchAttack( attack );
+										} else {
+											alert('Plan d\'attaque introuvable.')
+										}
+									} else {
+										alert('Le mode automatic est désactivé. Les lancements d\'attaques sauvegardées sont bloqués.');
+									}
 								} else {
-									alert('Plan d\'attaque introuvable.')
+									alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
 								}
 							})
 							//attack templates
@@ -2408,11 +2451,6 @@ if(window.Prototype) {
 					},
 					'on': function(){
 						console.info('KOC crestHunt on function');
-
-						if( KOC.conf.crestHunt.automatic ){
-							KOC.crestHunt.automaticOn();
-						}
-
 						try{
 							var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
 							if( persistentCrestHuntAttacks ){
@@ -2427,20 +2465,18 @@ if(window.Prototype) {
 						} catch(e){
 							console.error(e);
 						}
+
+						if( KOC.conf.crestHunt.automatic ){
+							KOC.crestHunt.automaticOn();
+						}
 					},
 					'off': function(){
 						console.info('KOC crestHunt off function');
-
-						KOC.conf.crestHunt.active = 0;
 
 						KOC.crestHunt.automaticOff();
 					},
 					'automaticOn': function(){
 						console.info('KOC crestHunt automaticOn function');
-
-						KOC.conf.crestHunt.automatic = 1;
-						KOC.shared.storeConf();
-
 						//launching stored attacks
 						for( var c in KOC.crestHunt.attacks ){
 							if( KOC.crestHunt.attacks.hasOwnProperty(c) ){
@@ -2455,9 +2491,6 @@ if(window.Prototype) {
 					},
 					'automaticOff': function(){
 						console.info('KOC crestHunt automaticOff function');
-
-						KOC.conf.crestHunt.automatic = 0;
-						KOC.shared.storeConf();
 					},
 					'storeAttacks': function(){
 						console.info('KOC crestHunt storeAttacks function');
@@ -2547,10 +2580,20 @@ if(window.Prototype) {
 					},
 					'launchAttack': function( attack ){
 						console.info('KOC crestHunt launchAttack function', attack);
+						if( !KOC.conf.crestHunt.active ){
+							return;
+						}
+
+						if( KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] && !KOC.conf.crestHunt.automatic ){
+							return;
+						}
+
 						if( attack.abort > 10 ){
 							attack.aborts.push('Trop d\'erreurs détectées.');
-							KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
-							KOC.crestHunt.storeAttacks();
+							if( KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
+								KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
+								KOC.crestHunt.storeAttacks();
+							}
 							return;
 						}
 						var abort = false;
@@ -2803,6 +2846,13 @@ if(window.Prototype) {
 
 						if( save ) KOC.crestHunt.storeAttacks();
 					},
+					'deleteAllPlans': function(){
+						console.info('KOC crestHunt deleteAllPlans function');
+						KOC.crestHunt.attacks = {};
+						KOC.crestHunt.storeAttacks();
+
+						$('#koc-crestHunt').find('.attack-list').find('ul').empty();
+					},
 					'attackInfo': function( attack, city ){
 						console.info('KOC crestHunt attackInfo function', attack, city);
 						if( city == null ){
@@ -2902,20 +2952,219 @@ if(window.Prototype) {
 						});
 					},
 				},
+			/* NOTEPAD */
+				'notepad':{
+					'options': {
+						'active': 0,
+						'visible': 0,
+						'moveable': 1,
+						'position': {'top': 10, 'left': 10},
+						'size': {'width': 200, 'height': 200},
+					},
+					'stored': ['notes'],
+					'notes': {},
+					'confPanel': function( $section ){
+						console.info('KOC notepad confPanel function');
+						var code = '<h3>Bloc-note</h3>'
+							+ '<div>'
+							+ KOC.shared.generateButton('notepad', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions')
+							+ KOC.shared.generateButton('notepad', 'clean', 'Supprimer les notes')
+							+ '</div>';
+
+						$section.append( code );
+					},
+					'on': function(){
+						console.info('KOC notepad on function');
+						$head.append( $('<style id="koc-notepad-css">').text(kocNotepadCss) );
+
+						try{
+							var notes = localStorage.getObject('koc_notepad_notes_' + KOC.server);
+							if( notes ){
+								KOC.notepad.notes = notes;
+							}
+						} catch(e){
+							alert(e);
+						}
+
+						var $notepad = $('<div id="koc-notepad" class="ui-widget ui-widget-content ui-corner-all">');
+
+						var code = '<h3 class="handle">Bloc Note</h3><div class="wrap">'
+								 + '<label for="koc-notepad-note-name">Nom de la note&nbsp;:&nbsp;</label>'
+								 + '<input type="text" id="koc-notepad-note-name" />'
+								 + '<label for="koc-notepad-note-text"><span class="charsLeft">1000 caractères restant</span>Contenu&nbsp;:&nbsp;</label>'
+								 + '<textarea id="koc-notepad-note-text"></textarea>'
+								 + '<br /><button class="save">Enregistrer</button>'
+								 + '<button class="cancel">Annuler</button>';
+
+						code += '<h3>Notes :</h3><ul class="notes">';
+						for( var n in KOC.notepad.notes ){
+							if( KOC.notepad.notes.hasOwnProperty(n) ){
+								var note = KOC.notepad.notes[n];
+								code += '<li><button data-id="'+ n +'">'+ note.name +'</button><span class="ui-icon ui-icon-trash"></span></li>';
+							}
+						}
+						code += '</ul>';
+
+						$notepad
+							.append( '<span class="ui-icon ui-icon-close"></span>' )
+							.append( code )
+							.draggable({
+								'helper': "original",
+								'handle': '.handle',
+								'stop': function(event, ui){
+									KOC.conf.notepad.position = ui.position;
+									KOC.shared.storeConf();
+								}
+							})
+							.resizable({
+								'minWidth': 200,
+								'minHeight': 200,
+								'stop': function(event, ui){
+									KOC.conf.notepad.size = ui.size;
+									KOC.shared.storeConf();
+								}
+							})
+							.css({
+								'top': KOC.conf.notepad.position.top,
+								'left': KOC.conf.notepad.position.left,
+								'width': KOC.conf.notepad.size.width,
+								'height': KOC.conf.notepad.size.height,
+							})
+							.on('click', '.ui-icon-close', function(){
+								KOC.$notepad.hide();
+								KOC.conf.notepad.visible = 0;
+								KOC.shared.storeConf();
+							})
+							.on('click', '.save', function(){
+								var name = $.trim( KOC.notepad.$name.val() ),
+									text = $.trim( KOC.notepad.$textarea.val() );
+
+								if( name.length ){
+									if( text.length > 1000 ){
+										alert('Texte trop long.');
+									} else {
+										var d = new Date(),
+											id = Math.floor( d.getTime() / 1000 );
+										KOC.notepad.notes[ id ] = {'name': name, 'text': text};
+										KOC.notepad.storeNotes();
+
+										KOC.notepad.$notes.append( '<li><button data-id="'+ id +'">'+ name +'</button><span class="ui-icon ui-icon-trash"></span></li>' );
+									}
+								} else {
+									alert('Nom de la note invalide.');
+								}
+							})
+							.on('click', '.cancel', function(){
+								KOC.notepad.$name.val('');
+								KOC.notepad.$textarea.val('');
+							})
+							.on('click', '.notes button', function(){
+								KOC.notepad.load( $(this).data('id') );
+							})
+							.on('click', '.notes .ui-icon-trash', function(){
+								var $this = $(this);
+								KOC.notepad.delete( $this.siblings().data('id') );
+								$this.parent().remove();
+							});
+
+						$body.append( $notepad );
+
+						KOC.$notepad =  $('#koc-notepad');
+						KOC.notepad.$notes = KOC.$notepad.find('.notes');
+						KOC.notepad.$wrap = KOC.$notepad.find('.wrap');
+						KOC.notepad.$span = KOC.notepad.$wrap.find('pre span');
+						KOC.notepad.$name = $('#koc-notepad-note-name');
+						KOC.notepad.$textarea = $('#koc-notepad-note-text');
+						KOC.notepad.$charsLeft = KOC.$notepad.find('.charsLeft');
+
+						KOC.notepad.$textarea[0].addEventListener('input', function(){
+								var text = KOC.notepad.$textarea.val(),
+									l = 1000 - parseFloat(text.length);
+								if( l < 2 ){
+									KOC.notepad.$charsLeft.text(l + ' caractère restant');
+								} else {
+									KOC.notepad.$charsLeft.text(l + ' caractères restant');
+								}
+						}, false);
+
+						if( KOC.conf.notepad.visible ){
+							KOC.$notepad.show();
+						}
+
+						var $kocNotepadToggle = $('<button id="koc-notepad-toggle">').text('Bloc Note');
+						$kocNotepadToggle.click(function(){
+							console.info('$kocNotepadToggle click');
+							KOC.$notepad.toggle();
+
+							KOC.conf.notepad.visible = (KOC.$notepad.is(':visible') ? 1 : 0);
+							KOC.shared.storeConf();
+						});
+
+						KOC.$buttons.append($kocNotepadToggle);
+					},
+					'off': function(){
+						console.info('KOC notepad off function');
+						$('#koc-notepad-toggle').remove();
+						$('#koc-notepad-css').remove();
+					},
+					'resetPositionAndDimension': function(){
+						console.info('KOC notepad resetPositionAndDimension function');
+
+						KOC.$notepad.css({
+							top: KOC.notepad.options.position.top,
+							left: KOC.notepad.options.position.left,
+							width: KOC.notepad.options.size.width,
+							height: KOC.notepad.options.size.height,
+						});
+
+						KOC.conf.notepad.position.top = KOC.notepad.options.position.top;
+						KOC.conf.notepad.position.left = KOC.notepad.options.position.left;
+						KOC.conf.notepad.size.width = KOC.notepad.options.size.width;
+						KOC.conf.notepad.size.height = KOC.notepad.options.size.height;
+
+						KOC.shared.storeConf();
+					},
+					'clean': function(){
+						console.info('KOC notepad clean function');
+
+						localStorage.setObject('koc_notepad_notes_' + KOC.server, '');
+
+						KOC.notepad.$notes.empty();
+					},
+					'load': function( id ){
+						console.info('KOC notepad load function');
+
+						if( KOC.notepad.notes[id] ){
+							KOC.notepad.$name.val( KOC.notepad.notes[id].name );
+							KOC.notepad.$textarea.val( KOC.notepad.notes[id].text );
+						} else {
+							alert('Note introuvable.');
+						}
+					},
+					'delete': function( id ){
+						console.info('koc notepad delete function');
+						delete KOC.notepad.notes[id];
+						KOC.notepad.storeNotes();
+					},
+					'storeNotes': function(){
+						console.info('KOC notepad storeNotes function');
+
+						localStorage.setObject('koc_notepad_notes_' + KOC.server, KOC.notepad.notes);
+					},
+				},
 			/* FORMATION */
-					/*cancelTraining(f + "," + currentcityid + "," + seed.queue_unt["city" + currentcityid][f][0] + "," + seed.queue_unt["city" + currentcityid][f][1] + "," + seed.queue_unt["city" + currentcityid][f][3] + "," + seed.queue_unt["city" + currentcityid][f][2] + "," + seed.queue_unt["city" + currentcityid][f][5]));*/
-					'formation': {
-						'options': {
+				'formation': {
+					'options': {
 						'active': 1,
 					},
 					'stored': ['rules'],
 					'rules': {},/*{idCity, unit, min, max, keep ressources, use labor, boost, active}*/
 					'confPanel': function( $section ){
 						console.info('KOC formation confPanel function');
-						var code = '<p>'
-							+ '<h2>Formation</h2>'
-							+ KOC.shared.generateCheckbox('formation', 'active', 'Activer le module', KOC.conf.formation.active)
-							+ '</p>';
+						var code = '<h3>Formation</h3>'
+							+ '<div>'
+							+ KOC.shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOC.conf.formation.automatic)
+							+ '</div>';
 
 						$section.append( code );
 					},
@@ -3201,7 +3450,6 @@ if(window.Prototype) {
 							   parameters: params,*/
 						//
 						//
-
 					}
 				},
 			/* TRANSPORT */
@@ -3214,10 +3462,10 @@ if(window.Prototype) {
 					'rules': {},
 					'confPanel': function( $section ){
 						console.info('KOC transport confPanel function');
-						var code = '<p>'
-							+ '<h2>Transport</h2>'
+						var code = '<h3>Transport</h3>'
+							+ '<div>'
 							+ KOC.shared.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
-							+ '</p>';
+							+ '</div>';
 
 						$section.append( code );
 					},
@@ -3287,6 +3535,7 @@ if(window.Prototype) {
 						KOC.shared.storeConf();
 					},
 					'storeAutomaticRules': function(){
+						console.info('koc transport storeAutomaticRules function');
 						localStorage.setObject('koc_transport_rules_' + KOC.server, KOC.transport.rules);
 					},
 					//'generateTransport': function(origin, destination, troops, ressources)
@@ -3337,10 +3586,10 @@ if(window.Prototype) {
 	//- file d'attente des recherches par ville
 
 	//Statistiques :
-	//- consommation
-	//- autonomie
+	//X- consommation
+	//X- autonomie
 	//- formation
-	//- gains
+	//X- gains
 
 	//Exploration :
 	//- recherche de TS / CB / FS
@@ -3363,11 +3612,11 @@ if(window.Prototype) {
 
 	//Attaque :
 	//- CB
-	//- TS
-	  //- vérification vague 1 et 2
-	  //- liste de coordonnées
+	//X- TS
+	  //X- vérification vague 1 et 2
+	  //X- liste de coordonnées
 	  //- uniquement les vides ou non (exploration)
-	//- rappel des quantités de troupes (mode anti-post-it :P)
+	  //X- rappel des quantités de troupes (mode anti-post-it :P)
 	//- mode rainbow (1 cible, x attaques de y miliciens)
 
 	//Avoir des recherches de TS/CB/FS indexées par villes et mémorisées pour ne pas avoir à refaire les recherches à chaque fois qu'on passe d'une recherche sur une ville à une autre.
@@ -3387,44 +3636,3 @@ if(window.Prototype) {
 
 	//bloc note
 */
-/*'productionPerHour': function( cityId ){
-	var modifiers = [],
-		wMods = [],
-		wilderness = window.seed.wilderness[ cityId ],
-		knights = window.seed.knights[ cityId ],
-		leaders = window.seed.leaders[ cityId ],
-		cityStat = window.seed.citystats[ cityId ],
-		tech = window.seed.tech,
-		res = window.seed.resources[ cityId ];
-
-	for( var w in wilderness ){
-		if( wilderness.hasOwnProperty(w) ){
-			var t = parseFloat( wilderness[ w ].tileType );
-			wMods[ Math.floor(t / 10) ] = parseFloat( wilderness[ w ].tileLevel );
-		}
-	}
-
-	var kmod = 0;
-	if( knights ){
-		var t = knights[ 'knt' + leaders.resourcefulnessKnightId ];
-		if( t ){
-			kmod = parseFloat( t.resourcefulness );
-		}
-	}
-
-	var pmod = 1,
-		p = citystat['pop'][0],
-		l = citystat['pop'][3];
-	if( p && l && p < l ){
-		pmod = p / l;
-	}
-
-	for( var i = 1; i <= KOC.resources_productivity.length; i++ ){
-		var u = res['rec' + i],
-			t = tech['tch' + i];
-
-		modifiers[i] = parseFloat( (u[2] * (1 + tech / 10 + kmod / 100 + 0.05 * wMods[i]) * pmod + 100 ) );
-	}
-
-	return modifiers;
-}*/

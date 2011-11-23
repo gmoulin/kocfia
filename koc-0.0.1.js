@@ -1,23 +1,26 @@
 console.info('koc start');
 var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 	+ "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}"
-	+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
-	+ "\n#koc-conf-panel { max-height: 700px; display: none; position: absolute; z-index: 99999; }"
+	+ "\n#koc-conf-panel .ui-icon-close { position: absolute; right: -3px; top: -3px; cursor: pointer; }"
+	+ "\n#koc-conf-panel { max-height: 700px; display: none; position: absolute; z-index: 100001; }"
 	+ "\n#koc-conf-panel label + select { margin-left: 5px; }"
 	+ "\n#koc-conf-panel .drag-handle { height: 36px; }"
 	+ "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }"
 	+ "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }"
+	+ "\n#koc-conf-panel ul { margin: 5px; }"
 	+ "\n.koc-conf-panel-tab.on:after, .koc-conf-panel-tab.off:after { content: ''; position: absolute; bottom: 0; right: 0; width: 0; height: 0; border-width: 10px; border-style: solid; }"
 	+ "\n.koc-conf-panel-tab.on:after { border-color: transparent green green transparent; }"
 	+ "\n.koc-conf-panel-tab.off:after { border-color: transparent red red transparent; }"
 	+ "\n#koc-options p { margin: 3px 0; }"
 	+ "\n#koc-chat ul { padding-left: 0; }"
-	+ "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 5px; }"
+	+ "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 0; }"
+	+ "\n.ui-tabs-panel h3:not(.ui-accordion-header) { margin: 0;}"
+	+ "\n.ui-tabs-panel h3:not(.ui-accordion-header):not(:first-child) { margin: 4px 0;}"
 	+ "\n.ui-tabs-panel h3 p { float: right; font-size: 11px; margin: 0;}"
-	+ "\n.attack-form fieldset { clear: both; }"
+	+ "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }"
+	+ "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }"
 	+ "\n.attack-form fieldset small { display: block; }"
-	+ "\n.attack-form .builds { display: none; float: right; max-width: 200px; }"
-	+ "\n.attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }"
+	+ "\n.attack-form .keep, .attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }"
 	+ "\n.attack-form { counter-reset: waves; }"
 	+ "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }"
 	+ "\n.attack-form .wave label { display: inline-block; }"
@@ -25,12 +28,12 @@ var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 	+ "\n.attack-form .unit-block select + label { margin-left: 10px; }"
 	+ "\n.attack-form .unit-qty { width: 60px; }"
 	+ "\n.attack-form textarea { width: 150px; height: 120px; }"
-	+ "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }"
+	+ "\n.attack-form .builds { display: none; float: right; max-width: 220px; }"
+	+ "\n.attack-form .builds div { -moz-column-count: 2; -moz-column-gap: 5px; -webkit-column-count: 2; -webkit-column-gap: 5px; column-count: 2; column-gap: 5px; }"
 	+ "\n.attack-list li { display: block; margin-bottom: 8px; }"
 	+ "\n.attack-list li span { display: inline-block; padding-right: 5px; }"
 	+ "\n.attack-list li img { width: 18px; }"
 	+ "\n.attack-list .attack-errors { display: block; }"
-	+ "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }"
 ;
 
 var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }"
@@ -64,8 +67,10 @@ var kocChatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .cha
 var kocChatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: #FAE4E4; }";
 var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
 
-var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 99998; display: none; }"
+var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }"
+	+ "\n#koc-overview .handle { margin: 0 0 2px 0; text-indent: 3px; }"
 	+ "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }"
+	+ "\n#koc-overview .ui-tabs .ui-tabs-panel { padding: 2px; }"
 	+ "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }"
 	+ "\n#koc-overview .wrap { width: 100%; overflow: hidden; }"
 	+ "\n#koc-overview table { width: 100%; float: left; }"
@@ -84,9 +89,9 @@ var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana
 ;
 
 var kocNotepadCss = "#koc-notepad { padding: 2px 3px; }"
-	+ "\n#koc-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 99998; display: none; }"
+	+ "\n#koc-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }"
 	+ "\n#koc-notepad .ui-icon-close { float: right; cursor: pointer; }"
-	+ "\n#koc-notepad .wrap { width: 100%; overflow: hidden; }"
+	+ "\n#koc-notepad .wrap { width: 100%; overflow: auto; }"
 	+ "\n#koc-notepad textarea { width: 100%; height: 150px; }"
 	+ "\n#koc-notepad .wrap input + label { display: block; }"
 	+ "\n#koc-notepad .charsLeft { float: right; }"
@@ -97,57 +102,58 @@ var kocNotepadCss = "#koc-notepad { padding: 2px 3px; }"
 	+ "\n#koc-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }"
 ;
 
-/*
- * jQuery each2 - v0.2 - 8/02/2010
- * http://benalman.com/projects/jquery-misc-plugins/
- *
- * Inspired by James Padolsey's quickEach
- * http://gist.github.com/500145
- *
- * Copyright (c) 2010 "Cowboy" Ben Alman
- * Dual licensed under the MIT and GPL licenses.
- * http://benalman.com/about/license/
- */
-(function(a){var b=a([1]);a.fn.each2=function(d){var c=-1;while((b.context=b[0]=this[++c])&&d.call(b[0],c,b)!==false){}return this}})(jQuery);
+/* helpers */
+	/*
+	 * jQuery each2 - v0.2 - 8/02/2010
+	 * http://benalman.com/projects/jquery-misc-plugins/
+	 *
+	 * Inspired by James Padolsey's quickEach
+	 * http://gist.github.com/500145
+	 *
+	 * Copyright (c) 2010 "Cowboy" Ben Alman
+	 * Dual licensed under the MIT and GPL licenses.
+	 * http://benalman.com/about/license/
+	 */
+	(function(a){var b=a([1]);a.fn.each2=function(d){var c=-1;while((b.context=b[0]=this[++c])&&d.call(b[0],c,b)!==false){}return this}})(jQuery);
 
-//localStorage method for caching javascript objects
-	if( typeof window.Storage != "undefined" ){
-		window.Storage.prototype.setObject = function(key, value){
-			this.setItem(key, JSON.stringify(value));
+	//localStorage method for caching javascript objects
+		if( typeof window.Storage != "undefined" ){
+			window.Storage.prototype.setObject = function(key, value){
+				this.setItem(key, JSON.stringify(value));
+			}
+
+			window.Storage.prototype.getObject = function(key){
+				return this.getItem(key) && JSON.parse( this.getItem(key) );
+			}
+		} else {
+			alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
 		}
 
-		window.Storage.prototype.getObject = function(key){
-			return this.getItem(key) && JSON.parse( this.getItem(key) );
+	String.prototype.capitalize = function(){
+		return this.charAt(0).toUpperCase() + this.slice(1);
+	};
+
+	// Return new array with duplicate values removed
+	Array.prototype.unique = function(){
+		var a = [];
+		var l = this.length;
+		for( var i = 0; i < l; i++ ){
+			for( var j= i + 1; j < l; j++ ){
+				// If this[i] is found later in the array
+				if( this[i] === this[j] ) j = ++i;
+			}
+			a.push(this[i]);
 		}
-	} else {
-		alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
-	}
+		return a;
+	};
 
-String.prototype.capitalize = function(){
-	return this.charAt(0).toUpperCase() + this.slice(1);
-};
+	Array.max = function( array ){
+		return Math.max.apply( Math, array );
+	};
 
-// Return new array with duplicate values removed
-Array.prototype.unique = function(){
-	var a = [];
-	var l = this.length;
-	for( var i = 0; i < l; i++ ){
-		for( var j= i + 1; j < l; j++ ){
-			// If this[i] is found later in the array
-			if( this[i] === this[j] ) j = ++i;
-		}
-		a.push(this[i]);
-	}
-	return a;
-};
-
-Array.max = function( array ){
-	return Math.max.apply( Math, array );
-};
-
-Array.min = function( array ){
-	return Math.min.apply( Math, array );
-};
+	Array.min = function( array ){
+		return Math.min.apply( Math, array );
+	};
 
 
 jQuery(document).ready(function(){
@@ -162,17 +168,16 @@ if(window.Prototype) {
 
 (function($){
 	try{
-		/* helpers */
-			//pointers
-				var $head = $('head'),
-					$body = $('body'),
-					$chatInput = $('#mod_comm_input'),
-					$chatGeneral = $('#mod_comm_list1'),
-					$chatAlliance = $('#mod_comm_list2'),
-					$chat = $('#kocmain_bottom').find('.mod_comm');
+		//pointers
+			var $head = $('head'),
+				$body = $('body'),
+				$chatInput = $('#mod_comm_input'),
+				$chatGeneral = $('#mod_comm_list1'),
+				$chatAlliance = $('#mod_comm_list2'),
+				$chat = $('#kocmain_bottom').find('.mod_comm');
 
-			//shared
-				var $dragHandle = $('<div class="drag-handle">');
+		//shared
+			var $dragHandle = $('<div class="drag-handle">');
 
 		var KOC = {
 			'server': null,
@@ -185,7 +190,7 @@ if(window.Prototype) {
 				console.info('KOC init function');
 				//get server id
 					KOC.server = KOC.shared.getServer();
-					console.log('server', KOC.server);
+					console.info('server', KOC.server);
 					if( KOC.server == null ){
 						console.error('wrong server id');
 						return;
@@ -270,7 +275,7 @@ if(window.Prototype) {
 				'defaultConf': {
 					'confPanel': {
 						'position': {'top': 100, 'left': 100},
-						'size': {'width': 'auto', 'height': 'auto'},
+						'size': {'width': 350, 'height': 250},
 						'selected': 0,
 						'visible': 0,
 					}
@@ -515,6 +520,17 @@ if(window.Prototype) {
 							}
 
 							KOC.conf[ mod ][ infos[1] ] = status;
+
+							if( $this.is('input[type=radio]') ){
+								var $linked = $this.siblings('input').filter('[type=radio]').each(function(){
+									var infos = this.id.split('-');
+									KOC.conf[ infos[0] ][ infos[1] ] = 0;
+									var func = infos[1] + 'Off';
+
+									if( typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
+								});
+							}
+
 							KOC.shared.storeConf();
 
 							if( typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
@@ -551,19 +567,11 @@ if(window.Prototype) {
 							minHeight: 250,
 							handles: 'n, e, s, w, ne, se, sw, nw',
 							resize: function(event, ui){
-								KOC.$confPanel.find('.ui-tabs-panel').css({
-									'max-width': KOC.conf.confPanel.size.width - 10,
-									'max-height': KOC.conf.confPanel.size.height - KOC.$confPanelNav.height() - 15,
-								});
+								KOC.$confPanelTabs.css('height', KOC.calcConfPanelInnerHeight());
 							},
 							stop: function(event, ui){
 								KOC.conf.confPanel.size = ui.size;
 								KOC.shared.storeConf();
-
-								KOC.$confPanelTabs.css({
-									'max-width': KOC.conf.confPanel.size.width,
-									'max-height': KOC.conf.confPanel.size.height - KOC.$confPanelNav.height() - 15,
-								});
 							}
 						})
 						.tabs({
@@ -601,10 +609,7 @@ if(window.Prototype) {
 						KOC.conf.confPanel.visible = (KOC.$confPanel.is(':visible') ? 1 : 0);
 						KOC.shared.storeConf();
 
-						KOC.$confPanelTabs.css({
-							'max-width': KOC.$confPanel.innerWidth() - 10,
-							'max-height': KOC.$confPanel.innerHeight() - KOC.$confPanelNav.height() - 15,
-						});
+						KOC.$confPanelTabs.css('height', KOC.calcConfPanelInnerHeight());
 					});
 
 					$body.append( $confPanel );
@@ -619,22 +624,18 @@ if(window.Prototype) {
 					KOC.$confPanelNav = $('#koc-conf-panel-tabs');
 					KOC.$confPanelTabs = KOC.$confPanel.find('.ui-tabs-panel');
 
-					if( KOC.conf.confPanel.size.width != 'auto' ){
-						KOC.$confPanel.find('.ui-tabs-panel').css({
-							'max-width': KOC.conf.confPanel.size.width - 10,
-							'max-height': KOC.conf.confPanel.size.height - KOC.$confPanelNav.height() - 15,
-						});
-					}
-
 					for( var i = 0; i < KOC.modules.length; i++ ){
 						var mod = KOC.modules[i];
 						if( typeof KOC[ mod ].modPanel == 'function' ) KOC[ mod ].modPanel();
 					}
 
-
 					if( KOC.conf.confPanel.visible ){
 						KOC.$confPanel.show();
+						KOC.$confPanelTabs.css('height', KOC.calcConfPanelInnerHeight());
 					}
+				},
+				'calcConfPanelInnerHeight': function(){
+					return KOC.$confPanel.innerHeight() - KOC.$confPanelNav.height() - 20;
 				},
 			/* SHARED */
 				'shared': {
@@ -700,7 +701,7 @@ if(window.Prototype) {
 						if( typeof num == 'undefined' || num == null ) return '&nbsp;';
 						num = '' + num;
 						if( num.indexOf(',') > -1 ) num.replace(/,/, '.');
-						num = '' + parseFloat(num);
+						num = '' + parseFloat(num).toFixed(0);
 						var l = num.length,
 							suffix = '',
 							decimal;
@@ -722,9 +723,14 @@ if(window.Prototype) {
 						}
 
 						var s = '' + num,
-							decimal = s.substr(s.length - 3, 2),
+							decimal = s.substr(s.length - 2, 2),
 							s = s.substr(0, s.length - 3);
-						if( s.length == 1 ){
+						if( decimal.substr(1, 1) == '0' ){
+							num = parseFloat(num).toFixed(1);
+						}
+						if( decimal == '00' ){
+							return parseFloat(num).toFixed(0) + suffix
+						} else if( s.length == 1 ){
 							return num + suffix;
 						} else if( s.length == 2 ){
 							return parseFloat(num).toFixed(1) + suffix;
@@ -812,6 +818,7 @@ if(window.Prototype) {
 						return code;
 					},
 					'marchTimeCalculator': function(cityId, troops, from_x, from_y, is_round_trip, items_applied){
+						console.info('koc shared marchTimeCalculator function', cityId, troops, from_x, from_y, is_round_trip, items_applied);
 						var speed = 99999,
 							total_troops = 0,
 							time = 0,
@@ -1349,7 +1356,11 @@ if(window.Prototype) {
 							+ KOC.shared.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions')
 							+ '</div>';
 
-						$section.append( code );
+						$section.append( code )
+							.on('click', '#overview-replace, #overview-moveable', function(){
+								$(this).closest('div').find('button').toggle( $(this).is('#overview-moveable') );
+							})
+							.find('#overview-replace').closest('div').find('button').toggle( KOC.conf.overview.moveable );
 					},
 					'on': function(){
 						console.info('KOC overview on function');
@@ -1950,17 +1961,30 @@ if(window.Prototype) {
 
 						return Math.floor(cityColWidth);
 					},
+					'calcInnerSizes': function( size ){
+						console.info('koc overview calcInnerSizes function');
+						KOC.overview.$cityTds.filter(':gt(2)').css('width', '');
+
+						var tableH = size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
+						KOC.overview.$wrap.css('height', tableH);
+						KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+
+						KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( size.width ) + 'px');
+
+						KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
+							$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
+						});
+					},
 					/* moveable */
 						'moveableOn': function(){
 							console.info('KOC overview moveableOn function');
-							KOC.overview.replaceOff();
 
 							KOC.$overview
-								.prepend( $dragHandle.clone() )
+								.prepend('<h3 class="handle">Vue Globale</h3>')
 								.prepend( '<span class="ui-icon ui-icon-close"></span>' )
 								.draggable({
 									'helper': "original",
-									'handle': '.drag-handle',
+									'handle': '.handle',
 									'stop': function(event, ui){
 										KOC.conf.overview.position = ui.position;
 										KOC.shared.storeConf();
@@ -1970,16 +1994,7 @@ if(window.Prototype) {
 									'minWidth': 250,
 									'minHeight': 250,
 									'resize': function(event, ui){
-										KOC.overview.$cityTds.filter(':gt(2)').css('width', '');
-										var tableH = ui.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-										KOC.overview.$wrap.css('height', tableH);
-										KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
-
-										KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( ui.size.width ) + 'px');
-
-										KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
-											$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
-										});
+										KOC.overview.calcInnerSizes( ui.size );
 									},
 									'stop': function(event, ui){
 										KOC.conf.overview.size = ui.size;
@@ -2002,15 +2017,7 @@ if(window.Prototype) {
 							if( KOC.conf.overview.visible ){
 								KOC.$overview.show();
 
-								var tableH = KOC.conf.overview.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-								KOC.overview.$wrap.css('height', tableH);
-								KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
-
-								KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( KOC.conf.overview.size.width ) + 'px');
-
-								KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
-									$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
-								});
+								KOC.overview.calcInnerSizes( KOC.conf.overview.size );
 							}
 
 							var $kocOverviewToggle = $('<button id="koc-overview-toggle">').text('Vue Globale');
@@ -2018,15 +2025,9 @@ if(window.Prototype) {
 								console.info('$kocOverviewToggle click');
 								KOC.$overview.toggle();
 
-								var tableH = KOC.conf.overview.size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-								KOC.overview.$wrap.css('height', tableH);
-								KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
-
-								KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( KOC.conf.overview.size.width ) + 'px');
-
-								KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
-									$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
-								});
+								if( KOC.$overview.is(':visible') ){
+									KOC.overview.calcInnerSizes( KOC.conf.overview.size );
+								}
 
 								KOC.conf.overview.visible = (KOC.$overview.is(':visible') ? 1 : 0);
 								KOC.shared.storeConf();
@@ -2039,49 +2040,57 @@ if(window.Prototype) {
 							KOC.$overview
 								.draggable('destroy')
 								.resizable('destroy')
-								.find('.drag-handle, .ui-icon-close').remove();
+								.find('.handle, .ui-icon-close').remove();
 						},
 						'resetPlacement': function(){
 							console.info('KOC overview resetPlacement function');
-							KOC.$overview.css( KOC.overview.options.position );
-							KOC.conf.overview.position = KOC.overview.options.position;
-							KOC.shared.storeConf();
+							if( KOC.conf.overview.moveable ){
+								console.log(KOC.$overview);
+								console.log(KOC.overview.options.position);
+								KOC.$overview.css( KOC.overview.options.position );
+								KOC.conf.overview.position = KOC.overview.options.position;
+								KOC.shared.storeConf();
+							}
 						},
 						'resetDimensions': function(){
 							console.info('KOC overview resetDimensions function');
-							KOC.$overview.css( KOC.overview.options.size );
-							KOC.conf.overview.size = KOC.overview.options.size;
-							KOC.shared.storeConf();
+							if( KOC.conf.overview.moveable ){
+								console.log(KOC.$overview);
+								console.log(KOC.overview.options.size);
+								KOC.$overview.css( KOC.overview.options.size );
+								KOC.conf.overview.size = KOC.overview.options.size;
+								KOC.shared.storeConf();
+							}
 						},
 					/* replace */
 						'replaceOn': function(){
 							console.info('KOC overview replaceOn function');
-							KOC.overview.moveableOff();
 
-							var $b = $('#kocmain_bottom');
+							var $b = $('#kocmain_bottom'),
+								$f = $b.siblings('.panel_friendlist');
 							var p = $b.offset();
+							var h = $b.outerHeight() + $f.outerHeight(),
+								w = $b.outerWidth();
 
 							KOC.$overview.css({
-								'height': $b.outerHeight(),
+								'height': $b.outerHeight() + $f.outerHeight(),
 								'width': $b.outerWidth(),
 								'top': p.top,
 								'left': p.left,
 							});
 
-							var tableH = KOC.$overview.height() - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
-							KOC.overview.$wrap.css('height', tableH);
-							KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+							$b.hide();
+							$f.hide();
+							KOC.$overview.show();
 
-							KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( KOC.$overview.width() ) + '%');
-
-							KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
-								$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
-							});
+							KOC.overview.calcInnerSizes({'height': h, 'width': w});
 
 							$('#koc-overview-toggle').remove();
 						},
 						'replaceOff': function(){
 							console.info('KOC overview replaceOff function');
+
+							$('#kocmain_bottom').show().siblings('.panel_fiendlist').show();
 						},
 				},
 			/* CREST HUNT */
@@ -2121,9 +2130,10 @@ if(window.Prototype) {
 								 +  '<label for="koc-crestHunt-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
 						}
 
-						form += '</fieldset><fieldset>'
-							 +  '<legend>Coordonnées</legend>'
-							 +  '<div class="builds">Attaques types&nbsp;:&nbsp;<br />'
+						form += '</fieldset>'
+							 +  '<fieldset class="builds">'
+							 +  '<legend>Attaques types</legend>'
+							 +  '<div>'
 							 +  '<button class="build" rel="5">TS5 (emp5)</button>'
 							 +  '<button class="build" rel="6">TS6 (emp7)</button>'
 							 +  '<button class="build" rel="7">TS7 (emp8)</button>'
@@ -2132,6 +2142,9 @@ if(window.Prototype) {
 							 +  '<button class="build" rel="9bis">TS9 (emp10)</button>'
 							 +  '<button class="build" rel="10">TS10 (emp10)</button>'
 							 +  '</div>'
+							 +  '</fieldset>'
+							 +  '<fieldset>'
+							 +  '<legend>Coordonnées</legend>'
 							 +  '<small>format: x,y x,y x,y ...</small>'
 							 +  '<textarea name="coords"></textarea>'
 							 +  '</fieldset>';
@@ -2142,15 +2155,25 @@ if(window.Prototype) {
 							 +	'<option value="">N\'importe lequel</option>'
 							 +	'</select>'
 							 +	'<div class="unit-block">'
-							 +	'<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" name="unit">'
+							 +	'<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">'
 							 +	'<option value="">Choisir</option>'
 							 +	'</select>'
-							 +	'<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" name="qantity" type="" />'
+							 +	'<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" />'
 							 +	'</div>'
 							 +	'<button class="add-unit">Ajouter une autre unité</button>'
 							 +	'</fieldset>');
 
-						form += '<button class="add-wave">Ajouter une vague</button>'
+						form += '<fieldset class="keep">'
+							 +	'<legend>Conserver</legend>'
+							 +	'<div class="unit-block">'
+							 +	'<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">'
+							 +	'<option value="">Choisir</option>'
+							 +	'</select>'
+							 +	'<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" />'
+							 +	'</div>'
+							 +	'<button class="add-unit">Ajouter une autre unité</button>'
+							 +	'</fieldset>'
+							 +  '<button class="add-wave">Ajouter une vague</button>'
 							 +	'<button class="launch">Lancer</button>'
 							 +	'<button class="save">Sauvegarder</button>'
 							 +	'<button class="saveAndLaunch">Sauvegarder et Lancer</button>'
@@ -2181,7 +2204,7 @@ if(window.Prototype) {
 								var $waves = KOC.crestHunt.$form.find('.wave');
 								if( $waves.length ) $waves.remove();
 
-								KOC.crestHunt.$form.find('.add-wave, .save, .launch, .saveAndLaunch, .builds').show();
+								KOC.crestHunt.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
 								KOC.crestHunt.addWaves(2, $(this).val());
 							})
@@ -2212,10 +2235,10 @@ if(window.Prototype) {
 								if( KOC.conf.crestHunt.active ){
 									var result = KOC.crestHunt.planAttack();
 									if( result.errors.length ){
-										KOC.crestHunt.$form.find('.message').html( '<li>' + errors.join('</li><li>') + '</li>' );
+										KOC.crestHunt.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 									} else {
 										var d = new Date();
-										attack.id = Math.floor(d.getTime() / 1000);
+										result.attack.id = Math.floor(d.getTime() / 1000);
 										KOC.crestHunt.launchAttack( result.attack );
 									}
 								} else {
@@ -2278,7 +2301,7 @@ if(window.Prototype) {
 									attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
 
 								if( attack ){
-									KOC.crestHunt.$form.find('.add-wave, .save, .launch, .saveAndLaunch, .builds').show();
+									KOC.crestHunt.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
 									if( $this.hasClass('edit') ){
 										KOC.crestHunt.$form.find('.edit-attackId').val( attack.id );
@@ -2310,6 +2333,22 @@ if(window.Prototype) {
 											$b.find('.unit-choice').val( unit.id );
 											$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
 										}
+									}
+
+									var $keep = KOC.crestHunt.$form.find('.keep');
+									if( attack.keep.length > 1 ){
+										for( var i = 1; i < attack.keep.length; i++ ){
+											$keep.find('.add-unit').trigger('click');
+										}
+									}
+
+									var $blocks = $keep.find('.unit-block');
+									for( var i = 0; i < attack.keep.length; i++ ){
+										var unit = attack.keep[i];
+
+										var $b = $blocks.eq(i);
+										$b.find('.unit-choice').val( unit.id );
+										$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
 									}
 								} else {
 									alert('Plan d\'attaque introuvable.')
@@ -2352,13 +2391,14 @@ if(window.Prototype) {
 								KOC.crestHunt.$form.find('.wave').remove();
 								KOC.crestHunt.addWaves(2, 'city' + KOC.crestHunt.$form.find('.city-choice').filter(':checked').val());
 
-								var $addUnit = KOC.crestHunt.$form.find('.add-unit');
+								var $waves = KOC.crestHunt.$form.find('.wave');
+								var $addUnit = $waves.find('.add-unit');
 								$addUnit.eq(1).trigger('click')
 								if( rel == '8' || rel == '9' || rel == '9bis' ){
 									$addUnit.eq(0).trigger('click');
 								}
-								var $uChoices = KOC.crestHunt.$form.find('.unit-choice'),
-									$uQuantity = KOC.crestHunt.$form.find('.unit-qty');
+								var $uChoices = $waves.find('.unit-choice'),
+									$uQuantity = $waves.find('.unit-qty');
 
 								switch( rel ){
 									case '5':
@@ -2503,11 +2543,12 @@ if(window.Prototype) {
 					'planAttack': function(){
 						console.info('KOC crestHunt planAttack function');
 						var $waves = KOC.crestHunt.$form.find('.wave'),
+							$keep = KOC.crestHunt.$form.find('.keep'),
 							$cityChoice = KOC.crestHunt.$form.find('.city-choice').filter(':checked'),
 							coords = $.trim( KOC.crestHunt.$form.find('textarea').val().replace(/\n/g, ' ') ),
 							errors = [],
 							regexp = /[^0-9, ]/,
-							attack = { 'waves':[], 'abort': 0, 'aborts': [], 'marching': {}, 'lastCoordIndex': 0 };
+							attack = { 'waves': [], 'abort': 0, 'aborts': [], 'marching': {}, 'lastCoordIndex': 0, 'keep': [] };
 
 						//check form
 							//city
@@ -2539,6 +2580,7 @@ if(window.Prototype) {
 							}
 
 							//waves
+							var unitList = [];
 							$waves.each2(function(i, $wave){
 								var w = {'units': []};
 
@@ -2560,17 +2602,39 @@ if(window.Prototype) {
 										}
 
 										if( valid ){
+											unitList.push(u);
 											w.units.push({'id': u, 'qty': q});
 										}
 									});
 
-								if( w.units.length ) attack.waves.push(w);
+								if( w.units.length ){
+									attack.waves.push(w);
+								}
 							});
 
 							if( !attack.waves.length ){
 								errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
 								errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
 							}
+
+							//keep
+							$keep.find('.unit-block').each2(function(i, $b){
+								var k = {},
+									u = $.trim( $b.find('.unit-choice').val() ),
+									q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+
+								if( u.length == 0 && q != false && q > 0 ){
+									errors.push('L\'unité à conserver doit être spécifiée.');
+								} else if( u.length > 0 && (q == false || q < 1) ){
+									errors.push('L\'unité à conserver doit avoir une quantité.');
+								} else {
+									if( unitList.length && $.inArray(u, unitList) > -1 ){
+										attack.keep.push({'id': u, 'qty': q});
+									} else {
+										errors.push('L\'unité à conserver ne correspond pas à une des unités de l\'attaque.');
+									}
+								}
+							});
 
 							if( errors.length ){
 								errors = errors.unique();
@@ -2584,7 +2648,7 @@ if(window.Prototype) {
 							return;
 						}
 
-						if( KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] && !KOC.conf.crestHunt.automatic ){
+						if( KOC.crestHunt.attacks[ attack.cityId ] && KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] && !KOC.conf.crestHunt.automatic ){
 							return;
 						}
 
@@ -2651,33 +2715,32 @@ if(window.Prototype) {
 												console.log('fetchMapTiles info', info);
 												if( info.tileType != 10 && info.tileType != 11 && info.tileType != 20 && info.tileType != 30 && info.tileType != 40 ){
 													attack.aborts.push('Coordonnées '+ attack.coords[ i ] +' n\'est pas une terre sauvage.');
-													abort = true;
-												} else if( info.tileUserId != null ){
+												} else if( info.tileUserId != null && info.tileUserId != "0" ){
 													attack.aborts.push('Coordonnées '+ attack.coords[ i ] +' occupées.');
-													abort = true;
 												} else {
 													validCoord = true;
 												}
 											} else {
 												attack.aborts.push('Informations sur '+ attack.coords[ i ] +' manquantes.');
-												abort = true;
 											}
 										}
 									},
 									error: function(){
 										attack.aborts.push('Informations sur '+ attack.coords[ i ] +' introuvables.');
-										abort = true;
 									},
 								});
 
 								if( validCoord ){
 									coord = gps;
 									break;
-								} else {
-									abort = true;
-									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 								}
 							}
+
+							if( coord == null ){
+								abort = true;
+								attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
+							}
+
 
 							if( !abort && coord ){
 								defaultParams.xcoord = coord[0];
@@ -2693,15 +2756,19 @@ if(window.Prototype) {
 
 								var params = defaultParams;
 
+								console.log('waves loop');
 								for( var i = 0; i < attack.waves.length; i++ ){
+									if( abort ) break; //previous wave ko
+									console.log('wave', i, attack.waves[i]);
 									var resources = [0, 0, 0, 0, 0];
 									var wave = attack.waves[i],
-										knights = KOC.shared.getAvailableKnights( cityId );
+										knights = KOC.shared.getAvailableKnights( attack.cityId );
 
 									if( !knights.length ){
 										attack.aborts.push('Aucun chevalier disponible.');
 										abort = true;
 									} else {
+										console.log('knight check');
 										//check knight
 										if( wave.knight == '' ){
 											wave.knight = knights[0].knightId;
@@ -2718,90 +2785,110 @@ if(window.Prototype) {
 											if( !knightOk ){
 												attack.aborts.push('Chevalier indisponible.');
 												abort = true;
-											} else {
-												params.kid = wave.knight;
+											}
+										}
+										if( !abort ){
+											console.log('unit check');
+											params.kid = wave.knight;
 
-												var unitsarr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-													units = window.seed.units[cityId];
-												for( var j = 0; j < wave.units.length; j++ ){
-													var unit = wave.units[j];
-													params["u" + unit.id] = unit.qty;
-													unitsarr[unit.id] = unit.qty;
+											var unitsarr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+												units = window.seed.units[ 'city' + attack.cityId ];
+											console.log('units', units);
+											for( var j = 0; j < wave.units.length; j++ ){
+												var unit = wave.units[j];
+												params["u" + unit.id] = unit.qty;
+												unitsarr[j] = unit.qty;
 
-													//check troops
-													if( parseFloat(units[ unit.id ]) < unit.qty ){
-														attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
-														abort = true;
-														break;
+												var available = parseFloat(units[ unit.id ]);
+
+												//check troops
+												if( available < unit.qty ){
+													attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
+													abort = true;
+													break;
+												} else {
+													for( var k = 0; k < attack.keep.length; k++ ){
+														var keep = attack.keep[k];
+														if( available - unit.qty < keep.qty ){
+															attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
+															abort = true;
+															break;
+														}
 													}
+													if( abort ) break;
 												}
+											}
+											console.log('unitsarr',unitsarr);
+											console.log('attack',attack);
 
-												if( !abort ){
-													$.ajax({
-														url: window.g_ajaxpath + "ajax/march.php" + window.g_ajaxsuffix,
-														async: false,
-														data: params,
-														dataType: 'json',
-														success: function(result){
-															if( result.ok ){
-																attack.marching.push(result.marchId);
-																var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
-																	d = new Date();
-																	ts = parseInt(d.getTime() / 1000, 10);
-																window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ut + timediff, params.xcoord, params.ycoord, unitsarr, params.type, params.kid, resources, result.tileId, result.tileType, result.tileLevel, params.cid, true);
+											if( !abort ){
+												console.log('launching attack');
+												$.ajax({
+													url: window.g_ajaxpath + "ajax/march.php" + window.g_ajaxsuffix,
+													async: false,
+													data: params,
+													dataType: 'json',
+													success: function(result){
+														if( result.ok ){
+															attack.marching.push(result.marchId);
+															var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
+																d = new Date();
+																ts = parseInt(d.getTime() / 1000, 10);
+															window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ut + timediff, params.xcoord, params.ycoord, unitsarr, params.type, params.kid, resources, result.tileId, result.tileType, result.tileLevel, params.cid, true);
 
-																window.updateBoosts(result);
+															window.updateBoosts(result);
 
-																if( result.data ){
-																	window.update_boosts();
-																	window.seed.playerEffects.fogExpire = 0;
-																}
-															} else {
-																attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (capcha ?).');
-																abort = true;
-																if( attack.marching.length ){
-																	//recall previous waves
-																	for( var j = 0; j < attack.marching.length; j++ ){
-																		var params = window.g_ajaxparams;
-																		params.cid = attack.cityId;
-																		params.mid = attack.marching[j];
-																		$.post(g_ajaxpath + "ajax/cancelMarch.php" + g_ajaxsuffix, params, function(result){
-																			if( result.ok ){
-																				var c = 'city' + attack.cityId,
-																					m = "m" + attack.marching[j];
-																				if( result.updateSeed ){
-																					window.seed.queue_atkp[c][m].marchStatus = 8;
-																					var marchtime = parseFloat(window.seed.queue_atkp[c][m].returnUnixTime) - parseFloat(seed.queue_atkp[c][m].destinationUnixTime);
-																					var d = new Date(),
-																						ts = parseInt(d.getTime() / 1000, 10);
-																					if( window.seed.playerEffects.returnExpire > ts ) marchtime *= 0.5;
-																					window.seed.queue_atkp[c][m].destinationUnixTime = result.destinationUnixTime || ts;
-																					window.seed.queue_atkp[c][m].returnUnixTime = result.returnUnixTime || ts + marchtime * result.returnMultiplier;
-																					window.seed.queue_atkp[c][m].marchStatus = 8;
+															if( result.data ){
+																window.update_boosts();
+																window.seed.playerEffects.fogExpire = 0;
+															}
+														} else {
+															attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (capcha ?).');
+															abort = true;
+															if( attack.marching.length ){
+																//recall previous waves
+																for( var j = 0; j < attack.marching.length; j++ ){
+																	var params = window.g_ajaxparams;
+																	params.cid = attack.cityId;
+																	params.mid = attack.marching[j];
+																	$.post(g_ajaxpath + "ajax/cancelMarch.php" + g_ajaxsuffix, params, function(result){
+																		if( result.ok ){
+																			var c = 'city' + attack.cityId,
+																				m = "m" + attack.marching[j];
+																			if( result.updateSeed ){
+																				window.seed.queue_atkp[c][m].marchStatus = 8;
+																				var marchtime = parseFloat(window.seed.queue_atkp[c][m].returnUnixTime) - parseFloat(seed.queue_atkp[c][m].destinationUnixTime);
+																				var d = new Date(),
+																					ts = parseInt(d.getTime() / 1000, 10);
+																				if( window.seed.playerEffects.returnExpire > ts ) marchtime *= 0.5;
+																				window.seed.queue_atkp[c][m].destinationUnixTime = result.destinationUnixTime || ts;
+																				window.seed.queue_atkp[c][m].returnUnixTime = result.returnUnixTime || ts + marchtime * result.returnMultiplier;
+																				window.seed.queue_atkp[c][m].marchStatus = 8;
 
-																					window.update_seed(result.updateSeed)
-																				}
-																				for( var j = 1; j < 13; j++ ){
-																					window.seed.queue_atkp[c][m]["unit" + j + "Return"] = parseInt(window.seed.queue_atkp[c][m]["unit" + j + "Count"], 10);
-																				}
+																				window.update_seed(result.updateSeed)
 																			}
-																		});
-																	}
+																			for( var j = 1; j < 13; j++ ){
+																				window.seed.queue_atkp[c][m]["unit" + j + "Return"] = parseInt(window.seed.queue_atkp[c][m]["unit" + j + "Count"], 10);
+																			}
+																		}
+																	});
 																}
 															}
-														},
-														error: function(){
-															attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (requête KO).');
-															abort = true;
-														},
-													});
-												}
+														}
+													},
+													error: function(){
+														attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (requête KO).');
+														abort = true;
+													},
+												});
 											}
 										}
 									}
 								}
 							}
-
+							console.log('after checks and launch');
+							console.log('unitsarr',unitsarr);
+							console.log(attack);
 							if( !abort ){
 								attack.lastCoordIndex = attack.lastCoordIndex + 1;
 
@@ -2832,8 +2919,11 @@ if(window.Prototype) {
 					},
 					'resetForm': function(){
 						console.info('KOC crestHunt resetForm function');
-						KOC.crestHunt.$form.find('.add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
+						KOC.crestHunt.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
 						KOC.crestHunt.$form.find('.wave').remove();
+						var $keep = KOC.crestHunt.$form.find('.keep');
+						$keep.find('.unit-block').filter(':gt(0)').remove();
+						$keep.find('.unit-choice').find('option').filter(':gt(0)').remove();
 						var $inputs = KOC.crestHunt.$form.find('input');
 						$inputs.filter('[type="text"], [type="hidden"]').val('');
 						$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
@@ -2883,9 +2973,21 @@ if(window.Prototype) {
 										  +  '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_'
 										  +  unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
 							}
-
 							code += unitsCode + '</span></div>';
 						}
+
+						code += '<div class="wave">Conserver&nbsp;:&nbsp;<span class="troops">'
+						var unitsCode = '';
+						for( var j = 0; j < attack.keep.length; j++ ){
+							var unit = attack.keep[j];
+							if( unitsCode.length ) unitsCode += ', ';
+
+							unitsCode += KOC.shared.format( unit.qty )
+									  +  '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_'
+									  +  unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
+						}
+						code += unitsCode + '</span></div>';
+
 
 						if( attack.aborts.length ){
 							attack.aborts = attack.aborts.unique();
@@ -2917,13 +3019,14 @@ if(window.Prototype) {
 
 						$ul.append( code );
 					},
+					//fill the keep <select> options too
 					'addWaves': function( num, cityId ){
 						console.info('KOC crestHunt addWaves function', num, cityId);
 						if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
 						var $clone = KOC.crestHunt.$waveSkeleton.clone();
-						$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+						$clone.insertBefore( KOC.crestHunt.$form.find('.keep') );
 						for( var i = 1; i < num; i++ ){
-							$clone.clone().insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+							$clone.clone().insertBefore( KOC.crestHunt.$form.find('.keep') );
 						}
 
 						var knights = KOC.shared.getAvailableKnights( cityId ),
@@ -2943,7 +3046,7 @@ if(window.Prototype) {
 							if( units.hasOwnProperty(u) ){
 								var name = window.unitcost[u][0];
 								if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
-								choices += '<option value="'+ u +'">'+ name + '('+ units[u] +')</option>';
+								choices += '<option value="'+ u +'">'+ name + ' ('+ KOC.shared.format(units[u]) +')</option>';
 							}
 						}
 
@@ -2959,7 +3062,7 @@ if(window.Prototype) {
 						'visible': 0,
 						'moveable': 1,
 						'position': {'top': 10, 'left': 10},
-						'size': {'width': 200, 'height': 200},
+						'size': {'width': 300, 'height': 280},
 					},
 					'stored': ['notes'],
 					'notes': {},

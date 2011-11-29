@@ -14,7 +14,6 @@ var kocConfPanelCss = "#koc-conf-panel-toggle {}"
 	+ "\n.koc-conf-panel-tab.off:after { border-color: transparent red red transparent; }"
 	+ "\n#koc-options p { margin: 3px 0; }"
 	+ "\n#koc-chat ul { padding-left: 0; }"
-	+ "\n.ui-dialog { z-index: 100002 !important; }"
 	+ "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 0; }"
 	+ "\n.ui-tabs-panel h3:not(.ui-accordion-header) { margin: 0;}"
 	+ "\n.ui-tabs-panel h3:not(.ui-accordion-header):not(:first-child) { margin: 4px 0; }"
@@ -2603,7 +2602,7 @@ jQuery(document).ready(function(){
 										break;
 								}
 							})
-							.find('.help').dialog({ autoOpen: false });
+							.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
 						KOC.crestHunt.$form = $section.find('.attack-form');
 						KOC.crestHunt.$list = $section.find('.attack-list');

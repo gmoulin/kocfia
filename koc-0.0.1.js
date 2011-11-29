@@ -97,63 +97,63 @@ var kocNotepadCss = "#koc-notepad { padding: 2px 3px; }"
 	+ "\n#koc-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }"
 ;
 
-/*
- * jQuery each2 - v0.2 - 8/02/2010
- * http://benalman.com/projects/jquery-misc-plugins/
- *
- * Inspired by James Padolsey's quickEach
- * http://gist.github.com/500145
- *
- * Copyright (c) 2010 "Cowboy" Ben Alman
- * Dual licensed under the MIT and GPL licenses.
- * http://benalman.com/about/license/
- */
-(function(a){var b=a([1]);a.fn.each2=function(d){var c=-1;while((b.context=b[0]=this[++c])&&d.call(b[0],c,b)!==false){}return this}})(jQuery);
+/* helper functions */
+	/*
+	 * jQuery each2 - v0.2 - 8/02/2010
+	 * http://benalman.com/projects/jquery-misc-plugins/
+	 *
+	 * Inspired by James Padolsey's quickEach
+	 * http://gist.github.com/500145
+	 *
+	 * Copyright (c) 2010 "Cowboy" Ben Alman
+	 * Dual licensed under the MIT and GPL licenses.
+	 * http://benalman.com/about/license/
+	 */
+	(function(a){var b=a([1]);a.fn.each2=function(d){var c=-1;while((b.context=b[0]=this[++c])&&d.call(b[0],c,b)!==false){}return this}})(jQuery);
 
-//localStorage method for caching javascript objects
-	if( typeof window.Storage != "undefined" ){
-		window.Storage.prototype.setObject = function(key, value){
-			this.setItem(key, JSON.stringify(value));
+	//localStorage method for caching javascript objects
+		if( typeof window.Storage != "undefined" ){
+			window.Storage.prototype.setObject = function(key, value){
+				this.setItem(key, JSON.stringify(value));
+			}
+
+			window.Storage.prototype.getObject = function(key){
+				return this.getItem(key) && JSON.parse( this.getItem(key) );
+			}
+		} else {
+			alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
 		}
 
-		window.Storage.prototype.getObject = function(key){
-			return this.getItem(key) && JSON.parse( this.getItem(key) );
+	String.prototype.capitalize = function(){
+		return this.charAt(0).toUpperCase() + this.slice(1);
+	};
+
+	Array.max = function( array ){
+		return Math.max.apply( Math, array );
+	};
+
+	Array.min = function( array ){
+		return Math.min.apply( Math, array );
+	};
+
+	// Return new array with duplicate values removed
+	Array.prototype.unique = function(){
+		var a = [];
+		var l = this.length;
+		for( var i = 0; i < l; i++ ){
+			for( var j= i + 1; j < l; j++ ){
+				// If this[i] is found later in the array
+				if( this[i] === this[j] ) j = ++i;
+			}
+			a.push(this[i]);
 		}
-	} else {
-		alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
-	}
-
-String.prototype.capitalize = function(){
-	return this.charAt(0).toUpperCase() + this.slice(1);
-};
-
-// Return new array with duplicate values removed
-Array.prototype.unique = function(){
-	var a = [];
-	var l = this.length;
-	for( var i = 0; i < l; i++ ){
-		for( var j= i + 1; j < l; j++ ){
-			// If this[i] is found later in the array
-			if( this[i] === this[j] ) j = ++i;
-		}
-		a.push(this[i]);
-	}
-	return a;
-};
-
-Array.max = function( array ){
-	return Math.max.apply( Math, array );
-};
-
-Array.min = function( array ){
-	return Math.min.apply( Math, array );
-};
-
+		return a;
+	};
 
 jQuery(document).ready(function(){
 
 //prototype json.stringify bug with array
-if(window.Prototype) {
+if( window.Prototype ){
 	delete Object.prototype.toJSON;
 	delete Array.prototype.toJSON;
 	delete Hash.prototype.toJSON;

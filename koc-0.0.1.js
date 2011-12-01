@@ -65,7 +65,9 @@ var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px 
 	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .flag { display: none; }"
 	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap img { margin-right: 0; width: 15px; height: 15px; float: none; position: absolute; top: 2px; left: 2px; }"
 ;
-var kocChatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
+var kocChatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }"
+	+ "\n.kocmain .mod_comm.ui-draggable { display: block; }"
+;
 
 var kocChatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: #C3ECE4; }"
 	+ "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }"
@@ -1030,11 +1032,14 @@ jQuery(document).ready(function(){
 										window.seed.queue_atkp[c][m].returnUnixTime = result.returnUnixTime || ts + marchtime * result.returnMultiplier;
 										window.seed.queue_atkp[c][m].marchStatus = 8;
 
-										window.update_seed(result.updateSeed);
+										//window.update_seed(result.updateSeed);
 									}
+									/*
 									for( var j = 1; j < 13; j++ ){
 										window.seed.queue_atkp[c][m]["unit" + j + "Return"] = parseInt(window.seed.queue_atkp[c][m]["unit" + j + "Count"], 10);
-									}
+									}*/
+								} else {
+									console.log('Erreur lors du rappel de la marche');
 								}
 							}
 						});
@@ -1642,7 +1647,7 @@ jQuery(document).ready(function(){
 						KOC.$overview = null;
 					},
 					'updateFromSeed': function(){
-						console.info('KOC overview updateFromSeed function');
+						console.info('KOC overview updateFromSeed function', window.seed);
 						var $popTrs = KOC.overview.$tbodyTrs.filter('.population').filter(':not(:first)'),
 							$resTrs = KOC.overview.$tbodyTrs.filter('.resources').filter(':not(:first)'),
 							$resCapTrs = KOC.overview.$tbodyTrs.filter('.resources_cap').filter(':not(:first)'),
@@ -2869,7 +2874,8 @@ jQuery(document).ready(function(){
 											var info = result.data['l_'+ gps[0] +'_t_'+ gps[1]];
 											if( info ){
 												console.log('fetchMapTiles info', info);
-												if( info.tileType != 10 && info.tileType != 11 && info.tileType != 20 && info.tileType != 30 && info.tileType != 40 ){
+												var type = parseInt(info.tileType, 10);
+												if( type <= 0 || type > 50 ){
 													attack.aborts.push('Coordonnées '+ attack.coords[ i ] +' n\'est pas une terre sauvage.');
 												} else if( info.tileUserId != null && info.tileUserId != "0" ){
 													attack.aborts.push('Coordonnées '+ attack.coords[ i ] +' occupées.');
@@ -2917,7 +2923,7 @@ jQuery(document).ready(function(){
 								if( abort ) break; //previous wave ko
 								console.log('wave', i+1, attack.waves[i]);
 								var resources = [0, 0, 0, 0, 0],
-									unitsArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+									unitsArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 									wave = attack.waves[i],
 									knights = KOC.shared.getAvailableKnights( attack.cityId ),
 									knight = null;
@@ -2950,12 +2956,14 @@ jQuery(document).ready(function(){
 									params.kid = knight;
 									console.log('unit check');
 
-										units = window.seed.units[ 'city' + attack.cityId ];
+									units = window.seed.units[ 'city' + attack.cityId ];
 									for( var j = 0; j < wave.units.length; j++ ){
 										var unit = wave.units[j];
+										var unitKey = unit.id.replace(/nt/, '');
+										var unitNum = parseInt(unit.id.replace(/unt/, ''), 10) - 1; //for unitArr, 0 based
 										var qty = parseFloat(unit.qty);
-										params[ unit.id.replace(/nt/, '') ] = qty;
-										unitsArr[j] = qty;
+										params[ unitKey ] = qty;
+										unitsArr[ unitNum ] = qty;
 
 										console.log('wave', i+1, 'unit', j+1, unit);
 
@@ -2995,17 +3003,23 @@ jQuery(document).ready(function(){
 												var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
 													d = new Date();
 													ts = parseInt(d.getTime() / 1000, 10);
-												time = ts + timediff; //for the wait before next attack
+												time = timediff; //for the wait before next attack
 												try{
-													window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, time, p.xcoord, p.ycoord, unitsArr, p.type, p.kid, resources, result.tileId, result.tileType, result.tileLevel, p.cid, true);
+													window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ts + timediff, p.xcoord, p.ycoord, unitsArr, p.type, p.kid, resources, result.tileId, result.tileType, result.tileLevel, p.cid, true);
 
-													window.updateBoosts(result);
+													//window.updateBoosts(result);
 
-													if( result.data ){
+													/*if( result.data ){
 														window.update_boosts();
 														window.seed.playerEffects.fogExpire = 0;
-													}
+													}*/
 												} catch(e){
+													console.log(e);
+
+													//to avoid using the same knight on wave 2 as the seed is not yet updated
+													window.seed.knights[ 'city' + p.cid ][ 'knt' + p.kid ].knightStatus = 10;
+													console.log('update knight status', 'city' + p.cid, 'knt' + p.kid, window.seed.knights[ 'city' + p.cid ][ 'knt' + p.kid ]);
+
 													$('#koc-refresh-seed').trigger('click');
 												}
 												console.log('wave', i+1, 'launched - result parsing done');
@@ -3046,9 +3060,6 @@ jQuery(document).ready(function(){
 						console.log('after checks and waves launches', attack);
 						if( !abort ){
 							attack.lastCoordIndex = attack.lastCoordIndex + 1;
-
-							//get estimated time
-							//var time = KOC.shared.marchTimeCalculator(attack.cityId, unitsArr, coord[0], coord[1], true, {});
 						}
 
 						if( abort ){
@@ -3059,7 +3070,7 @@ jQuery(document).ready(function(){
 
 						attack.marching = [];
 
-						if( KOC.crestHunt.attacks[ attack.cityId ] && lKOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
+						if( KOC.crestHunt.attacks[ attack.cityId ] && KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
 							KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
 							KOC.crestHunt.storeAttacks();
 							KOC.crestHunt.refreshCityAttacks( attack.cityId );
@@ -3068,15 +3079,16 @@ jQuery(document).ready(function(){
 						}
 
 
-						console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2), time*2);
+						console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2));
+						time *= 1000;
 
 						//force resfresh
-						setTimeout(function(){ KOC.crestHunt.recallDefenders( attack ); }, time + 10000);
+						setTimeout(function(){ console.log('attack defender recall'); KOC.crestHunt.recallDefenders( attack ); }, time + 30000);
 
-						setTimeout(function(){ window.update_seed_ajax(true, null) }, time*2 + 10000);
+						setTimeout(function(){ console.log('attack seed refresh'); window.update_seed_ajax(true, null) }, time*2 + 60000);
 
 						//next roundu
-						setTimeout(function(){ KOC.crestHunt.launchAttack( attack ); }, time*2 + 20000);
+						setTimeout(function(){ console.log('attack next round'); KOC.crestHunt.launchAttack( attack ); }, time*2 + 80000);
 					},
 					'resetForm': function(){
 						console.info('KOC crestHunt resetForm function');

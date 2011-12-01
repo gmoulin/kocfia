@@ -779,7 +779,7 @@ jQuery(document).ready(function(){
 					'getKnightStatText': function( knight ){
 						var stat = Math.max(parseFloat(knight.resourcefulness), parseFloat(knight.politics), parseFloat(knight.combat), parseFloat(knight.intelligence));
 
-						if( knight.resourcefulness == knight.politics || knight.resourcefulness == knight.combat || knight.resourcefulness == knight.intelligence ){
+						if( knight.resourcefulness == knight.politics && knight.resourcefulness == knight.combat && knight.resourcefulness == knight.intelligence ){
 							return 'pas de statistique principale';
 						} else if( knight.resourcefulness == stat ){
 							return 'R'+stat;
@@ -1680,7 +1680,7 @@ jQuery(document).ready(function(){
 											//cm.BOT_STATUS.BOT_MARCH_MARCHING: 1,
 											//cm.BOT_STATUS.BOT_MARCH_RETURNING: 2,
 											//cm.BOT_STATUS.BOT_MARCH_RESTING: 7,
-											if( marche.marchType == 9 && (marche.botMarchStatus == 1  || marche.botMarchStatus == 2 || marche.botMarchStatus == 7) ){
+											if( marche.marchType == 9 ){
 												//get attack duration (go, fight, return, unload, repeat)
 												var time = parseFloat(marche.returnUnixTime) - parseFloat(marche.marchUnixTime) + (parseFloat(marche.restPeriod) / 60);
 
@@ -3059,7 +3059,7 @@ jQuery(document).ready(function(){
 
 						attack.marching = [];
 
-						if( KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
+						if( KOC.crestHunt.attacks[ attack.cityId ] && lKOC.crestHunt.attacks[ attack.cityId ][ attack.id ] ){
 							KOC.crestHunt.attacks[ attack.cityId ][ attack.id ] = attack;
 							KOC.crestHunt.storeAttacks();
 							KOC.crestHunt.refreshCityAttacks( attack.cityId );
@@ -3075,7 +3075,7 @@ jQuery(document).ready(function(){
 
 						setTimeout(function(){ window.update_seed_ajax(true, null) }, time*2 + 10000);
 
-						//next round
+						//next roundu
 						setTimeout(function(){ KOC.crestHunt.launchAttack( attack ); }, time*2 + 20000);
 					},
 					'resetForm': function(){
@@ -3121,7 +3121,7 @@ jQuery(document).ready(function(){
 							var wave = attack.waves[j];
 							code += '<div class="wave">Vague '+ (j + 1) + '&nbsp;:&nbsp;'
 								 +  '<span class="knight">chevalier&nbsp;:&nbsp;'
-								 +  ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].knightLevel +', '+ KOC.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' )
+								 +  ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].skillPointsApplied +', '+ KOC.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' )
 								 +  '</span>'
 								 +  '<span class="troops">';
 
@@ -3194,7 +3194,7 @@ jQuery(document).ready(function(){
 							choices = '';
 						for( var i = 0; i < knights.length; i++ ){
 							var knight = knights[i];
-							choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.knightLevel + ', ' + KOC.shared.getKnightStatText( knight ) +')</option>';
+							choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.skillPointsApplied + ', ' + KOC.shared.getKnightStatText( knight ) +')</option>';
 						}
 
 						KOC.crestHunt.$form.find('.knight-choice').each2(function(i, $kc){

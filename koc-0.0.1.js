@@ -2923,7 +2923,7 @@ jQuery(document).ready(function(){
 								if( abort ) break; //previous wave ko
 								console.log('wave', i+1, attack.waves[i]);
 								var resources = [0, 0, 0, 0, 0],
-									unitsArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+									unitsArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 									wave = attack.waves[i],
 									knights = KOC.shared.getAvailableKnights( attack.cityId ),
 									knight = null;
@@ -2960,7 +2960,7 @@ jQuery(document).ready(function(){
 									for( var j = 0; j < wave.units.length; j++ ){
 										var unit = wave.units[j];
 										var unitKey = unit.id.replace(/nt/, '');
-										var unitNum = parseInt(unit.id.replace(/unt/, ''), 10) - 1; //for unitArr, 0 based
+										var unitNum = parseInt(unit.id.replace(/unt/, ''), 10) - 1; //for unitsArr, 0 based
 										var qty = parseFloat(unit.qty);
 										params[ unitKey ] = qty;
 										unitsArr[ unitNum ] = qty;

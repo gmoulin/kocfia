@@ -1,7 +1,7 @@
 console.info('koc start');
 /* @todo
  * test crestHunt
- * test grease monkey storage
+ * test postmessage
  * trace post to wall popup function
  * if possible highjack the function and return false if KOC.fbWallPopup.active && KOC.fbWallPopup.cancel (quicker, no http request and ui reflow)
  */
@@ -234,14 +234,22 @@ jQuery(document).ready(function(){
 					}
 					console.log(KOC.conf);
 
-				//set grease monkey storage for fbWallPopup module
+				//set message event listener
+				//used to pass data between iframes
+					console.info('KOC postMessage init');
 					try {
-						GM_setValue( 'active', KOC.fbWallPopup.active );
-						GM_setValue( 'post', KOC.fbWallPopup.post );
-						GM_setValue( 'cancel', KOC.fbWallPopup.cancel );
-						GM_setValue( 'privacyLevel', KOC.fbWallPopup.privacyLevel );
+						window.addEventListener('message', function(event){
+							console.log(event);
+							//return the conf values for fbWallPopup module
+							if( event.origin != 'http://koc.kapok.fr' ) event.source.postMessage(KOC.conf.fbWallPopup, event.origin);
+							else return;
+
+						}, false);
+
+						top.postMessage('loaded', 'http://koc.kapok.fr');
+						setInterval(function(){ top.postMessage('loaded', 'http://koc.kapok.fr'); }, 50000);
 					} catch(e){
-						console.warn('grease monkey store failed', e);
+						console.warn('postMessage initialization failed', e);
 					}
 
 				//gather stored items list
@@ -677,15 +685,6 @@ jQuery(document).ready(function(){
 
 							if( KOC[ mod ] && typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
 							//else console.warn('not a function', mod, func);
-
-							if( mod == 'fbWallPopup' ){
-								try {
-									GM_setValue( infos[1], status );
-								} catch(e){
-									console.warn('grease monkey store failed', e);
-								}
-							}
-
 						})
 						.on('change', '.conf-choice', function(){
 							var $this = $(this),

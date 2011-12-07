@@ -16,10 +16,18 @@ var styleElement = document.createElement("style");
 styleElement.innerHTML = fbCss;
 document.getElementsByTagName("head")[0].appendChild(styleElement);
 
-//check after 30s if the game is loaded
-setTimeout(function(){
-	if( document.getElementById('app_content_130402594779') == null ){
-		console.info('reloading');
-		unsafewindow.location.reload(true);
+//reload after 60s if no message from the koc iframe
+var isKocLoaded = setTimeout(function(){ unsafewindow.location.reload(true); }, 60000);
+unsafewindow.addEventListener('message', function(event){
+	console.log(event);
+	if( event.origin != 'http://koc.kapok.fr' ){
+		clearTimeout( isKocLoaded );
+		isKocLoaded = setTimeout(function(){ unsafewindow.location.reload(true); }, 60000);
 	}
-}, 60000);
+}, false);
+
+setTimeout(function(){
+	console.log(window.frames);
+	console.log(top.frames);
+	console.log(parent.frames);
+}, 5000);

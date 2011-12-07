@@ -24,21 +24,29 @@ kocFrame.parentNode.appendChild(style);
 var koccss = document.createElement('style');
 koccss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 
+var domain = 'http://koc.kapok.dev/';
+
 //inject the scripts
 var jqui = document.createElement('script');
-jqui.src = "http://koc.kapok.dev/jquery-ui-1.8.16.custom.min.js";
+jqui.src = domain + "jquery-ui-1.8.16.custom.min.js";
 
 var koc = document.createElement('script'),
 	d = new Date();
-koc.src = "http://koc.kapok.dev/koc-0.0.1.js?ts=" + d.getTime();
+koc.src = domain + "koc-0.0.1.js?ts=" + d.getTime();
 
 //clean and arrange the window
 var jquicss = document.createElement('link');
 jquicss.rel = "stylesheet";
-jquicss.href = "http://koc.kapok.dev/jquery-ui-1.8.16.custom.css";
+jquicss.href = domain + "jquery-ui-1.8.16.custom.css";
 jquicss.type = "text/css";
 
 document.head.appendChild( jquicss );
 document.head.appendChild( koccss );
 document.body.appendChild( jqui );
 document.body.appendChild( koc );
+
+setTimeout(function(){
+	console.log(window.frames);
+	console.log(top.frames);
+	console.log(parent.frames);
+}, 5000);

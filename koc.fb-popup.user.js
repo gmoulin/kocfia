@@ -15,23 +15,29 @@ console.log('privacy select', unsafeWindow.document.querySelector('#platform_dia
 var channel = unsafeWindow.document.querySelector('#uiserver_form input[name=channel]');
 console.log('channel', channel);
 if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
-	var active = GM_getValue('active');
-	console.log('active', active);
-	if( active ){
-		var cancel = GM_getValue('cancel');
-		var post = GM_getValue('post');
-		console.log('cancel', cancel);
-		console.log('post', post);
 
-		if( post ){
-			var privacyLevel = GM_getValue('privacyLevel');
-			console.log('privacyLevel', privacyLevel);
-			var privacy = unsafeWindow.document.querySelector('#platform_dialog_bottom_bar select');
-			privacy.innerHTML = '<option value="'+ privacyLevel +'"></option>';
-			privacy.selectedIndex = 0;
-			unsafeWindow.document.getElementById('uvsplj_7').click();
-		} else if( cancel ){
-			unsafeWindow.document.getElementById('uvsplj_8').click();
+	unsafeWindow.addEventListener(function(event){
+		console.log(event);
+		if( event.origin != '' ){
+			if( event.data.active ){
+				if( event.data.post ){
+					var privacy = unsafeWindow.document.querySelector('#platform_dialog_bottom_bar select');
+					privacy.innerHTML = '<option value="'+ event.data.privacyLevel +'"></option>';
+					privacy.selectedIndex = 0;
+					unsafeWindow.document.getElementById('uvsplj_7').click();
+				} else if( event.data.cancel ){
+					unsafeWindow.document.getElementById('uvsplj_8').click();
+				}
+			}
 		}
-	}
+	}, false);
+
+	unsafeWindow.parent.postMessage('fbWallPopup data please', 'http://koc.kapok.fr');
 }
+
+setTimeout(function(){
+	console.log(window.frames);
+	console.log(top.frames);
+	console.log(parent.frames);
+}, 5000);
+

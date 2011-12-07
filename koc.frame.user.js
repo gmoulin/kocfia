@@ -4,7 +4,7 @@
 // @namespace		KOC
 // @description		améliorations et automatisations diverses pour KOC
 // @require			http://userscripts.org/scripts/source/68059.user.js
-// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js
+// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @include			*kingdomsofcamelot.com/*main_src.php*
 // ==/UserScript==
 jQuery.noConflict();

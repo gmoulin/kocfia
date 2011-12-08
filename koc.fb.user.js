@@ -17,17 +17,13 @@ styleElement.innerHTML = fbCss;
 document.getElementsByTagName("head")[0].appendChild(styleElement);
 
 //reload after 60s if no message from the koc iframe
-var isKocLoaded = setTimeout(function(){ unsafewindow.location.reload(true); }, 60000);
-unsafewindow.addEventListener('message', function(event){
+//var isKocLoaded = setTimeout(function(){ unsafeWindow.location.reload(true); }, 60000);
+console.log(unsafeWindow.postMessage);
+console.log(window.postMessage);
+unsafeWindow.addEventListener('message', function(event){
 	console.log(event);
-	if( event.origin != 'http://koc.kapok.fr' ){
-		clearTimeout( isKocLoaded );
-		isKocLoaded = setTimeout(function(){ unsafewindow.location.reload(true); }, 60000);
+	if( event.origin == 'http://koc.kapok.fr' ){
+		//clearTimeout( isKocLoaded );
+		//isKocLoaded = setTimeout(function(){ unsafeWindow.location.reload(true); }, 60000);
 	}
 }, false);
-
-setTimeout(function(){
-	console.log(window.frames);
-	console.log(top.frames);
-	console.log(parent.frames);
-}, 5000);

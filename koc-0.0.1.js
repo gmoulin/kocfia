@@ -246,8 +246,17 @@ jQuery(document).ready(function(){
 
 						}, false);
 
-						top.postMessage('loaded', 'http://koc.kapok.fr');
-						setInterval(function(){ top.postMessage('loaded', 'http://koc.kapok.fr'); }, 50000);
+						console.log(window.parent.postMessage);
+						console.log(window.parent.parent.postMessage);
+
+						window.parent.postMessage('loaded', 'http://koc.kapok.fr');
+						window.parent.parent.postMessage('loaded', 'http://koc.kapok.fr');
+						window.top.postMessage('loaded', 'http://koc.kapok.fr');
+						setInterval(function(){
+							window.parent.postMessage('loaded', 'http://koc.kapok.fr');
+							window.parent.parent.postMessage('loaded', 'http://koc.kapok.fr');
+							window.top.postMessage('loaded', 'http://koc.kapok.fr');
+						}, 50000);
 					} catch(e){
 						console.warn('postMessage initialization failed', e);
 					}

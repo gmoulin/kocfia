@@ -18,7 +18,7 @@ if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
 
 	unsafeWindow.addEventListener(function(event){
 		console.log(event);
-		if( event.origin != '' ){
+		if( event.origin == 'http://koc.kapok.fr' ){
 			if( event.data.active ){
 				if( event.data.post ){
 					var privacy = unsafeWindow.document.querySelector('#platform_dialog_bottom_bar select');
@@ -36,6 +36,7 @@ if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
 }
 
 setTimeout(function(){
+	console.log('frames from popup');
 	console.log(window.frames);
 	console.log(top.frames);
 	console.log(parent.frames);

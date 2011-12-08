@@ -46,6 +46,7 @@ document.body.appendChild( jqui );
 document.body.appendChild( koc );
 
 setTimeout(function(){
+	console.log('frames from iframe');
 	console.log(window.frames);
 	console.log(top.frames);
 	console.log(parent.frames);

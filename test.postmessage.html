@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+	<title>Test.postmessage</title>
+	<script>
+
+		setTimeout(function(){
+			console.log('page init');
+			window.addEventListener('message', function(event){ console.log('window', event); }, false);
+
+			setInterval(function(){
+				console.log('messaging from page');
+				//window.frames['fwrap'].postMessage('test from page', 'http://koc.kapok.dev');
+				window.frames['fwrap'].frames['fsub'].postMessage('test from page', 'http://koc.kapok.dev');
+			}, 2000);
+		}, 1000);
+	</script>
+</head>
+<body>
+	<iframe name="fwrap" id ="fwrap" src="http://koc.kapok.dev/test.iframewrapper.html"></iframe>
+</body>
+</html>

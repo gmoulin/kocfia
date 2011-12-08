@@ -18,7 +18,7 @@ if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
 
 	unsafeWindow.addEventListener(function(event){
 		console.log(event);
-		if( event.origin == 'http://koc.kapok.fr' ){
+		if( event.origin.indexOf('kingdomsofcamelot.com') != -1 ){
 			if( event.data.active ){
 				if( event.data.post ){
 					var privacy = unsafeWindow.document.querySelector('#platform_dialog_bottom_bar select');
@@ -32,13 +32,6 @@ if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
 		}
 	}, false);
 
-	unsafeWindow.parent.postMessage('fbWallPopup data please', 'http://koc.kapok.fr');
+	unsafeWindow.parent.postMessage('fbWallPopup module conf please', window.location.protocol + '//' + window.location.hostname);
 }
-
-setTimeout(function(){
-	console.log('frames from popup');
-	console.log(window.frames);
-	console.log(top.frames);
-	console.log(parent.frames);
-}, 5000);
 

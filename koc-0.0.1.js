@@ -237,26 +237,20 @@ jQuery(document).ready(function(){
 				//set message event listener
 				//used to pass data between iframes
 					console.info('KOC postMessage init');
+					var origin = window.location.protocol + '//' + window.location.hostname;
 					try {
 						window.addEventListener('message', function(event){
 							console.log(event);
 							//return the conf values for fbWallPopup module
-							if( event.origin != 'http://koc.kapok.fr' ) event.source.postMessage(KOC.conf.fbWallPopup, event.origin);
-							else return;
+							if( event.origin.indexOf('facebook.com') != -1 ) event.source.postMessage(KOC.conf.fbWallPopup, origin);
+							return;
 
 						}, false);
 
-						console.log(window.parent.postMessage);
-						console.log(window.parent.parent.postMessage);
-
-						window.parent.postMessage('loaded', 'http://koc.kapok.fr');
-						window.parent.parent.postMessage('loaded', 'http://koc.kapok.fr');
-						window.top.postMessage('loaded', 'http://koc.kapok.fr');
+						top.postMessage('loaded', origin);
 						setInterval(function(){
-							window.parent.postMessage('loaded', 'http://koc.kapok.fr');
-							window.parent.parent.postMessage('loaded', 'http://koc.kapok.fr');
-							window.top.postMessage('loaded', 'http://koc.kapok.fr');
-						}, 50000);
+							top.postMessage('loaded', origin);
+						}, 30000);
 					} catch(e){
 						console.warn('postMessage initialization failed', e);
 					}

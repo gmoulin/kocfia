@@ -6,10 +6,10 @@
 				console.log('iframe init');
 				window.addEventListener('message', function(event){ console.log('iframe', event); }, false);
 
-				/*setInterval(function(){
+				setInterval(function(){
 					console.log('messaging from iframe');
 					top.postMessage('test from iframe', 'http://koc.kapok.dev');
-				}, 2000);*/
+				}, 2000);
 			}, 1000);
 		</script>
 	</head>

@@ -10,11 +10,11 @@
 			console.log('page init');
 			window.addEventListener('message', function(event){ console.log('window', event); }, false);
 
-			setInterval(function(){
+			/*setInterval(function(){
 				console.log('messaging from page');
 				//window.frames['fwrap'].postMessage('test from page', 'http://koc.kapok.dev');
 				window.frames['fwrap'].frames['fsub'].postMessage('test from page', 'http://koc.kapok.dev');
-			}, 2000);
+			}, 2000);*/
 		}, 1000);
 	</script>
 </head>

@@ -1,7 +1,7 @@
 console.info('koc start');
 /* @todo
  * test crestHunt
- * test postmessage
+ * test postmessage (popup)
  * trace post to wall popup function
  * if possible highjack the function and return false if KOC.fbWallPopup.active && KOC.fbWallPopup.cancel (quicker, no http request and ui reflow)
  */
@@ -50,6 +50,13 @@ console.info('koc start');
 		}
 		return a;
 	};
+
+	function product(){
+		return Array.prototype.reduce.call(arguments, function(as, bs) {
+			return [a.concat(b) for each (a in as) for each (b in bs)]
+		}, [[]]);
+	}
+
 
 	Array.max = function( array ){
 		return Math.max.apply( Math, array );
@@ -107,6 +114,8 @@ jQuery(document).ready(function(){
 		kocConfPanelCss += "\n#general-refreshFrequency, #general-reloadFrequency { width: 30px; text-align: center; }";
 		kocConfPanelCss += "\n#koc-conf-panel .coord { width: 30px; text-align: center; }";
 		kocConfPanelCss += "\n#koc-map .save, #koc-map .filter { display: none; }";
+		kocConfPanelCss += "\n#koc-map .search-result table { min-width: 50%; }";
+		kocConfPanelCss += "\n#koc-map .search-result textarea { float: right; width: 90px; height: 90px; }";
 
 	var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
@@ -193,7 +202,8 @@ jQuery(document).ready(function(){
 		//shared
 			var $dragHandle = $('<div class="drag-handle">');
 
-		var reloadTimeout, reloadInterval, reloadTimer, refreshTimeout;
+		var reloadTimeout, reloadInterval, reloadTimer, refreshTimeout,
+			merlinBoxClick = false;
 
 		KOC = {
 			'server': null,
@@ -236,24 +246,17 @@ jQuery(document).ready(function(){
 
 				//set message event listener
 				//used to pass data between iframes
-					console.info('KOC postMessage init');
-					var origin = window.location.protocol + '//' + window.location.hostname;
-					try {
-						window.addEventListener('message', function(event){
-							console.log(event);
-							//return the conf values for fbWallPopup module
-							if( event.origin.indexOf('facebook.com') != -1 ) event.source.postMessage(KOC.conf.fbWallPopup, origin);
-							return;
+					window.addEventListener('message', function(event){
+						console.log(event);
+						//return the conf values for fbWallPopup module
+						if( event.origin.indexOf('facebook.com') != -1 ) event.source.postMessage(KOC.conf.fbWallPopup, 'https://apps.facebook.com/');
+						return;
+					}, false);
 
-						}, false);
-
-						top.postMessage('loaded', origin);
-						setInterval(function(){
-							top.postMessage('loaded', origin);
-						}, 30000);
-					} catch(e){
-						console.warn('postMessage initialization failed', e);
-					}
+					top.postMessage('loaded', 'https://apps.facebook.com/');
+					setInterval(function(){
+						top.postMessage('loaded', 'https://apps.facebook.com/');
+					}, 10000);
 
 				//gather stored items list
 					for( var i = 0; i < KOC.modules.length; i++ ){
@@ -261,6 +264,16 @@ jQuery(document).ready(function(){
 						if( KOC[mod].stored ){
 							for( var j = 0; j < KOC[mod].stored.length; j++ ){
 								KOC.stored.push( mod + '_' + KOC[mod].stored[j] );
+
+								try{
+									var stored = localStorage.getObject('koc_' + mod + '_' + KOC[mod].stored[j] + '_' + KOC.server);
+									if( stored ){
+										KOC[mod][ KOC[mod].stored[j] ] = stored;
+									}
+								} catch(e){
+									alert(e);
+								}
+
 							}
 						}
 					}
@@ -278,6 +291,15 @@ jQuery(document).ready(function(){
 					KOC.confPanel();
 					console.timeEnd('confPanel');
 
+				//modules init
+					for( var i = 0; i < KOC.modules.length; i++ ){
+						if( KOC.conf[KOC.modules[i]].active ){
+							console.time('koc '+ KOC.modules[i] +' on');
+							KOC[ KOC.modules[i] ].on();
+							console.timeEnd('koc '+ KOC.modules[i] +' on');
+						}
+					}
+
 				//refresh button
 					KOC.$buttons.append(
 						$('<button id="koc-refresh-seed">')
@@ -286,13 +308,6 @@ jQuery(document).ready(function(){
 							.click(function(e){ KOC.shared.updateSeed(); })
 					);
 					KOC.$refreshButton = $('#koc-refresh-seed');
-
-				//modules init
-					for( var i = 0; i < KOC.modules.length; i++ ){
-						console.time('koc '+ KOC.modules[i] +' on');
-						KOC[ KOC.modules[i] ].on();
-						console.timeEnd('koc '+ KOC.modules[i] +' on');
-					}
 
 				//map links
 					$body.on('click', '.mapLink', function(){
@@ -318,9 +333,44 @@ jQuery(document).ready(function(){
 					if( KOC.conf.general.reload ){
 						KOC.shared.reloadCountdown(1);
 					}
+
 				//refresh data
 					if( KOC.conf.general.refresh ){
 						KOC.shared.refreshCountdown(1);
+					}
+
+				//merlin box
+					$body.on('click', '.mod_comm_mmb, .kocMerlinSmall', function(){
+						merlinBoxClick = true;
+					});
+
+					if( KOC.conf.general.hideMagicalBoxPreview ){
+						var i = 0;
+						var hideMerlinPreview = setInterval(function(){
+							console.log('modal visible', $('#modalBox1').is(':visible'), $('#modalTitle1').text().indexOf('Merlin'));
+							if( $('#modalBox1').is(':visible') ){
+								if( $('#modalTitle1').text().indexOf('Merlin') > -1 ){
+									window.Modal.hideModal();
+									clearInterval(hideMerlinPreview);
+								}
+							}
+							i++;
+							if( i > 4 ) clearInterval(hideMerlinPreview);
+						}, 1000);
+					}
+
+				//other players court invitations
+					if( KOC.conf.general.hideOtherPlayersCourtInvitation ){
+						var i = 0;
+						var hideViewCourt = setInterval(function(){
+							console.log('modal visible', $('#modalBox1').is(':visible'), $('#modalTitle1').text().indexOf('Merlin'));
+							if( $('#modalBox1').is(':visible') && $('#modalBox1').hasClass('modalBoxUEP') ){
+								window.Modal.hideModal();
+								clearInterval(hideViewCourt);
+							}
+							i++;
+							if( i > 4 ) clearInterval(hideViewCourt);
+						}, 1000);
 					}
 			},
 			/* default configuration */
@@ -332,6 +382,7 @@ jQuery(document).ready(function(){
 						'refresh': 0,
 						'refreshFrequency': 30,
 						'hideMagicalBoxPreview': 0,
+						'hideOtherPlayersCourtInvitation': 0,
 					},
 					'confPanel': {
 						'position': {'top': 100, 'left': 100},
@@ -596,7 +647,16 @@ jQuery(document).ready(function(){
 								break;
 							case 'magicalboxPreview.php':
 								this.addEventListener("load", function(){
-									if( KOC.conf.general.hideMagicalBoxPreview ){
+									//using merlinBoxClick flag to avoid closing the modal on game asked by the user
+									if( KOC.conf.general.hideMagicalBoxPreview && !merlinBoxClick ){
+										setTimeout(function(){ window.Modal.hideModal(); }, 300);
+									}
+									merlinBoxClick = false;
+								}, false);
+								break;
+							case 'viewCourt.php':
+								this.addEventListener("load", function(){
+									if( KOC.conf.general.hideOtherPlayersCourtInvitation ){
 										setTimeout(function(){ window.Modal.hideModal(); }, 300);
 									}
 								}, false);
@@ -806,6 +866,7 @@ jQuery(document).ready(function(){
 						for( var i = 0; i < KOC.stored.length; i++ ){
 							localStorage.removeItem('koc_' + KOC.stored[i] + '_' + KOC.server);
 						}
+						$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
 					},
 					'optionPanel': function($optionsSection){
 						console.info('KOC shared optionPanel function');
@@ -817,7 +878,8 @@ jQuery(document).ready(function(){
 							code += KOC.shared.generateInput('general', 'refreshFrequency', ' minutes', KOC.conf.general.refreshFrequency).replace(/<p>/, '');
 							code += KOC.shared.generateCheckbox('general', 'reload', 'Recharger toutes les ', KOC.conf.general.reload).replace(/<\/p>/, '');
 							code += KOC.shared.generateInput('general', 'reloadFrequency', ' minutes', KOC.conf.general.reloadFrequency).replace(/<p>/, '');
-							code += KOC.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin.');
+							code += KOC.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin', KOC.conf.general.hideMagicalBoxPreview);
+							code += KOC.shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOC.conf.general.hideOtherPlayersCourtInvitation);
 							code += '</div>';
 						$optionsSection.append( code );
 						for( var i = 0; i < KOC.modules.length; i++ ){
@@ -1154,6 +1216,19 @@ jQuery(document).ready(function(){
 							}
 						});
 					},
+					'getDistance': function( fromX, fromY, toX, toY ){
+						var max = 750;
+						var middle = max / 2;
+						var x = Math.abs(toX - fromX);
+						if (x > middle) {
+							x = max - x;
+						}
+						var y = Math.abs(toY - fromY);
+						if (y > middle) {
+							y = max - y;
+						}
+						return Math.round(100 * Math.sqrt(x * x + y * y)) / 100;
+					}
 				},
 			/* FACEBOOK WALL POST POPUP */
 				'fbWallPopup': {
@@ -1317,23 +1392,27 @@ jQuery(document).ready(function(){
 							}
 
 						//highlightFriendsAndFoes
-							try{
-								var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.server);
-								if( persistentFriendsList ){
-									KOC.chat.friendsList = persistentFriendsList;
+							if( $.isEmptyObject( KOC.chat.friendsList ) ){
+								try{
+									var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.server);
+									if( persistentFriendsList ){
+										KOC.chat.friendsList = persistentFriendsList;
+									}
+								} catch(e){
+									console.error(e);
 								}
-							} catch(e){
-								console.error(e);
 							}
 
 						//highlightFoes
-							try{
-								var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.server);
-								if( persistentFoesList ){
-									KOC.chat.foesList = persistentFoesList;
+							if( $.isEmptyObject( KOC.chat.foesList ) ){
+								try{
+									var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.server);
+									if( persistentFoesList ){
+										KOC.chat.foesList = persistentFoesList;
+									}
+								} catch(e){
+									console.error(e);
 								}
-							} catch(e){
-								console.error(e);
 							}
 
 							if( KOC.conf.chat.highlightFriends ){
@@ -2782,20 +2861,22 @@ jQuery(document).ready(function(){
 					},
 					'on': function(){
 						console.info('KOC crestHunt on function');
-						try{
-							var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
-							if( persistentCrestHuntAttacks ){
-								KOC.crestHunt.attacks = persistentCrestHuntAttacks;
-
-								for( var i = 0; i < KOC.citiesId.length; i++ ){
-									KOC.crestHunt.listCityAttacks( KOC.citiesId[i] );
+						if( $.isEmptyObject( KOC.crestHunt.attacks ) ){
+							try{
+								var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
+								if( persistentCrestHuntAttacks ){
+									KOC.crestHunt.attacks = persistentCrestHuntAttacks;
 								}
-
-								KOC.crestHunt.$saved.find('.charge').toggle( KOC.conf.crestHunt.automatic );
+							} catch(e){
+								console.error(e);
 							}
-						} catch(e){
-							console.error(e);
 						}
+
+						for( var i = 0; i < KOC.citiesId.length; i++ ){
+							KOC.crestHunt.listCityAttacks( KOC.citiesId[i] );
+						}
+
+						KOC.crestHunt.$saved.find('.charge').toggle( KOC.conf.crestHunt.automatic );
 
 						if( KOC.conf.crestHunt.automatic ){
 							KOC.crestHunt.automaticOn();
@@ -3175,13 +3256,15 @@ jQuery(document).ready(function(){
 						console.info('KOC notepad on function');
 						$head.append( $('<style id="koc-notepad-css">').text(kocNotepadCss) );
 
-						try{
-							var notes = localStorage.getObject('koc_notepad_notes_' + KOC.server);
-							if( notes ){
-								KOC.notepad.notes = notes;
+						if( $.isEmptyObject( KOC.notepad.notes ) ){
+							try{
+								var notes = localStorage.getObject('koc_notepad_notes_' + KOC.server);
+								if( notes ){
+									KOC.notepad.notes = notes;
+								}
+							} catch(e){
+								alert(e);
 							}
-						} catch(e){
-							alert(e);
 						}
 
 						var $notepad = $('<div id="koc-notepad" class="ui-widget ui-widget-content ui-corner-all">');
@@ -3281,7 +3364,7 @@ jQuery(document).ready(function(){
 								if( l < 2 ){
 									KOC.notepad.$charsLeft.text(l + ' caractère restant');
 								} else {
-									KOC.notepad.$charsLeft.text(l + ' caractères restant');
+									KOC.notepad.$charsLeft.text(l + ' caractères restant')
 								}
 						}, false);
 
@@ -3356,6 +3439,8 @@ jQuery(document).ready(function(){
 					},
 					'stored': ['search'],
 					'search': {},/*{by city, tiles}*/
+					'currentSearch': [],
+					'loadTypeLabels': { 'C': 'cités', 'CB': 'Camps Barbares', 'TS': 'Terres Sauvages', 'FS': 'Forêts Sombres' },
 					'confPanel': function( $section ){
 						console.info('KOC map confPanel function');
 						var code = '<h3>Carte</h3>';
@@ -3377,25 +3462,47 @@ jQuery(document).ready(function(){
 						var $section = KOC.$confPanel.find('#koc-map').html('');
 
 						var code = '<fieldset class="search"><legend>Recherche</legend>';
-							code += '<label for="koc-map-search-type">Type&nbsp;:&nbsp;</label>';
-							code += '<select id="koc-map-search-type">';
-							code += '<option value="">Choisir</option>';
-							code += '<option value="C">Cités</option>';
-							code += '<option value="CB">Camps Barbares</option>';
-							code += '<option value="TS">Terres Sauvages</option>';
-							code += '<option value="FS">Forêts Sombres</option>';
-							code += '</select>';
-							code += '<br /><label for="koc-map-search-near-x">Autour de&nbsp;:&nbsp;</label>';
-							code += '<input type="text" id="koc-map-search-near-x" class="coord" />';
-							code += '<input type="text" id="koc-map-search-near-y" class="coord" />';
-							code += '<br /><label for="koc-map-search-range-min">Distance&nbsp;:&nbsp;</label>';
-							code += '<input type="text" id="koc-map-search-range-min" class="coord" />';
-							code += '<input type="text" id="koc-map-search-range-max" class="coord" />';
-							code += '<button class="go">Rechercher</button>';
-							code += '<button class="cancel">Annuler</button>';
-							code += '</fieldset><fieldset class="save">';
-							code += '<label for="koc-map-search-city">Sauvegarder la recherche dans la cité&nbsp;:&nbsp;</label>';
-							code += '<select id="koc-map-search-city"><option value="">Choisir</option>';
+						code += '<label for="koc-map-type">Type&nbsp;:&nbsp;</label>';
+						code += '<select id="koc-map-type">';
+						code += '<option value="">Choisir</option>';
+						code += '<option value="C">Cités</option>';
+						code += '<option value="CB">Camps Barbares</option>';
+						code += '<option value="TS">Terres Sauvages</option>';
+						code += '<option value="FS">Forêts Sombres</option>';
+						code += '</select>';
+						code += '<br /><label for="koc-map-near-x">Autour de&nbsp;:&nbsp;</label>';
+						code += '<input type="text" id="koc-map-near-x" class="coord" />';
+						code += '<input type="text" id="koc-map-near-y" class="coord" />';
+						code += '<select id="koc-map-city-coord"><option value="">Villes</option>';
+
+						var loadOptions = '';
+						for( var c in KOC.cities ){
+							if( KOC.cities.hasOwnProperty(c) ){
+								var city = KOC.cities[c];
+								code += '<option value="'+ city.coords.x + '|' + city.coords.y +'">'+ city.roman + ' ' + city.name +'</option>';
+
+								if( KOC.map.search.hasOwnProperty( city.id ) ){
+									for( var t in KOC.map.search[ city.id ] ){
+										if( KOC.map.search[ city.id ].hasOwnProperty(t) ){
+											loadOptions += '<option value="'+ city.id + '|' + t +'">'+ city.roman + ' ' + city.name + ' - ' + KOC.map.loadTypeLabels[t] +'</option>';
+										}
+									}
+								}
+							}
+						}
+
+						code += '</select>';
+						code += '<br /><label for="koc-map-range-min">Distance entre&nbsp;:&nbsp;</label>';
+						code += '<input type="text" id="koc-map-range-min" class="coord" />';
+						code += '<label for="koc-map-range-max">&nbsp;et&nbsp;</label>';
+						code += '<input type="text" id="koc-map-range-max" class="coord" />';
+						code += '<button class="go">Rechercher</button>';
+						code += '<button class="cancel">Annuler</button>';
+						code += '<br /><label for="koc-map-load-saved">Ou charger une recherche sauvegardée&nbsp;:&nbsp;</label>';
+						code += '<br /><select id="koc-map-load-saved"><option value="">Choisir</option>'+ loadOptions +'</select>';
+						code += '</fieldset><fieldset class="save"><legend>Sauvegarde</legend>';
+						code += '<label for="koc-map-city-save">Sauvegarder la recherche dans la cité&nbsp;:&nbsp;</label>';
+						code += '<select id="koc-map-city-save"><option value="">Choisir</option>';
 
 						for( var c in KOC.cities ){
 							if( KOC.cities.hasOwnProperty(c) ){
@@ -3406,34 +3513,50 @@ jQuery(document).ready(function(){
 
 						code += '</select><button>Sauvegarder</button></fieldset>';
 						code += '<fieldset class="filter"><legend>Filter les résultats</legend>';
-						code += '<label for="koc-map-filter-level-min">Niveau de&nbsp;:&nbsp;</label>';
-						code += '<input type="text" id="koc-map-filter-level-min" class="coord" />';
-						code += '<label for="koc-map-filter-level-max">à&nbsp;:&nbsp;</label>';
-						code += '<input type="text" id="koc-map-filter-level-max" class="coord" />';
-						code += '<div class="type">';
-						code += '<input type="checkbox" id="koc-map-filter-type-plaine" value="10" />';
-						code += '<label for="koc-map-filter-type-plaine">Plaine</label>';
-						code += '<input type="checkbox" id="koc-map-filter-type-lac" value="11" />';
-						code += '<label for="koc-map-filter-type-lac">Lac</label>';
-						code += '<input type="checkbox" id="koc-map-filter-type-foret" value="20" />';
-						code += '<label for="koc-map-filter-type-foret">Forêt</label>';
-						code += '<input type="checkbox" id="koc-map-filter-type-colline" value="30" />';
-						code += '<label for="koc-map-filter-type-colline">Colline</label>';
-						code += '<input type="checkbox" id="koc-map-filter-type-montagne" value="40" />';
-						code += '<label for="koc-map-filter-type-montagne">Montagne</label>';
+						code += '<div class="level"><label for="koc-map-level-min">Niveau entre&nbsp;:&nbsp;</label>';
+						code += '<input type="text" id="koc-map-level-min" class="coord" />';
+						code += '<label for="koc-map-level-max">&nbsp;et&nbsp;:&nbsp;</label>';
+						code += '<input type="text" id="koc-map-level-max" class="coord" />';
+						code += '</div><div class="type"><label>Type&nbsp;:&nbsp;</label>';
+						code += '<input type="checkbox" id="koc-map-type-plain" value="10" />';
+						code += '<label for="koc-map-type-plain">Plaine</label>';
+						code += '<input type="checkbox" id="koc-map-type-lake" value="11" />';
+						code += '<label for="koc-map-type-lake">Lac</label>';
+						code += '<input type="checkbox" id="koc-map-type-forest" value="20" />';
+						code += '<label for="koc-map-type-forest">Forêt</label>';
+						code += '<input type="checkbox" id="koc-map-type-hill" value="30" />';
+						code += '<label for="koc-map-type-hill">Colline</label>';
+						code += '<input type="checkbox" id="koc-map-type-mountain" value="40" />';
+						code += '<label for="koc-map-type-mountain">Montagne</label>';
 						code += '</div><div class="status">';
-						code += '<input type="checkbox" id="koc-map-filter-status" />';
-						code += '<label for="koc-map-filter-status">Libre</label>';
+						code += '<label for="koc-map-status">Libre</label>';
+						code += '<input type="checkbox" id="koc-map-status" />';
+						code += '</div><div class="mist">';
+						code += '<label for="koc-map-mist">Sous brumes</label>';
+						code += '<input type="checkbox" id="koc-map-mist" />';
 						code += '</div></fieldset><div class="search-result"></div>';
 
 						$section
 							.append( code )
+							.on('change', '#koc-map-city-coord', function(){
+								var v = $(this).val();
+								if( v != '' ){
+									var cityCoord = v.split('|');
+									$('#koc-map-near-x').val( cityCoord[0] );
+									$('#koc-map-near-y').val( cityCoord[1] );
+								}
+							})
 							.on('click', '.search .go', function(){
-								var type = $('#koc-map-search-type').val(),
-									coordX = $.trim( $('#koc-map-search-near-x').val() ),
-									coordY = $.trim( $('#koc-map-search-near-y').val() ),
-									rangeMin = $.trim( $('#koc-map-search-range-min').val() ),
-									rangeMax = $.trim( $('#koc-map-search-range-max').val() ),
+								KOC.map.$save.hide();
+								KOC.map.$filter.hide();
+								KOC.map.$results.empty();
+								$(this).attr('disabled', 'disabled').html('Chargement');
+
+								var type = $('#koc-map-type').val(),
+									coordX = $.trim( $('#koc-map-near-x').val() ),
+									coordY = $.trim( $('#koc-map-near-y').val() ),
+									rangeMin = $.trim( $('#koc-map-range-min').val() ),
+									rangeMax = $.trim( $('#koc-map-range-max').val() ),
 									errors = [];
 
 								if( type == '' ){
@@ -3445,8 +3568,8 @@ jQuery(document).ready(function(){
 								} else {
 									coordX = parseInt(coordX, 10);
 									coordY = parseInt(coordY, 10);
-									if( coordX && coordY ){
-										if( coordX < 0 || coordX > 750 || coordY < 0 || coordY > 750 ){
+									if( coordX != Number.NaN && coordY != Number.NaN ){
+										if( coordX < 0 || coordX > 749 || coordY < 0 || coordY > 749 ){
 											errors.push('Coordonnée invalide.');
 										}
 									} else {
@@ -3457,147 +3580,465 @@ jQuery(document).ready(function(){
 								if( rangeMin == '' && rangeMax == '' ){
 									errors.push('Veuillez spécifier une distance.');
 								} else {
-									rangeMin = parseInt(coordX, 10);
-									rangeMax = parseInt(coordY, 10);
-									if( rangeMin && rangeMax ){
-										if( rangeMin < 0 || rangeMax < 0 || rangeMin > rangeMax ){
-											errors.push('Distance invalide.');
+									rangeMin = parseInt(rangeMin, 10);
+									rangeMax = parseInt(rangeMax, 10);
+									if( rangeMin != Number.NaN && rangeMax != Number.NaN ){
+										if( rangeMin < 1 || rangeMax < 1 || rangeMin > rangeMax ){
+											errors.push('Distance invalide. Minimum 1 de distance et distance minimum inférieure ou égale à la distance max.');
 										}
 									} else {
 										errors.push('Veuillez spécifier une distance.');
 									}
 								}
 
-
 								if( errors.length ){
 									alert( errors.join("\n") );
 								} else {
 									KOC.map.tmp = null;
 									KOC.map.explore( type, coordX, coordY, rangeMin, rangeMax );
-									KOC.map.displayResults();
-
-									KOC.map.$save.show();
-									KOC.map.$filter.show();
-									if( type == 'TS' ){
-										KOC.map.$filter.find('.type').show();
-									} else {
-										KOC.map.$filter.find('.type').hide();
-									}
 								}
 							})
 							.on('click', '.search .cancel', function(){
+								if( KOC.map.xhr ) KOC.map.xhr.abort(); //kill the ajax request
 								KOC.map.$search.find('input, select').val('');
+								KOC.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
 								KOC.map.$save.hide();
 								KOC.map.$filter.hide();
 								KOC.map.$results.empty();
 							})
 							.on('click', '.save button', function(){
-								var cityId = KOC.map.$save.find('select').val();
-								if( cityId == '' ){
-									alert('Vous devez spécifier une ville pour sauvegarder cette recherche.');
-								} else {
-									KOC.map.search[cityId] = KOC.map.results;
+								var cityId = $('#koc-map-city-save').val();
+								if( cityId && cityId != '' ){
+									if( !KOC.map.search.hasOwnProperty( cityId ) ) KOC.map.search[cityId] = {};
+									KOC.map.search[cityId][ KOC.map.currentSearch.type ] = KOC.map.currentSearch;
 									KOC.map.storeSearch();
+
+									var loadOptions = '<option value="">Choisir</option>';
+									for( var c in KOC.map.search ){
+										if( KOC.map.search.hasOwnProperty(c) ){
+											var city = KOC.shared.getCityById(c);
+											for( var t in KOC.map.search[c] ){
+												if( KOC.map.search[c].hasOwnProperty(t) ){
+													loadOptions += '<option value="'+ c + '|' + t +'">'+ city.roman + ' ' + city.name + ' - ' + KOC.map.loadTypeLabels[t] +'</option>';
+												}
+											}
+										}
+									}
+									$('#koc-map-load-saved').html( loadOptions );
+								} else {
+									alert('Vous devez spécifier une ville pour sauvegarder cette recherche.');
+								}
+							})
+							.on('change', '#koc-map-load-saved', function(){
+								var indices = $(this).val();
+								if( indices != '' ){
+									indices = indices.split('|');
+									KOC.map.$save.hide();
+									KOC.map.displaySaved( KOC.map.search[ indices[0] ][ indices[1] ] );
 								}
 							})
 							.on('change', '.filter input', function(){
-								var $lis = KOC.map.$result.find('li').hide(),
-									min = parseInt( $.trim( $('#koc-map-filter-level-min').val() ) ) || 0,
-									max = parseInt( $.trim( $('#koc-map-filter-level-min').val() ) ) || 10,
-									isTS = KOC.map.$result.find('ul').hasClass('.TS'),
-									product = [];
+								var $tbody = KOC.map.$results.find('tbody'),
+									$trs = $tbody.find('tr'),
+									min = parseInt( $.trim( $('#koc-map-level-min').val() ), 10 ),
+									max = parseInt( $.trim( $('#koc-map-level-max').val() ), 10 ),
+									classes = [],
+									levels = [],
+									types = [],
+									status = [];
 
-								for( var i = min; i <= max; i++ ){
-									product.push( '.level' + i );
+								if( min || max ){
+									if( !min ) min = 1;
+									if( !max ) max = 10;
+									for( var i = min; i <= max; i++ ){
+										levels.push( '.level' + i );
+									}
+									if( levels.length ) classes.push( levels );
 								}
 
-								if( isTS ){
-									var $types = KOC.map.$result.find('.type').find('input').filter(':checked');
+								if( $tbody.hasClass('TS') ){
+									var $types = KOC.map.$filter.find('.type').find('input').filter(':checked');
 									if( $types.length ){
 										$types.each(function(){
-											product.push( '.type' + this.value );
+											if( this.value == 10 ) types.push( '.type50' ); //two possible values for plains
+											types.push( '.type' + this.value );
 										});
+										if( types.length ) classes.push( types );
+									}
+									if( KOC.map.$filter.find('.status').find('input').filter(':checked').length ){
+										status.push('.free');
+										classes.push( status );
 									}
 								}
 
-								product = product.reduce(function(previousValue, currentValue, index, array){
-									var tmp = [];
-									for( var i = 0; i < previousValue.length; i++ ){
-										for( var j = 0; j < currentValue.length; j++ ){
-											tmp.push(previousValue[i].concat(currentValue[j]));
-										}
+								if( $tbody.hasClass('C') ){
+									if( KOC.map.$filter.find('.status').find('input').filter(':checked').length ){
+										status.push('.misted');
+										classes.push( status );
 									}
-									return tmp;
-								});
+								}
 
-								$lis.filter( product.join(',') ).show();
+								//cartesian product
+								if( classes.length ){
+									classes = classes.reduce(function(previousValue, currentValue, index, array){
+										var tmp = [];
+										for( var i = 0; i < previousValue.length; i++ ){
+											for( var j = 0; j < currentValue.length; j++ ){
+												tmp.push(previousValue[i].concat(currentValue[j]));
+											}
+										}
+										return tmp;
+									});
+								}
+
+								if( classes.length ) $trs.hide().filter( classes.join(',') ).show();
+								else $trs.show();
+
+								var list = [];
+								$trs.filter(':visible').each2(function(i, $tr){
+									var coord = $tr.find('td').eq(1).data('coord');
+									if( coord ) list.push(coord);
+								});
+								$('#coordsList').html( list.join("\n") );
 							});
 
 						KOC.map.$search = $('#koc-map').find('.search');
 						KOC.map.$save = $('#koc-map').find('.save');
 						KOC.map.$filter = $('#koc-map').find('.filter');
-						KOC.map.$result = $('#koc-map').find('.search-result');
+						KOC.map.$results = $('#koc-map').find('.search-result');
 					},
 					'on': function(){
 						console.info('KOC map on function');
 
-						try{
-							var search = localStorage.getObject('koc_map_search_' + KOC.server);
-							if( search ){
-								KOC.map.search = search;
+						if( $.isEmptyObject( KOC.map.search ) ){
+							try{
+								var search = localStorage.getObject('koc_map_search_' + KOC.server);
+								if( search ){
+									KOC.map.search = search;
+								}
+							} catch(e){
+								console.log(e);
 							}
-						} catch(e){
-							alert(e);
 						}
 					},
 					'cleanSearch': function(){
 						console.info('KOC map cleanSearch function');
 						localStorage.removeItem('koc_map_search_' + KOC.server);
+
+						$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
 					},
 					'cleanSearchForCity': function( cityId ){
 						console.info('KOC map cleanSearchForCity function');
 						KOC.map.search[cityId] = {};
 						localStorage.setObject('koc_map_search_' + KOC.server, KOC.map.search);
+
+						$('#koc-map-load-saved').find('option').filter('[value^="'+ cityId +'|"]').remove();
 					},
 					'storeSearch': function(){
 						console.info('KOC map storeSearch function');
 						localStorage.setObject('koc_map_search_' + KOC.server, KOC.map.search);
 					},
 					'explore': function( type, coordX, coordY, rangeMin, rangeMax ){
-						console.info('KOC map generateSearch function');
-						var x = Math.floor(coordX / 5) * 5;
-						var y = Math.floor(coordY / 5) * 5;
+						console.info('KOC map explore function');
+
+						KOC.map.currentSearch = {};
 
 						var params = window.g_ajaxparams,
 							blocks = [];
 
-						for( var i = x - rangeMax; i <= x - rangeMin; i + 5 ){
-							for( var j = y - rangeMax; j <= y - rangeMin; j + 5 ){
-								blocks.push("bl_" + i + "_bt_" + j);
+						//calculate the radius of the circle based on the distance max
+						var radiusMax = Math.ceil(rangeMax / 2 * Math.PI);
+						var radiusMin = Math.floor(rangeMin / 2 * Math.PI);
+
+						var leftCoordMin = Math.floor(coordX - radiusMin);
+						var rightCoordMin = Math.floor(coordX + radiusMin);
+						var topCoordMin = Math.floor(coordY - radiusMin);
+						var bottomCoordMin = Math.floor(coordY + radiusMin);
+
+						for( var i = coordX - radiusMax; i <= coordX + radiusMax; i++ ){
+							for( var j = coordY - radiusMax; j <= coordY + radiusMax; j++ ){
+								if( (i <= leftCoordMin || i >= rightCoordMin) && (j <= topCoordMin || j >= bottomCoordMin) ){
+									var range = KOC.shared.getDistance(coordX, coordY, i, j);
+									if( range >= rangeMin && range <= rangeMax ){
+										blocks.push("bl_" + ( i >= 750 ? i - 750 : i ) + "_bt_" + ( j >= 750 ? j - 750 : j ));
+									}
+								}
 							}
 						}
 
 						params.blocks = blocks.join(',');
 
-						$.ajax({
+						KOC.map.xhr = $.ajax({
 							url: window.g_ajaxpath + "ajax/fetchMapTiles.php" + window.g_ajaxsuffix,
-							async: false,
 							type: 'post',
 							data: params,
 							dataType: 'json',
 							success: function(result){
-								if( result.data ){
-									KOC.map.tmp = result.data;
+								if( result.ok && result.data ){
+									KOC.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
+									KOC.map.$save.show();
+									var chosenCityIndex = $('#koc-map-city-coord')[0].selectedIndex;
+									if( chosenCityIndex ){
+										$('#koc-map-city-save').prop('selectedIndex', chosenCityIndex);
+									}
+									KOC.map.$filter.show();
+									KOC.map.$filter.find('.type, .status, .mist').hide();
+									if( type == 'TS' ){
+										KOC.map.$filter.find('.type, .status').show();
+									} else if( type == 'C' ){
+										KOC.map.$filter.find('.mist').show();
+										KOC.map.$filter.find('.level').hide();
+									}
+									KOC.map.displayResults( type, coordX, coordY, rangeMin, rangeMax, result);
+								} else {
+									KOC.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
+									alert('La requête a échoué.');
 								}
 							},
 							error: function(){
+								KOC.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
 								alert('La requête a échoué.');
 							},
 						});
 					},
-					'displayResults': function(){
+					'displayResults': function( type, coordX, coordY, rangeMin, rangeMax, result ){
 						console.info('KOC map displayResults function');
-						//@todo
+
+						var leftRangeMax = coordX - rangeMax,
+							leftRangeMin = coordX - rangeMin,
+							rightRangeMax = coordX + rangeMax,
+							rightRangeMin = coordX + rangeMin,
+							topRangeMax = coordY - rangeMax,
+							topRangeMin = coordY - rangeMin,
+							bottomRangeMax = coordY + rangeMax,
+							bottomRangeMin = coordY + rangeMin;
+
+						var tiles = [];
+						for( var id in result.data ){
+							if( result.data.hasOwnProperty(id) ){
+								var tile = result.data[id];
+								var range = KOC.shared.getDistance(coordX, coordY, tile.xCoord, tile.yCoord);
+								if( range >= rangeMin && range <= rangeMax ){
+									//check type
+									switch( type ){
+										case 'C' : //cities
+											if( (tile.tileType == 51 && tile.tileCityId != null) ){
+												var user = result.userInfo['u'+ tile.tileUserId];
+												var name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
+												var info = {'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': KOC.shared.format(user.m), 'player': name, 'city': tile.cityName, 'misted': 0 };
+												tiles.push(info);
+											} else if( tile.tileType == 53 ){
+												var info = {'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': '?', 'player': '?', 'city': '?', 'misted': 1 };
+												tiles.push(info);
+											}
+											break;
+										case 'CB' : //barbarian
+											if( tile.tileType == 51 && tile.tileCityId == null ){
+												tiles.push({'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
+											}
+											break;
+										case 'FS' : //dark forests
+											if( tile.tileType == 54 ){
+												tiles.push({'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
+											}
+											break;
+										case 'TS' : //wilderness
+											if( tile.tileType >= 10 && tile.tileType <= 50 ){
+												var user = (tile.tileUserId != null ? result.userInfo['u'+ tile.tileUserId] : null);
+												var name = (user != null ? (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n : '');
+												var label = '';
+												if( tile.tileType == 10 ) label = 'Plaine';
+												else if( tile.tileType == 11 ) label = 'Lac';
+												else if( tile.tileType == 20 ) label = 'Forêt';
+												else if( tile.tileType == 30 ) label = 'Colline';
+												else if( tile.tileType == 40 ) label = 'Montagne';
+												else if( tile.tileType == 50 ) label = 'Plaine';
+
+												var info = {'range': range, 'type': tile.tileType, 'label': label, 'x': tile.xCoord, 'y': tile.yCoord, 'might': (user != null ? KOC.shared.format(user.m) : ''), 'player': name, 'level': tile.tileLevel };
+												tiles.push(info);
+											}
+											break;
+									}
+								}
+							}
+						}
+
+						tiles.sort(function(a, b){ return a.range - b.range });
+
+						var code = '<table><thead><tr>';
+						var list = [];
+						switch( type ){
+							case 'C' : //cities
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Nom</th>';
+								code += '<th>Joueur</th>';
+								code += '<th>Puissance</th>';
+								code += '<th>Sous brumes</th>';
+								code += '</tr></thead><tbody class="'+ type +'">';
+								for( var i = 0; i < tiles.length; i++ ){
+									var tile = tiles[i];
+									list.push( tile.x + ',' + tile.y );
+									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.city +'</td>';
+									code += '<td>'+ tile.player +'</td>';
+									code += '<td>'+ tile.might +'</td>';
+									code += '<td>'+ (tile.misted ? 'Oui' : 'Non') +'</td>';
+									code += '</tr>';
+								}
+								break;
+							case 'CB' : //barbarian
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Niveau</th>';
+								code += '</tr></thead><tbody class="'+ type +'">';
+								for( var i = 0; i < tiles.length; i++ ){
+									var tile = tiles[i];
+									list.push( tile.x + ',' + tile.y );
+									code += '<tr class="level'+ tile.level +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.level +'</td>';
+									code += '</tr>';
+								}
+								break;
+							case 'FS' : //dark forests
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Niveau</th>';
+								code += '</tr></thead><tbody class="'+ type +'">';
+								for( var i = 0; i < tiles.length; i++ ){
+									var tile = tiles[i];
+									list.push( tile.x + ',' + tile.y );
+									code += '<tr class="level'+ tile.level +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.level +'</td>';
+									code += '</tr>';
+								}
+								break;
+							case 'TS' : //wilderness
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Type</th>';
+								code += '<th>Niveau</th>';
+								code += '<th>Joueur</th>';
+								code += '<th>Puissance</th>';
+								code += '</tr></thead><tbody class="'+ type +'">';
+								for( var i = 0; i < tiles.length; i++ ){
+									var tile = tiles[i];
+									list.push( tile.x + ',' + tile.y );
+									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.label +'</td>';
+									code += '<td>'+ tile.level +'</td>';
+									code += '<td>'+ tile.player +'</td>';
+									code += '<td>'+ tile.might +'</td>';
+									code += '</tr>';
+								}
+								break;
+						}
+						code += '</tbody></table>';
+
+						var coordsList = '<textarea id="coordsList">'+ list.join("\n") +'</textarea>';
+
+						KOC.map.currentSearch = {'type': type, 'x': coordX, 'y': coordY, 'rangeMin': rangeMin, 'rangeMax': rangeMax, 'tiles': tiles};
+
+						KOC.map.$results.html( coordsList + code );
+					},
+					'displaySaved': function( list ){
+						KOC.map.$filter.show();
+						KOC.map.$filter.find('.type, .status, .mist').hide();
+						if( list.type == 'TS' ){
+							KOC.map.$filter.find('.type, .status').show();
+						} else if( list.type == 'C' ){
+							KOC.map.$filter.find('.mist').show();
+							KOC.map.$filter.find('.level').hide();
+						}
+
+						var code = '<table><thead><tr>';
+						var coords = [];
+						switch( list.type ){
+							case 'C' : //cities
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Nom</th>';
+								code += '<th>Joueur</th>';
+								code += '<th>Puissance</th>';
+								code += '<th>Sous brumes</th>';
+								code += '</tr></thead><tbody class="'+ type +'">';
+								for( var i = 0; i < list.tiles.length; i++ ){
+									var tile = list.tiles[i];
+									coords.push( tile.x + ',' + tile.y );
+									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.city +'</td>';
+									code += '<td>'+ tile.player +'</td>';
+									code += '<td>'+ tile.might +'</td>';
+									code += '<td>'+ (tile.misted ? 'Oui' : 'Non') +'</td>';
+									code += '</tr>';
+								}
+								break;
+							case 'CB' : //barbarian
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Niveau</th>';
+								code += '</tr></thead><tbody class="'+ list.type +'">';
+								for( var i = 0; i < list.tiles.length; i++ ){
+									var tile = list.tiles[i];
+									coords.push( tile.x + ',' + tile.y );
+									code += '<tr class="level'+ tile.level +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.level +'</td>';
+									code += '</tr>';
+								}
+								break;
+							case 'FS' : //dark forests
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Niveau</th>';
+								code += '</tr></thead><tbody class="'+ list.type +'">';
+								for( var i = 0; i < list.tiles.length; i++ ){
+									var tile = list.tiles[i];
+									coords.push( tile.x + ',' + tile.y );
+									code += '<tr class="level'+ tile.level +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.level +'</td>';
+									code += '</tr>';
+								}
+								break;
+							case 'TS' : //wilderness
+								code += '<th>Distance</th>';
+								code += '<th>Coordonnée</th>';
+								code += '<th>Type</th>';
+								code += '<th>Niveau</th>';
+								code += '<th>Joueur</th>';
+								code += '<th>Puissance</th>';
+								code += '</tr></thead><tbody class="'+ list.type +'">';
+								for( var i = 0; i < list.tiles.length; i++ ){
+									var tile = list.tiles[i];
+									coords.push( tile.x + ',' + tile.y );
+									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'">';
+									code += '<td>'+ tile.range +'</td>';
+									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ tile.label +'</td>';
+									code += '<td>'+ tile.level +'</td>';
+									code += '<td>'+ tile.player +'</td>';
+									code += '<td>'+ tile.might +'</td>';
+									code += '</tr>';
+								}
+								break;
+						}
+						code += '</tbody></table>';
+
+						var coordsList = '<textarea id="coordsList">'+ coords.join("\n") +'</textarea>';
+						KOC.map.$results.html( coordsList + code );
 					},
 				},
 			/* FORMATION */
@@ -3728,13 +4169,15 @@ jQuery(document).ready(function(){
 					'on': function(){
 						console.info('KOC formation on function');
 
-						try{
-							var persistentFormationRules = localStorage.getObject('koc_formation_rules_' + KOC.server);
-							if( persistentFormationRules ){
-								KOC.formation.automaticRules = persistentFormationRules;
+						if( $.isEmptyObject( KOC.formation.automaticRules ) ){
+							try{
+								var persistentFormationRules = localStorage.getObject('koc_formation_rules_' + KOC.server);
+								if( persistentFormationRules ){
+									KOC.formation.automaticRules = persistentFormationRules;
+								}
+							} catch(e){
+								console.error(e);
 							}
-						} catch(e){
-							console.error(e);
 						}
 					},
 					'off': function(){
@@ -3967,13 +4410,15 @@ jQuery(document).ready(function(){
 						KOC.conf.transport.automatic = 1;
 						KOC.shared.storeConf();
 
-						try{
-							var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.server);
-							if( persistentTransportRules ){
-								KOC.transport.rules = persistentTransportRules;
+						if( $.isEmptyObject( KOC.transport.rules ) ){
+							try{
+								var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.server);
+								if( persistentTransportRules ){
+									KOC.transport.rules = persistentTransportRules;
+								}
+							} catch(e){
+								console.error(e);
 							}
-						} catch(e){
-							console.error(e);
 						}
 					},
 					'automaticOff': function(){
@@ -4382,7 +4827,6 @@ jQuery(document).ready(function(){
 				},
 		};
 
-
 		var trys = 60;
 		function load(){
 			if( window.seed && window.seed.cities ){
@@ -4475,10 +4919,4 @@ jQuery(document).ready(function(){
 	//-liste d'attente
 
 	//bloc note
-*/
-/*
-params.rid = marchid;
-new Ajax.Request(g_ajaxpath + "ajax/fetchMarch.php" + g_ajaxsuffix, {
-
-update_march
 */

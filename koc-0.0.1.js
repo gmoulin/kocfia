@@ -255,7 +255,7 @@ jQuery(document).ready(function(){
 					}, false);
 
 					top.postMessage('loaded', 'https://apps.facebook.com/');
-					setInterval(function(){
+					window.setInterval(function(){
 						top.postMessage('loaded', 'https://apps.facebook.com/');
 					}, 10000);
 
@@ -345,7 +345,7 @@ jQuery(document).ready(function(){
 
 					if( KOC.conf.general.hideMagicalBoxPreview ){
 						var i = 0;
-						var hideMerlinPreview = setInterval(function(){
+						var hideMerlinPreview = window.setInterval(function(){
 							if( $('#modalBox1').is(':visible') ){
 								if( $('#modalTitle1').text().indexOf('Merlin') > -1 ){
 									window.Modal.hideModal();
@@ -353,33 +353,33 @@ jQuery(document).ready(function(){
 								}
 							}
 							i++;
-							if( i > 10 ) clearInterval(hideMerlinPreview);
+							if( i > 30 ) clearInterval(hideMerlinPreview);
 						}, 1000);
 					}
 
 				//other players court invitations
 					if( KOC.conf.general.hideOtherPlayersCourtInvitation ){
 						var i = 0;
-						var hideViewCourt = setInterval(function(){
+						var hideViewCourt = window.setInterval(function(){
 							if( $('#modalBox1').is(':visible') && $('#modalBox1').hasClass('modalBoxUEP') ){
 								window.Modal.hideModal();
 								clearInterval(hideViewCourt);
 							}
 							i++;
-							if( i > 10 ) clearInterval(hideViewCourt);
+							if( i > 30 ) clearInterval(hideViewCourt);
 						}, 1000);
 					}
 
 				//fair popup
 					if( KOC.conf.general.hideFairPopup ){
 						var i = 0;
-						var hideViewCourt = setInterval(function(){
+						var hideViewCourt = window.setInterval(function(){
 							if( $('#modalBox1').is(':visible') && $('#modalBox1').hasClass('modalBoxUEP') ){
 								$('#modalContent1').find('.button20.sendfriendbtn').click();
 								clearInterval(hideViewCourt);
 							}
 							i++;
-							if( i > 10 ) clearInterval(hideViewCourt);
+							if( i > 30 ) clearInterval(hideViewCourt);
 						}, 1000);
 					}
 			},
@@ -617,12 +617,12 @@ jQuery(document).ready(function(){
 							case 'vacationMode.php':
 							case 'volunteee.php':
 								this.addEventListener("load", function(){
-									setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+									window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
 								}, false);
 								break;
 							case 'changeCityName.php':
 								this.addEventListener("load", function(){
-									setTimeout(function(){
+									window.setTimeout(function(){
 										KOC.shared.getCities();
 										KOC.overview.updateFromSeed();
 									}, 500);
@@ -636,9 +636,9 @@ jQuery(document).ready(function(){
 								this.addEventListener("load", function(){
 									try{
 										var r = JSON.parse(this.responseText);
-										if( r.updateSeed ) setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										if( r.updateSeed ) window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
 									} catch(e){
-										setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
 										console.warn(e);
 										console.log(this.responseText);
 									}
@@ -648,9 +648,9 @@ jQuery(document).ready(function(){
 								this.addEventListener("load", function(){
 									try{
 										var r = JSON.parse(this.responseText);
-										if( r.ok ) setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										if( r.ok ) window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
 									} catch(e){
-										setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+										window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
 										console.warn(e);
 										console.log(this.responseText);
 									}
@@ -660,7 +660,7 @@ jQuery(document).ready(function(){
 								this.addEventListener("load", function(){
 									//using merlinBoxClick flag to avoid closing the modal on game asked by the user
 									if( KOC.conf.general.hideMagicalBoxPreview && !merlinBoxClick ){
-										setTimeout(function(){ window.Modal.hideModal(); }, 300);
+										window.setTimeout(function(){ window.Modal.hideModal(); }, 300);
 									}
 									merlinBoxClick = false;
 								}, false);
@@ -668,14 +668,14 @@ jQuery(document).ready(function(){
 							case 'viewCourt.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.general.hideOtherPlayersCourtInvitation ){
-										setTimeout(function(){ window.Modal.hideModal(); }, 300);
+										window.setTimeout(function(){ window.Modal.hideModal(); }, 300);
 									}
 								}, false);
 								break;
 							case 'rollFriendChance.php':
 								this.addEventListener("load", function(){
 									if( KOC.conf.general.hideFairPopup ){
-										setTimeout(function(){ $('#modalContent1').find('.button20.sendfriendbtn').click(); }, 300);
+										window.setTimeout(function(){ $('#modalContent1').find('.button20.sendfriendbtn').click(); }, 300);
 									}
 								}, false);
 								break;
@@ -900,7 +900,7 @@ jQuery(document).ready(function(){
 							code += KOC.shared.generateInput('general', 'reloadFrequency', ' minutes', KOC.conf.general.reloadFrequency).replace(/<p>/, '');
 							code += KOC.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin', KOC.conf.general.hideMagicalBoxPreview);
 							code += KOC.shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOC.conf.general.hideOtherPlayersCourtInvitation);
-							code += KOC.shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fêtes foraines', KOC.conf.general.hideFairPopup);
+							code += KOC.shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fêtes foraines (avec envoie)', KOC.conf.general.hideFairPopup);
 							code += '</div>';
 						$optionsSection.append( code );
 
@@ -913,14 +913,14 @@ jQuery(document).ready(function(){
 						console.info('KOC shared reloadCountdown function', status);
 						if( status ){
 							reloadTimer = parseFloat(KOC.conf.general.reloadFrequency) * 60 * 1000;
-							reloadTimeout = setTimeout(function(){
+							reloadTimeout = window.setTimeout(function(){
 								console.info('KOC shared reloadCountdown timeout function');
 								$('#koc-reload').submit();
 								clearInterval( reloadInterval );
 							}, reloadTimer - 1);
 
 							KOC.$reloadTimer.show().find('.koc-timer').html( KOC.shared.readableDuration(reloadTimer / 1000) );
-							reloadInterval = setInterval(function(){
+							reloadInterval = window.setInterval(function(){
 								reloadTimer -= 1000;
 								KOC.$reloadTimer.find('.koc-timer').html( KOC.shared.readableDuration(reloadTimer / 1000) );
 							}, 1000);
@@ -933,7 +933,7 @@ jQuery(document).ready(function(){
 					'refreshCountdown': function(status){
 						console.info('KOC shared refreshCountdown function', status);
 						if( status ){
-							refreshTimeout = setTimeout(function(){
+							refreshTimeout = window.setTimeout(function(){
 								console.info('KOC shared refreshCountdown timeout function');
 								$('#koc-refresh-seed').trigger('click');
 							}, parseFloat(KOC.conf.general.refreshFrequency) * 60 * 1000);
@@ -1226,7 +1226,7 @@ jQuery(document).ready(function(){
 						if( !KOC.shared.updatingSeed ){
 							KOC.shared.updatingSeed = true;
 							window.update_seed_ajax(true, null);
-							setTimeout(function(){ KOC.shared.updatingSeed = false; }, 10000);
+							window.setTimeout(function(){ KOC.shared.updatingSeed = false; }, 10000);
 						}
 					},
 					'fetchMarch': function( id ){
@@ -1413,10 +1413,10 @@ jQuery(document).ready(function(){
 									if( tmp.length ){
 										tmp.first().hide();
 									} else {
-										setTimeout(function(){ hideChatRules(); }, 500);
+										window.setTimeout(function(){ hideChatRules(); }, 500);
 									}
 								};
-								setTimeout(function(){ hideChatRules(); }, 500);
+								window.setTimeout(function(){ hideChatRules(); }, 500);
 							}
 
 						//highlightleaders
@@ -1560,7 +1560,7 @@ jQuery(document).ready(function(){
 							console.info('KOC chat cleanHelp function');
 							//suppression du superflu (demande aide et son résultat)
 							if( KOC.conf.chat.active && KOC.conf.chat.cleanHelp ){
-								setTimeout(function(){
+								window.setTimeout(function(){
 									var $messages = $chatAlliance.find('.chatwrap');
 									if( nbMsg > 0 ){
 										$messages.filter(':lt('+ nbMsg +')');
@@ -2401,6 +2401,8 @@ jQuery(document).ready(function(){
 								KOC.$overview.show();
 
 								KOC.overview.calcInnerSizes( KOC.conf.overview.size );
+							} else {
+								KOC.$overview.hide();
 							}
 
 							var $kocOverviewToggle = $('<button id="koc-overview-toggle">').text('Vue Globale');
@@ -2465,6 +2467,7 @@ jQuery(document).ready(function(){
 							$b.hide();
 							$f.hide();
 							KOC.$overview.show();
+							$b.find('.mod_comm').css('display', 'block');
 
 							KOC.overview.calcInnerSizes({'height': h, 'width': w});
 
@@ -2572,7 +2575,8 @@ jQuery(document).ready(function(){
 						var onGoing = '<h3>Attaques en cours</h3><div class="attack-list ongoing">';
 
 						var savedAttacks = '<h3>';
-						savedAttacks += KOC.shared.generateCheckbox('crestHunt', 'automatic', 'mode automatique', KOC.conf.crestHunt.automatic);
+						savedAttacks += '<span><input type="checkbox" id="crestHunt-panel-automatic" '+ (KOC.conf.crestHunt.automatic ? 'checked' : '') +'>';
+						savedAttacks += '<label for="crestHunt-panel-automatic">attaques automatiques</label></span>';
 						savedAttacks += 'Attaques enregistrées</h3>';
 						savedAttacks += '<div class="attack-list saved">';
 
@@ -2593,6 +2597,8 @@ jQuery(document).ready(function(){
 						help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
 						help += '<li>Pour les attaques sauvegardées les erreurs seront listées en-dessous</li>';
 						help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant)</li>';
+						help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
+						help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
 						help += '</ul><ol>';
 						help += '<li>Sélectionner une ville</li>';
 						help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
@@ -2602,10 +2608,8 @@ jQuery(document).ready(function(){
 						help += '</ol></div>';
 
 						$section.append( form + onGoing + savedAttacks + help )
-							//automatic toggle (function call will be done by $confPanel event listener
-							.on('change', '.conf-toggle', function(){
-								//KOC.$confPanelNav.find('#koc-crestHunt').parent().toggleClass('on off');
-								KOC.crestHunt.$saved.find('.charge').hide();
+							.on('change', '#crestHunt-panel-automatic', function(){
+								$('#crestHunt-automatic').prop('checked', $(this).prop('checked')).change();
 							})
 							//load knights and units on city change )
 							.on('change', '.city-choice', function(){
@@ -2965,18 +2969,25 @@ jQuery(document).ready(function(){
 					},
 					'automaticOn': function(){
 						console.info('KOC crestHunt automaticOn function');
+						$('#crestHunt-panel-automatic').prop('checked', true);
+
 						KOC.crestHunt.$saved.find('.charge').hide(); //hide manual launch button
+
+						//using closure to have a "copy" of the attack plan
+						var schredule = function(attack){
+							var delay = window.setTimeout(function(){
+								console.log('launching automatic attack', attack.id, attack.cityId, attack);
+								KOC.crestHunt.launchAttack( attack );
+							}, 20000);
+						};
 
 						//launching stored attacks
 						for( var c in KOC.crestHunt.attacks ){
 							if( KOC.crestHunt.attacks.hasOwnProperty(c) ){
-								var attacks = KOC.crestHunt.attacks[c];
-								for( var a in attacks ){
-									if( attacks.hasOwnProperty(a) ){
-										setTimeout(function(){
-											console.log('launching automatic attack', attack[a]);
-											KOC.crestHunt.launchAttack( attacks[a] );
-										}, 10000);
+								console.log(KOC.crestHunt.attacks[c]);
+								for( var a in KOC.crestHunt.attacks[c] ){
+									if( KOC.crestHunt.attacks[c].hasOwnProperty(a) ){
+										schredule(KOC.crestHunt.attacks[c][a]);
 									}
 								}
 							}
@@ -2984,6 +2995,8 @@ jQuery(document).ready(function(){
 					},
 					'automaticOff': function(){
 						console.info('KOC crestHunt automaticOff function');
+						$('#crestHunt-panel-automatic').prop('checked', false);
+
 						//show all manual launch buttons
 						KOC.crestHunt.$saved.find('.charge').show();
 
@@ -3298,6 +3311,21 @@ jQuery(document).ready(function(){
 					},
 					'recallDefenders': function( attack ){
 						console.info('KOC crestHunt recallDefenders function', attack.marching.length, attack);
+						var checkAndRecall = function(k){
+							var mParams = window.g_ajaxparams;
+							mParams.rid = attack.marching[k];
+							$.ajax({
+								url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
+								type: 'post',
+								data: mParams,
+								dataType: 'json',
+							}).done(function(data){
+								if( data.ok && data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
+									window.attack_recall(attack.marching[k], 1, attack.cityId);
+								}
+							});
+						}
+
 						if( attack.marching.length ){
 							//recall previous waves
 							var k, length = attack.marching.length;
@@ -3305,8 +3333,9 @@ jQuery(document).ready(function(){
 								var c = 'city' + attack.cityId,
 									m = "m" + attack.marching[k],
 									march = window.seed.queue_atkp[c][m];
-								if( march && march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
-									window.attack_recall(attack.marching[k], 1, attack.cityId);
+								console.log('march', march);
+								if( march ){ //march was not updated with returning troops
+									checkAndRecall(k);
 								}
 							}
 						}
@@ -4565,6 +4594,17 @@ jQuery(document).ready(function(){
 				if( !attack.hasOwnProperty('abort') ) attack.abort = 0;
 				if( !attack.hasOwnProperty('lastCoordIndex') ) attack.lastCoordIndex = 0;
 
+				//attacks loop only if in automatic mode
+				if( attack.lastCoordIndex == attack.coords.length ){
+					if( KOC.conf.crestHunt.automatic && KOC.crestHunt.attacks[ attack.cityId ] && KOC.crestHunt.attacks[ attack.cityId ][ attack.id ]){
+						attack.lastCoordIndex = 0;
+					} else {
+						attack.aborts.push('Attaque finie');
+						KOC.crestHunt.refreshOngoingInfo(attack, true);
+						return;
+					}
+				}
+
 				/* deferred attack functions */
 					//check previous marches for "away without leave" troops
 					//first in attack sequence, will pipe the deferred resolution to resetTracks function
@@ -4584,8 +4624,9 @@ jQuery(document).ready(function(){
 							var checkMarch = function(dfd, i){
 								console.info('KOC checkAndLaunchAttack deferred previousMarchingCheck function');
 								march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
-								console.log('march', i, m);
+								console.log('march', i, march);
 								if( march ){ //march was not updated with returning troops
+									var mParams = window.g_ajaxparams;
 									mParams.rid = attack.marching[i];
 									$.ajax({
 										url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
@@ -4596,7 +4637,7 @@ jQuery(document).ready(function(){
 										if( data.ok ){
 											//set the units Return value
 											for( j = 1; j < 13; j++ ){
-												if( m['unit'+ j +'Count'] > 0 ){
+												if( data.march['unit'+ j +'Return'] ){
 													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
 												}
 											}
@@ -4605,8 +4646,12 @@ jQuery(document).ready(function(){
 													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['resource' + j] = data.march['resource' + j];
 												}
 											}
-											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march['marchStatus'];
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
 											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
+
+											if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
+												window.attack_recall(attack.marching[i], 1, attack.cityId);
+											}
 										}
 									})
 									.always(function(){
@@ -4666,7 +4711,6 @@ jQuery(document).ready(function(){
 					//fourth in attack sequence, will pipe the deferred resolution to checkCoord function
 					var checkCoords = function(dfd){
 						console.info('KOC checkAndLaunchAttack deferred checkCoords function');
-						if( attack.lastCoordIndex == attack.coords.length ) attack.lastCoordIndex = 0;
 						coordIndex = attack.lastCoordIndex - 1;
 						return dfd.pipe(checkCoord(dfd));
 					};
@@ -4710,6 +4754,7 @@ jQuery(document).ready(function(){
 									} else {
 										baseParams.xcoord = gps[0];
 										baseParams.ycoord = gps[1];
+										attack.lastCoordIndex = coordIndex;
 										return dfd.pipe(checkAndLaunchWaves(dfd));
 									}
 								} else {
@@ -4810,7 +4855,7 @@ jQuery(document).ready(function(){
 							//fourth and last in wave sequence
 							var launchWave = function(wdfd){
 								console.info('KOC checkAndLaunchAttack deferred launchWave function');
-								console.log('wave', waveIndex + 1, wave);
+								console.log('wave', waveIndex + 1, attack.id, attack.cityId, wave);
 								var p = wParams; //params is redefined in $.ajax, need for attach_addoutgoingmarch call
 
 								$.ajax({
@@ -4881,7 +4926,7 @@ jQuery(document).ready(function(){
 								waveIndex++;
 								if( waveIndex < attack.waves.length ){
 									//launch next wave in 10s
-									setTimeout(function(){
+									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
 									}, 10000);
 								} else return dfd.resolve();
@@ -4944,21 +4989,21 @@ jQuery(document).ready(function(){
 						console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2));
 						time *= 1000; //timestamp in milliseconds in javascript
 
-						setTimeout(function(){
-							console.log('attack defender recall');
+						window.setTimeout(function(){
+							console.log('attack defender recall', attack.id, attack.cityId);
 							KOC.crestHunt.recallDefenders( attack );
 						}, time + 30000);
 
 						time *= 2; //round-trip
 
 						//force resfresh
-						setTimeout(function(){
+						window.setTimeout(function(){
 							console.log('attack seed refresh');
 							KOC.shared.updateSeed();
 						}, time + 30000);
 
 						//next roundu
-						setTimeout(function(){
+						window.setTimeout(function(){
 							console.log('attack next round', attack.id, 'city', attack.cityId);
 							KOC.crestHunt.launchAttack( attack );
 						}, time + 45000);
@@ -4968,7 +5013,7 @@ jQuery(document).ready(function(){
 		var trys = 60;
 		function load(){
 			if( window.seed && window.seed.cities ){
-				setTimeout(function(){
+				window.setTimeout(function(){
 					console.log(window);
 					console.log(window.seed);
 					console.log(window.unitstats);
@@ -4980,7 +5025,7 @@ jQuery(document).ready(function(){
 			} else {
 				trys--;
 				if( trys <= 0 ) window.location.reload();
-				else setTimeout(function(){ load(); }, 1000);
+				else window.setTimeout(function(){ load(); }, 1000);
 			}
 		}
 		load();

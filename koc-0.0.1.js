@@ -5115,5 +5115,8 @@ jQuery(document).ready(function(){
 	//-auto search
 	//-liste d'attente
 
-	//bloc note
+	//mode tournoi
+		//sauvegarde puissance récurrent
+		//pas de sauvegarde durant un tournois
+		//donner la position avec la différence sur le plus proche avec changement de cadeau
 */

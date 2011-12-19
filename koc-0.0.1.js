@@ -41,8 +41,8 @@ console.info('koc start');
 	Array.prototype.unique = function(){
 		var a = [];
 		var l = this.length;
-		for( var i = 0; i < l; i++ ){
-			for( var j= i + 1; j < l; j++ ){
+		for( var i = 0; i < l; i += 1 ){
+			for( var j= i + 1; j < l; j += 1 ){
 				// If this[i] is found later in the array
 				if( this[i] === this[j] ) j = ++i;
 			}
@@ -226,7 +226,7 @@ jQuery(document).ready(function(){
 				//gather the default conf
 					console.time('default conf gathering');
 					var i, modulesLength = KOC.modules.length;
-					for( i = 0; i < modulesLength; i++ ){
+					for( i = 0; i < modulesLength; i += 1 ){
 						var mod = KOC.modules[i];
 						KOC.defaultConf[mod] = KOC[mod].options;
 					}
@@ -260,11 +260,11 @@ jQuery(document).ready(function(){
 					}, 10000);
 
 				//gather stored items list
-					for( i = 0; i < modulesLength; i++ ){
+					for( i = 0; i < modulesLength; i += 1 ){
 						var mod = KOC.modules[i];
 						if( KOC[mod].stored ){
 							var j, length = KOC[mod].stored.length;
-							for( j = 0; j < length; j++ ){
+							for( j = 0; j < length; j += 1 ){
 								KOC.stored.push( mod + '_' + KOC[mod].stored[j] );
 
 								try{
@@ -294,7 +294,7 @@ jQuery(document).ready(function(){
 					console.timeEnd('confPanel');
 
 				//modules init
-					for( i = 0; i < modulesLength; i++ ){
+					for( i = 0; i < modulesLength; i += 1 ){
 						if( KOC.conf[KOC.modules[i]].active ){
 							console.time('koc '+ KOC.modules[i] +' on');
 							KOC[ KOC.modules[i] ].on();
@@ -352,7 +352,7 @@ jQuery(document).ready(function(){
 									clearInterval(hideMerlinPreview);
 								}
 							}
-							i++;
+							i += 1;
 							if( i > 30 ) clearInterval(hideMerlinPreview);
 						}, 1000);
 					}
@@ -365,7 +365,7 @@ jQuery(document).ready(function(){
 								window.Modal.hideModal();
 								clearInterval(hideViewCourt);
 							}
-							i++;
+							i += 1;
 							if( i > 30 ) clearInterval(hideViewCourt);
 						}, 1000);
 					}
@@ -378,7 +378,7 @@ jQuery(document).ready(function(){
 								$('#modalContent1').find('.button20.sendfriendbtn').click();
 								clearInterval(hideViewCourt);
 							}
-							i++;
+							i += 1;
 							if( i > 30 ) clearInterval(hideViewCourt);
 						}, 1000);
 					}
@@ -707,7 +707,7 @@ jQuery(document).ready(function(){
 						sections = '';
 
 					var i, modulesLength = KOC.modules.length;
-					for( i = 0; i < modulesLength; i++ ){
+					for( i = 0; i < modulesLength; i += 1 ){
 						var mod = KOC.modules[i];
 						if( typeof KOC[mod].modPanel == 'function' ){
 							var active = this.conf[mod].active;
@@ -871,7 +871,7 @@ jQuery(document).ready(function(){
 					KOC.$confPanelNav = $('#koc-conf-panel-tabs');
 					KOC.$confPanelTabs = KOC.$confPanel.find('.ui-tabs-panel');
 
-					for( i = 0; i < modulesLength; i++ ){
+					for( i = 0; i < modulesLength; i += 1 ){
 						var mod = KOC.modules[i];
 						if( typeof KOC[ mod ].modPanel == 'function' ) KOC[ mod ].modPanel();
 					}
@@ -893,7 +893,7 @@ jQuery(document).ready(function(){
 					'cleanLocalStorage': function(){
 						console.info('KOC shared cleanLocalStorage function');
 						var i, length = KOC.stored.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							localStorage.removeItem('koc_' + KOC.stored[i] + '_' + KOC.server);
 						}
 						$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
@@ -915,7 +915,7 @@ jQuery(document).ready(function(){
 						$optionsSection.append( code );
 
 						var i, length = KOC.modules.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							KOC[ KOC.modules[i] ].confPanel( $optionsSection );
 						}
 					},
@@ -958,7 +958,7 @@ jQuery(document).ready(function(){
 					'getCities': function(){
 						console.time('cities');
 						var i, length = window.seed.cities.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							var c = window.seed.cities[i];
 							KOC.cities.push( {'id': c[0], 'name': c[1], 'coords': {'x': c[2], 'y': c[3]}, 'roman': window.roman[i]} );
 							KOC.citiesId.push( c[0] );
@@ -968,7 +968,7 @@ jQuery(document).ready(function(){
 					'getCityById': function( cityId ){
 						if( cityId.indexOf('city') != 0 ) cityId = cityId.replace(/city/, '');
 						var i, length = KOC.cities.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							if( KOC.cities[i].id == cityId ){
 								return KOC.cities[i];
 							}
@@ -1090,7 +1090,7 @@ jQuery(document).ready(function(){
 						var code = '<p>';
 						if( values.length && labels.length && values.length == labels.length ){
 							var i, length = values.length;
-							for( i = 0; i < length; i++ ){
+							for( i = 0; i < length; i += 1 ){
 								if( i > 0 ) code += '<br />';
 								code += '<input type="radio" class="conf-toggle" id="'+ module +'-'+ values[i] +'" name="'+ module + '_' + name +'" '+ (selected[i] == 1 ? 'checked' : '') +' />';
 								code += '<label for="'+ module +'-'+ values[i] +'">'+ labels[i] +'</label>';
@@ -1105,7 +1105,7 @@ jQuery(document).ready(function(){
 							var values = options.values,
 								labels = options.labels,
 								i, length = values.length;
-							for( i = 0; i < length; i++ ){
+							for( i = 0; i < length; i += 1 ){
 								code += '<option value="'+ values[i] +'" '+ (values[i] == selected ? 'selected' : '') +'>'+ labels[i] +'</option>';
 							}
 						}
@@ -1124,7 +1124,7 @@ jQuery(document).ready(function(){
 						var techElevenModifier = parseInt(window.seed.tech.tch11),
 							techTwelveModifier = parseInt(window.seed.tech.tch12),
 							i, length = troops.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							var j = i + 1;
 							if( troops.length <= 0 || window.unitstats["unt" + j] == null ) continue;
 							total_troops += troops[i];
@@ -1197,7 +1197,7 @@ jQuery(document).ready(function(){
 					'mapLink': function( coords ){
 						if( !$.isArray(coords) ) coords = [coords];
 						var code = '', i, length = coords.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							code += '<span class="mapLink">'+ coords[i] +'</span>';
 						}
 						return code;
@@ -1340,13 +1340,13 @@ jQuery(document).ready(function(){
 
 						var friends = '',
 							i, length = KOC.chat.friendsList.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							friends += '<li><a href="#">'+ KOC.chat.friendsList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 						}
 
 						var foes = '';
 						length = KOC.chat.foesList.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							foes += '<li><a href="#">'+ KOC.chat.foesList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 						}
 
@@ -1375,7 +1375,7 @@ jQuery(document).ready(function(){
 									KOC.chat[list].push( name );
 									KOC.chat[list].sort();
 									var f = '', i, length = KOC.chat[list].length;
-									for( i = 0; i < length; i++ ){
+									for( i = 0; i < length; i += 1 ){
 										f += '<li><a href="#">'+ KOC.chat[list][ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 									}
 									$ul.html( f );
@@ -1764,7 +1764,7 @@ jQuery(document).ready(function(){
 						//headers
 						//data line for cities
 							var i, length = KOC.cities.length;
-							for( i = 0; i < length; i++ ){
+							for( i = 0; i < length; i += 1 ){
 								headers += '<th title="'+ KOC.cities[i].name +'">'+ window.roman[i] +'</th>';
 								dataLine += '<td>&nbsp;</td>';
 								sizer += '<td></td>';
@@ -1781,13 +1781,13 @@ jQuery(document).ready(function(){
 								if( KOC.overview.parts.hasOwnProperty(p) ){
 									dataTable += '<tr class="'+ p +'"><th colspan="'+ cols +'" class="'+ p +'">' +  KOC.overview.parts[p] + '</th></tr>';
 									length = KOC[p].length;
-									for( i = 0; i < length; i++ ){
+									for( i = 0; i < length; i += 1 ){
 										if( !KOC[p][i].hasOwnProperty('label') && KOC[p][i].hasOwnProperty('key') ){
 											KOC[p][i].label = window.resourceinfo[ KOC[p][i].key ];
 										}
 										var rowspan = KOC[p][i].rows;
 										if( rowspan ){
-											for( j = 0; j < rowspan; j++ ){
+											for( j = 0; j < rowspan; j += 1 ){
 												dataTable += '<tr class="'+ p +'">';
 												dataTable += (j == 0 ? '<td class="img" rowspan="'+ rowspan +'"><img src="'+ KOC[p][i].icon +'"></td>' : '');
 												dataTable += '<td class="label">'+ KOC[p][i].label[j] +'</td>';
@@ -1896,7 +1896,7 @@ jQuery(document).ready(function(){
 							$defensesTrs = KOC.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)');
 
 						var i, j, k, length = KOC.citiesId.length, subLength;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							var cityId = 'city' + KOC.citiesId[i];
 							var stats = window.seed.citystats[ cityId ];
 							var seed = {
@@ -1935,7 +1935,7 @@ jQuery(document).ready(function(){
 												barbariansRes.push( barbarianRes );
 
 												subLength = KOC.troops.length;
-												for( j = 0; j < subLength; j++ ){
+												for( j = 0; j < subLength; j += 1 ){
 													if( !barbariansTroops[j] ) barbariansTroops[j] = 0;
 													barbariansTroops[j] += parseFloat(marche['unit'+ ( j + 1 ) +'Count']);
 												}
@@ -1947,11 +1947,11 @@ jQuery(document).ready(function(){
 							//population
 								var line = 0;
 								subLength = KOC.population.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.population[j];
 									if( type.rows ){
 										var rowsLength = type.rows;
-										for( k = 0; k < rowsLength; k++ ){
+										for( k = 0; k < rowsLength; k += 1 ){
 											var inSeed = KOC.inSeed.population[ type.name[k] ],
 												$tds = $popTrs.eq(line).find('td'),
 												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
@@ -1975,7 +1975,7 @@ jQuery(document).ready(function(){
 													.data('ori', 0);
 											}
 
-											line++;
+											line += 1;
 										}
 
 									} else {
@@ -1995,13 +1995,13 @@ jQuery(document).ready(function(){
 												.data('ori', 0);
 										}
 
-										line++;
+										line += 1;
 									}
 								}
 
 							//resources
 								subLength = KOC.resources.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.resources[j],
 										inSeed = KOC.inSeed.resources[ type.name ],
 										$tds = $resTrs.eq(j).find('td'),
@@ -2027,7 +2027,7 @@ jQuery(document).ready(function(){
 
 							//resources cap
 								subLength = KOC.resources_cap.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.resources_cap[j],
 										inSeed = KOC.inSeed.resources_cap[ type.name ],
 										$tds = $resCapTrs.eq(j).find('td'),
@@ -2078,7 +2078,7 @@ jQuery(document).ready(function(){
 									var bonusW = [0, 0, 0, 0, 0];
 									if( seed.wilds ){
 										subLength = seed.wilds.length;
-										for( j = 0; j < subLength; j++ ){
+										for( j = 0; j < subLength; j += 1 ){
 											var b = seed.wilds[ j ].tileType[0];
 											bonusW[ b ] += parseInt( seed.wilds[ j ].tileLevel, 10);
 										}
@@ -2093,12 +2093,12 @@ jQuery(document).ready(function(){
 									}
 
 								subLength = KOC.resources_production_detail.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.resources_production_detail[j],
 										r = j + 1; //no gold
 									if( type.rows ){
 										var rowsLength = type.rows;
-										for( k = 0; k < rowsLength; k++ ){
+										for( k = 0; k < rowsLength; k += 1 ){
 											var $tds = $resProdDetailTrs.eq(line).find('td'),
 												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
@@ -2143,20 +2143,20 @@ jQuery(document).ready(function(){
 													.data('ori', '0');
 											}
 
-											line++;
+											line += 1;
 										}
 									}
 								}
 
 							//resources from barbarian camps
 								subLength = KOC.resources_production_barbarian.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var $tds = $resProdBarbarianTrs.eq(j).find('td'),
 										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 										n = 0;
 									if( barbariansRes.length ){
 										var brLength = barbariansRes.length
-										for( k = 0; k < brLength; k++ ){
+										for( k = 0; k < brLength; k += 1 ){
 											n += barbariansRes[k][j];
 										}
 										total[j] += n;
@@ -2174,11 +2174,11 @@ jQuery(document).ready(function(){
 							//resources consumption
 								var line = 0;
 								subLength = KOC.resources_consumption.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.resources_consumption[j];
 									if( type.rows ){
 										var rowsLength = type.rows;
-										for( k = 0; k < rowsLength; k++ ){
+										for( k = 0; k < rowsLength; k += 1 ){
 											var $tds = $resConsoTrs.eq(line).find('td'),
 												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
@@ -2211,14 +2211,14 @@ jQuery(document).ready(function(){
 													.data('ori', '0');
 											}
 
-											line++;
+											line += 1;
 										}
 									}
 								}
 
 							//resources production total
 								subLength = KOC.resources_production_total.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var $tds = $resProdTotalTrs.eq(j).find('td'),
 										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 
@@ -2234,7 +2234,7 @@ jQuery(document).ready(function(){
 
 							//resources autonomy
 								subLength = KOC.resources_autonomy.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var stock = KOC.resources[j],
 										stockInSeed = KOC.inSeed.resources[ stock.name ],
 										$tds = $resAutonomyTrs.eq(j).find('td'),
@@ -2264,11 +2264,11 @@ jQuery(document).ready(function(){
 							//troops
 								var line = 0;
 								subLength = KOC.troops.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.troops[j];
 									if( type.rows ){
 										var rowsLength = type.rows;
-										for( k = 0; k < rowsLength; k++ ){
+										for( k = 0; k < rowsLength; k += 1 ){
 											var $tds = $troopsTrs.eq( line ).find('td'),
 												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
@@ -2289,18 +2289,18 @@ jQuery(document).ready(function(){
 													.data('ori', 0);
 											}
 
-											line++;
+											line += 1;
 										}
 									}
 								}
 
 							//defenses
 								subLength = KOC.defenses.length;
-								for( j = 0; j < subLength; j++ ){
+								for( j = 0; j < subLength; j += 1 ){
 									var type = KOC.defenses[j];
 									if( type.rows ){
 										var rowsLength = type.rows;
-										for( k = 0; k < rowsLength; k++ ){
+										for( k = 0; k < rowsLength; k += 1 ){
 											var $tds = $defensesTrs.eq( j ).find('td'),
 												$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 												n = null;
@@ -2527,7 +2527,7 @@ jQuery(document).ready(function(){
 						form += '<legend>Ville</legend>';
 
 						var i, length = KOC.cities.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							var city = KOC.cities[i];
 							form += '<input id="koc-crestHunt-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" />';
 							form += '<label for="koc-crestHunt-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
@@ -2595,7 +2595,7 @@ jQuery(document).ready(function(){
 						savedAttacks += 'Attaques enregistrées</h3>';
 						savedAttacks += '<div class="attack-list saved">';
 
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							var city = KOC.cities[i];
 							var line = '<h3>' + city.roman + ' ' + city.name + '</h3><ul data-city="'+ city.id +'"></ul>';
 
@@ -2745,21 +2745,21 @@ jQuery(document).ready(function(){
 
 									var $waves = KOC.crestHunt.$form.find('.wave');
 									var i, j, wavesLength = attack.waves.length, unitsLength;
-									for( i = 0; i < wavesLength; i++ ){
+									for( i = 0; i < wavesLength; i += 1 ){
 										var $wave = $waves.eq(i),
 											wave = attack.waves[i];
 
 										$wave.find('.knight-choice').val( wave.knight );
 
 										if( wave.units.length > 1 ){
-											for( var j = 1; j < wave.units.length; j++ ){
+											for( var j = 1; j < wave.units.length; j += 1 ){
 												$wave.find('.add-unit').trigger('click');
 											}
 										}
 
 										var $blocks = $wave.find('.unit-block');
 										unitsLength = wave.units.length;
-										for( j = 0; j < unitsLength; j++ ){
+										for( j = 0; j < unitsLength; j += 1 ){
 											var $b = $blocks.eq(j),
 												unit = wave.units[j];
 											$b.find('.unit-choice').val( unit.id );
@@ -2770,13 +2770,13 @@ jQuery(document).ready(function(){
 									var $keep = KOC.crestHunt.$form.find('.keep');
 									if( attack.keep.length > 1 ){
 										var keepLength = attack.keep.length;
-										for( i = 1; i < keepLength; i++ ){
+										for( i = 1; i < keepLength; i += 1 ){
 											$keep.find('.add-unit').trigger('click');
 										}
 									}
 
 									var $blocks = $keep.find('.unit-block');
-									for( i = 0; i < keepLength; i++ ){
+									for( i = 0; i < keepLength; i += 1 ){
 										var unit = attack.keep[i];
 
 										var $b = $blocks.eq(i);
@@ -2957,7 +2957,7 @@ jQuery(document).ready(function(){
 						}
 
 						var i, length = KOC.citiesId.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							KOC.crestHunt.listCityAttacks( KOC.citiesId[i] );
 						}
 
@@ -2996,7 +2996,7 @@ jQuery(document).ready(function(){
 								for( var a in KOC.crestHunt.attacks[c] ){
 									if( KOC.crestHunt.attacks[c].hasOwnProperty(a) ){
 										schredule(KOC.crestHunt.attacks[c][a], i);
-										i++;
+										i += 1;
 									}
 								}
 							}
@@ -3060,7 +3060,7 @@ jQuery(document).ready(function(){
 							} else {
 								coords = coords.split(' ');
 								var wrongGPS = false, i, length = coords.length;
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									var coord = coords[i].split(',');
 									if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
 										wrongGPS = true;
@@ -3185,7 +3185,7 @@ jQuery(document).ready(function(){
 
 						var knights = window.seed.knights[ 'city' + city.id ],
 							j, k, wavesLength = attack.waves.length, unitsLength;
-						for( j = 0; j < wavesLength; j++ ){
+						for( j = 0; j < wavesLength; j += 1 ){
 							var wave = attack.waves[j];
 							code += '<div class="wave">Vague '+ (j + 1) + '&nbsp;:&nbsp;';
 							code += '<span class="knight">chevalier&nbsp;:&nbsp;';
@@ -3195,7 +3195,7 @@ jQuery(document).ready(function(){
 
 							var unitsCode = '';
 							unitsLength = wave.units.length;
-							for( k = 0; k < unitsLength; k++ ){
+							for( k = 0; k < unitsLength; k += 1 ){
 								var unit = wave.units[k];
 								if( unitsCode.length ) unitsCode += ', ';
 
@@ -3208,7 +3208,7 @@ jQuery(document).ready(function(){
 
 						code += '<div class="wave">Conserver&nbsp;:&nbsp;<span class="troops">'
 						var unitsCode = '', keepLength = attack.keep.length;
-						for( j = 0; j < keepLength; j++ ){
+						for( j = 0; j < keepLength; j += 1 ){
 							var unit = attack.keep[j];
 							if( unitsCode.length ) unitsCode += ', ';
 
@@ -3284,13 +3284,13 @@ jQuery(document).ready(function(){
 						if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
 						var $clone = KOC.crestHunt.$waveSkeleton.clone(), i;
 						$clone.insertBefore( KOC.crestHunt.$form.find('.keep') );
-						for( i = 1; i < num; i++ ){
+						for( i = 1; i < num; i += 1 ){
 							$clone.clone().insertBefore( KOC.crestHunt.$form.find('.keep') );
 						}
 
 						var knights = KOC.shared.getAvailableKnights( cityId ),
 							choices = '', i, length = knights.length;
-						for( i = 0; i < length; i++ ){
+						for( i = 0; i < length; i += 1 ){
 							var knight = knights[i];
 							choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.skillPointsApplied + ', ' + KOC.shared.getKnightStatText( knight ) +')</option>';
 						}
@@ -3318,7 +3318,7 @@ jQuery(document).ready(function(){
 						if( attack.marching.length ){
 							//recall previous waves
 							var k, length = attack.marching.length;
-							for( k = 0; k < length; k++ ){
+							for( k = 0; k < length; k += 1 ){
 								window.attack_recall(attack.marching[k], 2, attack.cityId);
 							}
 						}
@@ -3343,7 +3343,7 @@ jQuery(document).ready(function(){
 						if( attack.marching.length ){
 							//recall previous waves
 							var k, length = attack.marching.length;
-							for( k = 0; k < length; k++ ){
+							for( k = 0; k < length; k += 1 ){
 								var c = 'city' + attack.cityId,
 									m = "m" + attack.marching[k],
 									march = window.seed.queue_atkp[c][m];
@@ -3778,7 +3778,7 @@ jQuery(document).ready(function(){
 									if( !min ) min = 1;
 									if( !max ) max = 10;
 									var i;
-									for( i = min; i <= max; i++ ){
+									for( i = min; i <= max; i += 1 ){
 										levels.push( '.level' + i );
 									}
 									if( levels.length ) classes.push( levels );
@@ -3810,9 +3810,9 @@ jQuery(document).ready(function(){
 								if( classes.length ){
 									classes = classes.reduce(function(previousValue, currentValue, index, array){
 										var tmp = [], i, j, pLength = previousValue.length, cLength;
-										for( i = 0; i < pLength; i++ ){
+										for( i = 0; i < pLength; i += 1 ){
 											cLength = currentValue.length;
-											for( j = 0; j < cLength; j++ ){
+											for( j = 0; j < cLength; j += 1 ){
 												tmp.push(previousValue[i].concat(currentValue[j]));
 											}
 										}
@@ -3885,8 +3885,8 @@ jQuery(document).ready(function(){
 						var bottomCoordMin = Math.floor(coordY + radiusMin);
 
 						var i, j, maxX = coordX + radiusMax, maxY = coordY + radiusMax;
-						for( i = coordX - radiusMax; i <= maxX; i++ ){
-							for( j = coordY - radiusMax; j <= maxY; j++ ){
+						for( i = coordX - radiusMax; i <= maxX; i += 1 ){
+							for( j = coordY - radiusMax; j <= maxY; j += 1 ){
 								if( (i <= leftCoordMin || i >= rightCoordMin) && (j <= topCoordMin || j >= bottomCoordMin) ){
 									var range = KOC.shared.getDistance(coordX, coordY, i, j);
 									if( range >= rangeMin && range <= rangeMax ){
@@ -4006,7 +4006,7 @@ jQuery(document).ready(function(){
 								code += '<th>Puissance</th>';
 								code += '<th>Sous brumes</th>';
 								code += '</tr></thead><tbody class="'+ type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = tiles[i];
 									list.push( tile.x + ',' + tile.y );
 									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'">';
@@ -4024,7 +4024,7 @@ jQuery(document).ready(function(){
 								code += '<th>Coordonnée</th>';
 								code += '<th>Niveau</th>';
 								code += '</tr></thead><tbody class="'+ type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = tiles[i];
 									list.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +'">';
@@ -4039,7 +4039,7 @@ jQuery(document).ready(function(){
 								code += '<th>Coordonnée</th>';
 								code += '<th>Niveau</th>';
 								code += '</tr></thead><tbody class="'+ type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = tiles[i];
 									list.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +'">';
@@ -4057,7 +4057,7 @@ jQuery(document).ready(function(){
 								code += '<th>Joueur</th>';
 								code += '<th>Puissance</th>';
 								code += '</tr></thead><tbody class="'+ type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = tiles[i];
 									list.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'">';
@@ -4100,7 +4100,7 @@ jQuery(document).ready(function(){
 								code += '<th>Puissance</th>';
 								code += '<th>Sous brumes</th>';
 								code += '</tr></thead><tbody class="'+ type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = list.tiles[i];
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'">';
@@ -4118,7 +4118,7 @@ jQuery(document).ready(function(){
 								code += '<th>Coordonnée</th>';
 								code += '<th>Niveau</th>';
 								code += '</tr></thead><tbody class="'+ list.type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = list.tiles[i];
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +'">';
@@ -4133,7 +4133,7 @@ jQuery(document).ready(function(){
 								code += '<th>Coordonnée</th>';
 								code += '<th>Niveau</th>';
 								code += '</tr></thead><tbody class="'+ list.type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = list.tiles[i];
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +'">';
@@ -4151,7 +4151,7 @@ jQuery(document).ready(function(){
 								code += '<th>Joueur</th>';
 								code += '<th>Puissance</th>';
 								code += '</tr></thead><tbody class="'+ list.type +'">';
-								for( i = 0; i < length; i++ ){
+								for( i = 0; i < length; i += 1 ){
 									tile = list.tiles[i];
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'">';
@@ -4200,7 +4200,7 @@ jQuery(document).ready(function(){
 							units,
 							rLength = KOC.resources.length;
 						//by city
-						for( i = 0; i < cLength; i++ ){
+						for( i = 0; i < cLength; i += 1 ){
 							cityId = KOC.citiesId[i];
 							rule = KOC.formation.rules[ cityId ];
 							//available units
@@ -4267,7 +4267,7 @@ jQuery(document).ready(function(){
 							autoCode += '<p>';
 							autoCode += '<label>Garder</label>';
 
-							for( j = 0; j < rLength; j++ ){
+							for( j = 0; j < rLength; j += 1 ){
 								res = KOC.resources[j];
 								autoCode += '<label for="koc-formation-auto-city-keep-'+ res.name +'">';
 								autoCode += '<img src="'+ res.icon +'" title="'+ res.label +'">';
@@ -4422,7 +4422,7 @@ jQuery(document).ready(function(){
 											if (gambleId != null) {
 												time = rslt.timeNeeded
 											}
-											for( i = 1; i < 5; i++ ){
+											for( i = 1; i < 5; i += 1 ){
 												if (rslt.gamble) {
 													resourceFactors.push(rslt.gamble[i.toString()])
 												} else {
@@ -4650,12 +4650,12 @@ jQuery(document).ready(function(){
 									}).done(function(data){
 										if( data.ok ){
 											//set the units Return value
-											for( j = 1; j < 13; j++ ){
+											for( j = 1; j < 13; j += 1 ){
 												if( data.march['unit'+ j +'Return'] ){
 													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
 												}
 											}
-											for( j = 1; j < 6; j++ ){
+											for( j = 1; j < 6; j += 1 ){
 												if( data.march['resource' + j] ){
 													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['resource' + j] = data.march['resource' + j];
 												}
@@ -4669,13 +4669,13 @@ jQuery(document).ready(function(){
 										}
 									})
 									.always(function(){
-										i++;
+										i += 1;
 										if( i >= mLength ){
 											 return dfd.pipe(resetTracks(dfd));
 										} else return dfd.pipe(checkMarch(dfd, i));
 									});
 								} else {
-									i++;
+									i += 1;
 									if( i >= mLength ){
 										 return dfd.pipe(resetTracks(dfd));
 									} else return dfd.pipe(checkMarch(dfd, i));
@@ -4734,7 +4734,7 @@ jQuery(document).ready(function(){
 					var checkCoord = function( dfd ){
 						console.info('KOC checkAndLaunchAttack deferred checkCoord function');
 
-						coordIndex++;
+						coordIndex += 1;
 						if( coordIndex >= attack.coords.length ){
 							attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 							return dfd.reject();
@@ -4841,7 +4841,7 @@ jQuery(document).ready(function(){
 									j, k, unit, unitKey, unitNum, qty, available, keep,
 									uLength = wave.units.length,
 									kLength = attack.keep.length;
-								for( j = 0; j < uLength; j++ ){
+								for( j = 0; j < uLength; j += 1 ){
 									unit = wave.units[j];
 									unitKey = unit.id.replace(/nt/, '');
 									unitNum = parseInt(unit.id.replace(/unt/, ''), 10); //for unitsArr, 0 based
@@ -4854,7 +4854,7 @@ jQuery(document).ready(function(){
 										attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
 										return wdfd.reject();
 									} else {
-										for( k = 0; k < kLength; k++ ){
+										for( k = 0; k < kLength; k += 1 ){
 											keep = attack.keep[k];
 											if( unit.id == keep.id && available - qty < parseFloat(keep.qty) ){
 												attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') (conservation).');
@@ -4937,7 +4937,7 @@ jQuery(document).ready(function(){
 
 						$.when( waveSequence() )
 							.done(function(){
-								waveIndex++;
+								waveIndex += 1;
 								if( waveIndex < attack.waves.length ){
 									//launch next wave in 10s
 									window.setTimeout(function(){

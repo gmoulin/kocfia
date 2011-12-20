@@ -223,6 +223,16 @@ jQuery(document).ready(function(){
 						return;
 					}
 
+				//get server id
+					KOC.kabamuid = KOC.shared.getUserId();
+					console.info('kabamuid', KOC.kabamuid);
+					if( KOC.kabamuid == null ){
+						console.error('wrong user id');
+						return;
+					}
+
+				KOC.storeUniqueId = KOC.server + '_' + KOC.kabamuid;
+
 				//gather the default conf
 					console.time('default conf gathering');
 					var i, modulesLength = KOC.modules.length;
@@ -235,7 +245,7 @@ jQuery(document).ready(function(){
 
 				//get stored conf if present
 					try {
-						var storedConf = localStorage.getObject('koc_conf_' + KOC.server);
+						var storedConf = localStorage.getObject('koc_conf_' + KOC.storeUniqueId);
 						if( storedConf ){
 							$.extend(true, KOC.conf, storedConf);
 							console.info('used stored conf');
@@ -268,7 +278,7 @@ jQuery(document).ready(function(){
 								KOC.stored.push( mod + '_' + KOC[mod].stored[j] );
 
 								try{
-									var stored = localStorage.getObject('koc_' + mod + '_' + KOC[mod].stored[j] + '_' + KOC.server);
+									var stored = localStorage.getObject('koc_' + mod + '_' + KOC[mod].stored[j] + '_' + KOC.storeUniqueId);
 									if( stored ){
 										KOC[mod][ KOC[mod].stored[j] ] = stored;
 									}
@@ -323,7 +333,7 @@ jQuery(document).ready(function(){
 
 				//reload game form
 					var $form = $('<form>', { 'id': 'koc-reload', 'target': '_top', 'action': '', 'method': 'post' });
-					$form.append(' <input type="hidden" name="s" value="'+ KOC.server +'">');
+					$form.append(' <input type="hidden" name="s" value="'+ KOC.storeUniqueId +'">');
 					$body.append( $form.hide() );
 
 				//reload timeout
@@ -888,13 +898,13 @@ jQuery(document).ready(function(){
 				'shared': {
 					'storeConf': function(){
 						console.info('KOC storeConf function', KOC.conf);
-						localStorage.setObject('koc_conf_' + KOC.server, KOC.conf);
+						localStorage.setObject('koc_conf_' + KOC.storeUniqueId, KOC.conf);
 					},
 					'cleanLocalStorage': function(){
 						console.info('KOC shared cleanLocalStorage function');
 						var i, length = KOC.stored.length;
 						for( i = 0; i < length; i += 1 ){
-							localStorage.removeItem('koc_' + KOC.stored[i] + '_' + KOC.server);
+							localStorage.removeItem('koc_' + KOC.stored[i] + '_' + KOC.storeUniqueId);
 						}
 						$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
 					},
@@ -954,6 +964,10 @@ jQuery(document).ready(function(){
 					'getServer': function(){
 						console.info('koc shared getServer function');
 						return window.domainName;
+					},
+					'getUserId': function(){
+						console.info('koc shared getUserId function');
+						return window.kabamuid;
 					},
 					'getCities': function(){
 						console.time('cities');
@@ -1437,7 +1451,7 @@ jQuery(document).ready(function(){
 						//highlightFriendsAndFoes
 							if( $.isEmptyObject( KOC.chat.friendsList ) ){
 								try{
-									var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.server);
+									var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.storeUniqueId);
 									if( persistentFriendsList ){
 										KOC.chat.friendsList = persistentFriendsList;
 									}
@@ -1449,7 +1463,7 @@ jQuery(document).ready(function(){
 						//highlightFoes
 							if( $.isEmptyObject( KOC.chat.foesList ) ){
 								try{
-									var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.server);
+									var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.storeUniqueId);
 									if( persistentFoesList ){
 										KOC.chat.foesList = persistentFoesList;
 									}
@@ -1638,12 +1652,12 @@ jQuery(document).ready(function(){
 						},
 						'storeFriendsList': function(){
 							console.info('KOC storeFriendsList function');
-							localStorage.setObject('koc_chat_friends_list_' + KOC.server, KOC.chat.friendsList);
+							localStorage.setObject('koc_chat_friends_list_' + KOC.storeUniqueId, KOC.chat.friendsList);
 						},
 						'cleanFriendsList': function(){
 							console.info('KOC cleanFriendsList function');
 							KOC.chat.friendsList = [];
-							localStorage.setObject('koc_chat_friends_list_' + KOC.server, '');
+							localStorage.setObject('koc_chat_friends_list_' + KOC.storeUniqueId, '');
 							$('#koc-chat').find('ul').filter('[rel=friends]').empty();
 						},
 					/* highlight foes */
@@ -1658,12 +1672,12 @@ jQuery(document).ready(function(){
 						},
 						'storeFoesList': function(){
 							console.info('KOC storeFoesList function');
-							localStorage.setObject('koc_chat_foes_list_' + KOC.server, KOC.chat.foesList);
+							localStorage.setObject('koc_chat_foes_list_' + KOC.storeUniqueId, KOC.chat.foesList);
 						},
 						'cleanFoesList': function(){
 							console.info('KOC cleanFoesList function');
 							KOC.chat.foesList = [];
-							localStorage.setObject('koc_chat_foes_list_' + KOC.server, '');
+							localStorage.setObject('koc_chat_foes_list_' + KOC.storeUniqueId, '');
 							$('#koc-chat').find('ul').filter('[rel=foes]').empty();
 						},
 					/* highlight friends and foes */
@@ -2947,7 +2961,7 @@ jQuery(document).ready(function(){
 						console.info('KOC crestHunt on function');
 						if( $.isEmptyObject( KOC.crestHunt.attacks ) ){
 							try{
-								var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.server);
+								var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.storeUniqueId);
 								if( persistentCrestHuntAttacks ){
 									KOC.crestHunt.attacks = persistentCrestHuntAttacks;
 								}
@@ -3017,7 +3031,7 @@ jQuery(document).ready(function(){
 					'storeAttacks': function(){
 						console.info('KOC crestHunt storeAttacks function');
 						try{
-							localStorage.setObject('koc_crestHunt_attacks_' + KOC.server, KOC.crestHunt.attacks);
+							localStorage.setObject('koc_crestHunt_attacks_' + KOC.storeUniqueId, KOC.crestHunt.attacks);
 						} catch(e){
 							alert(e);
 						}
@@ -3323,35 +3337,67 @@ jQuery(document).ready(function(){
 							}
 						}
 					},
-					'recallDefenders': function( attack ){
-						console.info('KOC crestHunt recallDefenders function', attack.marching.length, attack);
-						var checkAndRecall = function(k){
-							var mParams = window.g_ajaxparams;
-							mParams.rid = attack.marching[k];
-							$.ajax({
-								url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
-								type: 'post',
-								data: mParams,
-								dataType: 'json',
-							}).done(function(data){
-								if( data.ok && data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
-									window.attack_recall(attack.marching[k], 1, attack.cityId);
-								}
-							});
-						}
+					'forceMarchUpdate': function( attack ){
+						console.info('KOC crestHunt forceMarchUpdate function');
+						if( window.seed.queue_atkp[ 'city' + attack.cityId ] ){
+							var mParams = window.g_ajaxparams,
+								i = 0, j, march,
+								mLength = attack.marching.length;
+							//console.log(mLength, attack.marching);
+							if( mLength == 0 ){
+								return;
+							}
 
-						if( attack.marching.length ){
-							//recall previous waves
-							var k, length = attack.marching.length;
-							for( k = 0; k < length; k += 1 ){
-								var c = 'city' + attack.cityId,
-									m = "m" + attack.marching[k],
-									march = window.seed.queue_atkp[c][m];
-								//console.log('march', march);
-								if( march ){ //march was not updated with returning troops
-									checkAndRecall(k);
+							var checkMarch = function(i){
+								console.info('KOC crestHunt forceMarchUpdate checkMarch function');
+								march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
+								//console.log('march', i, march);
+								if( march && !march.hasOwnProperty('kocUpdated') ){
+									var mParams = window.g_ajaxparams;
+									mParams.rid = attack.marching[i];
+									$.ajax({
+										url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
+										type: 'post',
+										data: mParams,
+										dataType: 'json',
+									}).done(function(data){
+										if( data.ok ){
+											//set the units Return value
+											for( j = 1; j < 13; j += 1 ){
+												if( data.march['unit'+ j +'Return'] ){
+													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
+												}
+											}
+											for( j = 1; j < 6; j += 1 ){
+												if( data.march['resource' + j] ){
+													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['resource' + j] = data.march['resource' + j];
+												}
+											}
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
+
+											if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
+												window.attack_recall(attack.marching[i], 1, attack.cityId);
+											}
+
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
+										}
+									})
+									.always(function(){
+										i += 1;
+										if( i < mLength ){
+											checkMarch(i);
+										}
+									});
+								} else {
+									i += 1;
+									if( i < mLength ){
+										 checkMarch(i);
+									}
 								}
 							}
+
+							checkMarch(i);
 						}
 					},
 				};
@@ -3383,7 +3429,7 @@ jQuery(document).ready(function(){
 
 						if( $.isEmptyObject( KOC.notepad.notes ) ){
 							try{
-								var notes = localStorage.getObject('koc_notepad_notes_' + KOC.server);
+								var notes = localStorage.getObject('koc_notepad_notes_' + KOC.storeUniqueId);
 								if( notes ){
 									KOC.notepad.notes = notes;
 								}
@@ -3533,7 +3579,7 @@ jQuery(document).ready(function(){
 					'clean': function(){
 						console.info('KOC notepad clean function');
 
-						localStorage.setObject('koc_notepad_notes_' + KOC.server, '');
+						localStorage.setObject('koc_notepad_notes_' + KOC.storeUniqueId, '');
 
 						KOC.notepad.$notes.empty();
 					},
@@ -3554,7 +3600,7 @@ jQuery(document).ready(function(){
 					},
 					'storeNotes': function(){
 						console.info('KOC notepad storeNotes function');
-						localStorage.setObject('koc_notepad_notes_' + KOC.server, KOC.notepad.notes);
+						localStorage.setObject('koc_notepad_notes_' + KOC.storeUniqueId, KOC.notepad.notes);
 					},
 				};
 
@@ -3841,7 +3887,7 @@ jQuery(document).ready(function(){
 
 						if( $.isEmptyObject( KOC.map.search ) ){
 							try{
-								var search = localStorage.getObject('koc_map_search_' + KOC.server);
+								var search = localStorage.getObject('koc_map_search_' + KOC.storeUniqueId);
 								if( search ){
 									KOC.map.search = search;
 								}
@@ -3852,20 +3898,20 @@ jQuery(document).ready(function(){
 					},
 					'cleanSearch': function(){
 						console.info('KOC map cleanSearch function');
-						localStorage.removeItem('koc_map_search_' + KOC.server);
+						localStorage.removeItem('koc_map_search_' + KOC.storeUniqueId);
 
 						$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
 					},
 					'cleanSearchForCity': function( cityId ){
 						console.info('KOC map cleanSearchForCity function');
 						KOC.map.search[cityId] = {};
-						localStorage.setObject('koc_map_search_' + KOC.server, KOC.map.search);
+						localStorage.setObject('koc_map_search_' + KOC.storeUniqueId, KOC.map.search);
 
 						$('#koc-map-load-saved').find('option').filter('[value^="'+ cityId +'|"]').remove();
 					},
 					'storeSearch': function(){
 						console.info('KOC map storeSearch function');
-						localStorage.setObject('koc_map_search_' + KOC.server, KOC.map.search);
+						localStorage.setObject('koc_map_search_' + KOC.storeUniqueId, KOC.map.search);
 					},
 					'explore': function( type, coordX, coordY, rangeMin, rangeMax ){
 						console.info('KOC map explore function');
@@ -4308,7 +4354,7 @@ jQuery(document).ready(function(){
 
 						if( $.isEmptyObject( KOC.formation.automaticRules ) ){
 							try{
-								var persistentFormationRules = localStorage.getObject('koc_formation_rules_' + KOC.server);
+								var persistentFormationRules = localStorage.getObject('koc_formation_rules_' + KOC.storeUniqueId);
 								if( persistentFormationRules ){
 									KOC.formation.automaticRules = persistentFormationRules;
 								}
@@ -4550,7 +4596,7 @@ jQuery(document).ready(function(){
 
 						if( $.isEmptyObject( KOC.transport.rules ) ){
 							try{
-								var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.server);
+								var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.storeUniqueId);
 								if( persistentTransportRules ){
 									KOC.transport.rules = persistentTransportRules;
 								}
@@ -4567,7 +4613,7 @@ jQuery(document).ready(function(){
 					},
 					'storeAutomaticRules': function(){
 						console.info('koc transport storeAutomaticRules function');
-						localStorage.setObject('koc_transport_rules_' + KOC.server, KOC.transport.rules);
+						localStorage.setObject('koc_transport_rules_' + KOC.storeUniqueId, KOC.transport.rules);
 					},
 					//'generateTransport': function(origin, destination, troops, ressources)
 					//getCitiesForPlayer
@@ -4625,8 +4671,6 @@ jQuery(document).ready(function(){
 					var previousMarchingCheck = function(dfd){
 						console.info('KOC checkAndLaunchAttack deferred previousMarchingCheck function');
 						if( window.seed.queue_atkp[ 'city' + attack.cityId ] ){
-							var d = new Date(),
-								ts = d.getTime();
 							var mParams = window.g_ajaxparams,
 								i = 0, j, march,
 								mLength = attack.marching.length;
@@ -4639,7 +4683,7 @@ jQuery(document).ready(function(){
 								console.info('KOC checkAndLaunchAttack deferred previousMarchingCheck function');
 								march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
 								//console.log('march', i, march);
-								if( march ){ //march was not updated with returning troops
+								if( march && !march.hasOwnProperty('kocUpdated') ){
 									var mParams = window.g_ajaxparams;
 									mParams.rid = attack.marching[i];
 									$.ajax({
@@ -4655,17 +4699,21 @@ jQuery(document).ready(function(){
 													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
 												}
 											}
+
 											for( j = 1; j < 6; j += 1 ){
 												if( data.march['resource' + j] ){
 													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['resource' + j] = data.march['resource' + j];
 												}
 											}
+
 											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
 											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
 
 											if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
 												window.attack_recall(attack.marching[i], 1, attack.cityId);
 											}
+
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
 										}
 									})
 									.always(function(){
@@ -4758,11 +4806,11 @@ jQuery(document).ready(function(){
 									//console.log('fetchMapTiles info', info);
 									var type = parseInt(info.tileType, 10);
 									if( type <= 0 || type > 50 ){
-										attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ coordIndex +'e) n\'est pas une terre sauvage.');
+										attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) n\'est pas une terre sauvage.');
 										return dfd.pipe(checkCoord( dfd ));
 
 									} else if( info.tileUserId != null && info.tileUserId != "0" ){
-										attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ coordIndex +'e) occupées.');
+										attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) occupées.');
 										return dfd.pipe(checkCoord( dfd ));
 
 									} else {
@@ -4772,14 +4820,14 @@ jQuery(document).ready(function(){
 										return dfd.pipe(checkAndLaunchWaves(dfd));
 									}
 								} else {
-									attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ coordIndex +'e) manquantes.');
+									attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) manquantes.');
 									return dfd.pipe(checkCoord( dfd ));
 								}
 							}
 						})
 						.fail(function(){
-							attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ coordIndex +'e) introuvables.');
-							return dfd.pipe(check( dfd ));
+							attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) introuvables.');
+							return dfd.pipe(checkCoord( dfd ));
 						});
 					};
 
@@ -5004,9 +5052,13 @@ jQuery(document).ready(function(){
 						time *= 1000; //timestamp in milliseconds in javascript
 
 						window.setTimeout(function(){
-							//console.log('attack defender recall', attack.id, attack.cityId);
-							KOC.crestHunt.recallDefenders( attack );
+							KOC.crestHunt.forceMarchUpdate( attack );
 						}, time + 30000);
+
+						//force march update
+						window.setTimeout(function(){
+							KOC.crestHunt.forceMarchUpdate( attack );
+						}, time + 60000);
 
 						time *= 2; //round-trip
 

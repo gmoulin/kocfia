@@ -264,9 +264,15 @@ jQuery(document).ready(function(){
 						return;
 					}, false);
 
-					top.postMessage('loaded', 'https://apps.facebook.com/');
+					//console.log('message');
+					//top.postMessage('loaded1', 'https://apps.facebook.com/');
+					top.postMessage('loaded2', 'http://apps.facebook.com/');
+					//top.postMessage('loaded3', window.location.href);
 					window.setInterval(function(){
-						top.postMessage('loaded', 'https://apps.facebook.com/');
+						//console.log('message');
+						//top.postMessage('loaded1', 'https://apps.facebook.com/');
+						top.postMessage('loaded2', 'http://apps.facebook.com/');
+						//top.postMessage('loaded3', window.location.href);
 					}, 10000);
 
 				//gather stored items list

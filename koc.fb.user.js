@@ -25,4 +25,3 @@ unsafeWindow.addEventListener('message', function(event){
 		reloadWindow = setTimeout(function(){ console.log('reloading'); unsafeWindow.location.reload(true); }, 120000);
 	}
 }, false);
-

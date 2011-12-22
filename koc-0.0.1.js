@@ -2759,6 +2759,7 @@ jQuery(document).ready(function(){
 									}
 
 									KOC.crestHunt.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
+									KOC.crestHunt.$form.find('.targetLevel').val(attack.targetLevel);
 									KOC.crestHunt.$form.find('textarea').val(attack.coords.join("\n"));
 
 									KOC.crestHunt.addWaves( attack.waves.length, attack.cityId );
@@ -2832,7 +2833,7 @@ jQuery(document).ready(function(){
 											attack.abort = 0;
 											attack.aborts = [];
 											attack.marching = [];
-											KOC.crestHunt.refreshOngoingInfo( attack );
+											KOC.crestHunt.refreshOngoingInfo( attack, false );
 											KOC.crestHunt.launchAttack( attack );
 										} else {
 											alert('Plan d\'attaque introuvable.')
@@ -3162,7 +3163,7 @@ jQuery(document).ready(function(){
 						attack.abort = 0;
 						attack.aborts = [];
 						attack.marching = [];
-						KOC.crestHunt.refreshOngoingInfo( attack );
+						KOC.crestHunt.refreshOngoingInfo( attack, false );
 						KOC.checkAndLaunchAttack( attack );
 					},
 					'resetForm': function(){
@@ -4787,9 +4788,11 @@ jQuery(document).ready(function(){
 					//fifth in attack sequence, will pipe the deferred resolution to checkAndLaunchWaves function if a suitable coordinate is found
 					var checkCoord = function( dfd ){
 						console.info('KOC checkAndLaunchAttack deferred checkCoord function');
+						KOC.crestHunt.refreshOngoingInfo(attack, false);
 
 						coordIndex += 1;
 						if( coordIndex >= attack.coords.length ){
+							attack.lastCoordIndex = coordIndex;
 							attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 							return dfd.reject();
 						}
@@ -4826,12 +4829,14 @@ jQuery(document).ready(function(){
 										return dfd.pipe(checkAndLaunchWaves(dfd));
 									}
 								} else {
+									attack.lastCoordIndex = coordIndex;
 									attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) manquantes.');
 									return dfd.pipe(checkCoord( dfd ));
 								}
 							}
 						})
 						.fail(function(){
+							attack.lastCoordIndex = coordIndex;
 							attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) introuvables.');
 							return dfd.pipe(checkCoord( dfd ));
 						});
@@ -4848,6 +4853,7 @@ jQuery(document).ready(function(){
 					//seventh in attack sequence, will pipe the deferred resolution to checkAndLaunchWave function until all waves are launched
 					var checkAndLaunchWave = function( dfd ){
 						console.info('KOC checkAndLaunchAttack deferred checkAndLaunchWave function');
+						KOC.crestHunt.refreshOngoingInfo(attack, false);
 
 						/* deferred wave specific functions */
 							//first in wave sequence, will pipe the deferred resolution to checkKnight function
@@ -5005,6 +5011,9 @@ jQuery(document).ready(function(){
 									KOC.crestHunt.recallWaves( attack );
 								}
 								return dfd.reject();
+							})
+							.always(function(){
+								KOC.crestHunt.refreshOngoingInfo(attack, false);
 							});
 					};
 

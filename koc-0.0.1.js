@@ -130,6 +130,8 @@ jQuery(document).ready(function(){
 		kocConfPanelCss += "\n#koc-formation .forms input[type=text] { width: 50px; }";
 		kocConfPanelCss += "\n#koc-formation .forms img { width: 18px; height: 18px; position: relative; top: 4px; }";
 		kocConfPanelCss += "\n#koc-formation .forms fieldset input + label, #koc-formation .forms fieldset select + label, #koc-formation .forms fieldset label + label { margin: 0 3px 0 10px; }";
+		kocConfPanelCss += "\n#koc-formation .forms .save { float: right; }"
+		kocConfPanelCss += "\n#koc-formation .forms fieldset { clear: both; }"
 
 	var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
@@ -145,6 +147,7 @@ jQuery(document).ready(function(){
 		kocChatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1, .kocmain .mod_comm .seltab2 a.tab2 { background: #FCF8DD; height: 20px; line-height: 20px; padding-right: 5px; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1 span, .kocmain .mod_comm .seltab2 a.tab2 span { background: none; height: 20px; line-height: 20px; padding-left: 5px; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content { width: auto; float: none; }";
+		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .message.clearfix { width: auto; display: block; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info { width: auto; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info .nm { padding-left: 18px; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info b { display: none; }";
@@ -317,7 +320,7 @@ jQuery(document).ready(function(){
 			//ajax sniffer
 				console.time('sniffer');
 				KOC.ajaxSniffer();
-				console.timeEnd('sniffer'); )
+				console.timeEnd('sniffer');
 
 			//get player cities
 				KOC.shared.getCities();
@@ -352,7 +355,7 @@ jQuery(document).ready(function(){
 							for( var i = 0; i < KOC.citiesId.length; i += 1 ){
 								KOC.shared.freeKnights( KOC.citiesId[i] );
 							}
-						}):
+						})
 				);
 
 			//map links
@@ -517,11 +520,11 @@ jQuery(document).ready(function(){
 				{'rows': 2, 'name': 'unt12', 'label': ['Catapulte', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 			],
 			'defenses': [
-				{'name': 'frt53', 'label': 'Arbalètes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
-				{'name': 'frt55', 'label': 'Trébuchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
-				{'name': 'frt60', 'label': 'Pièges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
-				{'name': 'frt61', 'label': 'Chausse-trapes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_61_30.jpg'},
-				{'name': 'frt62', 'label': 'Palissades', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_62_30.jpg'},
+				{'name': 'fort53', 'label': 'Arbalètes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
+				{'name': 'fort55', 'label': 'Trébuchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
+				{'name': 'fort60', 'label': 'Pièges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
+				{'name': 'fort61', 'label': 'Chausse-trapes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_61_30.jpg'},
+				{'name': 'fort62', 'label': 'Palissades', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_62_30.jpg'},
 			],
 			'inSeed': {
 				'population': {
@@ -2372,28 +2375,23 @@ jQuery(document).ready(function(){
 						//defenses
 							subLength = KOC.defenses.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.defenses[j];
-								if( type.rows ){
-									var rowsLength = type.rows;
-									for( k = 0; k < rowsLength; k += 1 ){
-										var $tds = $defensesTrs.eq( j ).find('td'),
-											$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-											n = null;
+								var fort = KOC.defenses[j];
+								var $tds = $defensesTrs.eq( j ).find('td'),
+									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
+									n = null;
 
-										if( seed.defenses[ type.name ] ){
-											n = parseFloat( seed.defenses[ type.name ] );
-										}
+								if( seed.fortifications.hasOwnProperty( fort.name ) ){
+									n = parseFloat( seed.fortifications[ fort.name ] );
+								}
 
-										if( n != null ){
-											$td.html( KOC.shared.format( n ) )
-												.attr('title', KOC.shared.readable(n))
-												.data('ori', n);
-										} else {
-											$td.html('&nbsp;')
-												.attr('title', '')
-												.data('ori', 0);
-										}
-									}
+								if( n != null ){
+									$td.html( KOC.shared.format( n ) )
+										.attr('title', KOC.shared.readable(n))
+										.data('ori', n);
+								} else {
+									$td.html('&nbsp;')
+										.attr('title', '')
+										.data('ori', 0);
 								}
 							}
 					}
@@ -4327,8 +4325,9 @@ jQuery(document).ready(function(){
 					form += '<h3>Formations automatiques</h3>';
 					form += '<div class="automatic-train-form">';
 					form += '<ul class="message"></ul>';
+					form += '<button class="save">Enregistrer</button>';
 
-					var i, j, u, res,
+					var i, j, u, d, f, res,
 						cLength = KOC.citiesId.length,
 						cityId, city,
 						rule, units, defenses, availableUnits,
@@ -4350,7 +4349,7 @@ jQuery(document).ready(function(){
 						form += city.roman +' '+ city.name +'</legend><p>';
 
 						//choose unit (check building requirements and tech requirements)
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-unit">Unités</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-unit">Unités&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-unit" class="train-unit" name="unit" autocomplete="off">';
 							form += '<option value=""></option>';
 
@@ -4364,15 +4363,15 @@ jQuery(document).ready(function(){
 							}
 							form += '</select>';
 
-						//choose pack size min and max
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-min">min</label>';
+						//choose pack size min and max]
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-min">Min&nbsp;:&nbsp;</label>';
 							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-min" name="min" class="train-min" autocomplete="off" />';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-max">max</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-max">Max&nbsp;:&nbsp;</label>';
 							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-max" name="max" class="train-max" autocomplete="off" />';
-							form += '<button class="train-max">max</button>';
+							form += '<button class="train-unit-max">max</button>';
 
 						//choose speed
-							form += '<br /><label for="koc-formation-auto-city-'+ cityId +'-speed">Vitesse</label>';
+							form += '<br /><label for="koc-formation-auto-city-'+ cityId +'-speed">Vitesse&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-speed" name="speed" class="train-speed" autocomplete="off">';
 							form += '<option value="0">Normal</option>';
 							form += '<option value="1">5-15% (coût x2)</option>';
@@ -4392,7 +4391,7 @@ jQuery(document).ready(function(){
 						*/
 
 						//choose workforce percentage
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-workforce">Travailleurs</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-workforce">Travailleurs&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-workforce" name="workforce" class="train-workforce" autocomplete="off">';
 							form += '<option value="0">0%</option>';
 							form += '<option value="0.25">25%</option>';
@@ -4410,22 +4409,24 @@ jQuery(document).ready(function(){
 
 						//defenses
 							form += '<p>';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-defense">Défenses</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-defense">Défenses&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-defense" name="defense" class="train-defense" autocomplete="off">';
 							form += '<option value=""></option>';
-							for( var d in defenses ){
+							for( d in defenses ){
 								if( defenses.hasOwnProperty(d) ){
-									form += '<option value="'+ d +'">'+ window.fortcost[d][0] + ' ('+ (availableDefenses.hasOwnProperty(d) ? KOC.shared.format(availableDefenses[d]) : '0' ) +')</option>';
+									f = d.replace(/frt/, 'fort');
+									form += '<option value="'+ d +'">'+ window.fortcost[d][0] + ' ('+ (availableDefenses.hasOwnProperty(f) ? KOC.shared.format(availableDefenses[f]) : '0' ) +')</option>';
 								}
 							}
 							form += '</select>';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-qty">Quantité</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-qty">Quantité&nbsp;:&nbsp;</label>';
 							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-quantity" name="quantity" class="train-quantity" autocomplete="off" />';
+							form += '<button class="train-defense-max">max</button>';
 							form += '</p>';
 
 						//keep resources ? (in easy format, with validation)
 							form += '<p class="train-keep">';
-							form += '<label>Garder</label>';
+							form += '<label>Garder&nbsp;:&nbsp;</label>';
 							for( j = 0; j < rLength; j += 1 ){
 								res = KOC.resources[j];
 								form += '<label for="koc-formation-auto-city-keep-'+ res.name +'">';
@@ -4500,15 +4501,11 @@ jQuery(document).ready(function(){
 							} else {
 								KOC.formation.$autoForm.find('.message').empty();
 
-								if( !KOC.formation.rules[ result.rule.cityId ] ){
-									KOC.formation.rules[ result.rule.cityId ] = {};
-								}
-
-								KOC.formation.rules[ result.rule.cityId ] = result.rule;
+								KOC.formation.rules = result.rules;
 								KOC.formation.storeRules();
 
 								if( KOC.conf.formation.active ){
-									KOC.formation.startAutomaticFormation( result.rule.cityId );
+									KOC.formation.startAutomaticFormations();
 								}
 							}
 						})
@@ -4527,13 +4524,18 @@ jQuery(document).ready(function(){
 						//reset manual form
 						.on('click', '.reset', KOC.formation.resetForm)
 						//calc max trainable units
-						.on('click', '.train-max', function(){
-							var $fieldset = $(this).closest('fieldset'),
+						.on('click', '.train-unit-max', function(){
+							var $fieldset = $(this).closest('fieldset');
 							KOC.formation.calcMaxTrainable( $fieldset );
+						})
+						//calc max trainable units
+						.on('click', '.train-defense-max', function(){
+							var $fieldset = $(this).closest('fieldset');
+							KOC.formation.calcMaxDefense( $fieldset );
 						})
 						//speed change, affect max
 						.on('change', '.train-speed', function(){
-							var $fieldset = $(this).closest('fieldset'),
+							var $fieldset = $(this).closest('fieldset');
 							KOC.formation.calcMaxTrainable( $fieldset );
 						})
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
@@ -4678,6 +4680,9 @@ jQuery(document).ready(function(){
 
 					return {'rules': rules, 'errors': errors};
 				},
+				'startAutomaticFormations': function(){
+					console.info('KOC formation startAutomaticFormations function');
+				},
 				'planManualRule': function(){
 					console.info('KOC formation planManualAttack function');
 					var rule = {},
@@ -4688,6 +4693,7 @@ jQuery(document).ready(function(){
 					console.info('KOC formation launchRule function', rule);
 
 					//walls_train_defense
+					//
 				},
 				'resetForm': function(){
 					console.info('KOC formation resetForm function');
@@ -4820,23 +4826,24 @@ jQuery(document).ready(function(){
 					}
 				},
 				'calcMaxTrainable': function( $fieldset ){
-					var unit = $fieldset.find('.train-unit').val();
+					console.info('KOC formation calcMaxTrainable function');
+					var unit = $fieldset.find('.train-unit').val(),
+						$max = $fieldset.find('.train-max');
 
 					if( unit == '' ){
-						$max.val('');
+						$max.val('').attr('title', '');
 						return;
 					}
 
 					var mod, i, nb, cost = [], res = [],
 						speed = $fieldset.find('.train-speed').val(),
-						cityId = $fieldset.find('.train-city').val(),
-						$max = $fieldset.find('.train-max'),
-						unitcost = window.unitcost["unt" + unit],
-						resources = window.seed.resources["city" + cityId],
-						cityStat = window.seed.citystats["city" + cityId];
+						cityId = 'city' + $fieldset.find('.train-city').val(),
+						unitcost = window.unitcost[unit],
+						resources = window.seed.resources[cityId],
+						cityStat = window.seed.citystats[cityId];
 
 					if( speed == 0 ){
-						mod = 1
+						mod = 1;
 					} else if( speed == 1 ){
 						mod = ~~ (1 * window.gambleOptionResults1[2]);
 					} else if( speed == 2 ){
@@ -4849,19 +4856,103 @@ jQuery(document).ready(function(){
 					}
 
 					cost.push( parseInt(unitcost[5], 10) * mod );
-					res.push( parseInt(gold[0], 10) );
+					res.push( parseInt(cityStat.gold[0], 10) );
 
 					cost.push( parseInt(unitcost[6], 10) );
 					res.push( parseInt(cityStat.pop[0], 10) - parseInt(cityStat.pop[3], 10) );
 
-					nb = res[0] / res[0];
+					nb = res[0] / cost[0];
 					for( i = 1; i < cost.length; i += 1 ){
 						if( cost[i] != 0 ){
-							nb = Math.min(nb, res[e] / cost[e]);
+							console.log(res[i], cost[i], res[i] / cost[i]);
+							nb = Math.min(nb, res[i] / cost[i]);
 						}
 					}
 
-					$max.val( parseInt(nb, 10) || 0 );
+					$max.val( KOC.shared.format(nb) || 0 ).attr('title', nb || 0);
+				},
+				'calcMaxDefense': function( $fieldset ){
+					console.info('KOC formation calcMaxDefense function');
+					var def = $fieldset.find('.train-defense').val(),
+						$qty = $fieldset.find('.train-quantity');
+
+					if( def == '' ){
+						$qty.val('').attr('title', '');
+						return;
+					}
+
+					var mod, i, d, nb, check, slot, cost = [], res = [],
+						cityId = 'city' + $fieldset.find('.train-city').val(),
+						fortcost = window.fortcost[def],
+						resources = window.seed.resources[cityId],
+						buildings = window.seed.buildings[cityId];
+
+					for( i = 1; i < 5; i += 1 ){
+						cost.push( parseInt(fortcost[i], 10) * 3600 );
+						res.push( parseInt(resources["rec" + i][0], 10) );
+					}
+
+					nb = res[0] / cost[0];
+					for( i = 1; i < cost.length; i += 1 ){
+						nb = Math.min(nb, res[i] / cost[i]);
+					}
+
+					nb = parseInt(nb, 10);
+
+					mod = 0;
+					d = parseInt(buildings.pos1[1], 10);
+					for( i = 1; i < (d + 1); i += 1 ){
+						mod += (i * 1000);
+					}
+
+					mod = mod / 2;
+
+					slot = KOC.formation.getWallSlots(cityId, 2);
+					check = 0;
+					def = def.replace(/frt/, '');
+					if( def < 60 ){
+						check = parseInt((mod - slot[0]) / parseInt(window.fortstats["unt" + def][5], 10), 10);
+					} else {
+						check = parseInt((mod - slot[1]) / parseInt(window.fortstats["unt" + def][5], 10), 10);
+					}
+
+					if( check < nb ){
+						nb = check;
+					}
+
+					$qty.val( KOC.shared.format(nb) || 0 ).attr('title', nb);
+				},
+				'getWallSlots': function(cityId, withQueue ){
+					console.info('KOC formation getWallSlots function');
+					var fortifications = window.seed.fortifications[cityId],
+						result = [0, 0],
+						f, def, fortification;
+					for( f in fortifications ){
+						if( fortifications.hasOwnProperty(f) ){
+							fortification = fortifications[f];
+							def = f.replace(/fort/, '');
+
+							if( def < 60 ){
+								result[0] += parseInt(window.fortstats["unt" + def][5], 10) * parseInt(fortification, 10);
+							} else {
+								result[1] += parseInt(window.fortstats["unt" + def][5], 10) * parseInt(fortification, 10);
+							}
+						}
+					}
+
+					if( withQueue == 2 ){
+						var queue = window.seed.queue_fort[cityId];
+						for( var i = 0; i < queue.length; i += 1 ){
+							def = parseInt(queue[i][0], 10);
+							if( def < 60 ){
+								result[0] += parseInt(window.fortstats["unt" + def][5], 10) * parseInt(queue[i][1], 10);
+							} else {
+								result[1] += parseInt(window.fortstats["unt" + def][5], 10) * parseInt(queue[i][1], 10);
+							}
+						}
+					}
+
+					return result;
 				},
 				'train': function(qty, unitId, boost, speed){
 					console.info('KOC formation train function');

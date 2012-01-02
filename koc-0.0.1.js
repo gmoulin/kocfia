@@ -130,8 +130,17 @@ jQuery(document).ready(function(){
 		kocConfPanelCss += "\n#koc-formation .forms input[type=text] { width: 50px; }";
 		kocConfPanelCss += "\n#koc-formation .forms img { width: 18px; height: 18px; position: relative; top: 4px; }";
 		kocConfPanelCss += "\n#koc-formation .forms fieldset input + label, #koc-formation .forms fieldset select + label, #koc-formation .forms fieldset label + label { margin: 0 3px 0 10px; }";
-		kocConfPanelCss += "\n#koc-formation .forms .save { float: right; }"
-		kocConfPanelCss += "\n#koc-formation .forms fieldset { clear: both; }"
+		kocConfPanelCss += "\n#koc-formation .forms .save { float: right; }";
+		kocConfPanelCss += "\n#koc-formation .forms fieldset { clear: both; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing .unit { display: inline-block; min-width: 80px; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing .ui-icon-trash { position: relative; top: 2px; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing img { margin-right: 5px; width: 18px; height: 18px; position: relative; top: 2px; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing.ui-accordion .ui-accordion-content { padding: 5px; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing ol { padding-bottom: 3px; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing table { width: 100%; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing th, #koc-formation .ongoing td { width: 50%; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing .canceled, #koc-formation .ongoing .canceled span { text-decoration: line-though; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing .canceled .ui-icon-trash { visibility: hidden; }";
 
 	var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
@@ -188,7 +197,7 @@ jQuery(document).ready(function(){
 		kocOverviewCss += "\n#koc-overview .sizer td, #koc-overview .sizer td.sum, #koc-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }";
 
 	var kocNotepadCss = "#koc-notepad { padding: 2px 3px; }";
-		kocNotepadCss += "\n#koc-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }";
+		kocNotepadCss += "\n#koc-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;	z-index: 100000; display: none; }";
 		kocNotepadCss += "\n#koc-notepad .ui-icon-close { float: right; cursor: pointer; }";
 		kocNotepadCss += "\n#koc-notepad .wrap { width: 100%; overflow: auto; }";
 		kocNotepadCss += "\n#koc-notepad textarea { width: 100%; height: 150px; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }";
@@ -453,12 +462,12 @@ jQuery(document).ready(function(){
 			'cities': [],//[{'id','name','coords': {x,y}}, ...]
 			'citiesId': [],
 			'resources': [
-				{'name': 'gold', 'key': 'rec0', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'name': 'resource1x3600', 'key': 'rec1', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'name': 'resource2x3600', 'key': 'rec2', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'name': 'resource3x3600', 'key': 'rec3', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'name': 'resource4x3600', 'key': 'rec4', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{'name': 'resource7', 'key': '7', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
+				{'name': 'gold', 'label': 'Or', 'key': 'rec0', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+				{'name': 'resource1x3600', 'label': 'Nourriture', 'key': 'rec1', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'name': 'resource2x3600', 'label': 'Bois', 'key': 'rec2', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'name': 'resource3x3600', 'label': 'Pierre', 'key': 'rec3', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'name': 'resource4x3600', 'label': 'Minerai', 'key': 'rec4', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'name': 'resource7', 'label': 'Pierre d\'Ether', 'key': '7', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
 			],
 			'resources_cap': [
 				{'name': 'resource1Capx3600', 'label': 'plafond', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
@@ -506,7 +515,7 @@ jQuery(document).ready(function(){
 				{'name': 'hapiness', 'label': 'bonheur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
 			],
 			'troops': [
-				{'rows': 2, 'name': 'unt1', 'label': ['Unité', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
+				{'rows': 2, 'name': 'unt1', 'label': ['Ravitailleur', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
 				{'rows': 2, 'name': 'unt2', 'label': ['Milicien', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
 				{'rows': 2, 'name': 'unt3', 'label': ['Eclaireur', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
 				{'rows': 2, 'name': 'unt4', 'label': ['Piquier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
@@ -1124,15 +1133,18 @@ jQuery(document).ready(function(){
 				'readableDuration': function( time ){
 					time = Math.floor( parseFloat( time ) );
 					if( time > 86400 ){ //1 day
-						time = time / 3600; //get time in days
-						return Math.floor(time / 24)+'j';
+						var h = Math.floor( time % 3600 );
+						time = time / 3600;
+						return Math.floor(time / 24) + 'j' + h + 'h';
 					} else {
 						if( time < 61 ){
 							return time + 's';
 						} else if( time > 3600 ){
-							return Math.floor( time / 3600 ) + 'h';
+							var m = Math.floor( (time % 3600) / 60 );
+							return Math.floor( time / 3600 ) + 'h' + m + 'm';
 						} else {
-							return Math.floor( time / 60 ) + 'm';
+							var s = Math.floor( time % 60 );
+							return Math.floor( time / 60 ) + 'm' + s + 's';
 						}
 					}
 				},
@@ -1857,7 +1869,7 @@ jQuery(document).ready(function(){
 						var left = 0, i, j, length;
 						for( var p in KOC.overview.parts ){
 							if( KOC.overview.parts.hasOwnProperty(p) ){
-								dataTable += '<tr class="'+ p +'"><th colspan="'+ cols +'" class="'+ p +'">' +  KOC.overview.parts[p] + '</th></tr>';
+								dataTable += '<tr class="'+ p +'"><th colspan="'+ cols +'" class="'+ p +'">' +	KOC.overview.parts[p] + '</th></tr>';
 								length = KOC[p].length;
 								for( i = 0; i < length; i += 1 ){
 									if( !KOC[p][i].hasOwnProperty('label') && KOC[p][i].hasOwnProperty('key') ){
@@ -3596,7 +3608,7 @@ jQuery(document).ready(function(){
 
 					$body.append( $notepad );
 
-					KOC.$notepad =  $('#koc-notepad');
+					KOC.$notepad =	$('#koc-notepad');
 					KOC.notepad.$notes = KOC.$notepad.find('.notes');
 					KOC.notepad.$wrap = KOC.$notepad.find('.wrap');
 					KOC.notepad.$span = KOC.notepad.$wrap.find('pre span');
@@ -4538,6 +4550,14 @@ jQuery(document).ready(function(){
 							var $fieldset = $(this).closest('fieldset');
 							KOC.formation.calcMaxTrainable( $fieldset );
 						})
+						.on('click', '.ongoing .formations .ui-icon-trash', function(){
+							var $this = $(this);
+							KOC.formation.cancelTraining( $this.attr('rel'), $this.parent() );
+						})
+						.on('click', '.ongoing .defenses .ui-icon-trash', function(){
+							var $this = $(this);
+							KOC.formation.cancelFortification( $this.attr('rel'), $this.parent() );
+						})
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
 					KOC.formation.$autoForm = $section.find('.automatic-rule-form');
@@ -4710,13 +4730,52 @@ jQuery(document).ready(function(){
 					var $ul = KOC.formation.$ongoing.find('ul').filter('[data-city='+ cityId +']');
 					$ul.empty();
 
-					var rule = KOC.formation.rules[ cityId ],
-						code = '';
-					if( rule ){
-						code += '';
-					}
+					city = 'city' + cityId;
 
-					//cityinfo_defenses
+					var code = '', i, formation, unit,
+						queue = window.seed.queue_unt[city];
+					//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
+
+					code += '<table border="0">';
+					code += '<thead><tr><th>Formations</th><th>Fortifications</th></tr></thead>';
+					code += '<tbody><tr><td>';
+
+					//troops
+					code += '<ol class="formations">';
+					for( i = 0; i < queue.length; i += 1 ){
+						formation = queue[i];
+						for( j = 0; j < KOC.troops.length; j += 1 ){
+							if( KOC.troops[j].name == 'unt' + formation[0] ){
+								unit = KOC.troops[j];
+								break;
+							}
+						}
+
+						code += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityId +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
+						code += '<img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />&nbsp;';
+						code += '<span class="unit">'+ KOC.shared.format( formation[1] ) +'</span>';
+						code += KOC.shared.readableDuration( formation[3] - formation[2] ) +'</li>';
+					}
+					code += '</ol></td><td>';
+
+					//defenses
+					code += '<ol class="defenses">';
+					queue = window.seed.queue_fort[city];
+					for( i = 0; i < queue.length; i += 1 ){
+						formation = queue[i];
+						for( j = 0; j < KOC.defenses.length; j += 1 ){
+							if( KOC.defenses[j].name == 'fort' + formation[0] ){
+								unit = KOC.defenses[j];
+								break;
+							}
+						}
+
+						code += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityId +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
+						code += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
+						code += '<span class="unit">'+ KOC.shared.format( formation[1] ) +'</span>';
+						code += KOC.shared.readableDuration( formation[3] - formation[2] ) +'</li>';
+					}
+					code += '</ol></td></tr></tbody></table>';
 
 					$ul.append( code );
 				},
@@ -4795,35 +4854,6 @@ jQuery(document).ready(function(){
 						}
 					}
 					return forts;
-				},
-				'trainingDuration': function( qty, unitId, boost, speed ){
-					console.info('KOC formation trainingDuration function');
-
-					var m = window.modal_barracks_train_max( unitId );
-					if( qty > m ) qty = m;
-
-					var t = window.modal_barracks_traintime(unitId, qty);
-					if( speed == 0 ){
-						return window.timestr(t);
-					} else if( speed == 1 ){
-						var h = window.timestr( Math.ceil( (100 - window.gambleOptionResults1[0]) / 100 * t) ),
-							b = window.timestr( Math.ceil( (100 - window.gambleOptionResults1[1]) / 100 * t) );
-						return h + " - " + b;
-					} else if( speed == 2 ){
-						var h = window.timestr( Math.ceil( (100 - window.gambleOptionResults2[0]) / 100 * t) ),
-							b = window.timestr( Math.ceil( (100 - window.gambleOptionResults2[1]) / 100 * t) );
-						return h + " - " + b;
-					} else {
-						//boost and speed are incompatible
-						if( boost == 36 ){
-							t = parseInt((t * 0.7), 10);
-						} else if( boost == 37 ){
-							t = parseInt(time * 0.5)
-						} else if( boost == 38 ){
-							t = parseInt(time * 0.3)
-						}
-						return window.timestr(t);
-					}
 				},
 				'calcMaxTrainable': function( $fieldset ){
 					console.info('KOC formation calcMaxTrainable function');
@@ -4953,6 +4983,105 @@ jQuery(document).ready(function(){
 					}
 
 					return result;
+				},
+				'cancelTraining': function( info, $li ){
+					console.info('KOC formation cancelTraining function');
+					var i, j, totalReturn,
+						params = $.extend({}, window.g_ajaxparams);
+
+					info = info.split(',');
+
+					params.requestType = "CANCEL_TRAINING";
+					params.cityId      = info[1];
+					params.typetrn     = info[2];
+					params.numtrptrn   = info[3];
+					params.trnETA      = info[4];
+					params.trnTmp      = info[5];
+					params.trnNeeded   = info[6];
+
+					cityId = 'city' + info[1];
+
+					$.ajax({
+							url: window.g_ajaxpath + 'ajax/cancelTraining.php' + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json'
+						})
+						.done(function( result ){
+							if( result.ok ){
+								window.update_seed_ajax(true, function(){
+									j = 0;
+									for( var i = 0; i < window.seed.queue_unt[cityId].length; i++ ){
+										if( i > info[0] ){
+											window.seed.queue_unt[cityId][i][2] = parseInt(result.dateTraining[j]["start"], 10);
+											window.seed.queue_unt[cityId][i][3] = parseInt(result.dateTraining[j]["end"], 10);
+											j += 1;
+										}
+									}
+
+									for( i = 1; i < 5; i += 1 ){
+										totalReturn = parseInt(window.unitcost["unt" + info[1]][i], 10) * parseInt(info[2], 10) * 3600 / 2;
+										window.seed.resources[cityId]["rec" + i][0] = parseInt(window.seed.resources[cityId]["rec" + i][0], 10) + totalReturn;
+									}
+								});
+
+								$li.addClass('canceled');
+
+								setTimeout(function(){ KOC.formation.listCityFormations( info[1] ); }, 500);
+							} else if( result.msg ){
+								alert( result.msg );
+							}
+						});
+				},
+				'cancelFortification': function( info, $li ){
+					console.info('KOC formation cancelFortification function');
+					var i, j, totalReturn,
+						params = $.extend({}, window.g_ajaxparams);
+
+					info = info.split(',');
+
+					params.requestType = "CANCEL_FORTIFICATIONS";
+					params.cityId      = info[1];
+					params.typefrt     = info[2];
+					params.numtrpfrt   = info[3];
+					params.frtETA      = info[4];
+					params.frtTmp      = info[5];
+					params.frtNeeded   = info[6];
+					params.frtid       = info[0];
+
+					cityId = 'city' + info[1];
+
+					$.ajax({
+							url: window.g_ajaxpath + 'ajax/cancelFortifications.php' + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json'
+						})
+						.done(function( result ){
+							if( result.ok ){
+								window.update_seed_ajax(true, function(){
+									j = 0;
+									for( var i = 0; i < window.seed.queue_unt[cityId].length; i++ ){
+										if( i > info[0] ){
+											window.seed.queue_fort[cityId][i][2] = parseInt(result.dateFortifications[j]["start"], 10);
+											window.seed.queue_fort[cityId][i][3] = parseInt(result.dateFortifications[j]["end"], 10);
+											j += 1;
+										}
+									}
+
+									for( i = 1; i < 5; i += 1 ){
+										totalReturn = parseInt(window.fortcost["frt" + info[1]][i], 10) * parseInt(info[2], 10) * 3600 / 2;
+										window.seed.resources[cityId]["rec" + i][0] = parseInt(window.seed.resources[cityId]["rec" + i][0], 10) + totalReturn;
+									}
+								});
+
+								$li.addClass('canceled');
+
+								setTimeout(function(){ KOC.formation.listCityFormations( info[1] ); }, 500);
+							} else if( result.msg ){
+								alert( result.msg );
+							}
+						});
 				},
 				'train': function(qty, unitId, boost, speed){
 					console.info('KOC formation train function');

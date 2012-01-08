@@ -139,8 +139,10 @@ jQuery(document).ready(function(){
 		kocConfPanelCss += "\n#koc-formation .ongoing ol { padding-bottom: 3px; }";
 		kocConfPanelCss += "\n#koc-formation .ongoing table { width: 100%; }";
 		kocConfPanelCss += "\n#koc-formation .ongoing th, #koc-formation .ongoing td { width: 50%; }";
+		kocConfPanelCss += "\n#koc-formation .ongoing td { vertical-align: top; }";
 		kocConfPanelCss += "\n#koc-formation .ongoing .canceled, #koc-formation .ongoing .canceled span { text-decoration: line-though; }";
 		kocConfPanelCss += "\n#koc-formation .ongoing .canceled .ui-icon-trash { visibility: hidden; }";
+		kocConfPanelCss += "\n#koc-gloryTournament .scout-form input[type=checkbox] + label { margin-right: 10px; }";
 
 	var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
@@ -234,9 +236,10 @@ jQuery(document).ready(function(){
 
 	KOC = {
 		'server': null,
-		'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt', 'notepad', 'map', 'formation'],
+		'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt', 'notepad', 'map', 'formation', 'gloryTournament'],
 		'modulesLabel': {
 			'crestHunt': 'Armoiries',
+			'gloryTournament': 'Tournoi de Gloire',
 		},
 		'stored': ['conf'],
 		'init': function(){
@@ -1237,11 +1240,15 @@ jQuery(document).ready(function(){
 				},
 				'getRallyPointLevel': function( cityId ){
 					var level = 0;
+					if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
 					for( var b in window.seed.buildings[cityId] ){
 						if( window.seed.buildings[cityId].hasOwnProperty(b) ){
 							var building = window.seed.buildings[cityId][b];
 
-							if( building[0] == 12 ) level = parseInt(building[1], 10);
+							if( building[0] == 12 ){
+								level = parseInt(building[1], 10);
+								break;
+							}
 						}
 					}
 					return level;
@@ -5275,6 +5282,405 @@ jQuery(document).ready(function(){
 				//getTransportDuration
 			};
 
+		/* GLORY TOURNAMENT */
+			KOC.gloryTournament = {
+				'options': {
+					'active': 1,
+					'automatic': 0,
+				},
+				'stored': ['rule'],
+				'rule': {},
+				'confPanel': function( $section ){
+					console.info('KOC gloryTournament confPanel function');
+					var code = '<h3>Tournoi de Gloire</h3>';
+					code += '<div>';
+					code += KOC.shared.generateCheckbox('gloryTournament', 'active', 'Activer le module', KOC.conf.gloryTournament.active);
+					code += KOC.shared.generateCheckbox('gloryTournament', 'automatic', 'Lancer les éclairages automatiques', KOC.conf.gloryTournament.automatic);
+					code += KOC.shared.generateButton('gloryTournament', 'deleteRule', 'Supprimer la règle enregistrée');
+					code += '</div>';
+
+					$section.append( code );
+				},
+				'modPanel': function(){
+					console.info('KOC gloryTournament modPanel function');
+					var $section = KOC.$confPanel.find('#koc-gloryTournament').html('');
+
+					var form = '<h3><span class="ui-icon ui-icon-info"></span>';
+					form += '<span><input type="checkbox" id="gloryTournament-panel-automatic" '+ (KOC.conf.gloryTournament.automatic ? 'checked' : '') +' autocomplete="off" />';
+					form += '<label for="gloryTournament-panel-automatic">éclairages automatiques</label></span>';
+					form += 'Configurer un éclairage</h3>';
+					form += '<div class="scout-form">';
+					form += '<ul class="message"></ul>';
+					form += '<fieldset><div><label>Envoyer depuis&nbsp;:&nbsp;</label><br />';
+
+					var i, length = KOC.cities.length;
+					for( i = 0; i < length; i += 1 ){
+						var city = KOC.cities[i],
+							checked = ( KOC.gloryTournament.rule.hasOwnProperty('cities') ? $.inArray(city.id, KOC.gloryTournament.rule.cities) > -1 : false );
+						form += '<input id="koc-gloryTournament-city'+ city.id +'" name="city" value="'+ city.id +'" type="checkbox" class="city-choice" '+ (checked ? 'checked' : '') +' autocomplete="off" />';
+						form += '<label for="koc-gloryTournament-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
+					}
+
+					form += '</div><div>';
+					var c = ( KOC.gloryTournament.rule.hasOwnProperty('coord') ? KOC.gloryTournament.rule.coord : '' );
+					form += '<label>Coordonnée&nbsp;:&nbsp;</label><input type="text" name="coord" id="gloryTournament-coord" value="'+ c +'" autocomplete="off" />';
+					form += '</div>';
+					form += '<button class="save">Sauvegarder</button>';
+					form += '<button class="reset">Annuler</button>';
+					form += '</fieldset></div>';
+
+					var help = '<div id="koc-gloryTournament-help" class="help" title="Aide Tournoi de Gloire"><ul>';
+					help += '<li>Envoie 2 éclaireurs en éclairage sur une coordonnée donnée à partir des villes cochées</li>';
+					help += '<li>Utilise la règle définie à chaque tentative</li>';
+					help += '<li>Ne vérifie pas si un boost d\'attaque est actif (gardien, objet, bonus, ...)</li>';
+					help += '<li>Utilise tous les slots des points de ralliements disponibles</li>';
+					help += '<li>Les éclairages sont actifs quand le module et les éclairages automatiques sont actifs (cochés)</li>';
+					help += '</ul></div>';
+
+					$section.append( form + help )
+						.on('change', '#gloryTournament-panel-automatic', function(){
+							$('#gloryTournament-automatic').prop('checked', $(this).prop('checked')).change();
+						})
+						//reset form
+						.on('click', '.reset', function(){
+							var $inputs = KOC.gloryTournament.$form.find('input');
+							$inputs.filter('[type=text]').val('');
+							$inputs.filter('[type=cgeckbox]').prop('checked', false);
+						})
+						//launch
+						.on('click', '.save', function(){
+							var result = KOC.gloryTournament.planScout();
+							if( result.errors.length ){
+								KOC.gloryTournament.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+							} else {
+								KOC.gloryTournament.$form.find('.message').empty();
+								KOC.gloryTournament.rule = result.rule;
+								KOC.gloryTournament.storeRule();
+							}
+						})
+						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
+
+					KOC.gloryTournament.$form = $section.find('.scout-form');
+				},
+				'on': function(){
+					console.info('KOC gloryTournament on function');
+					if( $.isEmptyObject( KOC.gloryTournament.rule ) ){
+						try{
+							var persistentGloryTournamentRule = localStorage.getObject('koc_gloryTournament_rule_' + KOC.storeUniqueId);
+							if( persistentGloryTournamentRule ){
+								KOC.gloryTournament.rule = persistentGloryTournamentRule;
+							}
+						} catch(e){
+							console.error(e);
+						}
+					}
+
+					if( KOC.conf.gloryTournament.automatic ){
+						KOC.gloryTournament.automaticOn();
+					}
+				},
+				'off': function(){
+					console.info('KOC gloryTournament off function');
+
+					KOC.gloryTournament.automaticOff();
+				},
+				'automaticOn': function(){
+					console.info('KOC gloryTournament automaticOn function');
+					$('#gloryTournament-panel-automatic').prop('checked', true);
+
+					if( !$.isEmptyObject( KOC.gloryTournament.rule ) ){
+						console.info('launching automatic scout', KOC.gloryTournament.rule);
+						KOC.gloryTournament.launchScout();
+					}
+				},
+				'automaticOff': function(){
+					console.info('KOC gloryTournament automaticOff function');
+					$('#gloryTournament-panel-automatic').prop('checked', false);
+				},
+				'storeRule': function(){
+					console.info('KOC gloryTournament storeRule function');
+					try{
+						localStorage.setObject('koc_gloryTournament_rule_' + KOC.storeUniqueId, KOC.gloryTournament.rule);
+					} catch(e){
+						alert(e);
+					}
+				},
+				'deleteRule': function(){
+					console.info('KOC gloryTournament deleteRule function');
+					KOC.gloryTournament.rule = {};
+					KOC.gloryTournament.storeRule();
+
+					$('#koc-crestHunt').find('.attack-list').find('ul').empty();
+				},
+				'planScout': function(){
+					console.info('KOC gloryTournament planScout function');
+					var $cities = KOC.gloryTournament.$form.find('.city-choice').filter(':checked'),
+						coord = $.trim( KOC.gloryTournament.$form.find('#gloryTournament-coord').val().replace(/\n/g, ' ') ),
+						errors = [],
+						regexp = /[^0-9, ]/,
+						rule = {};
+
+					//check form
+						//city
+						if( !$cities.length ){
+							errors.push('Au moins une ville de départ obligatoire.');
+						} else {
+							rule.cities = $cities.map(function(){ return this.value; }).get();
+						}
+
+						//coord
+						if( coord.length == 0 ){
+							errors.push('Coordonnée requise.');
+						} else if( regexp.test( coord ) ){
+							errors.push('Pour la coordonnée, veuillez respecter le format x,y.');
+						} else {
+							var c = coord.split(',');
+							if( c[0] < 0 || c[0] > 750 || c[0] < 0 || c[0] > 750 ){
+								errors.push('Coordonnée erronée.');
+							} else {
+								rule.coord = coord;
+							}
+						}
+
+						rule.unit = {'id': 'unt3', 'qty': 2};
+
+						if( errors.length ){
+							errors = errors.unique();
+						}
+
+					return {'rule': rule, 'errors': errors};
+				},
+				'launchScout': function(){
+					var rule = KOC.gloryTournament.rule;
+					console.info('KOC gloryTournament launchScout function', rule);
+					if( $.isEmptyObject( rule ) ){
+						return false;
+					}
+
+					if( !KOC.conf.gloryTournament.active || !KOC.conf.gloryTournament.automatic ){
+						return false;
+					}
+
+					//by city steps
+					var byCity = function( dfd ){
+						console.info('KOC gloryTournament deferred byCity function', cityIndex + 1);
+
+						if( !KOC.conf.gloryTournament.active || !KOC.conf.gloryTournament.automatic ){
+							return dfd.reject();
+						}
+
+						cityIndex += 1;
+						if( cityIndex < rule.cities.length ){
+							cityId = rule.cities[ cityIndex ];
+							city = 'city' + cityId;
+							wParams.cid = cityId;
+							return dfd.pipe( checkRaillyPoint( dfd ) );
+						}
+
+						return dfd.resolve();
+					};
+
+					//step 1 of the sequence
+					var checkRaillyPoint = function( dfd ){
+						console.info('KOC gloryTournament deferred checkRaillyPoint function');
+						slots = KOC.shared.getRallyPointLevel( city );
+						if( slots == 12 ) slots -= 1; //eleven armies at level 12
+						for( a in window.seed.queue_atkp[ city ] ){
+							if( window.seed.queue_atkp[ city ].hasOwnProperty(a) ) slots -= 1;
+						}
+
+						if( slots < 1 ){
+							return setTimeout(function(){ dfd.pipe( byCity( dfd ) ); }, 6000);
+						}
+
+						dfd.pipe( checkUnit( dfd ) );
+					};
+
+					//step 2 of the sequence
+					var checkUnit = function( dfd ){
+						console.info('KOC gloryTournament deferred checkUnit function');
+
+						units = window.seed.units[ city ];
+
+						unitKey = rule.unit.id.replace(/nt/, '');
+						unitNum = parseInt(rule.unit.id.replace(/unt/, ''), 10); //for unitsArr, 0 based
+						qty = parseFloat(rule.unit.qty);
+						wParams[ unitKey ] = qty;
+						unitsArr[ unitNum ] = qty;
+
+						available = parseFloat( units[ rule.unit.id ] );
+						if( available < qty ){
+							return setTimeout(function(){ dfd.pipe( byCity( dfd ) ); }, 6000);
+						}
+
+						return dfd.pipe( launchScouts( dfd ) );
+					};
+
+					//step 3 of the sequence
+					var launchScouts = function( dfd ){
+						console.info('KOC gloryTournament deferred launchScouts function');
+						$.when( subSequence( dfd ) )
+							.done(function(){
+								return dfd.resolve();
+							});
+					};
+
+					//sub sequence, launch scout for each ralliement point slot available
+					var subSequence = function( dfd ){
+						console.info('KOC gloryTournament deferred subSequence function');
+						return $.Deferred(function( sdfd ){
+							return sdfd.pipe( launch( dfd, sdfd ) );
+						}).promise();
+					};
+
+					var checkMarch = function( city, mid ){
+						console.info('KOC gloryTournament deferred checkMarch function');
+						var march = window.seed.queue_atkp[ city ][ 'm' + mid ];
+						if( march ){
+							var mParams = window.g_ajaxparams;
+							mParams.rid = mid;
+							$.ajax({
+								url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
+								type: 'post',
+								data: mParams,
+								dataType: 'json',
+							})
+							.done(function(data){
+								if( data.ok ){
+									mid = 'm' + mid;
+									//set the units Return value
+									for( j = 1; j < 13; j += 1 ){
+										if( data.march['unit'+ j +'Return'] ){
+											window.seed.queue_atkp[ city ][ mid ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
+										}
+									}
+
+									for( j = 1; j < 6; j += 1 ){
+										if( data.march['resource' + j] ){
+											window.seed.queue_atkp[ city ][ mid ]['resource' + j] = data.march['resource' + j];
+										}
+									}
+
+									window.seed.queue_atkp[ city ][ mid ].marchStatus = data.march.marchStatus;
+									window.seed.queue_atkp[ city ][ mid ].hasUpdated = true;
+								}
+							});
+						}
+					};
+
+					var removeMarch = function( city, mid ){
+						console.info('KOC gloryTournament deferred checkMarch function');
+						var march = window.seed.queue_atkp[ city ][ 'm' + mid ];
+						if( march ){
+							delete window.seed.queue_atkp[ city ][ 'm' + mid ];
+						}
+
+						if( cityId == window.currentcityid ) window.attack_generatequeue();
+					}
+
+					//sub sequence, launch scout
+					var launch = function( dfd, sdfd ){
+						console.info('KOC gloryTournament deferred launch function');
+						var p = wParams, //params is redefined in $.ajax, need for attach_addoutgoingmarch call
+							captcha = false;
+						$.ajax({
+							url: window.g_ajaxpath + "ajax/march.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: wParams,
+							dataType: 'json'
+						})
+						.done(function( result ){
+							if( result.ok ){
+								var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
+									d = new Date();
+									ts = parseInt(d.getTime() / 1000, 10);
+									time = timediff; //for the wait before next attack
+								try{
+									window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ts + timediff, p.xcoord, p.ycoord, unitsArr, p.type, p.kid, resources, result.tileId, result.tileType, result.tileLevel, p.cid, true);
+								} catch(e){
+									console.warn(e);
+								}
+
+								if( result.updateSeed ) window.update_seed(result.updateSeed);
+
+								window.updateBoosts(result);
+								if( result.liftFog ){
+									window.update_boosts();
+									window.seed.playerEffects.fogExpire = 0;
+									window.g_mapObject.getMoreSlots();
+								}
+
+								setTimeout(function(){ checkMarch( city, result.marchId); }, timediff * 1000 + 5000);
+								setTimeout(function(){ removeMarch( city, result.marchId); }, timediff * 1000 + 30000);
+							} else {
+								console.log('error', result);
+								if( result.hasOwnProperty('user_action') && result.user_action == 'marchCaptcha' ){
+									$('#gloryTournament-panel-automatic').prop('checked', false).change();
+									alert('Kabam capcha ! Eclairages stoppés en attendant ! Faite un éclairage manuel en validant le capcha puis relancer.');
+									captcha = true;
+								}
+							}
+						})
+						.always(function(){
+							if( captcha ){
+								return dfd.reject();
+							} else {
+								console.log('2 scouts launched from '+ cityId, cityIndex + 1);
+								slots -= 1;
+								if( slots < 1 ){
+									console.log('next city', cityIndex + 1);
+									return setTimeout(function(){ dfd.pipe( byCity( dfd ) ); }, 6000);
+								}
+
+								console.log('next launch', slots);
+								setTimeout(function(){ sdfd.pipe( launch( dfd, sdfd ) ); }, 10000);
+							}
+						});
+					};
+
+					//main sequence
+					var sequence = function(){
+						console.info('KOC gloryTournament deferred sequence function');
+						return $.Deferred( function( dfd ){
+							return dfd.pipe( byCity( dfd ) );
+						}).promise();
+					};
+
+
+					var wParams = jQuery.extend(true, {}, window.g_ajaxparams);
+					if( wParams == null ){
+						alert('Paramètres ajax manquant. Raffraîchissez la page.');
+						return;
+					}
+					wParams.type = 3; //MARCH_TYPE_SCOUT
+					wParams.gold = 0;
+					wParams.r1 = 0;
+					wParams.r2 = 0;
+					wParams.r3 = 0;
+					wParams.r4 = 0;
+					wParams.r5 = 0;
+					wParams.items = '';
+
+					var c = rule.coord.split(',');
+					wParams.xcoord = c[0];
+					wParams.ycoord = c[1];
+
+					wParams.kid = 0;
+
+					var cityIndex = -1,
+						cityId, city, slots, a, units, unitKey, unitNum, qty, available,
+						resources = [0, 0, 0, 0, 0],
+						unitsArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+					$.when( sequence() )
+						.always(function(){
+							if( KOC.conf.gloryTournament.active && KOC.conf.gloryTournament.automatic ){
+								setTimeout(function(){ KOC.gloryTournament.launchScout(); }, 30000);
+							}
+						});
+				}
+			};
+
 	/* CHECK AND LAUNCH ATTACK */
 		KOC.checkAndLaunchAttack = function( attack ){
 			console.info('KOC checkAndLaunchAttack function', attack.id, attack.cityId, attack);
@@ -5335,7 +5741,7 @@ jQuery(document).ready(function(){
 						}
 
 						var checkMarch = function(dfd, i){
-							console.info('KOC checkAndLaunchAttack deferred previousMarchingCheck function');
+							console.info('KOC checkAndLaunchAttack deferred checkMarch function');
 							march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
 							//console.log('march', i, march);
 							if( march && !march.hasOwnProperty('kocUpdated') ){
@@ -5412,9 +5818,9 @@ jQuery(document).ready(function(){
 					console.info('KOC checkAndLaunchAttack deferred checkRallyPoint function');
 					var slots = KOC.shared.getRallyPointLevel(attack.cityId),
 						a;
-					if( slots == 12 ) slots--; //eleven armies at level 12
+					if( slots == 12 ) slots -= 1; //eleven armies at level 12
 					for( a in window.seed.queue_atkp[attack.cityId] ){
-						if( window.seed.queue_atkp[attack.cityId].hasOwnProperty(a) ) slots--;
+						if( window.seed.queue_atkp[attack.cityId].hasOwnProperty(a) ) slots -= 1;
 					}
 
 					if( slots < attack.waves ){
@@ -5756,7 +6162,7 @@ jQuery(document).ready(function(){
 				console.timeEnd('Koc init');
 			}, 2000);
 		} else {
-			trys--;
+			trys -= 1;
 			if( trys <= 0 ) window.location.reload();
 			else window.setTimeout(function(){ load(); }, 1000);
 		}

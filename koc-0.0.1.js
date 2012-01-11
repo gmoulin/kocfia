@@ -84,11 +84,9 @@ var debug = {};
 jQuery(document).ready(function(){
 //CSS rules declarations
 	var kocConfPanelCss = "#koc-conf-panel-toggle {}";
-		kocConfPanelCss += "\n.drag-handle { cursor: move; width: 10px; height: 20px; background-color: grey; float: left;}";
 		kocConfPanelCss += "\n#koc-conf-panel .ui-icon-close { position: absolute; right: -3px; top: -3px; cursor: pointer; }";
 		kocConfPanelCss += "\n#koc-conf-panel { display: none; position: absolute; z-index: 100001; }";
 		kocConfPanelCss += "\n#koc-conf-panel label + select { margin-left: 5px; }";
-		kocConfPanelCss += "\n#koc-conf-panel .drag-handle { height: 36px; }";
 		kocConfPanelCss += "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }";
 		kocConfPanelCss += "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }";
 		kocConfPanelCss += "\n#koc-conf-panel ul:not(.ui-accordion-content) { margin: 5px; }";
@@ -179,7 +177,6 @@ jQuery(document).ready(function(){
 	var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
 
 	var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }";
-		kocOverviewCss += "\n#koc-overview .handle { margin: 0 0 2px 0; text-indent: 3px; }";
 		kocOverviewCss += "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }";
 		kocOverviewCss += "\n#koc-overview .ui-tabs .ui-tabs-panel { padding: 2px; }";
 		kocOverviewCss += "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }";
@@ -206,7 +203,6 @@ jQuery(document).ready(function(){
 		kocNotepadCss += "\n#koc-notepad .wrap input + label { display: block; }";
 		kocNotepadCss += "\n#koc-notepad .charsLeft { float: right; }";
 		kocNotepadCss += "\n#koc-notepad ul { display: block; -moz-column-count: 3; -moz-column-gap: 1em; -webkit-column-count: 3; -webkit-column-gap: 1em; column-count: 3; column-gap: 1em; }";
-		kocNotepadCss += "\n#koc-notepad .handle { margin-top: 0; }";
 		kocNotepadCss += "\n#koc-notepad li .ui-icon { display: inline-block; }";
 		kocNotepadCss += "\n#koc-notepad li { white-space: nowrap; }";
 		kocNotepadCss += "\n#koc-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }";
@@ -227,9 +223,6 @@ jQuery(document).ready(function(){
 			$chatGeneral = $('#mod_comm_list1'),
 			$chatAlliance = $('#mod_comm_list2'),
 			$chat = $('#kocmain_bottom').find('.mod_comm');
-
-	//shared
-		var $dragHandle = $('<div class="drag-handle">');
 
 	var reloadTimeout, reloadInterval, reloadTimer, refreshTimeout,
 		merlinBoxClick = false;
@@ -1604,8 +1597,7 @@ jQuery(document).ready(function(){
 							.css({
 								'top': KOC.conf.chat.position.top,
 								'left': KOC.conf.chat.position.left,
-							})
-							.prepend( $dragHandle.clone() );
+							});
 
 						if( KOC.conf.chat.size.width ){
 							$chat.css('width', KOC.conf.chat.size.width);
@@ -1633,8 +1625,7 @@ jQuery(document).ready(function(){
 						$chat
 							.draggable('destroy')
 							.resizable('destroy')
-							.css({'top': 0, 'left': 0})
-							.find('.drag-handle').remove();
+							.css({'top': 0, 'left': 0});
 						$chatInput.css('width', '')
 							.siblings('.button20').css('left', '');
 						$chat
@@ -2468,7 +2459,7 @@ jQuery(document).ready(function(){
 						console.info('KOC overview moveableOn function');
 
 						KOC.$overview
-							.prepend('<h3 class="handle">Vue Globale</h3>')
+							.prepend('<h3>Vue Globale</h3>')
 							.prepend( '<span class="ui-icon ui-icon-close"></span>' )
 							.draggable({
 								helper: "original",
@@ -2530,7 +2521,7 @@ jQuery(document).ready(function(){
 						KOC.$overview
 							.draggable('destroy')
 							.resizable('destroy')
-							.find('.handle, .ui-icon-close').remove();
+							.find('.ui-icon-close').remove();
 					},
 					'resetPlacement': function(){
 						console.info('KOC overview resetPlacement function');
@@ -3530,7 +3521,7 @@ jQuery(document).ready(function(){
 
 					var $notepad = $('<div id="koc-notepad" class="ui-widget ui-widget-content ui-corner-all">');
 
-					var code = '<h3 class="handle">Bloc Note</h3><div class="wrap">';
+					var code = '<h3>Bloc Note</h3><div class="wrap">';
 					code += '<label for="koc-notepad-note-name">Nom de la note&nbsp;:&nbsp;</label>';
 					code += '<input type="text" id="koc-notepad-note-name" />';
 					code += '<label for="koc-notepad-note-text"><span class="charsLeft">1000 caractères restant</span>Contenu&nbsp;:&nbsp;</label>';
@@ -3780,8 +3771,8 @@ jQuery(document).ready(function(){
 					code += '<label for="koc-map-level-max">&nbsp;et&nbsp;:&nbsp;</label>';
 					code += '<input type="text" id="koc-map-level-max" class="coord" />';
 					code += '</div><div class="type"><label>Type&nbsp;:&nbsp;</label>';
-					code += '<input type="checkbox" id="koc-map-type-plain" value="10" />';
-					code += '<label for="koc-map-type-plain">Plaine</label>';
+					code += '<input type="checkbox" id="koc-map-type-grassland" value="10" />';
+					code += '<label for="koc-map-type-grassland">Prairie</label>';
 					code += '<input type="checkbox" id="koc-map-type-lake" value="11" />';
 					code += '<label for="koc-map-type-lake">Lac</label>';
 					code += '<input type="checkbox" id="koc-map-type-forest" value="20" />';
@@ -3790,6 +3781,8 @@ jQuery(document).ready(function(){
 					code += '<label for="koc-map-type-hill">Colline</label>';
 					code += '<input type="checkbox" id="koc-map-type-mountain" value="40" />';
 					code += '<label for="koc-map-type-mountain">Montagne</label>';
+					code += '<input type="checkbox" id="koc-map-type-plain" value="50" />';
+					code += '<label for="koc-map-type-plain">Prairie</label>';
 					code += '</div><div class="status">';
 					code += '<label for="koc-map-status">Libre</label>';
 					code += '<input type="checkbox" id="koc-map-status" />';
@@ -3866,6 +3859,7 @@ jQuery(document).ready(function(){
 							//KOC.map.$save.hide();
 							//KOC.map.$filter.hide();
 							//KOC.map.$results.empty();
+							KOC.map.$status.empty();
 						})
 						.on('click', '.save button', function(event){
 							event.stopPropagation();
@@ -4014,7 +4008,7 @@ jQuery(document).ready(function(){
 											} else if( tile.tileType >= 10 && tile.tileType <= 50 ){
 												var label = '';
 
-												if( tile.tileType == 10 ) label = 'Plaine';
+												if( tile.tileType == 10 ) label = 'Prairie';
 												else if( tile.tileType == 11 ) label = 'Lac';
 												else if( tile.tileType == 20 ) label = 'Forêt';
 												else if( tile.tileType == 30 ) label = 'Colline';

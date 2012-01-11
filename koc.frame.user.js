@@ -12,7 +12,7 @@ jQuery.noConflict();
  * http://userscripts.org/scripts/source/68059.user.js -> used to run the whole script inside the page scope
  * else prototypes are not reachable (grease monkey sandbox limitation)
  */
-var kocFrame = parent.document.getElementById('kofc_iframe_0');
+var kocFrame = parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
 kocFrame.style.width = '100%';
 

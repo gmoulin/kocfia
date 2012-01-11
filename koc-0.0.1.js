@@ -869,7 +869,6 @@ jQuery(document).ready(function(){
 					.append( sections )
 					.draggable({
 						helper: "original",
-						handle: '.ui-tabs-nav',
 						distance: 20,
 						stop: function(event, ui){
 							KOC.conf.confPanel.position = ui.position;
@@ -1578,7 +1577,6 @@ jQuery(document).ready(function(){
 						$chat
 							.draggable({
 								helper: "original",
-								handle: '.drag-handle',
 								distance: 20,
 								stop: function(event, ui){
 									KOC.conf.chat.position = ui.position;
@@ -2474,7 +2472,6 @@ jQuery(document).ready(function(){
 							.prepend( '<span class="ui-icon ui-icon-close"></span>' )
 							.draggable({
 								helper: "original",
-								handle: '.handle',
 								distance: 20,
 								stop: function(event, ui){
 									KOC.conf.overview.position = ui.position;
@@ -3555,7 +3552,6 @@ jQuery(document).ready(function(){
 						.append( code )
 						.draggable({
 							helper: "original",
-							handle: '.handle',
 							distance: 20,
 							stop: function(event, ui){
 								KOC.conf.notepad.position = ui.position;
@@ -3856,6 +3852,7 @@ jQuery(document).ready(function(){
 
 							if( errors.length ){
 								alert( errors.join("\n") );
+								$(this).removeAttr('disabled').html('Rechercher');
 							} else {
 								KOC.map.explore( coordX, coordY, rangeMin, rangeMax );
 							}
@@ -4245,6 +4242,7 @@ jQuery(document).ready(function(){
 					var coordsList = '<textarea id="coordsList">'+ coords.join("\n") +'</textarea>';
 
 					KOC.map.$results.html( coordsList + code );
+					KOC.map.filterResults();
 				},
 				'filterResults': function(){
 					console.info('KOC map filterResults function');
@@ -5931,6 +5929,11 @@ jQuery(document).ready(function(){
 							console.info('KOC checkAndLaunchAttack deferred checkKnight function');
 							var knights = KOC.shared.getAvailableKnights( attack.cityId ),
 								k;
+							if( waveIndex == 0 && knights.length < attack.waves.length ){
+								attack.aborts.push('Pas assez de chevalier disponible pour lancer les '+ attack.waves.length +' vagues.');
+								return wdfd.reject();
+							}
+
 							if( !knights.length ){
 								attack.aborts.push('Aucun chevalier disponible.');
 								return wdfd.reject();
@@ -6135,7 +6138,7 @@ jQuery(document).ready(function(){
 
 					time *= 2; //round-trip
 
-					//force resfresh
+					//force refresh
 					window.setTimeout(function(){
 						//console.log('attack seed refresh');
 						KOC.shared.updateSeed();

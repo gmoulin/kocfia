@@ -1,11 +1,4 @@
 console.info('koc start');
-/* @todo
- * test crestHunt
- * test postmessage (popup)
- * trace post to wall popup function
- * if possible highjack the function and return false if KOC.fbWallPopup.active && KOC.fbWallPopup.cancel (quicker, no http request and ui reflow)
- */
-
 /* helpers */
 	/*
 	 * jQuery each2 - v0.2 - 8/02/2010
@@ -1130,7 +1123,12 @@ jQuery(document).ready(function(){
 					if( time > 86400 ){ //1 day
 						var h = Math.floor( time % 3600 );
 						time = time / 3600;
-						return Math.floor(time / 24) + 'j' + h + 'h';
+						var j = Math.floor(time / 24);
+						if( j > 10 ){
+							return j + 'j';
+						} else {
+							return j + 'j' + h + 'h';
+						}
 					} else {
 						if( time < 61 ){
 							return time + 's';
@@ -1353,6 +1351,85 @@ jQuery(document).ready(function(){
 						}
 					}
 					return level;
+				},
+				'forceMarchUpdate': function( attack ){
+					console.info('KOC shared forceMarchUpdate function');
+					if( window.seed.queue_atkp[ 'city' + attack.cityId ] ){
+						var mParams = window.g_ajaxparams,
+							i = 0, j, march, status,
+							mLength = attack.marching.length;
+						//console.log(mLength, attack.marching);
+						if( mLength == 0 ){
+							return;
+						}
+
+						var checkMarch = function(i){
+							console.info('KOC shared forceMarchUpdate checkMarch function');
+							status[i] = false;
+							march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
+							//console.log('march', i, march);
+							if( march ){
+								if( !march.hasOwnProperty('kocUpdated') ){
+									var mParams = window.g_ajaxparams;
+									mParams.rid = attack.marching[i];
+									$.ajax({
+										url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
+										type: 'post',
+										data: mParams,
+										dataType: 'json',
+									}).done(function(data){
+										if( data.ok ){
+											status[i] = true;
+											//set the units Return value
+											for( j = 1; j < 13; j += 1 ){
+												if( data.march['unit'+ j +'Return'] ){
+													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
+												}
+											}
+											for( j = 1; j < 6; j += 1 ){
+												if( data.march['resource' + j] ){
+													window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['resource' + j] = data.march['resource' + j];
+												}
+											}
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
+
+											if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
+												window.attack_recall(attack.marching[i], 1, attack.cityId);
+											}
+
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
+										} else {
+											console.log(data);
+										}
+									})
+									.always(function(){
+										i += 1;
+										if( i < mLength ){
+											checkMarch(i);
+										} else {
+											for( var j = 0; j < status.length; j += 1 ){
+												if( !status ) return setTimeout(function(){ KOC.shared.forceMarchUpdate( attack ); }, 10000);
+											}
+										}
+									});
+								} else {
+									status[i] = true;
+								}
+							} else {
+								i += 1;
+								if( i < mLength ){
+									 checkMarch(i);
+								} else {
+									for( var j = 0; j < status.length; j += 1 ){
+										if( !status ) return setTimeout(function(){ KOC.shared.forceMarchUpdate( attack ); }, 10000);
+									}
+								}
+							}
+						}
+
+						checkMarch(i);
+					}
 				},
 			},
 	};
@@ -2337,9 +2414,9 @@ jQuery(document).ready(function(){
 									if( total[j] >= 0 ){
 										$td.html('-');
 									} else if( s == 0 ){
-										$td.html('0s')
+										$td.html('0s');
 									} else {
-										var n = s / total[j] * 3600;
+										var n = s / ( -1 * total[j] ) * 3600;
 										$td.html( KOC.shared.readableDuration( n ) );
 									}
 								} else {
@@ -2521,7 +2598,7 @@ jQuery(document).ready(function(){
 						KOC.$overview
 							.draggable('destroy')
 							.resizable('destroy')
-							.find('.ui-icon-close').remove();
+							.find('h3, .ui-icon-close').remove();
 					},
 					'resetPlacement': function(){
 						console.info('KOC overview resetPlacement function');
@@ -2560,7 +2637,7 @@ jQuery(document).ready(function(){
 							'left': p.left,
 						});
 
-						$b.hide();
+						//$b.hide();
 						$f.hide();
 						KOC.$overview.show();
 						$b.find('.mod_comm').css('display', 'block');
@@ -3416,69 +3493,6 @@ jQuery(document).ready(function(){
 						for( k = 0; k < length; k += 1 ){
 							window.attack_recall(attack.marching[k], 2, attack.cityId);
 						}
-					}
-				},
-				'forceMarchUpdate': function( attack ){
-					console.info('KOC crestHunt forceMarchUpdate function');
-					if( window.seed.queue_atkp[ 'city' + attack.cityId ] ){
-						var mParams = window.g_ajaxparams,
-							i = 0, j, march,
-							mLength = attack.marching.length;
-						//console.log(mLength, attack.marching);
-						if( mLength == 0 ){
-							return;
-						}
-
-						var checkMarch = function(i){
-							console.info('KOC crestHunt forceMarchUpdate checkMarch function');
-							march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
-							//console.log('march', i, march);
-							if( march && !march.hasOwnProperty('kocUpdated') ){
-								var mParams = window.g_ajaxparams;
-								mParams.rid = attack.marching[i];
-								$.ajax({
-									url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
-									type: 'post',
-									data: mParams,
-									dataType: 'json',
-								}).done(function(data){
-									if( data.ok ){
-										//set the units Return value
-										for( j = 1; j < 13; j += 1 ){
-											if( data.march['unit'+ j +'Return'] ){
-												window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['unit'+ j +'Return'] = data.march['unit'+ j +'Return'];
-											}
-										}
-										for( j = 1; j < 6; j += 1 ){
-											if( data.march['resource' + j] ){
-												window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ]['resource' + j] = data.march['resource' + j];
-											}
-										}
-										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
-										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
-
-										if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
-											window.attack_recall(attack.marching[i], 1, attack.cityId);
-										}
-
-										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
-									}
-								})
-								.always(function(){
-									i += 1;
-									if( i < mLength ){
-										checkMarch(i);
-									}
-								});
-							} else {
-								i += 1;
-								if( i < mLength ){
-									 checkMarch(i);
-								}
-							}
-						}
-
-						checkMarch(i);
 					}
 				},
 			};
@@ -6121,14 +6135,10 @@ jQuery(document).ready(function(){
 					//console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2));
 					time *= 1000; //timestamp in milliseconds in javascript
 
+					//force march update 30s
 					window.setTimeout(function(){
-						KOC.crestHunt.forceMarchUpdate( attack );
-					}, time + 30000);
-
-					//force march update
-					window.setTimeout(function(){
-						KOC.crestHunt.forceMarchUpdate( attack );
-					}, time + 60000);
+						KOC.shared.forceMarchUpdate( attack );
+					}, time + 10000);
 
 					time *= 2; //round-trip
 

@@ -95,6 +95,8 @@ jQuery(document).ready(function(){
 		kocConfPanelCss += "\n.ui-tabs-panel .help { display:none; }";
 		kocConfPanelCss += "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }";
 		kocConfPanelCss += "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }";
+		kocConfPanelCss += "\n.ui-tabs-panel .infos span { float: right; margin-right: 5px; }";
+		kocConfPanelCss += "\n.ui-tabs-panel .accordion { clear: both; margin-top: 5px; }";
 		kocConfPanelCss += "\n.attack-form fieldset small { display: block; }";
 		kocConfPanelCss += "\n.attack-form .keep, .attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }";
 		kocConfPanelCss += "\n.attack-form { counter-reset: waves; }";
@@ -106,9 +108,11 @@ jQuery(document).ready(function(){
 		kocConfPanelCss += "\n.attack-form textarea { width: 150px; height: 120px; }";
 		kocConfPanelCss += "\n.attack-form .builds { display: none; float: right; max-width: 220px; }";
 		kocConfPanelCss += "\n.attack-form .builds div { -moz-column-count: 2; -moz-column-gap: 5px; -webkit-column-count: 2; -webkit-column-gap: 5px; column-count: 2; column-gap: 5px; }";
-		kocConfPanelCss += "\n.attack-list li { display: block; margin-bottom: 8px; }";
-		kocConfPanelCss += "\n.attack-list li span { display: inline-block; padding-right: 5px; }";
-		kocConfPanelCss += "\n.attack-list li img { width: 18px; }";
+		kocConfPanelCss += "\n.attack-list table { width: 100%; }";
+		kocConfPanelCss += "\n.attack-list td { vertical-align: top; }";
+		kocConfPanelCss += "\n.attack-list td .ui-icon { float: left; margin: 0 2px; }";
+		kocConfPanelCss += "\n.attack-list td span { display: inline-block; padding-right: 5px; }";
+		kocConfPanelCss += "\n.attack-list td img { width: 18px; }";
 		kocConfPanelCss += "\n.attack-list .attack-errors { display: block; }";
 		kocConfPanelCss += "\n.koc-timer-div { position: absolute; color: red; font-weight: bold; left: 612px; display: none; font-family: Verdana, Helvetica, sans-serif; }";
 		kocConfPanelCss += "\n#koc-reload-msg { top: 3px; }";
@@ -171,17 +175,22 @@ jQuery(document).ready(function(){
 
 	var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }";
 		kocOverviewCss += "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }";
+		kocOverviewCss += "\n#koc-overview > h3 { margin: 2px 0; text-indent: 10px; }";
 		kocOverviewCss += "\n#koc-overview .ui-tabs .ui-tabs-panel { padding: 2px; }";
-		kocOverviewCss += "\n#koc-overview .overview-parts-toggles { float: left; margin: 0; }";
 		kocOverviewCss += "\n#koc-overview .wrap { width: 100%; overflow: hidden; }";
 		kocOverviewCss += "\n#koc-overview table { width: 100%; float: left; }";
 		kocOverviewCss += "\n#koc-overview thead tr { display: block; position: relative; }";
 		kocOverviewCss += "\n#koc-overview tbody { overflow: auto; display: block; width: 100%; }";
 		kocOverviewCss += "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F8E0A8; }";
+		kocOverviewCss += "\n#koc-overview tr.highlight.toggle th, #koc-overview .toggle th.highlight, #koc-overview .toggle th { background-color: #CCC; }";
 		kocOverviewCss += "\n#koc-overview tr td.sum { background-color: #D9F4F1; }";
 		kocOverviewCss += "\n#koc-overview img { width:20px; }";
 		kocOverviewCss += "\n#koc-overview tr td.sum, #koc-overview tr td.sum ~ td { text-align: right; }";
-		kocOverviewCss += "\n#koc-overview th[colspan] { width: auto; }";
+		kocOverviewCss += "\n#koc-overview .toggle th { width: auto; cursor: pointer; }";
+		kocOverviewCss += "\n#koc-overview .details-toggle { margin-left: 10px; font-size: 12px; font-weight: normal; }";
+		kocOverviewCss += "\n#koc-overview .details-toggle label:not(:last-child) { padding-right: 8px; }";
+		kocOverviewCss += "\n#koc-overview .details-toggle input { position: relative; top: 2px; }";
+		kocOverviewCss += "\n#koc-overview .toggle .ui-icon { float: left; }";
 		kocOverviewCss += "\n#koc-overview .img { width: 20px; }";
 		kocOverviewCss += "\n#koc-overview .label { width: 100px; text-overflow: ellipsis; }";
 		kocOverviewCss += "\n#koc-overview .sum { width: 55px; }";
@@ -222,10 +231,10 @@ jQuery(document).ready(function(){
 
 	KOC = {
 		'server': null,
-		'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt', 'notepad', 'map', 'formation', 'gloryTournament'],
+		'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt', 'notepad', 'map', 'formation'], //, 'gloryTournament'],
 		'modulesLabel': {
 			'crestHunt': 'Armoiries',
-			'gloryTournament': 'Tournoi de Gloire',
+			//'gloryTournament': 'Tournoi de Gloire',
 		},
 		'stored': ['conf'],
 		'init': function(){
@@ -294,7 +303,7 @@ jQuery(document).ready(function(){
 					//top.postMessage('loaded3', window.location.href);
 				}, 10000);
 
-			//gather stored items list
+			//gather stored items list for deletion ease
 				for( i = 0; i < modulesLength; i += 1 ){
 					var mod = KOC.modules[i];
 					if( KOC[mod].stored ){
@@ -329,11 +338,17 @@ jQuery(document).ready(function(){
 				console.timeEnd('confPanel');
 
 			//modules init
-				for( i = 0; i < modulesLength; i += 1 ){
-					if( KOC.conf[KOC.modules[i]].active ){
+				var initModule = function(i){
+					//delayed init for modules
+					window.setTimeout(function(){
 						console.time('koc '+ KOC.modules[i] +' on');
 						KOC[ KOC.modules[i] ].on();
 						console.timeEnd('koc '+ KOC.modules[i] +' on');
+					}, i * 1000 + 1000);
+				};
+				for( i = 0; i < modulesLength; i += 1 ){
+					if( KOC.conf[KOC.modules[i]].active ){
+						initModule(i);
 					}
 				}
 
@@ -504,18 +519,32 @@ jQuery(document).ready(function(){
 				{'name': 'hapiness', 'label': 'bonheur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
 			],
 			'troops': [
-				{'rows': 2, 'name': 'unt1', 'label': ['Ravitailleur', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt2', 'label': ['Milicien', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt3', 'label': ['Eclaireur', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt4', 'label': ['Piquier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt5', 'label': ['Paladin', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt6', 'label': ['Archer', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt7', 'label': ['Cavalerie', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt8', 'label': ['Cavalerie Lourde', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt9', 'label': ['Wagon', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt10', 'label': ['Baliste', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt11', 'label': ['Bélier', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
-				{'rows': 2, 'name': 'unt12', 'label': ['Catapulte', 'en CB'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
+				{'name': 'unt1', 'label': 'Ravitailleur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
+				{'name': 'unt2', 'label': 'Milicien', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
+				{'name': 'unt3', 'label': 'Eclaireur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
+				{'name': 'unt4', 'label': 'Piquier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
+				{'name': 'unt5', 'label': 'Paladin', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
+				{'name': 'unt6', 'label': 'Archer', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
+				{'name': 'unt7', 'label': 'Cavalerie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
+				{'name': 'unt8', 'label': 'Cavalerie Lourde', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
+				{'name': 'unt9', 'label': 'Wagon', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
+				{'name': 'unt10', 'label': 'Baliste', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
+				{'name': 'unt11', 'label': 'Bélier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+				{'name': 'unt12', 'label': 'Catapulte', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
+			],
+			'troops_barbarian': [
+				{'name': 'unt1', 'label': 'Ravitailleur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
+				{'name': 'unt2', 'label': 'Milicien', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
+				{'name': 'unt3', 'label': 'Eclaireur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
+				{'name': 'unt4', 'label': 'Piquier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
+				{'name': 'unt5', 'label': 'Paladin', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
+				{'name': 'unt6', 'label': 'Archer', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
+				{'name': 'unt7', 'label': 'Cavalerie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
+				{'name': 'unt8', 'label': 'Cavalerie Lourde', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
+				{'name': 'unt9', 'label': 'Wagon', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
+				{'name': 'unt10', 'label': 'Baliste', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
+				{'name': 'unt11', 'label': 'Bélier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+				{'name': 'unt12', 'label': 'Catapulte', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 			],
 			'defenses': [
 				{'name': 'fort53', 'label': 'Arbalètes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
@@ -1431,6 +1460,16 @@ jQuery(document).ready(function(){
 						checkMarch(i);
 					}
 				},
+				'recallWaves': function( attack ){
+					console.info('KOC shared recallWaves function', attack);
+					if( attack.marching.length ){
+						//recall previous waves
+						var k, length = attack.marching.length;
+						for( k = 0; k < length; k += 1 ){
+							window.attack_recall( attack.marching[k], 2, attack.cityId );
+						}
+					}
+				},
 			},
 	};
 
@@ -1864,6 +1903,7 @@ jQuery(document).ready(function(){
 					'parts_visible': {
 						'population': 1,
 						'troops': 1,
+						'troops_barbarian': 1,
 						'defenses': 1,
 						'resources': 1,
 						'resources_cap': 1,
@@ -1878,6 +1918,7 @@ jQuery(document).ready(function(){
 				'parts': {
 					'population': 'population',
 					'troops': 'unités',
+					'troops_barbarian': 'unités en camps barbares',
 					'defenses': 'fortifications',
 					'resources': 'ressources',
 					'resources_cap': 'plafond',
@@ -1914,16 +1955,6 @@ jQuery(document).ready(function(){
 						cols = 3,
 						$overview = $('<div id="koc-overview" class="ui-widget ui-widget-content ui-corner-all">');
 
-					//parts toggles checkboxes
-						var toggles = '<p class="overview-parts-toggles">';
-						for( var p in KOC.overview.parts ){
-							if( KOC.overview.parts.hasOwnProperty(p) ){
-								toggles += '<input type="checkbox" id="overview-'+ p +'" name="'+ p +'" '+ (KOC.conf.overview.parts_visible[p] ? 'checked' : '' ) +'>'
-										+  '<label for="overview-'+ p +'">'+ KOC.overview.parts[p] +'</label>';
-							}
-						}
-						toggles += '</p>';
-
 					//headers
 					//data line for cities
 						var i, length = KOC.cities.length;
@@ -1938,52 +1969,67 @@ jQuery(document).ready(function(){
 
 					dataTable += headers + '<tbody>' + sizer;
 
-					//bodies
-						var left = 0, i, j, length;
-						for( var p in KOC.overview.parts ){
-							if( KOC.overview.parts.hasOwnProperty(p) ){
-								dataTable += '<tr class="'+ p +'"><th colspan="'+ cols +'" class="'+ p +'">' +	KOC.overview.parts[p] + '</th></tr>';
-								length = KOC[p].length;
-								for( i = 0; i < length; i += 1 ){
-									if( !KOC[p][i].hasOwnProperty('label') && KOC[p][i].hasOwnProperty('key') ){
-										KOC[p][i].label = window.resourceinfo[ KOC[p][i].key ];
-									}
-									var rowspan = KOC[p][i].rows;
-									if( rowspan ){
-										for( j = 0; j < rowspan; j += 1 ){
-											dataTable += '<tr class="'+ p +'">';
-											dataTable += (j == 0 ? '<td class="img" rowspan="'+ rowspan +'"><img src="'+ KOC[p][i].icon +'"></td>' : '');
-											dataTable += '<td class="label">'+ KOC[p][i].label[j] +'</td>';
-											dataTable += '<td class="sum"></td>';
-											dataTable += dataLine + '</tr>';
-										}
-									} else {
-										dataTable += '<tr class="'+ p +'">';
-										dataTable += '<td class="img"><img src="'+ KOC[p][i].icon +'"></td>';
-										dataTable += '<td class="label">'+ KOC[p][i].label +'</td>';
+					//body lines
+					var left = 0, i, j, length, part, koc_part;
+					for( part in KOC.overview.parts ){
+						if( KOC.overview.parts.hasOwnProperty( part ) ){
+							dataTable += '<tr class="'+ part +' toggle"><th colspan="'+ cols +'">';
+							dataTable += '<span class="ui-icon ui-icon-triangle-1-'+ (KOC.conf.overview.parts_visible[ part ] ? 'se' : 'e') +'"></span>';
+							dataTable += KOC.overview.parts[ part ].capitalize();
+							if( part == 'troops' ){
+								dataTable += '<span class="details-toggle">(';
+								dataTable += '<input type="checkbox" id="koc-overview-troops-barbian-toogle" value="troops_barbarian" '+ (KOC.conf.overview.parts_visible['troops_barbarian'] ? 'checked' : '') +'><label for="koc-overview-troops-barbian-toogle">CB</label>';
+								dataTable += ')</span>';
+							} else if( part == 'resources' ){
+								dataTable += '<span class="details-toggle">(';
+								dataTable += '<input type="checkbox" id="koc-overview-resources-cap-toogle" value="resources_cap" '+ (KOC.conf.overview.parts_visible['resources_cap'] ? 'checked' : '') +'>';
+								dataTable += '<label for="koc-overview-resources-cap-toogle">Plafond</label>';
+								dataTable += '<input type="checkbox" id="koc-overview-resources-production-detail-toogle" value="resources_production_detail" '+ (KOC.conf.overview.parts_visible['resources_production_detail'] ? 'checked' : '') +'>';
+								dataTable += '<label for="koc-overview-resources-production-detail-toogle">Prod</label>';
+								dataTable += '<input type="checkbox" id="koc-overview-resources-production-barbarian-toogle" value="resources_production_barbarian" '+ (KOC.conf.overview.parts_visible['resources_production_detail'] ? 'checked' : '') +'>';
+								dataTable += '<label for="koc-overview-resources-production-barbarian-toogle">CB</label>';
+								dataTable += '<input type="checkbox" id="koc-overview-resources-consumption-toogle" value="resources_consumption" '+ (KOC.conf.overview.parts_visible['resources_consumption'] ? 'checked' : '') +'>';
+								dataTable += '<label for="koc-overview-resources-consumption-toogle">Conso</label>';
+								dataTable += '<input type="checkbox" id="koc-overview-resources-production-total-toogle" value="resources_production_total" '+ (KOC.conf.overview.parts_visible['resources_production_total'] ? 'checked' : '') +'>';
+								dataTable += '<label for="koc-overview-resources-production-total-toogle">Total</label>';
+								dataTable += '<input type="checkbox" id="koc-overview-resources-autonomy-toogle" value="resources_autonomy" '+ (KOC.conf.overview.parts_visible['resources_autonomy'] ? 'checked' : '') +'>';
+								dataTable += '<label for="koc-overview-resources-autonomy-toogle">Autonomie</label>';
+								dataTable += ')</span>';
+							}
+							dataTable += '</th></tr>';
+							koc_part = KOC[ part ];
+							length = koc_part.length;
+							for( i = 0; i < length; i += 1 ){
+								if( !koc_part[i].hasOwnProperty('label') && koc_part[i].hasOwnProperty('key') ){
+									koc_part[i].label = window.resourceinfo[ koc_part[i].key ];
+								}
+								var rowspan = koc_part[i].rows;
+								if( rowspan ){
+									for( j = 0; j < rowspan; j += 1 ){
+										dataTable += '<tr class="'+ part + (part == 'troops' && j == 1 ? '_barbarian' : '' ) +'">';
+										dataTable += (j == 0 ? '<td class="img" rowspan="'+ rowspan +'"><img src="'+ koc_part[i].icon +'"></td>' : '');
+										dataTable += '<td class="label">'+ koc_part[i].label[j] +'</td>';
 										dataTable += '<td class="sum"></td>';
 										dataTable += dataLine + '</tr>';
 									}
+								} else {
+									dataTable += '<tr class="'+ part +'">';
+									dataTable += '<td class="img"><img src="'+ koc_part[i].icon +'"></td>';
+									dataTable += '<td class="label">'+ koc_part[i].label +'</td>';
+									dataTable += '<td class="sum"></td>';
+									dataTable += dataLine + '</tr>';
 								}
 							}
 						}
-
+					}
 					dataTable += '</tbody></table>';
 
-					$overview.append( toggles + '<div class="wrap">' + dataTable + '</div>' );
+					$overview.append('<div class="wrap">' + dataTable + '</div>');
 
 					$body.append( $overview );
-					KOC.$overview = $('#koc-overview');
-					KOC.overview.$toggles = KOC.$overview.find('.overview-parts-toggles');
-					KOC.overview.$wrap = KOC.$overview.find('.wrap');
-					KOC.overview.$table = $('#koc-overview-data');
-					KOC.overview.$header = KOC.overview.$table.find('thead');
-					KOC.overview.$headersThs = KOC.overview.$header.find('th');
-					KOC.overview.$tbody = KOC.overview.$table.find('tbody');
-					KOC.overview.$cityTds = KOC.overview.$tbody.find('.sizer').find('td');
-					KOC.overview.$tbodyTrs = KOC.overview.$tbody.find('tr').filter(':not(.sizer)');
+					KOC.overview.$div = $('#koc-overview');
 
-					KOC.$overview
+					KOC.overview.$div
 						//highlight from headers
 							.on('mouseenter', 'th', function(){
 								var col = KOC.overview.$headersThs.index( $(this).addClass('highlight') );
@@ -2009,38 +2055,94 @@ jQuery(document).ready(function(){
 								KOC.overview.$headersThs.eq(col).removeClass('highlight');
 							})
 						//toggles
-							.on('click', '.overview-parts-toggles input', function(e){
+							.on('click', '.toggle', function(){
 								var $this = $(this),
-									name = this.name,
-									checked = $this.is(':checked');
+									$triangle = $this.find('.ui-icon'),
+									part = $this.attr('class').split(' ')[0];
+									opened = !$triangle.hasClass('ui-icon-triangle-1-se');
 
-								KOC.overview.$tbodyTrs.filter( '.' + name ).toggle( checked );
+								if( opened ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
+								else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
 
-								KOC.conf.overview.parts_visible[ name ] = checked;
+								var $trs = KOC.overview.$tbodyTrs.filter( '.' + part );
 
+								$trs.filter(':not(.toggle)').toggle( opened );
+
+								if( !opened ){
+									var $details = $trs.filter('.toggle').find('.details-toggle');
+									if( $details.length ){
+										$details.find('input').each2(function(i, $input){
+											var detail = $input.val();
+
+											$input.prop('checked', false);
+											KOC.overview.$tbodyTrs.filter( '.' + detail ).hide();
+											KOC.conf.overview.parts_visible[ detail ] = false;
+										});
+									}
+								}
+
+								KOC.conf.overview.parts_visible[ part ] = opened;
+
+								KOC.shared.storeConf();
+							})
+							.on('click', '.details-toggle input', function(e){
+								e.stopPropagation();
+
+								var $this = $(this),
+									checked = $this.prop('checked'),
+									part = $this.val();
+
+								var $trs = KOC.overview.$tbodyTrs.filter( '.' + part ).toggle( checked ),
+									$triangle = $trs.filter('.toggle').find('.ui-icon');
+
+								if( checked ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
+								else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
+
+								KOC.conf.overview.parts_visible[ part ] = checked;
 								KOC.shared.storeConf();
 							});
 
-					KOC.overview.$toggles.find('input').each(function(){
-						var $this = $(this),
-							name = this.name,
-							checked = $this.is(':checked');
-						KOC.overview.$tbodyTrs.filter( '.' + name ).toggle( checked );
-					});
+					KOC.overview.$wrap = KOC.overview.$div.find('.wrap');
+					KOC.overview.$table = KOC.overview.$div.find('#koc-overview-data');
+					KOC.overview.$header = KOC.overview.$table.find('thead');
+					KOC.overview.$headersThs = KOC.overview.$header.find('th');
+					KOC.overview.$tbody = KOC.overview.$table.find('tbody');
+					KOC.overview.$cityTds = KOC.overview.$tbody.find('.sizer').find('td');
+					KOC.overview.$tbodyTrs = KOC.overview.$tbody.find('tr').filter(':not(.sizer)');
 
-					KOC.overview.updateFromSeed();
+					var trs, $details, detail;
+					for( part in KOC.conf.overview.parts_visible ){
+						if( KOC.conf.overview.parts_visible.hasOwnProperty(part) ){
+							$trs = KOC.overview.$tbodyTrs.filter( '.' + part );
 
-					if( KOC.conf.overview.moveable ){
-						KOC.overview.moveableOn();
-					} else if( KOC.conf.overview.replace ){
+							if( !KOC.conf.overview.parts_visible[part] ){
+								$trs.filter(':not(.toggle)').hide();
+							}
+
+							$details = $trs.filter('.toggle').find('.details-toggle');
+							if( $details.length ){
+								$details.find('input').each2(function(i, $input){
+									$input.prop('checked', false);
+									detail = $input.val();
+									KOC.overview.$tbodyTrs.filter( '.' + detail ).toggle( KOC.conf.overview.parts_visible[detail] );
+								});
+							}
+						}
+					}
+
+					window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 1000);
+
+					if( KOC.conf.overview.replace ){
 						KOC.overview.replaceOn();
+					} else {
+						KOC.overview.moveableOn();
 					}
 				},
 				'off': function(){
 					console.info('KOC overview off function');
 					$('#koc-overview-css').remove();
-					KOC.$overview.remove();
-					KOC.$overview = null;
+					KOC.overview.$div.remove();
+					KOC.overview.$div = null;
 				},
 				'updateFromSeed': function(){
 					if( KOC.overview.updating ) return;
@@ -2056,6 +2158,7 @@ jQuery(document).ready(function(){
 						$resProdTotalTrs = KOC.overview.$tbodyTrs.filter('.resources_production_total').filter(':not(:first)'),
 						$resAutonomyTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
 						$troopsTrs = KOC.overview.$tbodyTrs.filter('.troops').filter(':not(:first)'),
+						$troopsBarbarianTrs = KOC.overview.$tbodyTrs.filter('.troops_barbarian').filter(':not(:first)'),
 						$defensesTrs = KOC.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)');
 
 					var i, j, k, length = KOC.citiesId.length, subLength;
@@ -2425,35 +2528,48 @@ jQuery(document).ready(function(){
 							}
 
 						//troops
-							var line = 0;
 							subLength = KOC.troops.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.troops[j];
-								if( type.rows ){
-									var rowsLength = type.rows;
-									for( k = 0; k < rowsLength; k += 1 ){
-										var $tds = $troopsTrs.eq( line ).find('td'),
-											$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-											n = null;
+								var type = KOC.troops[j],
+									$tds = $troopsTrs.eq(j).find('td'),
+									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
+									n = null;
 
-										if( type.label[k] == 'en CB' && barbariansTroops.length ){
-											n = ( barbariansTroops[j] ? parseFloat( barbariansTroops[j] ) : 0 );
-										} else if( seed.units[ type.name ] ){
-											n = parseFloat( seed.units[ type.name ] );
-										}
+								if( seed.units[ type.name ] ){
+									n = parseFloat( seed.units[ type.name ] );
+								}
 
-										if( n != null ){
-											$td.html( KOC.shared.format( n ) )
-												.attr('title', KOC.shared.readable(n))
-												.data('ori', n);
-										} else {
-											$td.html('&nbsp;')
-												.attr('title', '')
-												.data('ori', 0);
-										}
+								if( n != null ){
+									$td.html( KOC.shared.format( n ) )
+										.attr('title', KOC.shared.readable(n))
+										.data('ori', n);
+								} else {
+									$td.html('&nbsp;')
+										.attr('title', '')
+										.data('ori', 0);
+								}
+							}
 
-										line += 1;
-									}
+						//troops barbarian
+							subLength = KOC.troops_barbarian.length;
+							for( j = 0; j < subLength; j += 1 ){
+								var type = KOC.troops_barbarian[j],
+									$tds = $troopsBarbarianTrs.eq(j).find('td'),
+									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
+									n = null;
+
+								if( barbariansTroops.length && barbariansTroops[j] ){
+									n = parseFloat( barbariansTroops[j] );
+								}
+
+								if( n != null ){
+									$td.html( KOC.shared.format( n ) )
+										.attr('title', KOC.shared.readable(n))
+										.data('ori', n);
+								} else {
+									$td.html('&nbsp;')
+										.attr('title', '')
+										.data('ori', 0);
 								}
 							}
 
@@ -2521,7 +2637,7 @@ jQuery(document).ready(function(){
 					console.info('koc overview calcInnerSizes function');
 					KOC.overview.$cityTds.filter(':gt(2)').css('width', '');
 
-					var tableH = size.height - KOC.overview.$toggles.height() - KOC.overview.$toggles.position().top - 5;
+					var tableH = size.height - 30 - (KOC.overview.movable ? KOC.overview.$div.find('h3').outerHeight(true) : 0);
 					KOC.overview.$wrap.css('height', tableH);
 					KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
 
@@ -2535,11 +2651,12 @@ jQuery(document).ready(function(){
 					'moveableOn': function(){
 						console.info('KOC overview moveableOn function');
 
-						KOC.$overview
+						KOC.overview.$div
 							.prepend('<h3>Vue Globale</h3>')
-							.prepend( '<span class="ui-icon ui-icon-close"></span>' )
+							.prepend('<span class="ui-icon ui-icon-close"></span>')
 							.draggable({
 								helper: "original",
+								handle: 'h3',
 								distance: 20,
 								stop: function(event, ui){
 									KOC.conf.overview.position = ui.position;
@@ -2565,29 +2682,29 @@ jQuery(document).ready(function(){
 							})
 							.on('click', '.ui-icon-close', function(e){
 								e.preventDefault();
-								KOC.$overview.hide();
+								KOC.overview.$div.hide();
 								KOC.conf.overview.visible = 0;
 								KOC.shared.storeConf();
 							});
 
 						if( KOC.conf.overview.visible ){
-							KOC.$overview.show();
+							KOC.overview.$div.show();
 
 							KOC.overview.calcInnerSizes( KOC.conf.overview.size );
 						} else {
-							KOC.$overview.hide();
+							KOC.overview.$div.hide();
 						}
 
 						var $kocOverviewToggle = $('<button id="koc-overview-toggle">').text('Vue Globale');
 						$kocOverviewToggle.click(function(){
 							console.info('$kocOverviewToggle click');
-							KOC.$overview.toggle();
+							KOC.overview.$div.toggle();
 
-							if( KOC.$overview.is(':visible') ){
+							if( KOC.overview.$div.is(':visible') ){
 								KOC.overview.calcInnerSizes( KOC.conf.overview.size );
 							}
 
-							KOC.conf.overview.visible = (KOC.$overview.is(':visible') ? 1 : 0);
+							KOC.conf.overview.visible = (KOC.overview.$div.is(':visible') ? 1 : 0);
 							KOC.shared.storeConf();
 						});
 
@@ -2595,7 +2712,7 @@ jQuery(document).ready(function(){
 					},
 					'moveableOff': function(){
 						console.info('KOC overview moveableOff function');
-						KOC.$overview
+						KOC.overview.$div
 							.draggable('destroy')
 							.resizable('destroy')
 							.find('h3, .ui-icon-close').remove();
@@ -2603,9 +2720,7 @@ jQuery(document).ready(function(){
 					'resetPlacement': function(){
 						console.info('KOC overview resetPlacement function');
 						if( KOC.conf.overview.moveable ){
-							//console.log(KOC.$overview);
-							//console.log(KOC.overview.options.position);
-							KOC.$overview.css( KOC.overview.options.position );
+							KOC.overview.$div.css( KOC.overview.options.position );
 							KOC.conf.overview.position = KOC.overview.options.position;
 							KOC.shared.storeConf();
 						}
@@ -2613,9 +2728,7 @@ jQuery(document).ready(function(){
 					'resetDimensions': function(){
 						console.info('KOC overview resetDimensions function');
 						if( KOC.conf.overview.moveable ){
-							//console.log(KOC.$overview);
-							//console.log(KOC.overview.options.size);
-							KOC.$overview.css( KOC.overview.options.size );
+							KOC.overview.$div.css( KOC.overview.options.size );
 							KOC.conf.overview.size = KOC.overview.options.size;
 							KOC.shared.storeConf();
 						}
@@ -2630,7 +2743,7 @@ jQuery(document).ready(function(){
 						var h = $b.outerHeight() + $f.outerHeight(),
 							w = $b.outerWidth();
 
-						KOC.$overview.css({
+						KOC.overview.$div.css({
 							'height': $b.outerHeight() + $f.outerHeight(),
 							'width': $b.outerWidth(),
 							'top': p.top,
@@ -2639,7 +2752,7 @@ jQuery(document).ready(function(){
 
 						//$b.hide();
 						$f.hide();
-						KOC.$overview.show();
+						KOC.overview.$div.show();
 						$b.find('.mod_comm').css('display', 'block');
 
 						KOC.overview.calcInnerSizes({'height': h, 'width': w});
@@ -2676,9 +2789,13 @@ jQuery(document).ready(function(){
 					console.info('KOC crestHunt modPanel function');
 					var $section = KOC.$confPanel.find('#koc-crestHunt').html('');
 
-					var form = '<h3>Formulaire<span class="ui-icon ui-icon-info"></span></h3>';
-					form += '<div class="forms">';
-					form += '<h3>Configurer une attaque</h3>';
+					var header = '<div class="infos cf">';
+					header += '<span class="ui-icon ui-icon-info"></span>';
+					header += '<span><input type="checkbox" id="crestHunt-panel-automatic" '+ (KOC.conf.crestHunt.automatic ? 'checked' : '') +' autocomplete="off" />';
+					header += '<label for="crestHunt-panel-automatic">attaques automatiques</label></span>';
+					header += '</div>'
+
+					var form = '<h3>Configurer une attaque</h3>';
 					form += '<div class="attack-form">';
 					form += '<ul class="message"></ul>';
 					form += '<input type="hidden" class="edit-attackId" name="attackId" value="" autocomplete="off" />';
@@ -2745,45 +2862,59 @@ jQuery(document).ready(function(){
 					form += '<button class="saveAndLaunch">Sauvegarder et Lancer</button>';
 					form += '<button class="reset">Annuler</button>';
 					form += '</div>';
-					form += '</div>';
 
 					//attacks list
-					var onGoing = '<h3>Attaques en cours</h3><div class="attack-list ongoing">';
+					var onGoing = '<h3>Attaques en cours</h3>';
+					onGoing += '<div class="attack-list ongoing">';
+					onGoing += '<table><thead><tr>';
+					onGoing += '<th>Actions</th>';
+					onGoing += '<th>Ville</th>';
+					onGoing += '<th>Cible</th>';
+					onGoing += '<th>Coordonnées</th>';
+					onGoing += '<th>Cible</th>';
+					onGoing += '<th>Info</th>';
+					onGoing += '</tr></thead>';
 
-					var savedAttacks = '<h3>';
-					savedAttacks += '<span><input type="checkbox" id="crestHunt-panel-automatic" '+ (KOC.conf.crestHunt.automatic ? 'checked' : '') +' autocomplete="off" />';
-					savedAttacks += '<label for="crestHunt-panel-automatic">attaques automatiques</label></span>';
-					savedAttacks += 'Attaques enregistrées</h3>';
-					savedAttacks += '<div class="attack-list saved">';
+					var savedPlans = '<h3>Attaques enregistrées</h3>';
+					savedPlans += '<div class="attack-list saved">';
+					savedPlans += '<table><thead><tr>';
+					savedPlans += '<th>Actions</th>';
+					savedPlans += '<th>Ville</th>';
+					savedPlans += '<th>Cible</th>';
+					savedPlans += '<th>Vagues</th>';
+					savedPlans += '<th>Converser</th>';
+					savedPlans += '</tr></thead>';
 
 					for( i = 0; i < length; i += 1 ){
 						var city = KOC.cities[i];
-						var line = '<h3>' + city.roman + ' ' + city.name + '</h3><ul data-city="'+ city.id +'"></ul>';
+						var line = '<tbody data-city="'+ city.id +'"></tbody>';
 
 						onGoing += line;
-						savedAttacks += line;
+						savedPlans += line;
 					}
-					onGoing += '</div>';
-					savedAttacks += '</div>';
+					onGoing += '</table></div>';
+					savedPlans += '</table></div>';
 
-					var help = '<div id="koc-crestHunt-help" class="help" title="Aide armoiries"><ul>';
+					var help = '<div id="koc-crestHunt-help" class="help" title="Aide armoiries"><h4>Règles, limitations et informations :</h4><ul>';
 					help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
 					help += '<li>Une attaque sera annulée au bout de 10 erreurs consécutives <br />(coordonnée occupée, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
 					help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique</li>';
 					help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-					help += '<li>Pour les attaques sauvegardées les erreurs seront listées en-dessous</li>';
-					help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant)</li>';
+					help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
+					help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant > 1min)</li>';
 					help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
 					help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
-					help += '</ul><ol>';
+					help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
+					help += '</ul><h4>Méthode :</h4><ol>';
 					help += '<li>Sélectionner une ville</li>';
 					help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
 					help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
+					help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
 					help += '<li>Les quantités de troupes peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
 					help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
 					help += '</ol></div>';
 
-					$section.append( form + onGoing + savedAttacks + help )
+					$section.append( header + '<div class="accordion">' + form + savedPlans + onGoing + '</div>' + help )
 						.on('change', '#crestHunt-panel-automatic', function(){
 							$('#crestHunt-automatic').prop('checked', $(this).prop('checked')).change();
 						})
@@ -2829,6 +2960,9 @@ jQuery(document).ready(function(){
 									var d = new Date();
 									result.attack.id = Math.floor(d.getTime() / 1000);
 									KOC.crestHunt.launchAttack( result.attack );
+
+									//open ongoing accordion
+									KOC.crestHunt.$accordion.accordion('activate', 2);
 								}
 							} else {
 								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
@@ -2869,27 +3003,35 @@ jQuery(document).ready(function(){
 								if( KOC.conf.crestHunt.active && $(this).hasClass('saveAndLaunch') ){
 									result.attack.id = Math.floor(d.getTime() / 1000);
 									KOC.crestHunt.launchAttack( result.attack );
+
+									//open ongoing accordion
+									KOC.crestHunt.$accordion.accordion('activate', 2);
+								} else {
+									//open saved accordion
+									KOC.crestHunt.$accordion.accordion('activate', 1);
 								}
 							}
 						})
 						//attack plan delete
 						.on('click', '.delete', function(){
-							var $this = $(this),
-								$li = $(this).parent(),
-								isEdit = $this.hasClass('edit'),
-								attackId = $li.data('attack'),
-								cityId = $li.data('city');
+							if( confirm('Etes-vous sûr ?') ){
+								var $this = $(this),
+									$tr = $(this).parent(),
+									isEdit = $this.hasClass('edit'),
+									attackId = $tr.data('attack'),
+									cityId = $tr.data('city');
 
-							KOC.crestHunt.deletePlan( attackId, cityId, true );
-							$li.remove();
+								KOC.crestHunt.deletePlan( attackId, cityId, true );
+								$tr.remove();
+							}
 						})
 						//attack plan edit and duplication
 						.on('click', '.edit, .duplicate', function(){
 							KOC.crestHunt.resetForm();
 							var $this = $(this),
-								$li = $this.parent(),
-								attackId = $li.data('attack'),
-								cityId = $li.data('city'),
+								$tr = $this.parent(),
+								attackId = $tr.data('attack'),
+								cityId = $tr.data('city'),
 								attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
 
 							if( attack ){
@@ -2947,11 +3089,8 @@ jQuery(document).ready(function(){
 									$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
 								}
 
-								//open the forms accordion
-								var $header = KOC.crestHunt.$forms.find('h3');
-								if( !$header.hasClass('ui-state-active') ){
-									$header.click();
-								}
+								//open form accordion
+								KOC.crestHunt.$accordion.accordion('activate', 0);
 							} else {
 								alert('Plan d\'attaque introuvable.')
 							}
@@ -2967,15 +3106,15 @@ jQuery(document).ready(function(){
 						})
 						//stop on next round
 						.on('click', '.stop', function(){
-							var $li = $(this).parent();
-							$li.data('stop', 1);
+							var $tr = $(this).parent();
+							$tr.data('stop', 1);
 						})
 						//manual launch
 						.on('click', '.charge', function(){
 							if( KOC.conf.crestHunt.active ){
 								if( !KOC.conf.crestHunt.automatic ){
-									var $li = $(this).hide().parent();
-									var attack = KOC.crestHunt.attacks[ $li.data('city') ][ $li.data('attack') ];
+									var $tr = $(this).hide().parent();
+									var attack = KOC.crestHunt.attacks[ $tr.data('city') ][ $tr.data('attack') ];
 									if( attack ){
 										attack.lastCoordIndex = 0;
 										attack.abort = 0;
@@ -2984,11 +3123,8 @@ jQuery(document).ready(function(){
 										KOC.crestHunt.refreshOngoingInfo( attack, false );
 										KOC.crestHunt.launchAttack( attack );
 
-										//open corresponding ongoing accordion
-										var $accordionContent = $li.closest('.ui-accordion-content');
-										var index = $accordionContent.parent().find('.ui-accordion-content').index( $accordionContent );
-
-										KOC.crestHunt.$ongoing.find('.ui-accordion-header').eq( index ).click();
+										//open ongoing accordion
+										KOC.crestHunt.$accordion.accordion('activate', 2);
 									} else {
 										alert('Plan d\'attaque introuvable.')
 									}
@@ -3111,14 +3247,12 @@ jQuery(document).ready(function(){
 						})
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
-					KOC.crestHunt.$forms = $section.find('.forms');
+					KOC.crestHunt.$accordion = $section.find('.accordion');
 					KOC.crestHunt.$form = $section.find('.attack-form');
 					KOC.crestHunt.$saved = $section.find('.attack-list.saved');
 					KOC.crestHunt.$ongoing = $section.find('.attack-list.ongoing');
 
-					$section.find('.forms').accordion({collapsible: true, autoHeight: false}).find('h3').eq(0).click().blur();
-					KOC.crestHunt.$saved.accordion({collapsible: true, autoHeight: false}).find('h3').eq(0).click().blur();
-					KOC.crestHunt.$ongoing.accordion({collapsible: true, autoHeight: false}).find('h3').eq(0).click().blur();
+					KOC.crestHunt.$accordion.accordion({collapsible: true, autoHeight: false}).accordion('activate', false);
 				},
 				'on': function(){
 					console.info('KOC crestHunt on function');
@@ -3187,8 +3321,8 @@ jQuery(document).ready(function(){
 					KOC.crestHunt.$saved.find('.charge').show();
 
 					//hide the on going attacks one
-					KOC.crestHunt.$ongoing.find('li').each2(function(i, $li){
-						KOC.crestHunt.$saved.find('li').filter('[data-city='+ $li.data('city') +'][data-attack='+ $li.data('attack') +']').find('.charge').hide();
+					KOC.crestHunt.$ongoing.find('tr').each2(function(i, $tr){
+						KOC.crestHunt.$saved.find('tr').filter('[data-city='+ $tr.data('city') +'][data-attack='+ $tr.data('attack') +']').find('.charge').hide();
 					});
 				},
 				'storeAttacks': function(){
@@ -3352,9 +3486,16 @@ jQuery(document).ready(function(){
 						city = KOC.shared.getCityById( city );
 					}
 
-					var code = '<li data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
-					code += '<span class="form">Depuis ' + city.roman + ' ' + city.name + '</span>';
-					code += '<span class="to">Vers terres sauvages niveau ' + attack.targetLevel + ' en : ' + KOC.shared.mapLink( attack.coords ) +'</span>';
+					var code = '<tr data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
+					code += '<td class="actions">';
+					code += '<span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
+					code += '<span class="ui-icon ui-icon-pencil edit" title="Modifier"></span>';
+					code += '<span class="ui-icon ui-icon-copy duplicate" title="Dupliquer"></span>';
+					code += '<span class="ui-icon ui-icon-trash delete" title="Supprimer"></span>';
+					code += '</td>';
+					code += '<td class="form">' + city.roman + ' ' + city.name + '</td>';
+					code += '<td class="to">TS' + attack.targetLevel + ' en : ' + KOC.shared.mapLink( attack.coords ) +'</td>';
+					code += '<td class="waves">';
 
 					var knights = window.seed.knights[ 'city' + city.id ],
 						j, k, wavesLength = attack.waves.length, unitsLength;
@@ -3378,8 +3519,7 @@ jQuery(document).ready(function(){
 						}
 						code += unitsCode + '</span></div>';
 					}
-
-					code += '<div class="wave">Conserver&nbsp;:&nbsp;<span class="troops">'
+					code += '</td><td class="keep"><span class="troops">'
 					var unitsCode = '', keepLength = attack.keep.length;
 					for( j = 0; j < keepLength; j += 1 ){
 						var unit = attack.keep[j];
@@ -3389,54 +3529,49 @@ jQuery(document).ready(function(){
 						unitsCode += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_';
 						unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
 					}
-					code += unitsCode + '</span></div>';
-
-					code += '<button class="charge">Lancer</button>';
-					code += '<button class="edit">Modifier</button>';
-					code += '<button class="duplicate">Dupliquer</button>';
-					code += '<button class="delete">Supprimer</button>';
-					code += '</li>';
+					code += unitsCode + '</span></td></tr>';
 
 					return code;
 				},
 				'refreshOngoingInfo': function(attack, noButton){
 					console.info('KOC crestHunt refreshOngoingInfo function');
 
-					var $li = KOC.crestHunt.$ongoing.find('li').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']');
-					if( $li.length == 0 ){
+					var $tr = KOC.crestHunt.$ongoing.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']');
+					if( $tr.length == 0 ){
 						var city = city = KOC.shared.getCityById( attack.cityId );
-						var code = '<li data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
-						code +='<span class="form">Depuis ' + city.roman + ' ' + city.name + '</span>';
-						code +='<span class="to">Vers terres sauvages niveau ' + attack.targetLevel + ' en : ' + KOC.shared.mapLink( attack.coords ) +'</span>';
-						code +='<div class="current"></div>';
-						code +='<button class="stop">Arrêter au retour des troupes</button>';
-						code +='<div class="info"></div></li>';
+						var code = '<tr data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
+						code += '<td class="action"><span class="ui-icon ui-icon- stop" tile="Arrêter au retour des troupes"></span></td>';
+						code += '<td class="form">' + city.roman + ' ' + city.name + '</td>';
+						code += '<td class="to">TS' + attack.targetLevel + '</td>';
+						code += '<td>' + KOC.shared.mapLink( attack.coords ) +'</td>';
+						code += '<td class="current"></td>';
+						code += '<td class="info"></td></tr>';
 
-						$li = $( code );
+						$tr = $( code );
 
-						KOC.crestHunt.$ongoing.find('ul').filter('[data-city='+ attack.cityId +']').append( $li );
+						KOC.crestHunt.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').append( $tr );
 					}
 
 					//attack stopped
 					if( noButton ){
-						$li.find('.current').remove();
-						$li.find('.stop').removeClass('stop').addClass('trash').html('Enlever les informations sur cette attaque.');
+						$tr.find('.current').remove();
+						$tr.find('.stop').removeClass('stop').addClass('trash').html('Enlever les informations sur cette attaque.');
 
 						//show the manual launch button
-						KOC.crestHunt.$saved.find('li').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']').find('.charge').show();
+						KOC.crestHunt.$saved.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']').find('.charge').show();
 					} else {
-						$li.find('.current').html( 'Attaque vers : ' + KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) + '(' + (attack.lastCoordIndex + 1) + 'e / ' + attack.coords.length + ')' );
+						$tr.find('.current').html( KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) + '(' + (attack.lastCoordIndex + 1) + 'e / ' + attack.coords.length + ')' );
 					}
 
 					if( attack.aborts.length ){
 						attack.aborts = attack.aborts.unique();
-						$li.find('.info').html( attack.aborts.join('<br />') );
+						$tr.find('.info').html( attack.aborts.join('<br />') );
 					}
 				},
 				'listCityAttacks': function( cityId ){
 					console.info('KOC crestHunt listCityAttacks function', cityId);
-					var $ul = KOC.crestHunt.$saved.find('ul').filter('[data-city='+ cityId +']');
-					$ul.empty();
+					var $tbody = KOC.crestHunt.$saved.find('tbody').filter('[data-city='+ cityId +']');
+					$tbody.empty();
 
 					var attacks = KOC.crestHunt.attacks[ cityId ],
 						code = '';
@@ -3448,7 +3583,7 @@ jQuery(document).ready(function(){
 						}
 					}
 
-					$ul.append( code );
+					$tbody.append( code );
 				},
 				//fill the keep <select> options too
 				'addWaves': function( num, cityId ){
@@ -3484,16 +3619,6 @@ jQuery(document).ready(function(){
 					KOC.crestHunt.$form.find('.unit-choice').each2(function(i, $uc){
 						$uc.append( choices );
 					});
-				},
-				'recallWaves': function( attack ){
-					console.info('KOC crestHunt recallWaves function', attack);
-					if( attack.marching.length ){
-						//recall previous waves
-						var k, length = attack.marching.length;
-						for( k = 0; k < length; k += 1 ){
-							window.attack_recall(attack.marching[k], 2, attack.cityId);
-						}
-					}
 				},
 			};
 
@@ -5289,7 +5414,7 @@ jQuery(document).ready(function(){
 			};
 
 		/* GLORY TOURNAMENT */
-			KOC.gloryTournament = {
+			/*KOC.gloryTournament = {
 				'options': {
 					'active': 1,
 					'automatic': 0,
@@ -5685,7 +5810,7 @@ jQuery(document).ready(function(){
 							}
 						});
 				}
-			};
+			};*/
 
 	/* CHECK AND LAUNCH ATTACK */
 		KOC.checkAndLaunchAttack = function( attack ){
@@ -5696,13 +5821,13 @@ jQuery(document).ready(function(){
 
 			if( !attack.hasOwnProperty('abort') ) attack.abort = 0;
 
-			var $li = KOC.crestHunt.$ongoing.find('ul').filter('[data-city='+ attack.cityId +']').find('li').filter('[data-attack='+ attack.id +']');
-			if( $li.length && $li.data('stop') ){
+			var $tr = KOC.crestHunt.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').find('tr').filter('[data-attack='+ attack.id +']');
+			if( $tr.length && $tr.data('stop') ){
 				attack.aborts.push('Attaque stoppée sur demande.');
 				KOC.crestHunt.refreshOngoingInfo(attack, true);
 				KOC.crestHunt.$saved
-					.find('ul').filter('[data-city='+ attack.cityId +']')
-					.find('li').filter('[data-attack='+ attack.id +']')
+					.find('tbody').filter('[data-city='+ attack.cityId +']')
+					.find('tr').filter('[data-attack='+ attack.id +']')
 					.find('.charge').show();
 				return false;
 			}
@@ -5741,9 +5866,8 @@ jQuery(document).ready(function(){
 						var mParams = window.g_ajaxparams,
 							i = 0, j, march,
 							mLength = attack.marching.length;
-						//console.log(mLength, attack.marching);
 						if( mLength == 0 ){
-							return dfd.pipe(resetTracks(dfd));
+							return dfd.pipe( resetTracks(dfd) );
 						}
 
 						var checkMarch = function(dfd, i){
@@ -5776,30 +5900,51 @@ jQuery(document).ready(function(){
 										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
 										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
 
+										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
+
 										if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
 											window.attack_recall(attack.marching[i], 1, attack.cityId);
 										}
 
-										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
+										i += 1;
+										attempts = 3;
+										if( i >= mLength ){
+											 return dfd.pipe( resetTracks(dfd) );
+										} else return dfd.pipe( checkMarch(dfd, i) );
+
+									} else {
+										console.log(data);
+										attempts -= 1;
+										if( attempts > 0 ){
+											return dfd.pipe( checkMarch(dfd, i) );
+										} else {
+											i += 1;
+											return dfd.pipe( checkMarch(dfd, i) );
+										}
 									}
 								})
-								.always(function(){
-									i += 1;
-									if( i >= mLength ){
-										 return dfd.pipe(resetTracks(dfd));
-									} else return dfd.pipe(checkMarch(dfd, i));
+								.fail(function(){
+									//network or server error
+									attempts -= 1;
+									if( attempts > 0 ){
+										return dfd.pipe( checkMarch(dfd, i) );
+									} else {
+										i += 1;
+										return dfd.pipe( checkMarch(dfd, i) );
+									}
+
 								});
 							} else {
 								i += 1;
 								if( i >= mLength ){
-									 return dfd.pipe(resetTracks(dfd));
-								} else return dfd.pipe(checkMarch(dfd, i));
+									 return dfd.pipe( resetTracks(dfd) );
+								} else return dfd.pipe( checkMarch(dfd, i) );
 							}
 						}
 
-						dfd.pipe(checkMarch(dfd, i));
+						dfd.pipe( checkMarch(dfd, i) );
 					} else {
-						return dfd.pipe(resetTracks(dfd));
+						return dfd.pipe( resetTracks(dfd) );
 					}
 				};
 
@@ -5808,13 +5953,16 @@ jQuery(document).ready(function(){
 				var resetTracks = function(dfd){
 					console.info('KOC checkAndLaunchAttack deferred resetTracks function');
 					//force refresh of attack queue for current city with march from the attack
-					if( attack.marching.length && window.currentCity == attack.cityId ){
+					if( attack.marching.length && window.currentcityid == attack.cityId ){
 						window.attack_generatequeue();
 					}
+
 					attack.marching = [];
+
 					//only reset aborts message at the start of the attack
 					if( !attack.hasOwnProperty('aborts') ) attack.aborts = [];
 					else if( attack.lastCoordIndex != 0 && attack.lastCoordIndex != attack.coords.length ) attack.aborts = [];
+
 					return dfd.pipe(checkRallyPoint(dfd));
 				};
 
@@ -5841,6 +5989,7 @@ jQuery(document).ready(function(){
 				var checkCoords = function(dfd){
 					console.info('KOC checkAndLaunchAttack deferred checkCoords function');
 					coordIndex = attack.lastCoordIndex;
+					attempts = 3;
 					return dfd.pipe(checkCoord(dfd));
 				};
 
@@ -5869,18 +6018,18 @@ jQuery(document).ready(function(){
 								if( type <= 0 || type > 50 ){
 									attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) n\'est pas une terre sauvage.');
 									coordIndex += 1;
-									return dfd.pipe(checkCoord( dfd ));
+									return dfd.pipe( checkCoord(dfd) );
 
 								} else if( info.tileUserId != null || info.tileCityId != null ){ //"0" -> under mists, "xxx" -> no mists
 									attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) occupées.');
 									coordIndex += 1;
-									return dfd.pipe(checkCoord( dfd ));
+									return dfd.pipe( checkCoord(dfd) );
 
 								} else {
 									baseParams.xcoord = gps[0];
 									baseParams.ycoord = gps[1];
 									attack.lastCoordIndex = coordIndex;
-									return dfd.pipe(checkAndLaunchWaves(dfd));
+									return dfd.pipe( checkAndLaunchWaves(dfd) );
 								}
 							} else {
 								attack.aborts.push('Informations sur '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) manquantes.');
@@ -5893,7 +6042,27 @@ jQuery(document).ready(function(){
 									return dfd.reject();
 								}
 
-								return dfd.pipe(checkCoord( dfd ));
+								attempts = 3;
+
+								return dfd.pipe( checkCoord(dfd) );
+							}
+						} else {
+							console.log(result);
+							attempts -= 1;
+							if( attempts > 0 ){
+								return dfd.pipe( checkCoord(dfd) );
+							} else {
+								coordIndex += 1;
+
+								if( coordIndex >= attack.coords.length ){
+									attack.lastCoordIndex = coordIndex - 1;
+									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
+									return dfd.reject();
+								}
+
+								attempts = 3;
+
+								return dfd.pipe( checkCoord(dfd) );
 							}
 						}
 					})
@@ -5908,7 +6077,8 @@ jQuery(document).ready(function(){
 							return dfd.reject();
 						}
 
-						return dfd.pipe(checkCoord( dfd ));
+						attempts = 3;
+						return dfd.pipe( checkCoord(dfd) );
 					});
 				};
 
@@ -5929,7 +6099,7 @@ jQuery(document).ready(function(){
 						var findLostKnights = function(wdfd){
 							console.info('KOC checkAndLaunchAttack deferred findLostKnights function');
 							KOC.shared.freeKnights( attack.cityId );
-							return wdfd.pipe(checkKnight(wdfd));
+							return wdfd.pipe( checkKnight(wdfd) );
 						};
 
 						//second in wave sequence, will pipe the deferred resolution to checkUnits function
@@ -5965,7 +6135,7 @@ jQuery(document).ready(function(){
 							}
 
 							wParams.kid = knight;
-							return wdfd.pipe(checkUnits(wdfd));
+							return wdfd.pipe( checkUnits(wdfd) );
 						};
 
 						//third in wave sequence, will pipe the deferred resolution to launchWave function
@@ -5995,7 +6165,7 @@ jQuery(document).ready(function(){
 									}
 								}
 							}
-							return wdfd.pipe(launchWave(wdfd));
+							return wdfd.pipe( launchWave(wdfd) );
 						};
 
 						//fourth and last in wave sequence
@@ -6010,7 +6180,7 @@ jQuery(document).ready(function(){
 								dataType: 'json'
 							}).done(function( result ){
 								if( result.ok ){
-									attack.marching.push(result.marchId);
+									attack.marching.push( result.marchId );
 									var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
 										d = new Date();
 										ts = parseInt(d.getTime() / 1000, 10);
@@ -6023,9 +6193,9 @@ jQuery(document).ready(function(){
 										window.seed.knights[ 'city' + p.cid ][ 'knt' + p.kid ].knightStatus = 10;
 									}
 
-									if( result.updateSeed ) window.update_seed(result.updateSeed);
+									if( result.updateSeed ) window.update_seed( result.updateSeed );
 
-									window.updateBoosts(result);
+									window.updateBoosts( result );
 									if( result.liftFog ){
 										window.update_boosts();
 										window.seed.playerEffects.fogExpire = 0;
@@ -6036,19 +6206,32 @@ jQuery(document).ready(function(){
 									return wdfd.resolve();
 
 								} else {
-									//console.log('wave', waveIndex + 1, 'failed to launch');
+									console.log(result);
 									if( result.msg ){
 										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé ('+ result.msg +').');
-									} else {
-										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé (capcha ?).');
+										return wdfd.reject();
+									} else if( result.user_action == 'marchCaptcha' ){
+										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé (captcha !).');
+										return wdfd.reject();
 									}
 
-									return wdfd.reject();
+									launchAttempts -= 1;
+									if( launchAttempts > 0 ){
+										return wdfd.pipe( launchWave(wdfd) );
+									} else {
+										return wdfd.reject();
+									}
 								}
 							}).fail(function(){
-								//console.log('wave', waveIndex + 1, 'failed to launch');
+								//network or server error
 								attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (requête KO).');
-								return wdfd.reject();
+
+								launchAttempts -= 1;
+								if( launchAttempts > 0 ){
+									return wdfd.pipe( launchWave(wdfd) );
+								} else {
+									return wdfd.reject();
+								}
 							});
 						};
 
@@ -6056,7 +6239,7 @@ jQuery(document).ready(function(){
 							return $.Deferred(function( wdfd ){
 								//calling sequencialy findLostKnights(), checkKnight(), checkUnits(), launchWave()
 								//using deferred.pipe() to iterate
-								return wdfd.pipe(findLostKnights(wdfd));
+								return wdfd.pipe( findLostKnights(wdfd) );
 							}).promise();
 						};
 
@@ -6066,7 +6249,8 @@ jQuery(document).ready(function(){
 						unitsArr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 						wave = attack.waves[ waveIndex ],
 						knight = null,
-						kLength = attack.keep.length;
+						kLength = attack.keep.length,
+						launchAttempts = 3;
 					$.when( waveSequence() )
 						.done(function(){
 							waveIndex += 1;
@@ -6080,7 +6264,7 @@ jQuery(document).ready(function(){
 						}).fail(function(){
 							if( attack.marching.length ){
 								//console.log('calling back previous waves', attack.marching.length);
-								KOC.crestHunt.recallWaves( attack );
+								KOC.shared.recallWaves( attack );
 							}
 							return dfd.reject();
 						});
@@ -6090,7 +6274,7 @@ jQuery(document).ready(function(){
 					return $.Deferred(function( dfd ){
 						//calling sequencialy previousMarchingCheck(), resetTracks(), checkRallyPoint(), checkCoords(), checkAndLaunchWaves()
 						//using deferred.pipe() to iterate
-						return dfd.pipe(previousMarchingCheck(dfd));
+						return dfd.pipe( previousMarchingCheck(dfd) );
 					}).promise();
 				};
 
@@ -6110,7 +6294,7 @@ jQuery(document).ready(function(){
 			baseParams.r5 = 0;
 			baseParams.items = '';
 
-			var coordIndex, waveIndex, time;
+			var coordIndex, waveIndex, time, increment = true, attempts = 3;
 
 			//using deferred to sequentialize asynchronous tasks
 			$.when( attackSequence() )
@@ -6135,7 +6319,7 @@ jQuery(document).ready(function(){
 					//console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2));
 					time *= 1000; //timestamp in milliseconds in javascript
 
-					//force march update 30s
+					//force march update 10s after impact
 					window.setTimeout(function(){
 						KOC.shared.forceMarchUpdate( attack );
 					}, time + 10000);
@@ -6160,9 +6344,9 @@ jQuery(document).ready(function(){
 	function load(){
 		if( window.seed && window.seed.cities ){
 			window.setTimeout(function(){
-				console.log(window);
+				/*console.log(window);
 				console.log(window.seed);
-				console.log(window.unitstats);
+				console.log(window.unitstats);*/
 				console.time('Koc init');
 				console.log('Koc init');
 				KOC.init();

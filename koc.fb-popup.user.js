@@ -32,6 +32,7 @@ if( channel.value.match(/kingdomsofcamelot\.com\/.+\/cross_iframe\.htm$/) ){
 		}
 	}, false);
 
-	unsafeWindow.parent.postMessage('fbWallPopup module conf please', window.location.protocol + '//' + window.location.hostname);
+	unsafeWindow.parent.postMessage('fbWallPopup module conf please', 'https://apps.facebook.com/');
+	unsafeWindow.parent.postMessage('fbWallPopup module conf please', 'http://apps.facebook.com/');
 }
 

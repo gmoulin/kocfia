@@ -1,5 +1,4 @@
 /* @todo
- * correction formatage durÃ©e
  * modification de l'autoscout
  */
 console.info('koc start');
@@ -27,7 +26,7 @@ console.info('koc start');
 				return this.getItem(key) && JSON.parse( this.getItem(key) );
 			}
 		} else {
-			alert('Pour utiliser ce script veuillez mettre Ã  jour votre navigateur !');
+			alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
 		}
 
 	String.prototype.capitalize = function(){
@@ -239,12 +238,14 @@ jQuery(document).ready(function(){
 
 	KOC = {
 		'server': null,
-		'modules': ['chat', 'fbWallPopup', 'overview', 'crestHunt', 'notepad', 'map', 'formation'], //, 'gloryTournament'],
+		'modules': ['chat', 'fbWallPopup', 'overview', 'wilderness', 'notepad', 'map', 'formation'], //, 'gloryTournament'],
 		'modulesLabel': {
-			'crestHunt': 'Armoiries',
+			'wilderness': 'TS',
+			'darkForest': 'FS',
 			//'gloryTournament': 'Tournoi de Gloire',
 		},
 		'stored': ['conf'],
+		//'ajax': [],
 		'init': function(){
 			console.info('KOC init function');
 
@@ -363,15 +364,15 @@ jQuery(document).ready(function(){
 			//refresh button
 				KOC.$buttons.append(
 					$('<button id="koc-refresh-seed">')
-						.text('RaffraÃ®chir')
-						.attr('title', 'Force la mise Ã  jour des donnÃ©es du jeux, sauf les troupes.')
+						.html('Raffraîchir')
+						.attr('title', 'Force la mise à jour des données du jeux, sauf les troupes.')
 						.click(function(e){ KOC.shared.updateSeed(); })
 				);
 				KOC.$refreshButton = $('#koc-refresh-seed');
 
 				KOC.$buttons.append(
 					$('<button id="koc-free-knights">')
-						.text('Rappeler les chevaliers perdus')
+						.html('Rappeler les chevaliers perdus')
 						.click(function(e){
 							for( var i = 0; i < KOC.citiesId.length; i += 1 ){
 								KOC.shared.freeKnights( KOC.citiesId[i] );
@@ -501,11 +502,11 @@ jQuery(document).ready(function(){
 				{'name': 'resource4', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_consumption': [
-				{'rows': 2, 'name': 'gold', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'rows': 2, 'name': 'resource1', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'rows': 2, 'name': 'resource2', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'rows': 2, 'name': 'resource3', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'rows': 2, 'name': 'resource4', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'rows': 2, 'name': 'gold', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+				{'rows': 2, 'name': 'resource1', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'rows': 2, 'name': 'resource2', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'rows': 2, 'name': 'resource3', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'rows': 2, 'name': 'resource4', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_production_total': [
 				{'name': 'gold', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
@@ -522,7 +523,7 @@ jQuery(document).ready(function(){
 				{'name': 'resource4x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'population': [
-				{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'pÃ©on', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
+				{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'péon', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
 				{'name': 'taxRate', 'label': 'taxation', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/taxes.png'},
 				{'name': 'hapiness', 'label': 'bonheur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
 			],
@@ -537,7 +538,7 @@ jQuery(document).ready(function(){
 				{'name': 'unt8', 'label': 'Cavalerie Lourde', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
 				{'name': 'unt9', 'label': 'Wagon', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
 				{'name': 'unt10', 'label': 'Baliste', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{'name': 'unt11', 'label': 'BÃ©lier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+				{'name': 'unt11', 'label': 'Bélier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
 				{'name': 'unt12', 'label': 'Catapulte', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 			],
 			'troops_barbarian': [
@@ -551,13 +552,13 @@ jQuery(document).ready(function(){
 				{'name': 'unt8', 'label': 'Cavalerie Lourde', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
 				{'name': 'unt9', 'label': 'Wagon', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
 				{'name': 'unt10', 'label': 'Baliste', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{'name': 'unt11', 'label': 'BÃ©lier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+				{'name': 'unt11', 'label': 'Bélier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
 				{'name': 'unt12', 'label': 'Catapulte', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 			],
 			'defenses': [
-				{'name': 'fort53', 'label': 'ArbalÃ¨tes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
-				{'name': 'fort55', 'label': 'TrÃ©buchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
-				{'name': 'fort60', 'label': 'PiÃ¨ges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
+				{'name': 'fort53', 'label': 'Arbalètes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
+				{'name': 'fort55', 'label': 'Trébuchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
+				{'name': 'fort60', 'label': 'Pièges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
 				{'name': 'fort61', 'label': 'Chausse-trapes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_61_30.jpg'},
 				{'name': 'fort62', 'label': 'Palissades', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_62_30.jpg'},
 			],
@@ -594,10 +595,16 @@ jQuery(document).ready(function(){
 		/* AJAX SNIFFER */
 			'ajaxSniffer': function(){
 				console.info('KOC ajaxSniffer function');
-				var buffer = null;
 				XMLHttpRequest.prototype.oldOpen = XMLHttpRequest.prototype.open;
 				var newOpen = function(method, url, async, user, password){
 					var filename = url.substring(url.lastIndexOf('/')+1);
+
+					//KOC.ajax[filename] = (KOC.ajax[filename] || 0) + 1;
+
+					//this.addEventListener('load', function(){ KOC.ajax[filename] = KOC.ajax[filename] - 1; });
+					//this.addEventListener('abort', function(){ KOC.ajax[filename] = KOC.ajax[filename] - 1; });
+					//this.addEventListener('error', function(){ KOC.ajax[filename] = KOC.ajax[filename] - 1; });
+
 					switch(filename){
 						case 'getChat.php':
 							this.addEventListener("load", function(){
@@ -780,6 +787,7 @@ jQuery(document).ready(function(){
 							break;
 					}
 
+
 					this.oldOpen(method, url, async, user, password);
 				}
 				XMLHttpRequest.prototype.open = newOpen;
@@ -787,7 +795,7 @@ jQuery(document).ready(function(){
 		/* CONFIGURATION PANEL */
 			'confPanel': function(){
 				console.info('KOC confPanel function');
-				$head.append( $('<style>').text(kocConfPanelCss) );
+				$head.append( $('<style>').html(kocConfPanelCss) );
 
 				var $confPanel = $('<div id="koc-conf-panel">');
 
@@ -938,7 +946,7 @@ jQuery(document).ready(function(){
 						KOC.shared.storeConf();
 					});
 
-				var $kocConfPanelToggle = $('<button id="koc-conf-panel-toggle">').text('KOC');
+				var $kocConfPanelToggle = $('<button id="koc-conf-panel-toggle">').html('KOC');
 				$kocConfPanelToggle.click(function(){
 					console.info('$kocConfPanelToggle click');
 					KOC.$confPanel.toggle();
@@ -991,15 +999,15 @@ jQuery(document).ready(function(){
 					console.info('KOC shared optionPanel function');
 					var code = '<h3>Global</h3>';
 						code += '<div>';
-						code += KOC.shared.generateButton('shared', 'cleanLocalStorage', 'Remise Ã  zÃ¨ro des donnÃ©es persistantes', null);
+						code += KOC.shared.generateButton('shared', 'cleanLocalStorage', 'Remise à zèro des données persistantes', null);
 						code += KOC.shared.generateButton('shared', 'reloadGame', 'Recharger la page');
-						code += KOC.shared.generateCheckbox('general', 'refresh', 'RafraÃ®chir les donnÃ©es toutes les ', KOC.conf.general.refresh).replace(/<\/p>/, '');
+						code += KOC.shared.generateCheckbox('general', 'refresh', 'Rafraîchir les données toutes les ', KOC.conf.general.refresh).replace(/<\/p>/, '');
 						code += KOC.shared.generateInput('general', 'refreshFrequency', ' minutes', KOC.conf.general.refreshFrequency).replace(/<p>/, '');
 						code += KOC.shared.generateCheckbox('general', 'reload', 'Recharger toutes les ', KOC.conf.general.reload).replace(/<\/p>/, '');
 						code += KOC.shared.generateInput('general', 'reloadFrequency', ' minutes', KOC.conf.general.reloadFrequency).replace(/<p>/, '');
-						code += KOC.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boÃ®te magique de Merlin', KOC.conf.general.hideMagicalBoxPreview);
+						code += KOC.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin', KOC.conf.general.hideMagicalBoxPreview);
 						code += KOC.shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOC.conf.general.hideOtherPlayersCourtInvitation);
-						code += KOC.shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fÃªtes foraines (avec envoie)', KOC.conf.general.hideFairPopup);
+						code += KOC.shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fêtes foraines (avec envoie)', KOC.conf.general.hideFairPopup);
 						code += '</div>';
 					$optionsSection.append( code );
 
@@ -1156,27 +1164,31 @@ jQuery(document).ready(function(){
 					return num.substr(0, length) + s;
 				},
 				'readableDuration': function( time ){
-					time = Math.floor( parseFloat( time ) );
-					if( time > 86400 ){ //1 day
-						var h = Math.floor( time % 3600 );
-						time = time / 3600;
-						var j = Math.floor(time / 24);
-						if( j > 10 ){
-							return j + 'j';
-						} else {
-							return j + 'j' + h + 'h';
-						}
-					} else {
-						if( time < 61 ){
-							return time + 's';
-						} else if( time > 3600 ){
-							var m = Math.floor( (time % 3600) / 60 );
-							return Math.floor( time / 3600 ) + 'h' + m + 'm';
-						} else {
-							var s = Math.floor( time % 60 );
-							return Math.floor( time / 60 ) + 'm' + s + 's';
-						}
+					if( !isNaN( parseFloat(time) ) && isFinite(time) ){
+						return '-';
 					}
+					time = Math.floor( parseFloat(time) );
+
+					var time_units = [
+						[31556926, 'a'],
+						[2629744, 'm'],
+						[86400, 'j'],
+						[3600, 'h'],
+						[60, 'm'],
+						[1, 's']
+					];
+
+					var values = [], i, length = time_units.length;
+					for( i = 0; i < length; i++ ){
+						if( i === 0 ){
+							values[i] = parseInt(time / time_units[i][0], 10);
+						} else {
+							values[i] = parseInt((time % time_units[i][0]) / time_units[i][0], 10);
+						}
+						values[i] += time_units[i][1];
+					}
+
+					return values.join(' ');
 				},
 				'generateCheckbox': function(module, option, text, checked){
 					return '<p><input type="checkbox" class="conf-toggle" id="'+ module +'-'+ option +'" '+ (checked ? 'checked' : '') +' /><label for="'+ module +'-'+ option +'">'+ text +'</label></p>';
@@ -1491,14 +1503,14 @@ jQuery(document).ready(function(){
 					'post': 0,
 					'privacyLevel': null,
 				},
-				'privacyLevelList': {'values': [80, 50, 40, 10], 'labels': ['public', 'amis d\'amis', 'amis', 'privÃ©']},
+				'privacyLevelList': {'values': [80, 50, 40, 10], 'labels': ['public', 'amis d\'amis', 'amis', 'privé']},
 				'confPanel': function( $section ){
 					console.info('KOC fbWallPopup confPanel function');
 					var code = '<h3>Popup facebook pour poster sur le mur</h3>';
 						code += '<div>';
 						code += KOC.shared.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOC.conf.fbWallPopup.active);
 						code += KOC.shared.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOC.conf.fbWallPopup.cancel, KOC.conf.fbWallPopup.post]);
-						code += KOC.shared.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilitÃ©', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList);
+						code += KOC.shared.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilité', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList);
 						code += '</div>';
 
 					$section.append( code );
@@ -1534,13 +1546,13 @@ jQuery(document).ready(function(){
 					var code = '<h3>Chat</h3>';
 						code += '<div>';
 						code += KOC.shared.generateCheckbox('chat', 'active', 'Activer le module', KOC.conf.chat.active);
-						code += KOC.shared.generateCheckbox('chat', 'moveable', 'Chat dÃ©placable et redimensionnable', KOC.conf.chat.moveable);
+						code += KOC.shared.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable);
 						code += KOC.shared.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp);
-						code += KOC.shared.generateButton('chat', 'onRight', 'Repositionner le chat Ã  droite');
-						code += KOC.shared.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats GÃ©nÃ©ral et Alliance)', KOC.conf.chat.highlightLeaders);
-						code += KOC.shared.generateButton('chat', 'getLeadersList', 'RaffraÃ®chir la liste des joueurs de la chancellerie');
-						code += KOC.shared.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat GÃ©nÃ©ral)', KOC.conf.chat.highlightFriends);
-						code += KOC.shared.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat GÃ©nÃ©ral)', KOC.conf.chat.highlightFoes);
+						code += KOC.shared.generateButton('chat', 'onRight', 'Repositionner le chat à droite');
+						code += KOC.shared.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders);
+						code += KOC.shared.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie');
+						code += KOC.shared.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends);
+						code += KOC.shared.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes);
 						code += KOC.shared.generateButton('chat', 'cleanFriendsList', 'Vider la liste d\'amis');
 						code += KOC.shared.generateButton('chat', 'cleanFoesList', 'Vider la liste d\'ennemis');
 						code += '</div>';
@@ -1690,7 +1702,7 @@ jQuery(document).ready(function(){
 				/* moveable */
 					'moveableOn': function(){
 						console.info('KOC chat moveableOn function');
-						$head.append( $('<style id="koc-chat-moveable">').text(kocChatMoveableCss) );
+						$head.append( $('<style id="koc-chat-moveable">').html(kocChatMoveableCss) );
 
 						$chat
 							.draggable({
@@ -1741,7 +1753,7 @@ jQuery(document).ready(function(){
 								.css('height', function(){ return $(this).parent().height() - 43; });
 						var $jeu = $chat.find('.mod_comm_mmb');
 						$jeu.data('ori', $jeu.html())
-							.removeClass('mod_comm_mmb').addClass('kocMerlinSmall').html('BoÃ®tes Magiques');
+							.removeClass('mod_comm_mmb').addClass('kocMerlinSmall').html('Boîtes Magiques');
 					},
 					'moveableOff': function(){
 						console.info('KOC chat moveableOff function');
@@ -1771,7 +1783,7 @@ jQuery(document).ready(function(){
 				/* cleanHelp */
 					'cleanHelpOn': function(){
 						console.info('KOC chat cleanHelpOn function');
-						$head.append( $('<style id="koc-chat-help">').text(kocChatHelpCss) );
+						$head.append( $('<style id="koc-chat-help">').html(kocChatHelpCss) );
 					},
 					'cleanHelpOff': function(){
 						console.info('KOC chat cleanHelpOff function');
@@ -1779,7 +1791,7 @@ jQuery(document).ready(function(){
 					},
 					'cleanHelp': function( nbMsg ){
 						console.info('KOC chat cleanHelp function');
-						//suppression du superflu (demande aide et son rÃ©sultat)
+						//suppression du superflu (demande aide et son résultat)
 						if( KOC.conf.chat.active && KOC.conf.chat.cleanHelp ){
 							window.setTimeout(function(){
 								var $messages = $chatAlliance.find('.chatwrap');
@@ -1793,7 +1805,7 @@ jQuery(document).ready(function(){
 											$helpLink
 												.click() //clic auto sur les demandes d'aides
 												.closest('.chatwrap').remove(); //et suppression de la demande d'aide
-											//suppression du rÃ©sultat -> masquÃ© en css .noalliance
+											//suppression du résultat -> masqué en css .noalliance
 										}
 									});
 							}, 250);
@@ -1830,7 +1842,7 @@ jQuery(document).ready(function(){
 						console.info('KOC chat highlightLeadersOn function');
 						KOC.chat.getLeadersList();
 
-						$head.append( $('<style id="koc-chat-highlight-leaders">').text(kocChatHighlightLeadersCss) );
+						$head.append( $('<style id="koc-chat-highlight-leaders">').html(kocChatHighlightLeadersCss) );
 					},
 					'highlightLeadersOff': function(){
 						console.info('KOC chat highlightLeadersOff function');
@@ -1840,7 +1852,7 @@ jQuery(document).ready(function(){
 				/* highlight friends */
 					'highlightFriendsOn': function( highlight ){
 						console.info('KOC chat highlightFriendsOn function');
-						$head.append( $('<style id="koc-chat-highlight-friends">').text(kocChatHighlightFriendsCss) );
+						$head.append( $('<style id="koc-chat-highlight-friends">').html(kocChatHighlightFriendsCss) );
 						KOC.chat.highlightFriendsAndFoes(0);
 					},
 					'highlightFriendsOff': function(){
@@ -1860,7 +1872,7 @@ jQuery(document).ready(function(){
 				/* highlight foes */
 					'highlightFoesOn': function(){
 						console.info('KOC chat highlightFoesOn function');
-						$head.append( $('<style id="koc-chat-highlight-foes">').text(kocChatHighlightFoesCss) );
+						$head.append( $('<style id="koc-chat-highlight-foes">').html(kocChatHighlightFoesCss) );
 						KOC.chat.highlightFriendsAndFoes(0);
 					},
 					'highlightFoesOff': function(){
@@ -1926,14 +1938,14 @@ jQuery(document).ready(function(){
 				'updating' : false,
 				'parts': {
 					'population': 'population',
-					'troops': 'unitÃ©s',
-					'troops_barbarian': 'unitÃ©s en camps barbares',
+					'troops': 'unités',
+					'troops_barbarian': 'unités en camps barbares',
 					'defenses': 'fortifications',
 					'resources': 'ressources',
 					'resources_cap': 'plafond',
-					'resources_production_detail': 'dÃ©tail production',
+					'resources_production_detail': 'détail production',
 					'resources_production_barbarian': 'production camps barbares',
-					'resources_consumption': 'dÃ©pense',
+					'resources_consumption': 'dépense',
 					'resources_production_total': 'total production',
 					'resources_autonomy': 'autonomie',
 				},
@@ -1941,9 +1953,9 @@ jQuery(document).ready(function(){
 					console.info('KOC overview confPanel function');
 					var code = '<h3>Vue globale</h3>';
 						code += '<div>';
-						code += KOC.shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat Ã  droite)', 'Vue globale dÃ©placable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable]);
-						code += KOC.shared.generateButton('overview', 'resetPlacement', 'Remise Ã  zÃ©ro de la position');
-						code += KOC.shared.generateButton('overview', 'resetDimensions', 'Remise Ã  zÃ©ro des dimensions');
+						code += KOC.shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable]);
+						code += KOC.shared.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position');
+						code += KOC.shared.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions');
 						code += '</div>';
 
 					$section.append( code )
@@ -1955,7 +1967,7 @@ jQuery(document).ready(function(){
 				'on': function(){
 					console.info('KOC overview on function');
 
-					$head.append( $('<style id="koc-overview-css">').text(kocOverviewCss) );
+					$head.append( $('<style id="koc-overview-css">').html(kocOverviewCss) );
 
 					var dataTable = '<table id="koc-overview-data">',
 						headers = '<thead><tr><th class="img">&nbsp;</th><th class="label">&nbsp;</th><th class="sum">Total</th>',
@@ -2457,9 +2469,9 @@ jQuery(document).ready(function(){
 										var $tds = $resConsoTrs.eq(line).find('td'),
 											$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 											n = null;
-										//'dÃ©pense', 'formation'
+										//'dépense', 'formation'
 										switch( type.label[k] ){
-											case 'dÃ©pense':
+											case 'dépense':
 												var inSeed = KOC.inSeed.resources_consumption[ type.name ];
 												if( inSeed ){
 													if( inSeed.hasOwnProperty('type') ){
@@ -2704,7 +2716,7 @@ jQuery(document).ready(function(){
 							KOC.overview.$div.hide();
 						}
 
-						var $kocOverviewToggle = $('<button id="koc-overview-toggle">').text('Vue Globale');
+						var $kocOverviewToggle = $('<button id="koc-overview-toggle">').html('Vue Globale');
 						$kocOverviewToggle.click(function(){
 							console.info('$kocOverviewToggle click');
 							KOC.overview.$div.toggle();
@@ -2775,8 +2787,8 @@ jQuery(document).ready(function(){
 					},
 			};
 
-		/* CREST HUNT */
-			KOC.crestHunt = {
+		/* WILDERNESS */
+			KOC.wilderness = {
 				'options': {
 					'active': 1,
 					'automatic': 0,
@@ -2784,24 +2796,24 @@ jQuery(document).ready(function(){
 				'stored': ['attacks'],
 				'attacks': {}, //by city id and attack id
 				'confPanel': function( $section ){
-					console.info('KOC crestHunt confPanel function');
+					console.info('KOC wilderness confPanel function');
 					var code = '<h3>Armoiries</h3>';
 					code += '<div>';
-					code += KOC.shared.generateCheckbox('crestHunt', 'active', 'Activer le module', KOC.conf.crestHunt.active);
-					code += KOC.shared.generateCheckbox('crestHunt', 'automatic', 'Lancer les attaques automatiques', KOC.conf.crestHunt.automatic);
-					code += KOC.shared.generateButton('crestHunt', 'deleteAllPlans', 'Supprimer toutes les attaques enregistrÃ©es');
+					code += KOC.shared.generateCheckbox('wilderness', 'active', 'Activer le module', KOC.conf.wilderness.active);
+					code += KOC.shared.generateCheckbox('wilderness', 'automatic', 'Lancer les attaques automatiques', KOC.conf.wilderness.automatic);
+					code += KOC.shared.generateButton('wilderness', 'deleteAllPlans', 'Supprimer toutes les attaques enregistrées');
 					code += '</div>';
 
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC crestHunt modPanel function');
-					var $section = KOC.$confPanel.find('#koc-crestHunt').html('');
+					console.info('KOC wilderness modPanel function');
+					var $section = KOC.$confPanel.find('#koc-wilderness').html('');
 
 					var header = '<div class="infos cf">';
 					header += '<span class="ui-icon ui-icon-info"></span>';
-					header += '<span><input type="checkbox" id="crestHunt-panel-automatic" '+ (KOC.conf.crestHunt.automatic ? 'checked' : '') +' autocomplete="off" />';
-					header += '<label for="crestHunt-panel-automatic">attaques automatiques</label></span>';
+					header += '<span><input type="checkbox" id="wilderness-panel-automatic" '+ (KOC.conf.wilderness.automatic ? 'checked' : '') +' autocomplete="off" />';
+					header += '<label for="wilderness-panel-automatic">attaques automatiques</label></span>';
 					header += '</div>'
 
 					var form = '<h3>Configurer une attaque</h3>';
@@ -2815,8 +2827,8 @@ jQuery(document).ready(function(){
 					var i, length = KOC.cities.length;
 					for( i = 0; i < length; i += 1 ){
 						var city = KOC.cities[i];
-						form += '<input id="koc-crestHunt-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" autocomplete="off" />';
-						form += '<label for="koc-crestHunt-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
+						form += '<input id="koc-wilderness-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" autocomplete="off" />';
+						form += '<label for="koc-wilderness-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
 					}
 
 					form += '</fieldset>';
@@ -2833,7 +2845,7 @@ jQuery(document).ready(function(){
 					form += '</div>';
 					form += '</fieldset>';
 					form += '<fieldset>';
-					form += '<legend>CoordonnÃ©es</legend>';
+					form += '<legend>Coordonnées</legend>';
 					form += '<label>Niveau&nbsp;:&nbsp;</label>';
 					form += '<input type="text" class="targetLevel" />';
 					form += '<small>format: x,y x,y x,y ...</small>';
@@ -2846,24 +2858,24 @@ jQuery(document).ready(function(){
 					skel += '<option value="">N\'importe lequel</option>';
 					skel += '</select>';
 					skel += '<div class="unit-block">';
-					skel += '<label>UnitÃ©&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
+					skel += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
 					skel += '<option value="">Choisir</option>';
 					skel += '</select>';
-					skel += '<label>QuantitÃ©&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
+					skel += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
 					skel += '</div>';
-					skel += '<button class="add-unit">Ajouter une autre unitÃ©</button>';
+					skel += '<button class="add-unit">Ajouter une autre unité</button>';
 					skel += '</fieldset>';
-					KOC.crestHunt.$waveSkeleton = $(skel);
+					KOC.wilderness.$waveSkeleton = $(skel);
 
 					form += '<fieldset class="keep">';
 					form += '<legend>Conserver</legend>';
 					form += '<div class="unit-block">';
-					form += '<label>UnitÃ©&nbsp;:&nbsp;</label><select class="unit-choice">';
+					form += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">';
 					form += '<option value="">Choisir</option>';
 					form += '</select>';
-					form += '<label>QuantitÃ©&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
+					form += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
 					form += '</div>';
-					form += '<button class="add-unit">Ajouter une autre unitÃ©</button>';
+					form += '<button class="add-unit">Ajouter une autre unité</button>';
 					form += '</fieldset>';
 					form +=  '<button class="add-wave">Ajouter une vague</button>';
 					form += '<button class="launch">Lancer</button>';
@@ -2879,18 +2891,18 @@ jQuery(document).ready(function(){
 					onGoing += '<th class="action">Actions</th>';
 					onGoing += '<th class="from">Ville</th>';
 					onGoing += '<th class="to">Cible</th>';
-					onGoing += '<th class="coords">CoordonnÃ©es</th>';
+					onGoing += '<th class="coords">Coordonnées</th>';
 					onGoing += '<th class="current">Cible</th>';
 					onGoing += '<th class="info">Info</th>';
 					onGoing += '</tr></thead>';
 
-					var savedPlans = '<h3>Attaques enregistrÃ©es</h3>';
+					var savedPlans = '<h3>Attaques enregistrées</h3>';
 					savedPlans += '<div class="attack-list saved">';
 					savedPlans += '<table><thead><tr>';
 					savedPlans += '<th class="action">Actions</th>';
 					savedPlans += '<th class="from">Ville</th>';
 					savedPlans += '<th class="to">Cible</th>';
-					savedPlans += '<th class="coords">CoordonnÃ©es</th>';
+					savedPlans += '<th class="coords">Coordonnées</th>';
 					savedPlans += '<th class="waves">Vagues</th>';
 					savedPlans += '<th class="keep">Converser</th>';
 					savedPlans += '</tr></thead>';
@@ -2905,37 +2917,37 @@ jQuery(document).ready(function(){
 					onGoing += '</table></div>';
 					savedPlans += '</table></div>';
 
-					var help = '<div id="koc-crestHunt-help" class="help" title="Aide armoiries"><h4>RÃ¨gles, limitations et informations :</h4><ul>';
-					help += '<li>Les terres sauvages occupÃ©es ne seront pas attaquÃ©es (vÃ©rification pour chaque coordonnÃ©e Ã  chaque attaque)</li>';
-					help += '<li>Une attaque sera annulÃ©e au bout de 10 erreurs consÃ©cutives <br />(coordonnÃ©e occupÃ©e, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
-					help += '<li>Les attaques sauvegardÃ©es peuvent Ãªtre lancÃ©es manuellement ou via le mode automatique</li>';
-					help += '<li>Pour le formulaire les erreurs seront listÃ©es au-dessus</li>';
-					help += '<li>Aucune vague n\'est lancÃ©e si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
-					help += '<li>Si une vague est en erreur les vagues prÃ©cÃ©dentes seront rappelÃ©es (sous rÃ©serves des limitations de temps de marche restant > 1min)</li>';
-					help += '<li>Lors du dÃ©marrage du mode automatique, 20 secondes s\'Ã©coulent entre chaque lancement de plan d\'attaque sauvegardÃ©</li>';
-					help += '<li>Dix secondes s\'Ã©coulent entre chaque lancement de vague</li>';
-					help += '<li>Chaque requÃªte au serveur est exÃ©cutÃ©e au maximum 3 fois lors de problÃ¨me rÃ©seau ou serveur</li>';
-					help += '</ul><h4>MÃ©thode :</h4><ol>';
-					help += '<li>SÃ©lectionner une ville</li>';
-					help += '<li>SpÃ©cifier une ou plusieurs coordonnÃ©es (sÃ©parÃ©es par un retour Ã  la ligne, sous le format x,y)</li>';
-					help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques prÃ©programmÃ©es)</li>';
-					help += '<li>SpÃ©cifier les chevaliers (optionnel, par dÃ©faut le premier chevalier disponible est utilisÃ©)</li>';
-					help += '<li>Les quantitÃ©s de troupes peuvent Ãªtre spÃ©cifiÃ©es via un nombre ou un abrÃ©viation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
-					help += '<li>SpÃ©cifier les quantitÃ©s de troupes Ã  conserver (optionnel)</li>';
+					var help = '<div id="koc-wilderness-help" class="help" title="Aide armoiries"><h4>Règles, limitations et informations :</h4><ul>';
+					help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
+					help += '<li>Une attaque sera annulée au bout de 10 erreurs consécutives <br />(coordonnée occupée, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
+					help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique</li>';
+					help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
+					help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
+					help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant > 1min)</li>';
+					help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
+					help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
+					help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
+					help += '</ul><h4>Méthode :</h4><ol>';
+					help += '<li>Sélectionner une ville</li>';
+					help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
+					help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
+					help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
+					help += '<li>Les quantités de troupes peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
+					help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
 					help += '</ol></div>';
 
 					$section.append( header + '<div class="accordion">' + form + savedPlans + onGoing + '</div>' + help )
-						.on('change', '#crestHunt-panel-automatic', function(){
-							$('#crestHunt-automatic').prop('checked', $(this).prop('checked')).change();
+						.on('change', '#wilderness-panel-automatic', function(){
+							$('#wilderness-automatic').prop('checked', $(this).prop('checked')).change();
 						})
 						//load knights and units on city change )
 						.on('change', '.city-choice', function(){
-							var $waves = KOC.crestHunt.$form.find('.wave');
+							var $waves = KOC.wilderness.$form.find('.wave');
 							if( $waves.length ) $waves.remove();
 
-							KOC.crestHunt.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
+							KOC.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
-							KOC.crestHunt.addWaves(2, $(this).val());
+							KOC.wilderness.addWaves(2, $(this).val());
 						})
 						//add unit button
 						.on('click', '.add-unit', function(){
@@ -2943,7 +2955,7 @@ jQuery(document).ready(function(){
 								$b = $this.siblings('.unit-block').eq(0).clone();
 
 							$b.find('input, select').val('');
-							$b.append('<button class="remove">Supprimer cette unitÃ©</button>')
+							$b.append('<button class="remove">Supprimer cette unité</button>')
 							  .insertBefore( $this );
 						})
 						//remove unit button
@@ -2952,50 +2964,50 @@ jQuery(document).ready(function(){
 						})
 						//add wave button
 						.on('click', '.add-wave', function(){
-							var $clone = KOC.crestHunt.$form.find('.wave').eq(0).clone();
+							var $clone = KOC.wilderness.$form.find('.wave').eq(0).clone();
 							$clone.find('input, select').val('');
-							$clone.insertBefore( KOC.crestHunt.$form.find('.add-wave') );
+							$clone.insertBefore( KOC.wilderness.$form.find('.add-wave') );
 						})
 						//reset form
-						.on('click', '.reset', KOC.crestHunt.resetForm)
+						.on('click', '.reset', KOC.wilderness.resetForm)
 						//launch
 						.on('click', '.launch', function(){
 							console.info('attack launch click');
-							if( KOC.conf.crestHunt.active ){
-								var result = KOC.crestHunt.planAttack();
+							if( KOC.conf.wilderness.active ){
+								var result = KOC.wilderness.planAttack();
 								if( result.errors.length ){
-									KOC.crestHunt.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+									KOC.wilderness.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 								} else {
-									KOC.crestHunt.$form.find('.message').empty();
+									KOC.wilderness.$form.find('.message').empty();
 									var d = new Date();
 									result.attack.id = Math.floor(d.getTime() / 1000);
-									KOC.crestHunt.launchAttack( result.attack );
+									KOC.wilderness.launchAttack( result.attack );
 
 									//open ongoing accordion
-									KOC.crestHunt.$accordion.accordion('activate', 2);
+									KOC.wilderness.$accordion.accordion('activate', 2);
 								}
 							} else {
-								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloquÃ©s.');
+								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
 							}
 						})
 						//save
 						.on('click', '.save, .saveAndLaunch', function(){
 							console.info('attack save click');
-							var result = KOC.crestHunt.planAttack();
+							var result = KOC.wilderness.planAttack();
 							if( result.errors.length ){
-								KOC.crestHunt.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								KOC.wilderness.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 							} else {
-								KOC.crestHunt.$form.find('.message').empty();
+								KOC.wilderness.$form.find('.message').empty();
 
-								if( !KOC.crestHunt.attacks[ result.attack.cityId ] ){
-									KOC.crestHunt.attacks[ result.attack.cityId ] = {};
+								if( !KOC.wilderness.attacks[ result.attack.cityId ] ){
+									KOC.wilderness.attacks[ result.attack.cityId ] = {};
 								}
 
-								var editAttackId = KOC.crestHunt.$form.find('.edit-attackId').val(),
-									editCityId = KOC.crestHunt.$form.find('.edit-cityId').val();
+								var editAttackId = KOC.wilderness.$form.find('.edit-attackId').val(),
+									editCityId = KOC.wilderness.$form.find('.edit-cityId').val();
 								if( editAttackId != '' && editCityId != '' ){
-									KOC.crestHunt.deletePlan( editAttackId, editCityId, false );
-									KOC.crestHunt.$saved.find('li')
+									KOC.wilderness.deletePlan( editAttackId, editCityId, false );
+									KOC.wilderness.$saved.find('li')
 										.filter('[data-city='+ editCityId +'][data-attack='+ editAttackId +']')
 										.remove();
 								}
@@ -3003,62 +3015,62 @@ jQuery(document).ready(function(){
 								var d = new Date();
 								result.attack.id = Math.floor(d.getTime() / 1000);
 
-								KOC.crestHunt.attacks[ result.attack.cityId ][ result.attack.id ] = result.attack;
+								KOC.wilderness.attacks[ result.attack.cityId ][ result.attack.id ] = result.attack;
 
-								KOC.crestHunt.$saved.find('ul').filter('[data-city='+ result.attack.cityId +']')
-									.append( KOC.crestHunt.attackInfo( result.attack, null ) );
+								KOC.wilderness.$saved.find('ul').filter('[data-city='+ result.attack.cityId +']')
+									.append( KOC.wilderness.attackInfo( result.attack, null ) );
 
-								KOC.crestHunt.storeAttacks();
+								KOC.wilderness.storeAttacks();
 
-								if( KOC.conf.crestHunt.active && $(this).hasClass('saveAndLaunch') ){
+								if( KOC.conf.wilderness.active && $(this).hasClass('saveAndLaunch') ){
 									result.attack.id = Math.floor(d.getTime() / 1000);
-									KOC.crestHunt.launchAttack( result.attack );
+									KOC.wilderness.launchAttack( result.attack );
 
 									//open ongoing accordion
-									KOC.crestHunt.$accordion.accordion('activate', 2);
+									KOC.wilderness.$accordion.accordion('activate', 2);
 								} else {
 									//open saved accordion
-									KOC.crestHunt.$accordion.accordion('activate', 1);
+									KOC.wilderness.$accordion.accordion('activate', 1);
 								}
 							}
 						})
 						//attack plan delete
 						.on('click', '.delete', function(){
-							if( confirm('Etes-vous sÃ»r ?') ){
+							if( confirm('Etes-vous sûr ?') ){
 								var $this = $(this),
 									$tr = $(this).parent().parent(),
 									isEdit = $this.hasClass('edit'),
 									attackId = $tr.data('attack'),
 									cityId = $tr.data('city');
 
-								KOC.crestHunt.deletePlan( attackId, cityId, true );
+								KOC.wilderness.deletePlan( attackId, cityId, true );
 								$tr.remove();
 							}
 						})
 						//attack plan edit and duplication
 						.on('click', '.edit, .duplicate', function(){
-							KOC.crestHunt.resetForm();
+							KOC.wilderness.resetForm();
 							var $this = $(this),
 								$tr = $this.parent(),
 								attackId = $tr.data('attack'),
 								cityId = $tr.data('city'),
-								attack = KOC.crestHunt.attacks[ cityId ][ attackId ];
+								attack = KOC.wilderness.attacks[ cityId ][ attackId ];
 
 							if( attack ){
-								KOC.crestHunt.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
+								KOC.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
 								if( $this.hasClass('edit') ){
-									KOC.crestHunt.$form.find('.edit-attackId').val( attack.id );
-									KOC.crestHunt.$form.find('.edit-cityId').val( attack.cityId );
+									KOC.wilderness.$form.find('.edit-attackId').val( attack.id );
+									KOC.wilderness.$form.find('.edit-cityId').val( attack.cityId );
 								}
 
-								KOC.crestHunt.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
-								KOC.crestHunt.$form.find('.targetLevel').val(attack.targetLevel);
-								KOC.crestHunt.$form.find('textarea').val(attack.coords.join("\n"));
+								KOC.wilderness.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
+								KOC.wilderness.$form.find('.targetLevel').val(attack.targetLevel);
+								KOC.wilderness.$form.find('textarea').val(attack.coords.join("\n"));
 
-								KOC.crestHunt.addWaves( attack.waves.length, attack.cityId );
+								KOC.wilderness.addWaves( attack.waves.length, attack.cityId );
 
-								var $waves = KOC.crestHunt.$form.find('.wave');
+								var $waves = KOC.wilderness.$form.find('.wave');
 								var i, j, wavesLength = attack.waves.length, unitsLength;
 								for( i = 0; i < wavesLength; i += 1 ){
 									var $wave = $waves.eq(i),
@@ -3082,7 +3094,7 @@ jQuery(document).ready(function(){
 									}
 								}
 
-								var $keep = KOC.crestHunt.$form.find('.keep');
+								var $keep = KOC.wilderness.$form.find('.keep');
 								if( attack.keep.length > 1 ){
 									var keepLength = attack.keep.length;
 									for( i = 1; i < keepLength; i += 1 ){
@@ -3100,7 +3112,7 @@ jQuery(document).ready(function(){
 								}
 
 								//open form accordion
-								KOC.crestHunt.$accordion.accordion('activate', 0);
+								KOC.wilderness.$accordion.accordion('activate', 0);
 							} else {
 								alert('Plan d\'attaque introuvable.')
 							}
@@ -3109,53 +3121,53 @@ jQuery(document).ready(function(){
 						.on('change', '.knight-choice', function(){
 							var id = $(this).val();
 							if( id != '' ){
-								KOC.crestHunt.$form.find('.knight-choice').not( this ).each2(function(i, $kc){
+								KOC.wilderness.$form.find('.knight-choice').not( this ).each2(function(i, $kc){
 									if( $kc.val() == id ) $kc.val('');
 								});
 							}
 						})
 						//stop on next round
 						.on('click', '.stop', function(){
-							if( confirm('Etes-vous sÃ»r ?') ){
+							if( confirm('Etes-vous sûr ?') ){
 								var $tr = $(this).parent().parent();
 								$tr.data('stop', 1);
 							}
 						})
 						//manual launch
 						.on('click', '.charge', function(){
-							if( KOC.conf.crestHunt.active ){
-								if( !KOC.conf.crestHunt.automatic ){
+							if( KOC.conf.wilderness.active ){
+								if( !KOC.conf.wilderness.automatic ){
 									var $tr = $(this).hide().parent().parent();
-									var attack = KOC.crestHunt.attacks[ $tr.data('city') ][ $tr.data('attack') ];
+									var attack = KOC.wilderness.attacks[ $tr.data('city') ][ $tr.data('attack') ];
 									if( attack ){
 										attack.lastCoordIndex = 0;
 										attack.abort = 0;
 										attack.aborts = [];
 										attack.marching = [];
-										KOC.crestHunt.refreshOngoingInfo( attack, false );
-										KOC.crestHunt.launchAttack( attack );
+										KOC.wilderness.refreshOngoingInfo( attack, false );
+										KOC.wilderness.launchAttack( attack );
 
 										//open ongoing accordion
-										KOC.crestHunt.$accordion.accordion('activate', 2);
+										KOC.wilderness.$accordion.accordion('activate', 2);
 									} else {
 										alert('Plan d\'attaque introuvable.')
 									}
 								} else {
-									alert('Le mode automatic est activÃ©. Le lancement d\'attaque sauvegardÃ©e est bloquÃ© (attaque dÃ©jÃ  en cours).');
+									alert('Le mode automatic est activé. Le lancement d\'attaque sauvegardée est bloqué (attaque déjà en cours).');
 								}
 							} else {
-								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloquÃ©s.');
+								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
 							}
 						})
 						//attack templates
 						.on('click', '.build', function(){
 							var rel = $(this).attr('rel');
-							KOC.crestHunt.$form.find('.wave').remove();
-							KOC.crestHunt.addWaves(2, 'city' + KOC.crestHunt.$form.find('.city-choice').filter(':checked').val());
+							KOC.wilderness.$form.find('.wave').remove();
+							KOC.wilderness.addWaves(2, 'city' + KOC.wilderness.$form.find('.city-choice').filter(':checked').val());
 
-							var $waves = KOC.crestHunt.$form.find('.wave');
+							var $waves = KOC.wilderness.$form.find('.wave');
 							var $addUnit = $waves.find('.add-unit');
-							var $level = KOC.crestHunt.$form.find('.targetLevel');
+							var $level = KOC.wilderness.$form.find('.targetLevel');
 							$addUnit.eq(1).trigger('click')
 							if( rel == '8' || rel == '9' || rel == '9bis' ){
 								$addUnit.eq(0).trigger('click');
@@ -3259,20 +3271,20 @@ jQuery(document).ready(function(){
 						})
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
-					KOC.crestHunt.$accordion = $section.find('.accordion');
-					KOC.crestHunt.$form = $section.find('.attack-form');
-					KOC.crestHunt.$saved = $section.find('.attack-list.saved');
-					KOC.crestHunt.$ongoing = $section.find('.attack-list.ongoing');
+					KOC.wilderness.$accordion = $section.find('.accordion');
+					KOC.wilderness.$form = $section.find('.attack-form');
+					KOC.wilderness.$saved = $section.find('.attack-list.saved');
+					KOC.wilderness.$ongoing = $section.find('.attack-list.ongoing');
 
-					KOC.crestHunt.$accordion.accordion({collapsible: true, autoHeight: false}).accordion('activate', false);
+					KOC.wilderness.$accordion.accordion({collapsible: true, autoHeight: false}).accordion('activate', false);
 				},
 				'on': function(){
-					console.info('KOC crestHunt on function');
-					if( $.isEmptyObject( KOC.crestHunt.attacks ) ){
+					console.info('KOC wilderness on function');
+					if( $.isEmptyObject( KOC.wilderness.attacks ) ){
 						try{
-							var persistentCrestHuntAttacks = localStorage.getObject('koc_crestHunt_attacks_' + KOC.storeUniqueId);
-							if( persistentCrestHuntAttacks ){
-								KOC.crestHunt.attacks = persistentCrestHuntAttacks;
+							var persistentwildernessAttacks = localStorage.getObject('koc_wilderness_attacks_' + KOC.storeUniqueId);
+							if( persistentwildernessAttacks ){
+								KOC.wilderness.attacks = persistentwildernessAttacks;
 							}
 						} catch(e){
 							console.error(e);
@@ -3281,25 +3293,25 @@ jQuery(document).ready(function(){
 
 					var i, length = KOC.citiesId.length;
 					for( i = 0; i < length; i += 1 ){
-						KOC.crestHunt.listCityAttacks( KOC.citiesId[i] );
+						KOC.wilderness.listCityAttacks( KOC.citiesId[i] );
 					}
 
-					KOC.crestHunt.$saved.find('.charge').toggle( KOC.conf.crestHunt.automatic );
+					KOC.wilderness.$saved.find('.charge').toggle( KOC.conf.wilderness.automatic );
 
-					if( KOC.conf.crestHunt.automatic ){
-						KOC.crestHunt.automaticOn();
+					if( KOC.conf.wilderness.automatic ){
+						KOC.wilderness.automaticOn();
 					}
 				},
 				'off': function(){
-					console.info('KOC crestHunt off function');
+					console.info('KOC wilderness off function');
 
-					KOC.crestHunt.automaticOff();
+					KOC.wilderness.automaticOff();
 				},
 				'automaticOn': function(){
-					console.info('KOC crestHunt automaticOn function');
-					$('#crestHunt-panel-automatic').prop('checked', true);
+					console.info('KOC wilderness automaticOn function');
+					$('#wilderness-panel-automatic').prop('checked', true);
 
-					KOC.crestHunt.$saved.find('.charge').hide(); //hide manual launch button
+					KOC.wilderness.$saved.find('.charge').hide(); //hide manual launch button
 
 					//using closure to have a "copy" of the attack plan
 					var i = 1;
@@ -3308,17 +3320,17 @@ jQuery(document).ready(function(){
 							console.info('launching automatic attack', attack.id, attack.cityId, attack);
 							attack.abort = 0;
 							attack.aborts = [];
-							KOC.crestHunt.launchAttack( attack );
+							KOC.wilderness.launchAttack( attack );
 						}, i * 20000);
 					};
 
 					//launching stored attacks
-					for( var c in KOC.crestHunt.attacks ){
-						if( KOC.crestHunt.attacks.hasOwnProperty(c) ){
-							//console.log(KOC.crestHunt.attacks[c]);
-							for( var a in KOC.crestHunt.attacks[c] ){
-								if( KOC.crestHunt.attacks[c].hasOwnProperty(a) ){
-									schredule(KOC.crestHunt.attacks[c][a], i);
+					for( var c in KOC.wilderness.attacks ){
+						if( KOC.wilderness.attacks.hasOwnProperty(c) ){
+							//console.log(KOC.wilderness.attacks[c]);
+							for( var a in KOC.wilderness.attacks[c] ){
+								if( KOC.wilderness.attacks[c].hasOwnProperty(a) ){
+									schredule(KOC.wilderness.attacks[c][a], i);
 									i += 1;
 								}
 							}
@@ -3326,60 +3338,60 @@ jQuery(document).ready(function(){
 					}
 				},
 				'automaticOff': function(){
-					console.info('KOC crestHunt automaticOff function');
-					$('#crestHunt-panel-automatic').prop('checked', false);
+					console.info('KOC wilderness automaticOff function');
+					$('#wilderness-panel-automatic').prop('checked', false);
 
 					//show all manual launch buttons
-					KOC.crestHunt.$saved.find('.charge').show();
+					KOC.wilderness.$saved.find('.charge').show();
 
 					//hide the on going attacks one
-					KOC.crestHunt.$ongoing.find('tr').each2(function(i, $tr){
-						KOC.crestHunt.$saved.find('tr').filter('[data-city='+ $tr.data('city') +'][data-attack='+ $tr.data('attack') +']').find('.charge').hide();
+					KOC.wilderness.$ongoing.find('tr').each2(function(i, $tr){
+						KOC.wilderness.$saved.find('tr').filter('[data-city='+ $tr.data('city') +'][data-attack='+ $tr.data('attack') +']').find('.charge').hide();
 					});
 				},
 				'storeAttacks': function(){
-					console.info('KOC crestHunt storeAttacks function');
+					console.info('KOC wilderness storeAttacks function');
 					try{
-						localStorage.setObject('koc_crestHunt_attacks_' + KOC.storeUniqueId, KOC.crestHunt.attacks);
+						localStorage.setObject('koc_wilderness_attacks_' + KOC.storeUniqueId, KOC.wilderness.attacks);
 					} catch(e){
 						alert(e);
 					}
 				},
 				'planAttack': function(){
-					console.info('KOC crestHunt planAttack function');
-					var $waves = KOC.crestHunt.$form.find('.wave'),
-						$keep = KOC.crestHunt.$form.find('.keep'),
-						$cityChoice = KOC.crestHunt.$form.find('.city-choice').filter(':checked'),
-						level = $.trim( KOC.crestHunt.$form.find('.targetLevel').val() ),
-						coords = $.trim( KOC.crestHunt.$form.find('textarea').val().replace(/\n/g, ' ') ),
+					console.info('KOC wilderness planAttack function');
+					var $waves = KOC.wilderness.$form.find('.wave'),
+						$keep = KOC.wilderness.$form.find('.keep'),
+						$cityChoice = KOC.wilderness.$form.find('.city-choice').filter(':checked'),
+						level = $.trim( KOC.wilderness.$form.find('.targetLevel').val() ),
+						coords = $.trim( KOC.wilderness.$form.find('textarea').val().replace(/\n/g, ' ') ),
 						errors = [],
 						regexp = /[^0-9, ]/,
-						attack = { 'waves': [], 'lastCoordIndex': 0, 'keep': [] };
+						attack = { 'type': 'attack', 'waves': [], 'lastCoordIndex': 0, 'keep': [] };
 
 					//check form
 						//city
 						if( !$cityChoice.length ){
-							errors.push('Ville de dÃ©part obligatoire.');
+							errors.push('Ville de départ obligatoire.');
 						} else {
 							attack.cityId = $cityChoice.val();
 						}
 
 						//targetLevel
 						if( level == '' ){
-							errors.push('Le niveau des terres sauvages ciblÃ©es est requis.');
+							errors.push('Le niveau des terres sauvages ciblées est requis.');
 						} else if( level == Number.NaN ){
-							errors.push('Le niveau des terres sauvages ciblÃ©es est Ã©ronnÃ©, il doit Ãªtre un chiffre.');
+							errors.push('Le niveau des terres sauvages ciblées est éronné, il doit être un chiffre.');
 						} else if( level < 1 || level > 10 ){
-							errors.push('Le niveau des terres sauvages ciblÃ©es est Ã©ronnÃ©, il doit Ãªtre compris entre 1 et 10.');
+							errors.push('Le niveau des terres sauvages ciblées est éronné, il doit être compris entre 1 et 10.');
 						} else {
 							attack.targetLevel = level;
 						}
 
 						//coords
 						if( coords.length == 0 ){
-							errors.push('Au moins une coordonnÃ©e est requise.');
+							errors.push('Au moins une coordonnée est requise.');
 						} else if( regexp.test( coords ) ){
-							errors.push('Pour les coordonnÃ©es, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnÃ©es.');
+							errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnées.');
 						} else {
 							coords = coords.split(' ');
 							var wrongGPS = false, i, length = coords.length;
@@ -3390,7 +3402,7 @@ jQuery(document).ready(function(){
 								}
 							}
 							if( wrongGPS ){
-								errors.push('Une des coordonnÃ©es est erronÃ©e.');
+								errors.push('Une des coordonnées est erronée.');
 							} else {
 								attack.coords = coords;
 							}
@@ -3430,8 +3442,8 @@ jQuery(document).ready(function(){
 						});
 
 						if( !attack.waves.length ){
-							errors.push('Au moins une unitÃ© de l\'attaque doit Ãªtre spÃ©cifiÃ©e.');
-							errors.push('Au moins une unitÃ© de l\'attaque doit avoir une quantitÃ© valide.');
+							errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
+							errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
 						}
 
 						//keep
@@ -3441,9 +3453,9 @@ jQuery(document).ready(function(){
 								q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
 
 							if( u.length == 0 && q != false && q > 0 ){
-								errors.push('L\'unitÃ© Ã  conserver doit Ãªtre spÃ©cifiÃ©e.');
+								errors.push('L\'unité à conserver doit être spécifiée.');
 							} else if( u.length > 0 && (q == false || q < 1) ){
-								errors.push('L\'unitÃ© Ã  conserver doit avoir une quantitÃ©.');
+								errors.push('L\'unité à conserver doit avoir une quantité.');
 							} else if( u.length > 0 && unitList.length && $.inArray(u, unitList) > -1 ){
 								attack.keep.push({'id': u, 'qty': q});
 							}
@@ -3456,42 +3468,42 @@ jQuery(document).ready(function(){
 					return {'attack': attack, 'errors': errors};
 				},
 				'launchAttack': function( attack ){
-					console.info('KOC crestHunt launchAttack function', attack);
+					console.info('KOC wilderness launchAttack function', attack);
 					attack.lastCoordIndex = 0;
 					attack.abort = 0;
 					attack.aborts = [];
 					attack.marching = [];
-					KOC.crestHunt.refreshOngoingInfo( attack, false );
-					KOC.checkAndLaunchAttack( attack );
+					KOC.wilderness.refreshOngoingInfo( attack, false );
+					KOC.checkAndLaunchAttack( attack, 'wilderness' );
 				},
 				'resetForm': function(){
-					console.info('KOC crestHunt resetForm function');
-					KOC.crestHunt.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
-					KOC.crestHunt.$form.find('.wave').remove();
-					var $keep = KOC.crestHunt.$form.find('.keep');
+					console.info('KOC wilderness resetForm function');
+					KOC.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
+					KOC.wilderness.$form.find('.wave').remove();
+					var $keep = KOC.wilderness.$form.find('.keep');
 					$keep.find('.unit-block').filter(':gt(0)').remove();
 					$keep.find('.unit-choice').find('option').filter(':gt(0)').remove();
-					var $inputs = KOC.crestHunt.$form.find('input');
+					var $inputs = KOC.wilderness.$form.find('input');
 					$inputs.filter('[type="text"], [type="hidden"]').val('');
 					$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
-					KOC.crestHunt.$form.find('select, textarea').val('');
-					KOC.crestHunt.$form.find('.message').empty();
+					KOC.wilderness.$form.find('select, textarea').val('');
+					KOC.wilderness.$form.find('.message').empty();
 				},
 				'deletePlan': function( attackId, cityId, save ){
-					console.info('KOC crestHunt deletePlan function', attackId, cityId, save);
-					delete KOC.crestHunt.attacks[ cityId ][ attackId ];
+					console.info('KOC wilderness deletePlan function', attackId, cityId, save);
+					delete KOC.wilderness.attacks[ cityId ][ attackId ];
 
-					if( save ) KOC.crestHunt.storeAttacks();
+					if( save ) KOC.wilderness.storeAttacks();
 				},
 				'deleteAllPlans': function(){
-					console.info('KOC crestHunt deleteAllPlans function');
-					KOC.crestHunt.attacks = {};
-					KOC.crestHunt.storeAttacks();
+					console.info('KOC wilderness deleteAllPlans function');
+					KOC.wilderness.attacks = {};
+					KOC.wilderness.storeAttacks();
 
-					$('#koc-crestHunt').find('.attack-list').find('ul').empty();
+					$('#koc-wilderness').find('.attack-list').find('ul').empty();
 				},
 				'attackInfo': function( attack, city ){
-					console.info('KOC crestHunt attackInfo function', attack, city);
+					console.info('KOC wilderness attackInfo function', attack, city);
 					if( city == null ){
 						city = KOC.shared.getCityById( attack.cityId );
 					} else if( !city.id ){
@@ -3518,7 +3530,7 @@ jQuery(document).ready(function(){
 						code += '<div class="knight">chevalier&nbsp;:&nbsp;';
 						code += ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].skillPointsApplied +', '+ KOC.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' );
 						code += '</div>';
-						code += '<div class="troops">unitÃ©s&nbsp;:&nbsp;';
+						code += '<div class="troops">unités&nbsp;:&nbsp;';
 
 						var unitsCode = '';
 						unitsLength = wave.units.length;
@@ -3547,13 +3559,13 @@ jQuery(document).ready(function(){
 					return code;
 				},
 				'refreshOngoingInfo': function(attack, noButton){
-					console.info('KOC crestHunt refreshOngoingInfo function');
+					console.info('KOC wilderness refreshOngoingInfo function');
 
-					var $tr = KOC.crestHunt.$ongoing.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']');
+					var $tr = KOC.wilderness.$ongoing.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']');
 					if( $tr.length == 0 ){
 						var city = city = KOC.shared.getCityById( attack.cityId );
 						var code = '<tr data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
-						code += '<td class="action"><span class="ui-icon ui-icon-cancel" title="ArrÃªter au retour des troupes"></span></td>';
+						code += '<td class="action"><span class="ui-icon ui-icon-cancel" title="Arrêter au retour des troupes"></span></td>';
 						code += '<td class="form">' + city.roman + ' ' + city.name + '</td>';
 						code += '<td class="to">TS ' + attack.targetLevel + '</td>';
 						code += '<td class="coords">' + KOC.shared.mapLink( attack.coords ) +'</td>';
@@ -3562,7 +3574,7 @@ jQuery(document).ready(function(){
 
 						$tr = $( code );
 
-						KOC.crestHunt.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').append( $tr );
+						KOC.wilderness.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').append( $tr );
 					}
 
 					//attack stopped
@@ -3570,7 +3582,7 @@ jQuery(document).ready(function(){
 						$tr.find('.stop').removeClass('stop').addClass('trash').attr('title', 'Enlever les informations sur cette attaque.');
 
 						//show the manual launch button
-						KOC.crestHunt.$saved.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']').find('.charge').show();
+						KOC.wilderness.$saved.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']').find('.charge').show();
 					} else {
 						$tr.find('.current').html( KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) + '(' + (attack.lastCoordIndex + 1) + 'e / ' + attack.coords.length + ')' );
 					}
@@ -3583,16 +3595,16 @@ jQuery(document).ready(function(){
 					}
 				},
 				'listCityAttacks': function( cityId ){
-					console.info('KOC crestHunt listCityAttacks function', cityId);
-					var $tbody = KOC.crestHunt.$saved.find('tbody').filter('[data-city='+ cityId +']');
+					console.info('KOC wilderness listCityAttacks function', cityId);
+					var $tbody = KOC.wilderness.$saved.find('tbody').filter('[data-city='+ cityId +']');
 					$tbody.empty();
 
-					var attacks = KOC.crestHunt.attacks[ cityId ],
+					var attacks = KOC.wilderness.attacks[ cityId ],
 						code = '';
 					if( attacks ){
 						for( var a in attacks ){
 							if( attacks.hasOwnProperty(a) ){
-								code += KOC.crestHunt.attackInfo( attacks[a], cityId );
+								code += KOC.wilderness.attackInfo( attacks[a], cityId );
 							}
 						}
 					}
@@ -3601,12 +3613,12 @@ jQuery(document).ready(function(){
 				},
 				//fill the keep <select> options too
 				'addWaves': function( num, cityId ){
-					console.info('KOC crestHunt addWaves function', num, cityId);
+					console.info('KOC wilderness addWaves function', num, cityId);
 					if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
-					var $clone = KOC.crestHunt.$waveSkeleton.clone(), i;
-					$clone.insertBefore( KOC.crestHunt.$form.find('.keep') );
+					var $clone = KOC.wilderness.$waveSkeleton.clone(), i;
+					$clone.insertBefore( KOC.wilderness.$form.find('.keep') );
 					for( i = 1; i < num; i += 1 ){
-						$clone.clone().insertBefore( KOC.crestHunt.$form.find('.keep') );
+						$clone.clone().insertBefore( KOC.wilderness.$form.find('.keep') );
 					}
 
 					var knights = KOC.shared.getAvailableKnights( cityId ),
@@ -3616,7 +3628,7 @@ jQuery(document).ready(function(){
 						choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.skillPointsApplied + ', ' + KOC.shared.getKnightStatText( knight ) +')</option>';
 					}
 
-					KOC.crestHunt.$form.find('.knight-choice').each2(function(i, $kc){
+					KOC.wilderness.$form.find('.knight-choice').each2(function(i, $kc){
 						$kc.append( choices );
 					});
 
@@ -3625,12 +3637,12 @@ jQuery(document).ready(function(){
 					for( var u in units ){
 						if( units.hasOwnProperty(u) ){
 							var name = window.unitcost[u][0];
-							if( name == 'UnitÃ© de Ravitaillement' ) name = 'Ravitailleur';
+							if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
 							choices += '<option value="'+ u +'">'+ name + ' ('+ KOC.shared.format(units[u]) +')</option>';
 						}
 					}
 
-					KOC.crestHunt.$form.find('.unit-choice').each2(function(i, $uc){
+					KOC.wilderness.$form.find('.unit-choice').each2(function(i, $uc){
 						$uc.append( choices );
 					});
 				},
@@ -3651,7 +3663,7 @@ jQuery(document).ready(function(){
 					console.info('KOC notepad confPanel function');
 					var code = '<h3>Bloc-note</h3>';
 					code += '<div>';
-					code += KOC.shared.generateButton('notepad', 'resetPositionAndDimension', 'Remise Ã  zÃ©ro de la position et des dimensions');
+					code += KOC.shared.generateButton('notepad', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions');
 					code += KOC.shared.generateButton('notepad', 'clean', 'Supprimer les notes');
 					code += '</div>';
 
@@ -3659,7 +3671,7 @@ jQuery(document).ready(function(){
 				},
 				'on': function(){
 					console.info('KOC notepad on function');
-					$head.append( $('<style id="koc-notepad-css">').text(kocNotepadCss) );
+					$head.append( $('<style id="koc-notepad-css">').html(kocNotepadCss) );
 
 					if( $.isEmptyObject( KOC.notepad.notes ) ){
 						try{
@@ -3677,7 +3689,7 @@ jQuery(document).ready(function(){
 					var code = '<h3>Bloc Note</h3><div class="wrap">';
 					code += '<label for="koc-notepad-note-name">Nom de la note&nbsp;:&nbsp;</label>';
 					code += '<input type="text" id="koc-notepad-note-name" />';
-					code += '<label for="koc-notepad-note-text"><span class="charsLeft">1000 caractÃ¨res restant</span>Contenu&nbsp;:&nbsp;</label>';
+					code += '<label for="koc-notepad-note-text"><span class="charsLeft">1000 caractères restant</span>Contenu&nbsp;:&nbsp;</label>';
 					code += '<textarea id="koc-notepad-note-text"></textarea>';
 					code += '<br /><button class="save">Enregistrer</button>';
 					code += '<button class="cancel">Annuler</button>';
@@ -3767,9 +3779,9 @@ jQuery(document).ready(function(){
 							var text = KOC.notepad.$textarea.val(),
 								l = 1000 - parseFloat(text.length);
 							if( l < 2 ){
-								KOC.notepad.$charsLeft.text(l + ' caractÃ¨re restant');
+								KOC.notepad.$charsLeft.html(l + ' caractère restant');
 							} else {
-								KOC.notepad.$charsLeft.text(l + ' caractÃ¨res restant')
+								KOC.notepad.$charsLeft.html(l + ' caractères restant')
 							}
 					}, false);
 
@@ -3777,7 +3789,7 @@ jQuery(document).ready(function(){
 						KOC.$notepad.show();
 					}
 
-					var $kocNotepadToggle = $('<button id="koc-notepad-toggle">').text('Bloc Note');
+					var $kocNotepadToggle = $('<button id="koc-notepad-toggle">').html('Bloc Note');
 					$kocNotepadToggle.click(function(){
 						console.info('$kocNotepadToggle click');
 						KOC.$notepad.toggle();
@@ -3846,17 +3858,17 @@ jQuery(document).ready(function(){
 				'stored': ['search'],
 				'search': {},/*{by city, tiles}*/
 				'currentSearch': [],
-				'loadTypeLabels': { 'C': 'citÃ©s', 'CB': 'Camps Barbares', 'TS': 'Terres Sauvages', 'FS': 'ForÃªts Sombres' },
+				'loadTypeLabels': { 'C': 'cités', 'CB': 'Camps Barbares', 'TS': 'Terres Sauvages', 'FS': 'Forêts Sombres' },
 				'confPanel': function( $section ){
 					console.info('KOC map confPanel function');
 					var code = '<h3>Carte</h3>';
 					code += '<div>';
-					code += KOC.shared.generateButton('map', 'cleanSearch', 'Supprimer toutes les recherches gÃ©ographiques');
+					code += KOC.shared.generateButton('map', 'cleanSearch', 'Supprimer toutes les recherches géographiques');
 
 					for( var c in KOC.cities ){
 						if( KOC.cities.hasOwnProperty(c) ){
 							var city = KOC.cities[c];
-							code += KOC.shared.generateButton('map', 'cleanSearchForCity', 'Supprimer les recherches gÃ©ographiques de ' + city.roman + ' ' +city.name, city.id).replace(/<\/p>/, '');
+							code += KOC.shared.generateButton('map', 'cleanSearchForCity', 'Supprimer les recherches géographiques de ' + city.roman + ' ' +city.name, city.id).replace(/<\/p>/, '');
 						}
 					}
 					code += '</p></div>';
@@ -3896,10 +3908,10 @@ jQuery(document).ready(function(){
 					code += '<input type="text" id="koc-map-range-max" class="coord" />';
 					code += '<button class="go">Rechercher</button>';
 					code += '<button class="cancel">Annuler</button>';
-					code += '<br /><label for="koc-map-load-saved">Ou charger une recherche sauvegardÃ©e&nbsp;:&nbsp;</label>';
+					code += '<br /><label for="koc-map-load-saved">Ou charger une recherche sauvegardée&nbsp;:&nbsp;</label>';
 					code += '<br /><select id="koc-map-load-saved"><option value="">Choisir</option>'+ loadOptions +'</select>';
 					code += '</fieldset><fieldset class="save"><legend>Sauvegarde</legend>';
-					code += '<label for="koc-map-city-save">Sauvegarder la recherche dans la citÃ©&nbsp;:&nbsp;</label>';
+					code += '<label for="koc-map-city-save">Sauvegarder la recherche dans la cité&nbsp;:&nbsp;</label>';
 					code += '<select id="koc-map-city-save"><option value="">Choisir</option>';
 
 					for( var c in KOC.cities ){
@@ -3910,14 +3922,14 @@ jQuery(document).ready(function(){
 					}
 
 					code += '</select><button>Sauvegarder</button></fieldset>';
-					code += '<fieldset class="filter"><legend>Filter les rÃ©sultats</legend>';
-					code += '<div class="category"><label for="koc-map-category">CatÃ©gorie&nbsp;:&nbsp;</label>';
+					code += '<fieldset class="filter"><legend>Filter les résultats</legend>';
+					code += '<div class="category"><label for="koc-map-category">Catégorie&nbsp;:&nbsp;</label>';
 					code += '<select id="koc-map-category">';
 					code += '<option value="">Choisir</option>';
-					code += '<option value="C">CitÃ©s</option>';
+					code += '<option value="C">Cités</option>';
 					code += '<option value="CB">Camps Barbares</option>';
 					code += '<option value="TS">Terres Sauvages</option>';
-					code += '<option value="FS">ForÃªts Sombres</option>';
+					code += '<option value="FS">Forêts Sombres</option>';
 					code += '</select></div>';
 					code += '<div class="level"><label for="koc-map-level-min">Niveau entre&nbsp;:&nbsp;</label>';
 					code += '<input type="text" id="koc-map-level-min" class="coord" />';
@@ -3929,7 +3941,7 @@ jQuery(document).ready(function(){
 					code += '<input type="checkbox" id="koc-map-type-lake" value="11" />';
 					code += '<label for="koc-map-type-lake">Lac</label>';
 					code += '<input type="checkbox" id="koc-map-type-forest" value="20" />';
-					code += '<label for="koc-map-type-forest">ForÃªt</label>';
+					code += '<label for="koc-map-type-forest">Forêt</label>';
 					code += '<input type="checkbox" id="koc-map-type-hill" value="30" />';
 					code += '<label for="koc-map-type-hill">Colline</label>';
 					code += '<input type="checkbox" id="koc-map-type-mountain" value="40" />';
@@ -3969,30 +3981,30 @@ jQuery(document).ready(function(){
 								errors = [];
 
 							if( coordX == '' || coordY == '' ){
-								errors.push('Veuillez spÃ©cifier une coordonnÃ©e.');
+								errors.push('Veuillez spécifier une coordonnée.');
 							} else {
 								coordX = parseInt(coordX, 10);
 								coordY = parseInt(coordY, 10);
 								if( coordX != Number.NaN && coordY != Number.NaN ){
 									if( coordX < 0 || coordX > 749 || coordY < 0 || coordY > 749 ){
-										errors.push('CoordonnÃ©e invalide.');
+										errors.push('Coordonnée invalide.');
 									}
 								} else {
-									errors.push('Veuillez spÃ©cifier une coordonnÃ©e.');
+									errors.push('Veuillez spécifier une coordonnée.');
 								}
 							}
 
 							if( rangeMin == '' && rangeMax == '' ){
-								errors.push('Veuillez spÃ©cifier une distance.');
+								errors.push('Veuillez spécifier une distance.');
 							} else {
 								rangeMin = parseInt(rangeMin, 10);
 								rangeMax = parseInt(rangeMax, 10);
 								if( rangeMin != Number.NaN && rangeMax != Number.NaN ){
 									if( rangeMin < 1 || rangeMax < 1 || rangeMin > rangeMax ){
-										errors.push('Distance invalide. Minimum 1 de distance et distance minimum infÃ©rieure ou Ã©gale Ã  la distance max.');
+										errors.push('Distance invalide. Minimum 1 de distance et distance minimum inférieure ou égale à la distance max.');
 									}
 								} else {
-									errors.push('Veuillez spÃ©cifier une distance.');
+									errors.push('Veuillez spécifier une distance.');
 								}
 							}
 
@@ -4031,7 +4043,7 @@ jQuery(document).ready(function(){
 								}
 								$('#koc-map-load-saved').html( loadOptions );
 							} else {
-								alert('Vous devez spÃ©cifier une ville pour sauvegarder cette recherche.');
+								alert('Vous devez spécifier une ville pour sauvegarder cette recherche.');
 							}
 						})
 						.on('change', '#koc-map-load-saved', function(){
@@ -4131,7 +4143,7 @@ jQuery(document).ready(function(){
 								bottomRangeMax = coordY + rangeMax,
 								bottomRangeMin = coordY + rangeMin;
 
-							var tiles = [];
+							var tiles = { city: [], barbarian: [], darkForest: [], wilderness: [] };
 							//merge results with previous deferred partialExplore results
 							if( KOC.map.currentSearch.tiles ){
 								tiles = KOC.map.currentSearch.tiles;
@@ -4147,23 +4159,23 @@ jQuery(document).ready(function(){
 												if( tile.tileCityId != null ){
 													var user = result.userInfo['u'+ tile.tileUserId];
 													var name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
-													tiles.push({ 'category': 'C', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': KOC.shared.format(user.m), 'player': name, 'city': tile.cityName, 'misted': 0 });
+													tiles.city.push({ 'category': 'C', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': KOC.shared.format(user.m), 'player': name, 'city': tile.cityName, 'misted': 0 });
 												} else {
 										//barbarian
-													tiles.push({ 'category': 'CB', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
+													tiles.barbarian.push({ 'category': 'CB', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
 												}
 											} else if( tile.tileType == 53 ){
-												tiles.push({ 'category': 'C', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': '?', 'player': '?', 'city': '?', 'misted': 1 });
+												tiles.city.push({ 'category': 'C', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': '?', 'player': '?', 'city': '?', 'misted': 1 });
 										//dark forest
 											} else if( tile.tileType == 54 ){
-												tiles.push({ 'category': 'FS', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
+												tiles.darkForest.push({ 'category': 'FS', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
 										//wilderness (swamp tileType = 0)
 											} else if( tile.tileType >= 10 && tile.tileType <= 50 ){
 												var label = '';
 
 												if( tile.tileType == 10 ) label = 'Prairie';
 												else if( tile.tileType == 11 ) label = 'Lac';
-												else if( tile.tileType == 20 ) label = 'ForÃªt';
+												else if( tile.tileType == 20 ) label = 'Forêt';
 												else if( tile.tileType == 30 ) label = 'Colline';
 												else if( tile.tileType == 40 ) label = 'Montagne';
 												else if( tile.tileType == 50 ) label = 'Plaine';
@@ -4183,7 +4195,7 @@ jQuery(document).ready(function(){
 													}
 												}
 
-												tiles.push({ 'category': 'TS', 'range': range, 'type': tile.tileType, 'label': label, 'x': tile.xCoord, 'y': tile.yCoord, 'might': might, 'player': name, 'level': tile.tileLevel });
+												tiles.wilderness.push({ 'category': 'TS', 'range': range, 'type': tile.tileType, 'label': label, 'x': tile.xCoord, 'y': tile.yCoord, 'might': might, 'player': name, 'level': tile.tileLevel });
 											}
 									}
 								}
@@ -4213,7 +4225,7 @@ jQuery(document).ready(function(){
 								loop = false;
 							}
 
-							KOC.map.$status.html('Recherche des coordonnÃ©es ' + start + ' Ã  ' + end + ' sur ' + length + '.');
+							KOC.map.$status.html('Recherche des coordonnées ' + start + ' à ' + end + ' sur ' + length + '.');
 
 							if( start == end ) end += 1; //avoid the start = end case with the slice which need a difference
 							params.blocks = blocks.slice(start, end).join(',');
@@ -4286,7 +4298,7 @@ jQuery(document).ready(function(){
 							KOC.map.$status.html('Recherche finie.');
 						})
 						.fail(function(){
-							KOC.map.$status.html('Recherche Ã©chouÃ©e avant la fin.');
+							KOC.map.$status.html('Recherche échouée avant la fin.');
 						})
 						.always(function(){
 							KOC.map.$save.show();
@@ -4300,24 +4312,24 @@ jQuery(document).ready(function(){
 						category = KOC.map.$category.val(),
 						code = '<table><thead><tr>',
 						coords = [],
-						i, tile,
-						length = tiles.length;
+						i, tile, lenght;
 					switch( category ){
 						case 'C' : //cities
+							length = tiles.city.length;
 							code += '<th>Distance</th>';
-							code += '<th>CoordonnÃ©e</th>';
+							code += '<th>Coordonnée</th>';
 							code += '<th>Nom</th>';
 							code += '<th>Joueur</th>';
 							code += '<th>Puissance</th>';
 							code += '<th>Sous brumes</th>';
 							code += '</tr></thead><tbody class="'+ category +'">';
 							for( i = 0; i < length; i += 1 ){
-								tile = tiles[i];
+								tile = tiles.city[i];
 								if( tile.category == category ){
 									coords.push( tile.x + ',' + tile.y );
-									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'">';
+									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.city +'</td>';
 									code += '<td>'+ tile.player +'</td>';
 									code += '<td>'+ tile.might +'</td>';
@@ -4327,54 +4339,57 @@ jQuery(document).ready(function(){
 							}
 							break;
 						case 'CB' : //barbarian
+							length = tiles.barbarian.length;
 							code += '<th>Distance</th>';
-							code += '<th>CoordonnÃ©e</th>';
+							code += '<th>Coordonnée</th>';
 							code += '<th>Niveau</th>';
 							code += '</tr></thead><tbody class="'+ category +'">';
 							for( i = 0; i < length; i += 1 ){
-								tile = tiles[i];
+								tile = tiles.barbarian[i];
 								if( tile.category == category ){
 									coords.push( tile.x + ',' + tile.y );
-									code += '<tr class="level'+ tile.level +'">';
+									code += '<tr class="level'+ tile.level +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.level +'</td>';
 									code += '</tr>';
 								}
 							}
 							break;
 						case 'FS' : //dark forests
+							length = tiles.darkForest.length;
 							code += '<th>Distance</th>';
-							code += '<th>CoordonnÃ©e</th>';
+							code += '<th>Coordonnée</th>';
 							code += '<th>Niveau</th>';
 							code += '</tr></thead><tbody class="'+ category +'">';
 							for( i = 0; i < length; i += 1 ){
-								tile = tiles[i];
+								tile = tiles.darkForest[i];
 								if( tile.category == category ){
 									coords.push( tile.x + ',' + tile.y );
-									code += '<tr class="level'+ tile.level +'">';
+									code += '<tr class="level'+ tile.level +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.level +'</td>';
 									code += '</tr>';
 								}
 							}
 							break;
 						case 'TS' : //wilderness
+							length = tiles.wilderness.length;
 							code += '<th>Distance</th>';
-							code += '<th>CoordonnÃ©e</th>';
+							code += '<th>Coordonnée</th>';
 							code += '<th>Type</th>';
 							code += '<th>Niveau</th>';
 							code += '<th>Joueur</th>';
 							code += '<th>Puissance</th>';
 							code += '</tr></thead><tbody class="'+ category +'">';
 							for( i = 0; i < length; i += 1 ){
-								tile = tiles[i];
+								tile = tiles.wilderness[i];
 								if( tile.category == category ){
 									coords.push( tile.x + ',' + tile.y );
-									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'">';
+									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td data-coord="'+ tile.x + ',' + tile.y +'">'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.label +'</td>';
 									code += '<td>'+ tile.level +'</td>';
 									code += '<td>'+ tile.player +'</td>';
@@ -4449,14 +4464,21 @@ jQuery(document).ready(function(){
 						});
 					}
 
-					if( classes.length ) $trs.hide().filter( classes.join(',') ).show();
-					else $trs.show();
+					//inject style
+					$head.find('#koc-map-search-result-filter').remove();
+					if( classes.length ){
+						var rule = '#koc-map .search-result table tr { display: none; }';
+						rule += '#koc-map .search-result table ' + classes.join(', #koc-map .search-result table ') + '{ display: table-row; }';
+
+						$head.append( $('<style id="koc-map-search-result-filter">').html( rule ) );
+					}
 
 					var list = [];
 					$trs.filter(':visible').each2(function(i, $tr){
-						var coord = $tr.find('td').eq(1).data('coord');
+						var coord = $tr.data('coord');
 						if( coord ) list.push(coord);
 					});
+
 					$('#coordsList').html( list.join("\n") );
 				},
 			};
@@ -4476,7 +4498,7 @@ jQuery(document).ready(function(){
 					code += '<div>';
 					code += KOC.shared.generateCheckbox('formation', 'active', 'Activer le module', KOC.conf.formation.active);
 					code += KOC.shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOC.conf.formation.automatic);
-					code += KOC.shared.generateButton('formation', 'deleteAllRules', 'Supprimer toutes les rÃ¨gles de formation enregistrÃ©es');
+					code += KOC.shared.generateButton('formation', 'deleteAllRules', 'Supprimer toutes les règles de formation enregistrées');
 					code += '</div>';
 
 					$section.append( code );
@@ -4513,14 +4535,14 @@ jQuery(document).ready(function(){
 						form += city.roman +' '+ city.name +'</legend><p>';
 
 						//choose unit (check building requirements and tech requirements)
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-unit">UnitÃ©s&nbsp;:&nbsp;</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-unit">Unités&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-unit" class="train-unit" name="unit" autocomplete="off">';
 							form += '<option value=""></option>';
 
 							for( u in units ){
 								if( units.hasOwnProperty(u) ){
 									var name = window.unitcost[u][0];
-									if( name == 'UnitÃ© de Ravitaillement' ) name = 'Ravitailleur';
+									if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
 
 									form += '<option value="'+ u +'">'+ name + ' ('+ (availableUnits.hasOwnProperty(u) ? KOC.shared.format(availableUnits[u]) : '0' ) +')</option>';
 								}
@@ -4538,8 +4560,8 @@ jQuery(document).ready(function(){
 							form += '<br /><label for="koc-formation-auto-city-'+ cityId +'-speed">Vitesse&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-speed" name="speed" class="train-speed" autocomplete="off">';
 							form += '<option value="0">Normal</option>';
-							form += '<option value="1">5-15% (coÃ»t x2)</option>';
-							form += '<option value="2">10-25% (coÃ»t x4)</option>';
+							form += '<option value="1">5-15% (coût x2)</option>';
+							form += '<option value="2">10-25% (coût x4)</option>';
 							form += '</select>';
 
 						//choose boost
@@ -4566,14 +4588,14 @@ jQuery(document).ready(function(){
 
 						//nice to have
 							/*
-							form += '<label>DurÃ©e</label>';
+							form += '<label>Durée</label>';
 							form += '<output></output>';
 							*/
 						form += '</p>';
 
 						//defenses
 							form += '<p>';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-defense">DÃ©fenses&nbsp;:&nbsp;</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-defense">Défenses&nbsp;:&nbsp;</label>';
 							form += '<select id="koc-formation-auto-city-'+ cityId +'-defense" name="defense" class="train-defense" autocomplete="off">';
 							form += '<option value=""></option>';
 							for( d in defenses ){
@@ -4583,7 +4605,7 @@ jQuery(document).ready(function(){
 								}
 							}
 							form += '</select>';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-qty">QuantitÃ©&nbsp;:&nbsp;</label>';
+							form += '<label for="koc-formation-auto-city-'+ cityId +'-qty">Quantité&nbsp;:&nbsp;</label>';
 							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-quantity" name="quantity" class="train-quantity" autocomplete="off" />';
 							form += '<button class="train-defense-max">max</button>';
 							form += '</p>';
@@ -4626,14 +4648,14 @@ jQuery(document).ready(function(){
 					onGoing += '</div>';
 
 					var help = '<div id="koc-formation-help" class="help" title="Aide formation"><ul>';
-					/*help += '<li>Les terres sauvages occupÃ©es ne seront pas attaquÃ©es (vÃ©rification pour chaque coordonnÃ©e Ã  chaque attaque)</li>';
-					help += '<li>Une attaque sera annulÃ©e au bout de 10 erreurs consÃ©cutives <br />(coordonnÃ©e occupÃ©e, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
-					help += '<li>Les attaques sauvegardÃ©es peuvent Ãªtre lancÃ©es manuellement ou via le mode automatique</li>';
-					help += '<li>Pour le formulaire les erreurs seront listÃ©es au-dessus</li>';
-					help += '<li>Pour les attaques sauvegardÃ©es les erreurs seront listÃ©es en-dessous</li>';
-					help += '<li>Si une vague est en erreur les vagues prÃ©cÃ©dentes seront rappelÃ©es (sous rÃ©serves des limitations de temps de marche restant)</li>';
-					help += '<li>Lors du dÃ©marrage du mode automatique, 20 secondes s\'Ã©coulent entre chaque lancement de plan d\'attaque sauvegardÃ©</li>';
-					help += '<li>Dix secondes s\'Ã©coulent entre chaque lancement de vague</li>';*/
+					/*help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
+					help += '<li>Une attaque sera annulée au bout de 10 erreurs consécutives <br />(coordonnée occupée, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
+					help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique</li>';
+					help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
+					help += '<li>Pour les attaques sauvegardées les erreurs seront listées en-dessous</li>';
+					help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant)</li>';
+					help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
+					help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';*/
 					help += '</ul></div>';
 
 					$section.append( form + onGoing + help )
@@ -4653,7 +4675,7 @@ jQuery(document).ready(function(){
 									KOC.formation.stopAutoFormation( cityId );
 								}
 							} else {
-								alert('Le module n\'est pas actif. Les lancements de formations automatiques sont bloquÃ©s.');
+								alert('Le module n\'est pas actif. Les lancements de formations automatiques sont bloqués.');
 							}
 						})
 						//save auto formation
@@ -4788,7 +4810,7 @@ jQuery(document).ready(function(){
 						hasTroop = false;
 						hasDef = false;
 						$city = $fieldset.find('.train-city');
-						cityLabel = $.trim( $fieldset.find('legend').text() );
+						cityLabel = $.trim( $fieldset.find('legend').html() );
 						//city
 						rule.city = $city.val();
 						rule.active = $city.prop('checked') ? 1 : 0;
@@ -4806,7 +4828,7 @@ jQuery(document).ready(function(){
 								rule.min = min;
 								rule.max = max;
 							} else {
-								errors.push('QuantitÃ©s de troupes invalide pour '+ cityLabel +'.');
+								errors.push('Quantités de troupes invalide pour '+ cityLabel +'.');
 								nbErr += 1;
 							}
 
@@ -4838,12 +4860,12 @@ jQuery(document).ready(function(){
 								rule.keep[ $res.attr('name') ] = res;
 							} else {
 								nbErr += 1;
-								errors.push('Au moins une des quantitÃ© de ressources Ã  conserver est invalide pour '+ cityLabel +'.');
+								errors.push('Au moins une des quantité de ressources à conserver est invalide pour '+ cityLabel +'.');
 							}
 						});
 
 						if( !hasTroop && !hasDef ){
-							errors.push('RÃ¨gle invalide pour '+ cityLabel +', non prise en compte.');
+							errors.push('Règle invalide pour '+ cityLabel +', non prise en compte.');
 						} else if( nbErr == 0 ){
 							rules[ rule.city ] = rule;
 						}
@@ -5354,29 +5376,29 @@ jQuery(document).ready(function(){
 					var $section = KOC.$confPanel.find('#koc-transport').html('');
 
 					//envoie manuel
-						//ville expÃ©ditrice
+						//ville expéditrice
 						//ville destinataire
-							//une par dÃ©faut
+							//une par défaut
 							//plusieurs possibles (*)
 								//un ou plusieurs envoies
-								//-> rÃ¨gle automatique temporaire
-						//ou coordonnÃ©es
+								//-> règle automatique temporaire
+						//ou coordonnées
 							//manuelle
 							//via liste
 							//plusieurs possibles (*)
 						//choix troupes
-							//une par dÃ©faut
+							//une par défaut
 							//plusieurs possible
-						//-> capacitÃ© totale
+						//-> capacité totale
 						//choix des ressources
-							//une par dÃ©faut
+							//une par défaut
 							//plusieurs possible
-						//temps du trajet (recalculÃ© Ã  chaque changement de troupe)
+						//temps du trajet (recalculé à chaque changement de troupe)
 						//bouton envoie
 					//envoie automatique
-						//garder x minerais dans la ville 1, le reste va Ã  la ville 2
-						//approvisionnement ville x Ã  partri de ville y si ressources < z
-						//activation / dÃ©sactivation par ville
+						//garder x minerais dans la ville 1, le reste va à la ville 2
+						//approvisionnement ville x à partri de ville y si ressources < z
+						//activation / désactivation par ville
 				},
 				'on': function(){
 					console.info('KOC transport on function');
@@ -5440,8 +5462,8 @@ jQuery(document).ready(function(){
 					var code = '<h3>Tournoi de Gloire</h3>';
 					code += '<div>';
 					code += KOC.shared.generateCheckbox('gloryTournament', 'active', 'Activer le module', KOC.conf.gloryTournament.active);
-					code += KOC.shared.generateCheckbox('gloryTournament', 'automatic', 'Lancer les Ã©clairages automatiques', KOC.conf.gloryTournament.automatic);
-					code += KOC.shared.generateButton('gloryTournament', 'deleteRule', 'Supprimer la rÃ¨gle enregistrÃ©e');
+					code += KOC.shared.generateCheckbox('gloryTournament', 'automatic', 'Lancer les éclairages automatiques', KOC.conf.gloryTournament.automatic);
+					code += KOC.shared.generateButton('gloryTournament', 'deleteRule', 'Supprimer la règle enregistrée');
 					code += '</div>';
 
 					$section.append( code );
@@ -5452,8 +5474,8 @@ jQuery(document).ready(function(){
 
 					var form = '<h3><span class="ui-icon ui-icon-info"></span>';
 					form += '<span><input type="checkbox" id="gloryTournament-panel-automatic" '+ (KOC.conf.gloryTournament.automatic ? 'checked' : '') +' autocomplete="off" />';
-					form += '<label for="gloryTournament-panel-automatic">Ã©clairages automatiques</label></span>';
-					form += 'Configurer un Ã©clairage</h3>';
+					form += '<label for="gloryTournament-panel-automatic">éclairages automatiques</label></span>';
+					form += 'Configurer un éclairage</h3>';
 					form += '<div class="scout-form">';
 					form += '<ul class="message"></ul>';
 					form += '<fieldset><div><label>Envoyer depuis&nbsp;:&nbsp;</label><br />';
@@ -5468,18 +5490,18 @@ jQuery(document).ready(function(){
 
 					form += '</div><div>';
 					var c = ( KOC.gloryTournament.rule.hasOwnProperty('coord') ? KOC.gloryTournament.rule.coord : '' );
-					form += '<label>CoordonnÃ©e&nbsp;:&nbsp;</label><input type="text" name="coord" id="gloryTournament-coord" value="'+ c +'" autocomplete="off" />';
+					form += '<label>Coordonnée&nbsp;:&nbsp;</label><input type="text" name="coord" id="gloryTournament-coord" value="'+ c +'" autocomplete="off" />';
 					form += '</div>';
 					form += '<button class="save">Sauvegarder</button>';
 					form += '<button class="reset">Annuler</button>';
 					form += '</fieldset></div>';
 
 					var help = '<div id="koc-gloryTournament-help" class="help" title="Aide Tournoi de Gloire"><ul>';
-					help += '<li>Envoie 2 Ã©claireurs en Ã©clairage sur une coordonnÃ©e donnÃ©e Ã  partir des villes cochÃ©es</li>';
-					help += '<li>Utilise la rÃ¨gle dÃ©finie Ã  chaque tentative</li>';
-					help += '<li>Ne vÃ©rifie pas si un boost d\'attaque est actif (gardien, objet, bonus, ...)</li>';
+					help += '<li>Envoie 2 éclaireurs en éclairage sur une coordonnée donnée à partir des villes cochées</li>';
+					help += '<li>Utilise la règle définie à chaque tentative</li>';
+					help += '<li>Ne vérifie pas si un boost d\'attaque est actif (gardien, objet, bonus, ...)</li>';
 					help += '<li>Utilise tous les slots des points de ralliements disponibles</li>';
-					help += '<li>Les Ã©clairages sont actifs quand le module et les Ã©clairages automatiques sont actifs (cochÃ©s)</li>';
+					help += '<li>Les éclairages sont actifs quand le module et les éclairages automatiques sont actifs (cochés)</li>';
 					help += '</ul></div>';
 
 					$section.append( form + help )
@@ -5555,7 +5577,7 @@ jQuery(document).ready(function(){
 					KOC.gloryTournament.rule = {};
 					KOC.gloryTournament.storeRule();
 
-					$('#koc-crestHunt').find('.attack-list').find('ul').empty();
+					$('#koc-wilderness').find('.attack-list').find('ul').empty();
 				},
 				'planScout': function(){
 					console.info('KOC gloryTournament planScout function');
@@ -5568,20 +5590,20 @@ jQuery(document).ready(function(){
 					//check form
 						//city
 						if( !$cities.length ){
-							errors.push('Au moins une ville de dÃ©part obligatoire.');
+							errors.push('Au moins une ville de départ obligatoire.');
 						} else {
 							rule.cities = $cities.map(function(){ return this.value; }).get();
 						}
 
 						//coord
 						if( coord.length == 0 ){
-							errors.push('CoordonnÃ©e requise.');
+							errors.push('Coordonnée requise.');
 						} else if( regexp.test( coord ) ){
-							errors.push('Pour la coordonnÃ©e, veuillez respecter le format x,y.');
+							errors.push('Pour la coordonnée, veuillez respecter le format x,y.');
 						} else {
 							var c = coord.split(',');
 							if( c[0] < 0 || c[0] > 750 || c[0] < 0 || c[0] > 750 ){
-								errors.push('CoordonnÃ©e erronÃ©e.');
+								errors.push('Coordonnée erronée.');
 							} else {
 								rule.coord = coord;
 							}
@@ -5761,7 +5783,7 @@ jQuery(document).ready(function(){
 								console.log('error', result);
 								if( result.hasOwnProperty('user_action') && result.user_action == 'marchCaptcha' ){
 									$('#gloryTournament-panel-automatic').prop('checked', false).change();
-									alert('Kabam capcha ! Eclairages stoppÃ©s en attendant ! Faite un Ã©clairage manuel en validant le capcha puis relancer.');
+									alert('Kabam capcha ! Eclairages stoppés en attendant ! Faite un éclairage manuel en validant le capcha puis relancer.');
 									captcha = true;
 								}
 							}
@@ -5794,7 +5816,7 @@ jQuery(document).ready(function(){
 
 					var wParams = jQuery.extend(true, {}, window.g_ajaxparams);
 					if( wParams == null ){
-						alert('ParamÃ¨tres ajax manquant. RaffraÃ®chissez la page.');
+						alert('Paramètres ajax manquant. Raffraîchissez la page.');
 						return;
 					}
 					wParams.type = 3; //MARCH_TYPE_SCOUT
@@ -5827,19 +5849,20 @@ jQuery(document).ready(function(){
 			};*/
 
 	/* CHECK AND LAUNCH ATTACK */
-		KOC.checkAndLaunchAttack = function( attack ){
+		KOC.checkAndLaunchAttack = function( attack, mod ){
 			console.info('KOC checkAndLaunchAttack function', attack.id, attack.cityId, attack);
-			if( !KOC.conf.crestHunt.active ){
+			var check = KOC.conf[ mod ] && KOC.conf[ mod ].hasOwnProperty('active') && KOC.conf[ mod ].active;
+			if( !check ){
 				return false;
 			}
 
 			if( !attack.hasOwnProperty('abort') ) attack.abort = 0;
 
-			var $tr = KOC.crestHunt.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').find('tr').filter('[data-attack='+ attack.id +']');
+			var $tr = KOC[mod].$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').find('tr').filter('[data-attack='+ attack.id +']');
 			if( $tr.length && $tr.data('stop') ){
-				attack.aborts.push('Attaque stoppÃ©e sur demande.');
-				KOC.crestHunt.refreshOngoingInfo(attack, true);
-				KOC.crestHunt.$saved
+				attack.aborts.push('Attaque stoppée sur demande.');
+				KOC[mod].refreshOngoingInfo(attack, true);
+				KOC[mod].$saved
 					.find('tbody').filter('[data-city='+ attack.cityId +']')
 					.find('tr').filter('[data-attack='+ attack.id +']')
 					.find('.charge').show();
@@ -5847,8 +5870,8 @@ jQuery(document).ready(function(){
 			}
 
 			if( attack.abort > 10 ){
-				attack.aborts.push('Trop d\'erreurs dÃ©tectÃ©es. Attaque stoppÃ©e.');
-				KOC.crestHunt.refreshOngoingInfo(attack, true);
+				attack.aborts.push('Trop d\'erreurs détectées. Attaque stoppée.');
+				KOC[mod].refreshOngoingInfo(attack, true);
 				return false;
 			}
 
@@ -5860,11 +5883,11 @@ jQuery(document).ready(function(){
 
 			//attacks loop only if in automatic mode
 			if( attack.lastCoordIndex >= attack.coords.length ){
-				if( KOC.conf.crestHunt.automatic && KOC.crestHunt.attacks[ attack.cityId ] && KOC.crestHunt.attacks[ attack.cityId ][ attack.id ]){
+				if( KOC.conf[mod].automatic && KOC[mod].attacks[ attack.cityId ] && KOC[mod].attacks[ attack.cityId ][ attack.id ]){
 					attack.lastCoordIndex = 0;
 				} else {
 					attack.aborts.push('Attaque finie');
-					KOC.crestHunt.refreshOngoingInfo(attack, true);
+					KOC[mod].refreshOngoingInfo(attack, true);
 					return;
 				}
 			}
@@ -6030,12 +6053,12 @@ jQuery(document).ready(function(){
 								//console.log('fetchMapTiles info', info);
 								var type = parseInt(info.tileType, 10);
 								if( type <= 0 || type > 50 ){
-									attack.aborts.push('CoordonnÃ©es '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) n\'est pas une terre sauvage.');
+									attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) n\'est pas une terre sauvage.');
 									coordIndex += 1;
 									return dfd.pipe( checkCoord(dfd) );
 
 								} else if( info.tileUserId != null || info.tileCityId != null ){ //"0" -> under mists, "xxx" -> no mists
-									attack.aborts.push( KOC.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) occupÃ©es.');
+									attack.aborts.push( KOC.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) occupées.');
 									coordIndex += 1;
 									return dfd.pipe( checkCoord(dfd) );
 
@@ -6052,7 +6075,7 @@ jQuery(document).ready(function(){
 
 								if( coordIndex >= attack.coords.length ){
 									attack.lastCoordIndex = coordIndex - 1;
-									attack.aborts.push('Aucune coordonnÃ©e validÃ©e pour l\'attaque.');
+									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 									return dfd.reject();
 								}
 
@@ -6070,7 +6093,7 @@ jQuery(document).ready(function(){
 
 								if( coordIndex >= attack.coords.length ){
 									attack.lastCoordIndex = coordIndex - 1;
-									attack.aborts.push('Aucune coordonnÃ©e validÃ©e pour l\'attaque.');
+									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 									return dfd.reject();
 								}
 
@@ -6087,7 +6110,7 @@ jQuery(document).ready(function(){
 
 						if( coordIndex >= attack.coords.length ){
 							attack.lastCoordIndex = coordIndex - 1;
-							attack.aborts.push('Aucune coordonnÃ©e validÃ©e pour l\'attaque.');
+							attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
 							return dfd.reject();
 						}
 
@@ -6220,25 +6243,24 @@ jQuery(document).ready(function(){
 									return wdfd.resolve();
 
 								} else {
-									console.log(result);
 									if( result.msg ){
-										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusÃ© ('+ result.msg +').');
+										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé ('+ result.msg +').');
 										return wdfd.reject();
 									} else if( result.user_action == 'marchCaptcha' ){
-										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusÃ© (captcha !).');
+										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé (captcha !).');
 										return wdfd.reject();
-									}
-
-									launchAttempts -= 1;
-									if( launchAttempts > 0 ){
-										return wdfd.pipe( launchWave(wdfd) );
 									} else {
-										return wdfd.reject();
+										launchAttempts -= 1;
+										if( launchAttempts > 0 ){
+											return wdfd.pipe( launchWave(wdfd) );
+										} else {
+											return wdfd.reject();
+										}
 									}
 								}
 							}).fail(function(){
 								//network or server error
-								attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusÃ© (requÃªte KO).');
+								attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (requête KO).');
 
 								launchAttempts -= 1;
 								if( launchAttempts > 0 ){
@@ -6253,7 +6275,12 @@ jQuery(document).ready(function(){
 							return $.Deferred(function( wdfd ){
 								//calling sequencialy findLostKnights(), checkKnight(), checkUnits(), launchWave()
 								//using deferred.pipe() to iterate
-								return wdfd.pipe( findLostKnights(wdfd) );
+								if( attack.type == 'attack' ){
+									return wdfd.pipe( findLostKnights(wdfd) );
+								} else { //scout
+									wParams.kid = 0;
+									return wdfd.pipe( checkUnits(wdfd) );
+								}
 							}).promise();
 						};
 
@@ -6294,7 +6321,7 @@ jQuery(document).ready(function(){
 
 			var baseParams = jQuery.extend(true, {}, window.g_ajaxparams);
 			if( baseParams == null ){
-				alert('ParamÃ¨tres ajax manquant. RaffraÃ®chissez la page.');
+				alert('Paramètres ajax manquant. Raffraîchissez la page.');
 				return;
 			}
 
@@ -6318,16 +6345,16 @@ jQuery(document).ready(function(){
 				})
 				.always(function(){
 					//console.log('after launching waves');
-					KOC.crestHunt.refreshOngoingInfo(attack, false);
+					KOC[mod].refreshOngoingInfo(attack, false);
 
 					attack.lastCoordIndex = attack.lastCoordIndex + 1;
 
 					//save the last coord if the attack is a stored one
-					if( KOC.crestHunt.attacks[ attack.cityId ]
-						&& KOC.crestHunt.attacks[ attack.cityId ][ attack.id ]
+					if( KOC[mod].attacks[ attack.cityId ]
+						&& KOC[mod].attacks[ attack.cityId ][ attack.id ]
 					){
-						KOC.crestHunt.attacks[ attack.cityId ][ attack.id ].lastCoordIndex = attack.lastCoordIndex;
-						KOC.crestHunt.storeAttacks();
+						KOC[mod].attacks[ attack.cityId ][ attack.id ].lastCoordIndex = attack.lastCoordIndex;
+						KOC[mod].storeAttacks();
 					}
 
 					//console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2));
@@ -6349,7 +6376,7 @@ jQuery(document).ready(function(){
 					//next round
 					window.setTimeout(function(){
 						//console.log('attack next round', attack.id, 'city', attack.cityId);
-						KOC.checkAndLaunchAttack( attack );
+						KOC.checkAndLaunchAttack( attack, mod );
 					}, time + 45000);
 				});
 		};
@@ -6378,17 +6405,17 @@ jQuery(document).ready(function(){
 });
 /*
 	//Construction :
-	//- mise en place de la ville (Ã  dÃ©tailler)
+	//- mise en place de la ville (à détailler)
 		//- positionnement
 		//- nombre
 	//- file d'attente des construction par ville
 		//- modifiable (suppression, insertion, ordre)
 		//- gestion des erreurs
 
-	//EntraÃ®nement :
-	//- entraÃ®nement automatique
-	//- entraÃ®nement programmÃ© (x miliciens puis y archers puis ...)
-	//- prise en compte des options (accÃ©lÃ©rations, ...)
+	//Entraînement :
+	//- entraînement automatique
+	//- entraînement programmé (x miliciens puis y archers puis ...)
+	//- prise en compte des options (accélérations, ...)
 
 	//Recherche :
 	//- file d'attente des recherches par ville
@@ -6407,43 +6434,42 @@ jQuery(document).ready(function(){
 
 	//Alerte :
 	//- attaque
-		//- plusieurs niveaux de dangerositÃ© (Ã©clairage, grosse attaque, vidage, ...)
+		//- plusieurs niveaux de dangerosité (éclairage, grosse attaque, vidage, ...)
 	//- manque de nourriture
-	//- manque de ressource (couplÃ©e avec les files d'attente)
+	//- manque de ressource (couplée avec les files d'attente)
 
 	//Rapport :
 	//- auto-suppression
 	//- sauvegarde
-	//- consultation simplifiÃ©e
+	//- consultation simplifiée
 	//- scan des rapports d'alliance
 	//- vision claire des horaires
 
 	//Attaque :
-	//- CB
 	//X- TS
-	  //X- vÃ©rification vague 1 et 2
-	  //X- liste de coordonnÃ©es
+	  //X- vérification vague 1 et 2
+	  //X- liste de coordonnées
 	  //- uniquement les vides ou non (exploration)
-	  //X- rappel des quantitÃ©s de troupes (mode anti-post-it :P)
+	  //X- rappel des quantités de troupes (mode anti-post-it :P)
 	//- mode rainbow (1 cible, x attaques de y miliciens)
 
-	//X Avoir des recherches de TS/CB/FS indexÃ©es par villes et mÃ©morisÃ©es pour ne pas avoir Ã  refaire les recherches Ã  chaque fois qu'on passe d'une recherche sur une ville Ã  une autre.
+	//X Avoir des recherches de TS/CB/FS indexées par villes et mémorisées pour ne pas avoir à refaire les recherches à chaque fois qu'on passe d'une recherche sur une ville à une autre.
 
 	//Renforcement :
-	//- garder x miliciens dans la ville 1, le reste va Ã  la ville 2
+	//- garder x miliciens dans la ville 1, le reste va à la ville 2
 	//- prise en compte des attaques (CB, ...)
 	//- envoyer de la nourriture avec les renforts
 
 
 	//Coordination :
-	//Si on pouvait intÃ©grer le planificateur ce serait top (au moins les donnÃ©es source : rÃ©cupÃ©rer tous les temps de marche des pourfendeurs connectÃ©s jusqu'Ã  un point donnÃ©, pour un type d'unitÃ© Ã  choisir)
+	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des pourfendeurs connectés jusqu'à un point donné, pour un type d'unité à choisir)
 
 	//Laboratorie :
 	//-auto search
 	//-liste d'attente
 
 	//mode tournoi
-		//sauvegarde puissance rÃ©current
+		//sauvegarde puissance récurrent
 		//pas de sauvegarde durant un tournois
-		//donner la position avec la diffÃ©rence sur le plus proche avec changement de cadeau
+		//donner la position avec la différence sur le plus proche avec changement de cadeau
 */

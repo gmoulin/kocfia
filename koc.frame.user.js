@@ -12,7 +12,8 @@ jQuery.noConflict();
  * http://userscripts.org/scripts/source/68059.user.js -> used to run the whole script inside the page scope
  * else prototypes are not reachable (grease monkey sandbox limitation)
  */
-var kocFrame = parent.document.getElementById('kocIframes1');
+//var kocFrame = parent.document.getElementById('kocIframes1');
+var kocFrame = parent.document.frames[0];
 //force koc iframe to width 100%
 kocFrame.style.width = '100%';
 
@@ -28,7 +29,7 @@ var domain = 'http://koc.kapok.dev/';
 
 //inject the scripts
 var jqui = document.createElement('script');
-jqui.src = domain + "jquery-ui-1.8.16.custom.min.js";
+jqui.src = domain + "jquery-ui-1.8.17.custom.min.js";
 
 var koc = document.createElement('script'),
 	d = new Date();
@@ -37,7 +38,7 @@ koc.src = domain + "koc-0.0.1.js?ts=" + d.getTime();
 //clean and arrange the window
 var jquicss = document.createElement('link');
 jquicss.rel = "stylesheet";
-jquicss.href = domain + "jquery-ui-1.8.16.custom.css";
+jquicss.href = domain + "jquery-ui-1.8.17.custom.css";
 jquicss.type = "text/css";
 
 document.head.appendChild( jquicss );

@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name			KOC-FB
+// @name			KOCFIA-FB-PAGE
 // @version			0.1
 // @namespace		KOC
 // @description		facebook page improvement for KOC (outside the KOC iframe)

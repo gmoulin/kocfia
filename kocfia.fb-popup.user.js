@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name			KOC-FB-POPUP
+// @name			KOCFIA-FB-POPUP
 // @version			0.1
 // @namespace		KOC
 // @description		facebook popup management

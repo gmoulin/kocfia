@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name			KOC
+// @name			KOCFIA-MAIN
 // @version			0.1
 // @namespace		KOC
 // @description		améliorations et automatisations diverses pour KOC
@@ -25,7 +25,7 @@ kocFrame.parentNode.appendChild(style);
 var koccss = document.createElement('style');
 koccss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 
-var domain = 'http://koc.kapok.dev/';
+var domain = 'http://kocfia.kapok.dev/';
 
 //inject the scripts
 var jqui = document.createElement('script');
@@ -33,7 +33,7 @@ jqui.src = domain + "jquery-ui-1.8.17.custom.min.js";
 
 var koc = document.createElement('script'),
 	d = new Date();
-koc.src = domain + "koc-0.0.1.js?ts=" + d.getTime();
+koc.src = domain + "kocfia-0.0.1.js?ts=" + d.getTime();
 
 //clean and arrange the window
 var jquicss = document.createElement('link');

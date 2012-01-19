@@ -1,7 +1,10 @@
 /* @todo
  * modification de l'autoscout
+ * https://github.com/baggachipz/TimerBar-jQuery-Plugin
+ * canvas zoom http://jsfiddle.net/mBzVR/4/
+ * http://lexadecimal.com/
  */
-console.info('koc start');
+console.info('kocfia start');
 /* helpers */
 	/*
 	 * jQuery each2 - v0.2 - 8/02/2010
@@ -26,7 +29,7 @@ console.info('koc start');
 				return this.getItem(key) && JSON.parse( this.getItem(key) );
 			}
 		} else {
-			alert('Pour utiliser ce script veuillez mettre à jour votre navigateur !');
+			alert('Pour utiliser ce script veuillez mettre Ã  jour votre navigateur !');
 		}
 
 	String.prototype.capitalize = function(){
@@ -73,148 +76,154 @@ console.info('koc start');
 		return Math.min.apply( Math, array );
 	};
 
-var KOC = {};
-
-var debug = {};
+var KOCFIA = {};
 
 jQuery(document).ready(function(){
 //CSS rules declarations
-	var kocConfPanelCss = "#koc-conf-panel-toggle {}";
-		kocConfPanelCss += "\n#koc-conf-panel .ui-icon-close { position: absolute; right: -3px; top: -3px; cursor: pointer; }";
-		kocConfPanelCss += "\n#koc-conf-panel { display: none; position: absolute; z-index: 100001; }";
-		kocConfPanelCss += "\n#koc-conf-panel label + select { margin-left: 5px; }";
-		kocConfPanelCss += "\n#koc-conf-panel .ui-icon-close { float: right; cursor: pointer; }";
-		kocConfPanelCss += "\n#koc-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }";
-		kocConfPanelCss += "\n#koc-conf-panel ul:not(.ui-accordion-content) { margin: 5px; }";
-		kocConfPanelCss += "\n.koc-conf-panel-tab.on { background-image: -moz-linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: -webkit-linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%; }";
-		kocConfPanelCss += "\n.koc-conf-panel-tab.off { background-image: -moz-linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: -webkit-linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%; }";
-		kocConfPanelCss += "\n#koc-options p { margin: 3px 0; }";
-		kocConfPanelCss += "\n#koc-chat ul { padding-left: 0; }";
-		kocConfPanelCss += "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 0; }";
-		kocConfPanelCss += "\n.ui-tabs-panel h3:not(.ui-accordion-header) { margin: 0;}";
-		kocConfPanelCss += "\n.ui-tabs-panel h3:not(.ui-accordion-header):not(:first-child) { margin: 4px 0; }";
-		kocConfPanelCss += "\n.ui-tabs-panel h3 p { float: right; font-size: 11px; margin: 0; }";
-		kocConfPanelCss += "\n.ui-tabs-panel h3 span { float: right; font-size: 11px; margin: 0 5px; cursor: pointer; }";
-		kocConfPanelCss += "\n.ui-tabs-panel .help { display:none; }";
-		kocConfPanelCss += "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }";
-		kocConfPanelCss += "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }";
-		kocConfPanelCss += "\n.ui-tabs-panel .infos span { float: right; margin-right: 5px; }";
-		kocConfPanelCss += "\n.ui-tabs-panel .accordion { clear: both; margin-top: 5px; }";
-		kocConfPanelCss += "\n.attack-form fieldset small { display: block; }";
-		kocConfPanelCss += "\n.attack-form .keep, .attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }";
-		kocConfPanelCss += "\n.attack-form { counter-reset: waves; }";
-		kocConfPanelCss += "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }";
-		kocConfPanelCss += "\n.attack-form .wave label { display: inline-block; }";
-		kocConfPanelCss += "\n.attack-form .wave > label, .attack-form .unit-block label:first-child { min-width: 80px; }";
-		kocConfPanelCss += "\n.attack-form .unit-block select + label { margin-left: 10px; }";
-		kocConfPanelCss += "\n.attack-form .unit-qty { width: 60px; }";
-		kocConfPanelCss += "\n.attack-form textarea { width: 150px; height: 120px; }";
-		kocConfPanelCss += "\n.attack-form .builds { display: none; float: right; max-width: 220px; }";
-		kocConfPanelCss += "\n.attack-form .builds div { -moz-column-count: 2; -moz-column-gap: 5px; -webkit-column-count: 2; -webkit-column-gap: 5px; column-count: 2; column-gap: 5px; }";
-		kocConfPanelCss += "\n.attack-list.ui-accordion-content { padding: 2px; }";
-		kocConfPanelCss += "\n.attack-list table { width: 100%; }";
-		kocConfPanelCss += "\n.attack-list th { padding: 2px; }";
-		kocConfPanelCss += "\n.attack-list td { padding: 2px; vertical-align: top; white-space: nowrap; }";
-		kocConfPanelCss += "\n.attack-list .actions, .attack-list .current { text-align: center; }";
-		kocConfPanelCss += "\n.attack-list .coords, .attack-list .info { white-space: normal; max-width: 200px; }";
-		kocConfPanelCss += "\n.attack-list td .ui-icon { float: left; margin: 0 2px; cursor: pointer; }";
-		kocConfPanelCss += "\n.attack-list td span:not(.ui-icon) { display: inline-block; padding-right: 5px; }";
-		kocConfPanelCss += "\n.attack-list td img { width: 18px; }";
-		kocConfPanelCss += "\n.attack-list .attack-errors { display: block; }";
-		kocConfPanelCss += "\n.koc-timer-div { position: absolute; color: red; font-weight: bold; left: 612px; display: none; font-family: Verdana, Helvetica, sans-serif; }";
-		kocConfPanelCss += "\n#koc-reload-msg { top: 3px; }";
-		kocConfPanelCss += "\n#general-refreshFrequency, #general-reloadFrequency { width: 30px; text-align: center; }";
-		kocConfPanelCss += "\n#koc-conf-panel .coord { width: 30px; text-align: center; }";
-		kocConfPanelCss += "\n#koc-map .save, #koc-map .filter { display: none; }";
-		kocConfPanelCss += "\n#koc-map .search-status { padding: 3px; text-align: center; }";
-		kocConfPanelCss += "\n#koc-map .search-result table { min-width: 50%; }";
-		kocConfPanelCss += "\n#koc-map .search-result textarea { float: right; width: 90px; height: 90px; }";
-		kocConfPanelCss += "\n#koc-formation .forms input[type=text] { width: 50px; }";
-		kocConfPanelCss += "\n#koc-formation .forms img { width: 18px; height: 18px; position: relative; top: 4px; }";
-		kocConfPanelCss += "\n#koc-formation .forms fieldset input + label, #koc-formation .forms fieldset select + label, #koc-formation .forms fieldset label + label { margin: 0 3px 0 10px; }";
-		kocConfPanelCss += "\n#koc-formation .forms .save { float: right; }";
-		kocConfPanelCss += "\n#koc-formation .forms fieldset { clear: both; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing .unit { display: inline-block; min-width: 80px; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing .ui-icon-trash { position: relative; top: 2px; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing img { margin-right: 5px; width: 18px; height: 18px; position: relative; top: 2px; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing.ui-accordion .ui-accordion-content { padding: 5px; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing ol { padding-bottom: 3px; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing table { width: 100%; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing th, #koc-formation .ongoing td { width: 50%; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing td { vertical-align: top; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing .canceled, #koc-formation .ongoing .canceled span { text-decoration: line-though; }";
-		kocConfPanelCss += "\n#koc-formation .ongoing .canceled .ui-icon-trash { visibility: hidden; }";
-		kocConfPanelCss += "\n#koc-gloryTournament .scout-form input[type=checkbox] + label { margin-right: 10px; }";
+	var confPanelCss  = "\n#kocfia-conf-panel .ui-icon-close { position: absolute; right: -3px; top: -3px; cursor: pointer; }";
+		confPanelCss += "\n#kocfia-conf-panel { display: none; position: absolute; z-index: 100001; }";
+		confPanelCss += "\n#kocfia-conf-panel label + select { margin-left: 5px; }";
+		confPanelCss += "\n#kocfia-conf-panel .ui-icon-close { float: right; cursor: pointer; }";
+		confPanelCss += "\n#kocfia-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; }";
+		confPanelCss += "\n#kocfia-conf-panel ul:not(.ui-accordion-content) { margin: 5px; }";
+		confPanelCss += "\n.kocfia-conf-panel-tab.on { background-image: -moz-linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: -webkit-linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%; }";
+		confPanelCss += "\n.kocfia-conf-panel-tab.off { background-image: -moz-linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: -webkit-linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-image: linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%; }";
+		confPanelCss += "\n#kocfia-options p { margin: 3px 0; }";
+		confPanelCss += "\n#kocfia-chat ul { padding-left: 0; }";
+		confPanelCss += "\n.ui-tabs .ui-tabs-panel { overflow: auto; padding: 0; }";
+		confPanelCss += "\n.ui-tabs-panel h3:not(.ui-accordion-header) { margin: 0;}";
+		confPanelCss += "\n.ui-tabs-panel h3:not(.ui-accordion-header):not(:first-child) { margin: 4px 0; }";
+		confPanelCss += "\n.ui-tabs-panel h3 p { float: right; font-size: 11px; margin: 0; }";
+		confPanelCss += "\n.ui-tabs-panel h3 span { float: right; font-size: 11px; margin: 0 5px; cursor: pointer; }";
+		confPanelCss += "\n.ui-tabs-panel .help { display:none; }";
+		confPanelCss += "\n.ui-accordion .ui-accordion-header { text-indent: 30px; }";
+		confPanelCss += "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }";
+		confPanelCss += "\n.ui-tabs-panel .infos span { float: right; margin-right: 5px; }";
+		confPanelCss += "\n.ui-tabs-panel .accordion { clear: both; margin-top: 5px; }";
+		confPanelCss += "\n.attack-form fieldset small { display: block; }";
+		confPanelCss += "\n.attack-form .keep, .attack-form .add-wave, .attack-form .launch, .attack-form .save, .attack-form .saveAndLaunch { display: none; }";
+		confPanelCss += "\n.attack-form { counter-reset: waves; }";
+		confPanelCss += "\n.attack-form .wave legend::after { counter-increment: waves; content: ' ' counter(waves); }";
+		confPanelCss += "\n.attack-form .wave label { display: inline-block; }";
+		confPanelCss += "\n.attack-form .wave > label, .attack-form .unit-block label:first-child { min-width: 80px; }";
+		confPanelCss += "\n.attack-form .unit-block select + label { margin-left: 10px; }";
+		confPanelCss += "\n.attack-form .unit-qty { width: 60px; }";
+		confPanelCss += "\n.attack-form textarea { width: 150px; height: 120px; }";
+		confPanelCss += "\n.attack-form .builds { display: none; float: right; max-width: 220px; }";
+		confPanelCss += "\n.attack-form .builds div { -moz-column-count: 2; -moz-column-gap: 5px; -webkit-column-count: 2; -webkit-column-gap: 5px; column-count: 2; column-gap: 5px; }";
+		confPanelCss += "\n.attack-list.ui-accordion-content { padding: 2px; }";
+		confPanelCss += "\n.attack-list table, .formation-list table { width: 100%; }";
+		confPanelCss += "\n.attack-list .toggle, .formation-list .toggle { cursor: pointer; }";
+		confPanelCss += "\n.attack-list .toggle .ui-icon, .formation-list .toggle .ui-icon { float: left; }";
+		confPanelCss += "\n.attack-list thead th, .formation-list thead th { background-color: #cccccc; }";
+		confPanelCss += "\n.attack-list tbody th, .formation-list tbody th { background-color: #e1d5d4; }";
+		confPanelCss += "\n.attack-list tbody td, .formation-list tbody td { background-color: #fdf8f0; }";
+		confPanelCss += "\n.attack-list img, .formation-list img { width: 18px; }";
+		confPanelCss += "\n.attack-list th { padding: 2px; }";
+		confPanelCss += "\n.attack-list td { padding: 2px; vertical-align: top; white-space: nowrap; }";
+		confPanelCss += "\n.attack-list .actions, .attack-list .current { text-align: center; }";
+		confPanelCss += "\n.attack-list .coords, .attack-list .info { white-space: normal; max-width: 200px; }";
+		confPanelCss += "\n.attack-list td .ui-icon { float: left; margin: 0 2px; cursor: pointer; }";
+		confPanelCss += "\n.attack-list td span:not(.ui-icon) { display: inline-block; padding-right: 5px; }";
+		confPanelCss += "\n.attack-list .attack-errors { display: block; }";
+		confPanelCss += "\n.kocfia-timer-div { position: absolute; color: red; font-weight: bold; left: 612px; display: none; font-family: Verdana, Helvetica, sans-serif; }";
+		confPanelCss += "\n#kocfia-reload-msg { top: 3px; }";
+		confPanelCss += "\n#general-refreshFrequency, #general-reloadFrequency { width: 30px; text-align: center; }";
+		confPanelCss += "\n#kocfia-conf-panel .coord { width: 30px; text-align: center; }";
+		confPanelCss += "\n#kocfia-map .save, #kocfia-map .filter { display: none; }";
+		confPanelCss += "\n#kocfia-map .search-status { padding: 3px; text-align: center; }";
+		confPanelCss += "\n#kocfia-map .search-result table { min-width: 50%; }";
+		confPanelCss += "\n#kocfia-map .search-result textarea { float: right; width: 90px; height: 90px; }";
+		confPanelCss += "\n#kocfia-formation .forms input[type=text] { width: 50px; }";
+		confPanelCss += "\n#kocfia-formation .forms img { width: 18px; height: 18px; position: relative; top: 4px; }";
+		confPanelCss += "\n#kocfia-formation .forms fieldset input + label, #kocfia-formation .forms fieldset select + label, #kocfia-formation .forms fieldset label + label { margin: 0 3px 0 10px; }";
+		confPanelCss += "\n#kocfia-formation .forms .save { float: right; }";
+		confPanelCss += "\n#kocfia-formation .forms fieldset { clear: both; }";
+		//confPanelCss += "\n.formation-list.ongoing .unit { display: inline-block; min-width: 80px; }";
+		confPanelCss += "\n.attack-list.ongoing .ui-icon-trash { position: relative; top: 2px; }";
+		confPanelCss += "\n.ongoing img { margin-right: 5px; width: 18px; height: 18px; position: relative; top: 2px; }";
+		confPanelCss += "\n.ongoing .time { display: inline-block; margin-left: 10px; }";
+		confPanelCss += "\n.ongoing.ui-accordion .ui-accordion-content { padding: 5px; }";
+		confPanelCss += "\n.ongoing ol { padding-bottom: 3px; }";
+		confPanelCss += "\n.ongoing table { width: 100%; }";
+		confPanelCss += "\n.ongoing td { vertical-align: top; }";
+		confPanelCss += "\n.ongoing .canceled, .ongoing .canceled span { text-decoration: line-though; }";
+		confPanelCss += "\n.ongoing .canceled .ui-icon-trash { visibility: hidden; }";
+		confPanelCss += "\n#kocfia-formation .ongoing thead th, #kocfia-formation .ongoing td { width: 25%; }";
+		confPanelCss += "\n#kocfia-formation .ongoing thead tr th:last-child, #kocfia-formation .ongoing tr td:last-child { width: 50%; }";
+		confPanelCss += "\n#kocfia-map-canvas { width: 350px; height: 350px; background: #000; }";
+		confPanelCss += "\n#kocfia-gloryTournament .scout-form input[type=checkbox] + label { margin-right: 10px; }";
 
-	var kocChatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_body { top: 20px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_body form { height: 25px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .mod_comm_forum { padding-left: 0; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction .button20 { top: 2px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction { width: auto; padding: 3px 5px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction #mod_comm_input { position: absolute; top: 5px; left: 5px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist { width: auto; margin-left: 0; border: none; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .kocMerlinSmall { float: right; padding: 4px; font-size: 10px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab2, .kocmain .mod_comm .seltab2 a.tab1 { height: 20px; line-height: 20px; padding: 0 5px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1, .kocmain .mod_comm .seltab2 a.tab2 { background: #FCF8DD; height: 20px; line-height: 20px; padding-right: 5px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1 span, .kocmain .mod_comm .seltab2 a.tab2 span { background: none; height: 20px; line-height: 20px; padding-left: 5px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content { width: auto; float: none; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .message.clearfix { width: auto; display: block; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info { width: auto; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info .nm { padding-left: 18px; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info b { display: none; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .tx { width: auto; float: none; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .flag { display: none; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap img { margin-right: 0; width: 15px; height: 15px; float: none; position: absolute; top: 2px; left: 2px; cursor: pointer; z-index: 1; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .tx a { text-decoration: underline; }";
-		kocChatMoveableCss += "\n.kocmain .mod_comm .tx a:hover { text-decoration: none; }";
+	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_body { top: 20px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_body form { height: 25px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .mod_comm_forum { padding-left: 0; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction .button20 { top: 2px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction { width: auto; padding: 3px 5px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction #mod_comm_input { position: absolute; top: 5px; left: 5px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist { width: auto; margin-left: 0; border: none; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .koc-merlin-small { float: right; padding: 4px; font-size: 10px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab2, .kocmain .mod_comm .seltab2 a.tab1 { height: 20px; line-height: 20px; padding: 0 5px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1, .kocmain .mod_comm .seltab2 a.tab2 { background: #FCF8DD; height: 20px; line-height: 20px; padding-right: 5px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1 span, .kocmain .mod_comm .seltab2 a.tab2 span { background: none; height: 20px; line-height: 20px; padding-left: 5px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content { width: auto; float: none; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .message.clearfix { width: auto; display: block; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info { width: auto; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info .nm { padding-left: 18px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .info b { display: none; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .tx { width: auto; float: none; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap .content .flag { display: none; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap img { margin-right: 0; width: 15px; height: 15px; float: none; position: absolute; top: 2px; left: 2px; cursor: pointer; z-index: 1; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .tx a { text-decoration: underline; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .tx a:hover { text-decoration: none; }";
 
-	var kocChatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
-		kocChatHelpCss += "\n.kocmain .mod_comm.ui-draggable { display: block; }";
+	var chatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
+		chatHelpCss += "\n.kocmain .mod_comm.ui-draggable { display: block; }";
 
-	var kocChatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: #C3ECE4; }";
-		kocChatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }";
-		kocChatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: #D5D2F7; }";
+	var chatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: #C3ECE4; }";
+		chatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }";
+		chatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: #D5D2F7; }";
 
-	var kocChatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: #FAE4E4; }";
-	var kocChatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
+	var chatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: #FAE4E4; }";
+	var chatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
 
-	var kocOverviewCss = "#koc-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }";
-		kocOverviewCss += "\n#koc-overview .ui-icon-close { float: right; cursor: pointer; }";
-		kocOverviewCss += "\n#koc-overview > h3 { margin: 2px 0; text-indent: 10px; }";
-		kocOverviewCss += "\n#koc-overview .ui-tabs .ui-tabs-panel { padding: 2px; }";
-		kocOverviewCss += "\n#koc-overview .wrap { width: 100%; overflow: hidden; }";
-		kocOverviewCss += "\n#koc-overview table { width: 100%; float: left; }";
-		kocOverviewCss += "\n#koc-overview thead tr { display: block; position: relative; }";
-		kocOverviewCss += "\n#koc-overview tbody { overflow: auto; display: block; width: 100%; }";
-		kocOverviewCss += "\n#koc-overview tr.highlight td, #koc-overview th.highlight { background-color: #F8E0A8; }";
-		kocOverviewCss += "\n#koc-overview tr.highlight.toggle th, #koc-overview .toggle th.highlight, #koc-overview .toggle th { background-color: #CCC; }";
-		kocOverviewCss += "\n#koc-overview tr td.sum { background-color: #D9F4F1; }";
-		kocOverviewCss += "\n#koc-overview img { width:20px; }";
-		kocOverviewCss += "\n#koc-overview tr td.sum, #koc-overview tr td.sum ~ td { text-align: right; }";
-		kocOverviewCss += "\n#koc-overview .toggle th { width: auto; cursor: pointer; }";
-		kocOverviewCss += "\n#koc-overview .details-toggle { margin-left: 10px; font-size: 12px; font-weight: normal; }";
-		kocOverviewCss += "\n#koc-overview .details-toggle label:not(:last-child) { padding-right: 8px; }";
-		kocOverviewCss += "\n#koc-overview .details-toggle input { position: relative; top: 2px; }";
-		kocOverviewCss += "\n#koc-overview .toggle .ui-icon { float: left; }";
-		kocOverviewCss += "\n#koc-overview .img { width: 20px; }";
-		kocOverviewCss += "\n#koc-overview .label { width: 100px; text-overflow: ellipsis; }";
-		kocOverviewCss += "\n#koc-overview .sum { width: 55px; }";
-		kocOverviewCss += "\n#koc-overview thead tr th:last-child, #koc-overview thead tr td:last-child { width: auto; }";
-		kocOverviewCss += "\n#koc-overview .sizer td, #koc-overview .sizer td.sum, #koc-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }";
+	var overviewCss = "#kocfia-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }";
+		overviewCss += "\n#kocfia-overview .ui-icon-close { float: right; cursor: pointer; }";
+		overviewCss += "\n#kocfia-overview > h3 { margin: 2px 0; text-indent: 10px; }";
+		overviewCss += "\n#kocfia-overview .ui-tabs .ui-tabs-panel { padding: 2px; }";
+		overviewCss += "\n#kocfia-overview .wrap { width: 100%; overflow: hidden; }";
+		overviewCss += "\n#kocfia-overview table { width: 100%; float: left; }";
+		overviewCss += "\n#kocfia-overview thead tr { display: block; position: relative; }";
+		overviewCss += "\n#kocfia-overview tbody { overflow: auto; display: block; width: 100%; }";
+		overviewCss += "\n#kocfia-overview tr.highlight td, #kocfia-overview th.highlight { background-color: #F8E0A8; }";
+		overviewCss += "\n#kocfia-overview tr.highlight.toggle th, #kocfia-overview .toggle th.highlight, #kocfia-overview .toggle th { background-color: #CCC; }";
+		overviewCss += "\n#kocfia-overview tr td.sum { background-color: #D9F4F1; }";
+		overviewCss += "\n#kocfia-overview img { width:20px; }";
+		overviewCss += "\n#kocfia-overview tr td.sum, #kocfia-overview tr td.sum ~ td { text-align: right; }";
+		overviewCss += "\n#kocfia-overview .toggle th { width: auto; cursor: pointer; }";
+		overviewCss += "\n#kocfia-overview .details-toggle { margin-left: 10px; font-size: 12px; font-weight: normal; }";
+		overviewCss += "\n#kocfia-overview .details-toggle label { cursor: pointer; }";
+		overviewCss += "\n#kocfia-overview .details-toggle label:not(:last-child) { padding-right: 8px; }";
+		overviewCss += "\n#kocfia-overview .details-toggle input { position: relative; top: 2px; }";
+		overviewCss += "\n#kocfia-overview .toggle .ui-icon { float: left; }";
+		overviewCss += "\n#kocfia-overview .img { width: 20px; }";
+		overviewCss += "\n#kocfia-overview .label { width: 100px; text-overflow: ellipsis; }";
+		overviewCss += "\n#kocfia-overview .sum { width: 55px; }";
+		overviewCss += "\n#kocfia-overview thead tr th:last-child, #kocfia-overview thead tr td:last-child { width: auto; }";
+		overviewCss += "\n#kocfia-overview .sizer td, #kocfia-overview .sizer td.sum, #kocfia-overview .sizer.highlight td { height: 1px; line-height: 1px; background-color: black; padding: 0; }";
 
-	var kocNotepadCss = "#koc-notepad { padding: 2px 3px; }";
-		kocNotepadCss += "\n#koc-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;	z-index: 100000; display: none; }";
-		kocNotepadCss += "\n#koc-notepad .ui-icon-close { float: right; cursor: pointer; }";
-		kocNotepadCss += "\n#koc-notepad .wrap { width: 100%; overflow: auto; }";
-		kocNotepadCss += "\n#koc-notepad textarea { width: 100%; height: 150px; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }";
-		kocNotepadCss += "\n#koc-notepad .wrap input + label { display: block; }";
-		kocNotepadCss += "\n#koc-notepad .charsLeft { float: right; }";
-		kocNotepadCss += "\n#koc-notepad ul { display: block; -moz-column-count: 3; -moz-column-gap: 1em; -webkit-column-count: 3; -webkit-column-gap: 1em; column-count: 3; column-gap: 1em; }";
-		kocNotepadCss += "\n#koc-notepad li .ui-icon { display: inline-block; }";
-		kocNotepadCss += "\n#koc-notepad li { white-space: nowrap; }";
-		kocNotepadCss += "\n#koc-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }";
+	var notepadCss = "#kocfia-notepad { padding: 2px 3px; }";
+		notepadCss += "\n#kocfia-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;	z-index: 100000; display: none; }";
+		notepadCss += "\n#kocfia-notepad .ui-icon-close { float: right; cursor: pointer; }";
+		notepadCss += "\n#kocfia-notepad .wrap { width: 100%; overflow: auto; }";
+		notepadCss += "\n#kocfia-notepad textarea { width: 100%; height: 150px; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }";
+		notepadCss += "\n#kocfia-notepad .wrap input + label { display: block; }";
+		notepadCss += "\n#kocfia-notepad .charsLeft { float: right; }";
+		notepadCss += "\n#kocfia-notepad ul { display: block; -moz-column-count: 3; -moz-column-gap: 1em; -webkit-column-count: 3; -webkit-column-gap: 1em; column-count: 3; column-gap: 1em; }";
+		notepadCss += "\n#kocfia-notepad li .ui-icon { display: inline-block; }";
+		notepadCss += "\n#kocfia-notepad li { white-space: nowrap; }";
+		notepadCss += "\n#kocfia-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }";
 
 //prototype json.stringify bug with array
 	if( window.Prototype ){
@@ -236,7 +245,7 @@ jQuery(document).ready(function(){
 	var reloadTimeout, reloadInterval, reloadTimer, refreshTimeout,
 		merlinBoxClick = false;
 
-	KOC = {
+	KOCFIA = {
 		'server': null,
 		'modules': ['chat', 'fbWallPopup', 'overview', 'wilderness', 'notepad', 'map', 'formation'], //, 'gloryTournament'],
 		'modulesLabel': {
@@ -247,47 +256,47 @@ jQuery(document).ready(function(){
 		'stored': ['conf'],
 		//'ajax': [],
 		'init': function(){
-			console.info('KOC init function');
+			console.info('KOCFIA init function');
 
 			//get server id
-				KOC.server = KOC.shared.getServer();
-				console.info('server', KOC.server);
-				if( KOC.server == null ){
+				KOCFIA.server = KOCFIA.shared.getServer();
+				console.info('server', KOCFIA.server);
+				if( KOCFIA.server == null ){
 					console.error('wrong server id');
 					return;
 				}
 
 			//get server id
-				KOC.kabamuid = KOC.shared.getUserId();
-				console.info('kabamuid', KOC.kabamuid);
-				if( KOC.kabamuid == null ){
+				KOCFIA.kabamuid = KOCFIA.shared.getUserId();
+				console.info('kabamuid', KOCFIA.kabamuid);
+				if( KOCFIA.kabamuid == null ){
 					console.error('wrong user id');
 					return;
 				}
 
-			KOC.storeUniqueId = KOC.server + '_' + KOC.kabamuid;
+			KOCFIA.storeUniqueId = KOCFIA.server + '_' + KOCFIA.kabamuid;
 
 			//gather the default conf
 				console.time('default conf gathering');
-				var i, modulesLength = KOC.modules.length;
+				var i, modulesLength = KOCFIA.modules.length;
 				for( i = 0; i < modulesLength; i += 1 ){
-					var mod = KOC.modules[i];
-					KOC.defaultConf[mod] = KOC[mod].options;
+					var mod = KOCFIA.modules[i];
+					KOCFIA.defaultConf[mod] = KOCFIA[mod].options;
 				}
-				KOC.conf = KOC.defaultConf;
+				KOCFIA.conf = KOCFIA.defaultConf;
 				console.timeEnd('default conf gathering');
 
 			//get stored conf if present
 				try {
-					var storedConf = localStorage.getObject('koc_conf_' + KOC.storeUniqueId);
+					var storedConf = localStorage.getObject('kocfia_conf_' + KOCFIA.storeUniqueId);
 					if( storedConf ){
-						$.extend(true, KOC.conf, storedConf);
+						$.extend(true, KOCFIA.conf, storedConf);
 						console.info('used stored conf');
 					}
 				} catch( e ){
 					console.error(e);
 				}
-				//console.log(KOC.conf);
+				//console.log(KOCFIA.conf);
 
 			//set message event listener
 			//used to pass data between iframes
@@ -295,8 +304,8 @@ jQuery(document).ready(function(){
 					//console.log(event);
 					//return the conf values for fbWallPopup module
 					if( event.origin.indexOf('facebook.com') != -1 ){
-						event.source.postMessage(KOC.conf.fbWallPopup, 'https://apps.facebook.com/');
-						event.source.postMessage(KOC.conf.fbWallPopup, 'http://apps.facebook.com/');
+						event.source.postMessage(KOCFIA.conf.fbWallPopup, 'https://apps.facebook.com/');
+						event.source.postMessage(KOCFIA.conf.fbWallPopup, 'http://apps.facebook.com/');
 					}
 					return;
 				}, false);
@@ -314,16 +323,16 @@ jQuery(document).ready(function(){
 
 			//gather stored items list for deletion ease
 				for( i = 0; i < modulesLength; i += 1 ){
-					var mod = KOC.modules[i];
-					if( KOC[mod].stored ){
-						var j, length = KOC[mod].stored.length;
+					var mod = KOCFIA.modules[i];
+					if( KOCFIA[mod].stored ){
+						var j, length = KOCFIA[mod].stored.length;
 						for( j = 0; j < length; j += 1 ){
-							KOC.stored.push( mod + '_' + KOC[mod].stored[j] );
+							KOCFIA.stored.push( mod + '_' + KOCFIA[mod].stored[j] );
 
 							try{
-								var stored = localStorage.getObject('koc_' + mod + '_' + KOC[mod].stored[j] + '_' + KOC.storeUniqueId);
+								var stored = localStorage.getObject('kocfia_' + mod + '_' + KOCFIA[mod].stored[j] + '_' + KOCFIA.storeUniqueId);
 								if( stored ){
-									KOC[mod][ KOC[mod].stored[j] ] = stored;
+									KOCFIA[mod][ KOCFIA[mod].stored[j] ] = stored;
 								}
 							} catch(e){
 								alert(e);
@@ -335,47 +344,47 @@ jQuery(document).ready(function(){
 
 			//ajax sniffer
 				console.time('sniffer');
-				KOC.ajaxSniffer();
+				KOCFIA.ajaxSniffer();
 				console.timeEnd('sniffer');
 
 			//get player cities
-				KOC.shared.getCities();
+				KOCFIA.shared.getCities();
 
 			//configuration panel
 				console.time('confPanel');
-				KOC.confPanel();
+				KOCFIA.confPanel();
 				console.timeEnd('confPanel');
 
 			//modules init
 				var initModule = function(i){
 					//delayed init for modules
 					window.setTimeout(function(){
-						console.time('koc '+ KOC.modules[i] +' on');
-						KOC[ KOC.modules[i] ].on();
-						console.timeEnd('koc '+ KOC.modules[i] +' on');
+						console.time('kocfia '+ KOCFIA.modules[i] +' on');
+						KOCFIA[ KOCFIA.modules[i] ].on();
+						console.timeEnd('kocfia '+ KOCFIA.modules[i] +' on');
 					}, i * 1000 + 1000);
 				};
 				for( i = 0; i < modulesLength; i += 1 ){
-					if( KOC.conf[KOC.modules[i]].active ){
+					if( KOCFIA.conf[KOCFIA.modules[i]].active ){
 						initModule(i);
 					}
 				}
 
 			//refresh button
-				KOC.$buttons.append(
-					$('<button id="koc-refresh-seed">')
-						.html('Raffraîchir')
-						.attr('title', 'Force la mise à jour des données du jeux, sauf les troupes.')
-						.click(function(e){ KOC.shared.updateSeed(); })
+				KOCFIA.$buttons.append(
+					$('<button id="kocfia-refresh-seed">')
+						.html('RaffraÃ®chir')
+						.attr('title', 'Force la mise Ã  jour des donnÃ©es du jeux, sauf les troupes.')
+						.click(function(e){ KOCFIA.shared.updateSeed(); })
 				);
-				KOC.$refreshButton = $('#koc-refresh-seed');
+				KOCFIA.$refreshButton = $('#kocfia-refresh-seed');
 
-				KOC.$buttons.append(
-					$('<button id="koc-free-knights">')
+				KOCFIA.$buttons.append(
+					$('<button id="kocfia-free-knights">')
 						.html('Rappeler les chevaliers perdus')
 						.click(function(e){
-							for( var i = 0; i < KOC.citiesId.length; i += 1 ){
-								KOC.shared.freeKnights( KOC.citiesId[i] );
+							for( var i = 0; i < KOCFIA.citiesId.length; i += 1 ){
+								KOCFIA.shared.freeKnights( KOCFIA.citiesId[i] );
 							}
 						})
 				);
@@ -391,28 +400,28 @@ jQuery(document).ready(function(){
 				});
 
 			//reload game form
-				var $form = $('<form>', { 'id': 'koc-reload', 'target': '_top', 'action': '', 'method': 'post' });
-				$form.append(' <input type="hidden" name="s" value="'+ KOC.storeUniqueId +'">');
+				var $form = $('<form>', { 'id': 'kocfia-reload', 'target': '_top', 'action': '', 'method': 'post' });
+				$form.append(' <input type="hidden" name="s" value="'+ KOCFIA.storeUniqueId +'">');
 				$body.append( $form.hide() );
 
 			//reload timeout
-				$body.append('<div id="koc-reload-msg" class="koc-timer-div">Rechargement de la page dans : <span class="koc-timer"></span></div>');
-				KOC.$reloadTimer = $('#koc-reload-msg');
-				if( KOC.conf.general.reload ){
-					KOC.shared.reloadCountdown(1);
+				$body.append('<div id="kocfia-reload-msg" class="kocfia-timer-div">Rechargement de la page dans : <span class="kocfia-timer"></span></div>');
+				KOCFIA.$reloadTimer = $('#kocfia-reload-msg');
+				if( KOCFIA.conf.general.reload ){
+					KOCFIA.shared.reloadCountdown(1);
 				}
 
 			//refresh data
-				if( KOC.conf.general.refresh ){
-					KOC.shared.refreshCountdown(1);
+				if( KOCFIA.conf.general.refresh ){
+					KOCFIA.shared.refreshCountdown(1);
 				}
 
 			//merlin box
-				$body.on('click', '.mod_comm_mmb, .kocMerlinSmall', function(){
+				$body.on('click', '.mod_comm_mmb, .koc-merlin-small', function(){
 					merlinBoxClick = true;
 				});
 
-				if( KOC.conf.general.hideMagicalBoxPreview ){
+				if( KOCFIA.conf.general.hideMagicalBoxPreview ){
 					var i = 0;
 					var hideMerlinPreview = window.setInterval(function(){
 						if( $('#modalBox1').is(':visible') ){
@@ -427,7 +436,7 @@ jQuery(document).ready(function(){
 				}
 
 			//other players court invitations
-				if( KOC.conf.general.hideOtherPlayersCourtInvitation ){
+				if( KOCFIA.conf.general.hideOtherPlayersCourtInvitation ){
 					var i = 0;
 					var hideViewCourt = window.setInterval(function(){
 						if( $('#modalBox1').is(':visible') && $('#modalBox1').hasClass('modalBoxUEP') ){
@@ -440,7 +449,7 @@ jQuery(document).ready(function(){
 				}
 
 			//fair popup
-				if( KOC.conf.general.hideFairPopup ){
+				if( KOCFIA.conf.general.hideFairPopup ){
 					var i = 0;
 					var hideViewCourt = window.setInterval(function(){
 						if( $('#modalBox1').is(':visible') && $('#modalBox1').hasClass('modalBoxUEP') ){
@@ -502,11 +511,11 @@ jQuery(document).ready(function(){
 				{'name': 'resource4', 'label': 'camps barbare', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_consumption': [
-				{'rows': 2, 'name': 'gold', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{'rows': 2, 'name': 'resource1', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{'rows': 2, 'name': 'resource2', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{'rows': 2, 'name': 'resource3', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{'rows': 2, 'name': 'resource4', 'label': ['dépense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{'rows': 2, 'name': 'gold', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+				{'rows': 2, 'name': 'resource1', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+				{'rows': 2, 'name': 'resource2', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+				{'rows': 2, 'name': 'resource3', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+				{'rows': 2, 'name': 'resource4', 'label': ['dÃ©pense', 'formation'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'resources_production_total': [
 				{'name': 'gold', 'label': 'total', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
@@ -523,7 +532,7 @@ jQuery(document).ready(function(){
 				{'name': 'resource4x3600', 'label': 'autonomie', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
 			],
 			'population': [
-				{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'péon', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
+				{'rows': 4, 'name': ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], 'label': ['population', 'plafond', 'pÃ©on', 'glandeur'], 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
 				{'name': 'taxRate', 'label': 'taxation', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/taxes.png'},
 				{'name': 'hapiness', 'label': 'bonheur', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
 			],
@@ -538,7 +547,7 @@ jQuery(document).ready(function(){
 				{'name': 'unt8', 'label': 'Cavalerie Lourde', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
 				{'name': 'unt9', 'label': 'Wagon', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
 				{'name': 'unt10', 'label': 'Baliste', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{'name': 'unt11', 'label': 'Bélier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+				{'name': 'unt11', 'label': 'BÃ©lier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
 				{'name': 'unt12', 'label': 'Catapulte', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 			],
 			'troops_barbarian': [
@@ -552,13 +561,13 @@ jQuery(document).ready(function(){
 				{'name': 'unt8', 'label': 'Cavalerie Lourde', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
 				{'name': 'unt9', 'label': 'Wagon', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
 				{'name': 'unt10', 'label': 'Baliste', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{'name': 'unt11', 'label': 'Bélier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
+				{'name': 'unt11', 'label': 'BÃ©lier', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
 				{'name': 'unt12', 'label': 'Catapulte', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
 			],
 			'defenses': [
-				{'name': 'fort53', 'label': 'Arbalètes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
-				{'name': 'fort55', 'label': 'Trébuchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
-				{'name': 'fort60', 'label': 'Pièges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
+				{'name': 'fort53', 'label': 'ArbalÃ¨tes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
+				{'name': 'fort55', 'label': 'TrÃ©buchets', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
+				{'name': 'fort60', 'label': 'PiÃ¨ges', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
 				{'name': 'fort61', 'label': 'Chausse-trapes', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_61_30.jpg'},
 				{'name': 'fort62', 'label': 'Palissades', 'icon': 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_62_30.jpg'},
 			],
@@ -594,31 +603,31 @@ jQuery(document).ready(function(){
 			},
 		/* AJAX SNIFFER */
 			'ajaxSniffer': function(){
-				console.info('KOC ajaxSniffer function');
+				console.info('KOCFIA ajaxSniffer function');
 				XMLHttpRequest.prototype.oldOpen = XMLHttpRequest.prototype.open;
 				var newOpen = function(method, url, async, user, password){
 					var filename = url.substring(url.lastIndexOf('/')+1);
 
-					//KOC.ajax[filename] = (KOC.ajax[filename] || 0) + 1;
+					//KOCFIA.ajax[filename] = (KOCFIA.ajax[filename] || 0) + 1;
 
-					//this.addEventListener('load', function(){ KOC.ajax[filename] = KOC.ajax[filename] - 1; });
-					//this.addEventListener('abort', function(){ KOC.ajax[filename] = KOC.ajax[filename] - 1; });
-					//this.addEventListener('error', function(){ KOC.ajax[filename] = KOC.ajax[filename] - 1; });
+					//this.addEventListener('load', function(){ KOCFIA.ajax[filename] = KOCFIA.ajax[filename] - 1; });
+					//this.addEventListener('abort', function(){ KOCFIA.ajax[filename] = KOCFIA.ajax[filename] - 1; });
+					//this.addEventListener('error', function(){ KOCFIA.ajax[filename] = KOCFIA.ajax[filename] - 1; });
 
 					switch(filename){
 						case 'getChat.php':
 							this.addEventListener("load", function(){
-								if( KOC.conf.chat.active && ( KOC.conf.chat.cleanHelp || KOC.conf.chat.highlightLeaders || KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) ){
+								if( KOCFIA.conf.chat.active && ( KOCFIA.conf.chat.cleanHelp || KOCFIA.conf.chat.highlightLeaders || KOCFIA.conf.chat.highlightFriends || KOCFIA.conf.chat.highlightFoes ) ){
 									try {
 										var r = JSON.parse(this.responseText);
 										if( r.data && r.data.newChats ){
 											if( r.data.newChats['2'] && r.data.newChats['2'].length > 0 ){
-												if( KOC.conf.chat.cleanHelp ) KOC.chat.cleanHelp( r.data.newChats[2] );
-												if( KOC.conf.chat.highlightLeaders ) KOC.chat.highlightLeaders( $chatAlliance, r.data.newChats['2'].length );
+												if( KOCFIA.conf.chat.cleanHelp ) KOCFIA.chat.cleanHelp( r.data.newChats[2] );
+												if( KOCFIA.conf.chat.highlightLeaders ) KOCFIA.chat.highlightLeaders( $chatAlliance, r.data.newChats['2'].length );
 											}
 											if( r.data.newChats['1'] && r.data.newChats['1'].length > 0 ){
-												if( KOC.conf.chat.highlightLeaders ) KOC.chat.highlightLeaders( $chatGeneral, r.data.newChats['1'].length );
-												if( KOC.conf.chat.highlightFriends || KOC.conf.chat.highlightFoes ) KOC.chat.highlightFriendsAndFoes( r.data.newChats['1'].length );
+												if( KOCFIA.conf.chat.highlightLeaders ) KOCFIA.chat.highlightLeaders( $chatGeneral, r.data.newChats['1'].length );
+												if( KOCFIA.conf.chat.highlightFriends || KOCFIA.conf.chat.highlightFoes ) KOCFIA.chat.highlightFriendsAndFoes( r.data.newChats['1'].length );
 											}
 										}
 									} catch(e){
@@ -630,19 +639,19 @@ jQuery(document).ready(function(){
 							break;
 						case 'allianceGetLeaders.php':
 							this.addEventListener("load", function(){
-								if( KOC.conf.chat.active && KOC.conf.chat.highlightLeaders ){
+								if( KOCFIA.conf.chat.active && KOCFIA.conf.chat.highlightLeaders ){
 									console.time('allianceGetLeaders load');
 									var r = JSON.parse(this.responseText);
 									if( r.officers ){
-										KOC.chat.leaders = {};
+										KOCFIA.chat.leaders = {};
 										for( var o in r.officers ){
 											if( r.officers.hasOwnProperty(o) ){
-												KOC.chat.leaders[ r.officers[o].genderAndName ] = r.officers[o].type.toLowerCase();
+												KOCFIA.chat.leaders[ r.officers[o].genderAndName ] = r.officers[o].type.toLowerCase();
 											}
 										}
 									}
-									KOC.chat.highlightLeaders( $chatAlliance, 0 );
-									KOC.chat.highlightLeaders( $chatGeneral, 0 );
+									KOCFIA.chat.highlightLeaders( $chatAlliance, 0 );
+									KOCFIA.chat.highlightLeaders( $chatGeneral, 0 );
 									console.timeEnd('allianceGetLeaders load');
 								}
 							}, false);
@@ -704,14 +713,14 @@ jQuery(document).ready(function(){
 						case 'vacationMode.php':
 						case 'volunteee.php':
 							this.addEventListener("load", function(){
-								window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+								window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 							}, false);
 							break;
 						case 'changeCityName.php':
 							this.addEventListener("load", function(){
 								window.setTimeout(function(){
-									KOC.shared.getCities();
-									KOC.overview.updateFromSeed();
+									KOCFIA.shared.getCities();
+									KOCFIA.overview.updateFromSeed();
 								}, 500);
 							}, false);
 							break;
@@ -723,9 +732,9 @@ jQuery(document).ready(function(){
 							this.addEventListener("load", function(){
 								try{
 									var r = JSON.parse(this.responseText);
-									if( r.updateSeed ) window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+									if( r.updateSeed ) window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 								} catch(e){
-									window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+									window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 									console.warn(e);
 									//console.log(this.responseText);
 								}
@@ -735,9 +744,9 @@ jQuery(document).ready(function(){
 							this.addEventListener("load", function(){
 								try{
 									var r = JSON.parse(this.responseText);
-									if( r.ok ) window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+									if( r.ok ) window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 								} catch(e){
-									window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+									window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 									console.warn(e);
 									//console.log(this.responseText);
 								}
@@ -750,13 +759,13 @@ jQuery(document).ready(function(){
 										window.Modal.hideModal();
 									}
 								}, 300);
-								window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 500);
+								window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 							}, false);
 							break;
 						case 'magicalboxPreview.php':
 							this.addEventListener("load", function(){
 								//using merlinBoxClick flag to avoid closing the modal on game asked by the user
-								if( KOC.conf.general.hideMagicalBoxPreview && !merlinBoxClick ){
+								if( KOCFIA.conf.general.hideMagicalBoxPreview && !merlinBoxClick ){
 									window.setTimeout(function(){ window.Modal.hideModal(); }, 300);
 								}
 								merlinBoxClick = false;
@@ -764,14 +773,14 @@ jQuery(document).ready(function(){
 							break;
 						case 'viewCourt.php':
 							this.addEventListener("load", function(){
-								if( KOC.conf.general.hideOtherPlayersCourtInvitation ){
+								if( KOCFIA.conf.general.hideOtherPlayersCourtInvitation ){
 									window.setTimeout(function(){ window.Modal.hideModal(); }, 300);
 								}
 							}, false);
 							break;
 						case 'rollFriendChance.php':
 							this.addEventListener("load", function(){
-								if( KOC.conf.general.hideFairPopup ){
+								if( KOCFIA.conf.general.hideFairPopup ){
 									//console.log($('#modalContent1').find('.button20.sendfriendbtn'));
 									window.setTimeout(function(){ $('#modalContent1').find('.button20.sendfriendbtn').click(); }, 300);
 								}
@@ -780,8 +789,8 @@ jQuery(document).ready(function(){
 						case '_dispatch.php':
 							this.addEventListener("load", function(){
 								window.setTimeout(function(){
-									KOC.chat.cleanHelp(0); //to clean self construction help messages
-									KOC.overview.updateFromSeed();
+									KOCFIA.chat.cleanHelp(0); //to clean self construction help messages
+									KOCFIA.overview.updateFromSeed();
 								}, 500);
 							}, false);
 							break;
@@ -794,30 +803,30 @@ jQuery(document).ready(function(){
 			},
 		/* CONFIGURATION PANEL */
 			'confPanel': function(){
-				console.info('KOC confPanel function');
-				$head.append( $('<style>').html(kocConfPanelCss) );
+				console.info('KOCFIA confPanel function');
+				$head.append( $('<style>').html(confPanelCss) );
 
-				var $confPanel = $('<div id="koc-conf-panel">');
+				var $confPanel = $('<div id="kocfia-conf-panel">');
 
-				var $optionsSection = $('<div id="koc-options">'),
-					lis = '<li><a href="#koc-options">Options</a></li>',
+				var $optionsSection = $('<div id="kocfia-options">'),
+					lis = '<li><a href="#kocfia-options">Options</a></li>',
 					sections = '';
 
-				var i, modulesLength = KOC.modules.length;
+				var i, modulesLength = KOCFIA.modules.length;
 				for( i = 0; i < modulesLength; i += 1 ){
-					var mod = KOC.modules[i];
-					if( typeof KOC[mod].modPanel == 'function' ){
-						var active = KOC.conf[mod].active;
-						var name = ( KOC.modulesLabel[mod] ? KOC.modulesLabel[mod] : mod.capitalize() );
-						lis += '<li class="koc-conf-panel-tab '+ (active ? 'on' : 'off') +'">';
-						lis += '<a href="#koc-'+ mod +'">'+ name +'</a>';
+					var mod = KOCFIA.modules[i];
+					if( typeof KOCFIA[mod].modPanel == 'function' ){
+						var active = KOCFIA.conf[mod].active;
+						var name = ( KOCFIA.modulesLabel[mod] ? KOCFIA.modulesLabel[mod] : mod.capitalize() );
+						lis += '<li class="kocfia-conf-panel-tab '+ (active ? 'on' : 'off') +'">';
+						lis += '<a href="#kocfia-'+ mod +'">'+ name +'</a>';
 						lis += '</li>';
-						sections += '<div id="koc-'+ mod +'"></div>';
+						sections += '<div id="kocfia-'+ mod +'"></div>';
 					}
 				}
 
 				console.time('shared option panel');
-				KOC.shared.optionPanel( $optionsSection );
+				KOCFIA.shared.optionPanel( $optionsSection );
 				console.timeEnd('shared option panel');
 
 				//manage the checked status change of the options
@@ -836,7 +845,7 @@ jQuery(document).ready(function(){
 							status = null;
 
 						if( func == 'active' ){
-							KOC.$confPanelNav.find('li').find('a').filter('[href=#koc-'+ mod +']').parent().toggleClass('on off');
+							KOCFIA.$confPanelNav.find('li').find('a').filter('[href=#kocfia-'+ mod +']').parent().toggleClass('on off');
 						}
 
 						if( $this.is(':checked') ){
@@ -849,37 +858,37 @@ jQuery(document).ready(function(){
 							else func += 'Off';
 						}
 
-						KOC.conf[ mod ][ infos[1] ] = status;
+						KOCFIA.conf[ mod ][ infos[1] ] = status;
 
 						if( mod == 'general' ){
 							if( infos[1] == 'reload' ){
-								KOC.shared.reloadCountdown(status);
+								KOCFIA.shared.reloadCountdown(status);
 							}
 							if( infos[1] == 'refresh' ){
-								KOC.shared.refreshCountdown(status);
+								KOCFIA.shared.refreshCountdown(status);
 							}
 						}
 
 						if( $this.is('input[type=radio]') ){
 							var $linked = $this.siblings('input').filter('[type=radio]').each(function(){
 								var infos = this.id.split('-');
-								KOC.conf[ infos[0] ][ infos[1] ] = 0;
+								KOCFIA.conf[ infos[0] ][ infos[1] ] = 0;
 								var func = infos[1] + 'Off';
 
-								if( typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
+								if( typeof KOCFIA[ mod ][ func ] == 'function' ) KOCFIA[ mod ][ func ]();
 							});
 						}
 
-						KOC.shared.storeConf();
+						KOCFIA.shared.storeConf();
 
-						if( KOC[ mod ] && typeof KOC[ mod ][ func ] == 'function' ) KOC[ mod ][ func ]();
+						if( KOCFIA[ mod ] && typeof KOCFIA[ mod ][ func ] == 'function' ) KOCFIA[ mod ][ func ]();
 						//else console.warn('not a function', mod, func);
 					})
 					.on('change', '.conf-choice', function(){
 						var $this = $(this),
 							infos = this.id.split('-');
-						KOC.conf[ infos[0] ][ infos[1] ] = $this.val();
-						KOC.shared.storeConf();
+						KOCFIA.conf[ infos[0] ][ infos[1] ] = $this.val();
+						KOCFIA.shared.storeConf();
 					})
 					.on('click', '.conf-action', function(e){
 						e.preventDefault();
@@ -887,23 +896,26 @@ jQuery(document).ready(function(){
 							infos = $this.attr('rel').split('-'),
 							param = $this.data('param');
 						if( param ){
-							KOC[ infos[0] ][ infos[1] ](param);
+							KOCFIA[ infos[0] ][ infos[1] ](param);
 						} else {
-							KOC[ infos[0] ][ infos[1] ]();
+							KOCFIA[ infos[0] ][ infos[1] ]();
 						}
 					});
 
 				$confPanel
 					.append( '<span class="ui-icon ui-icon-close"></span>' )
-					.append( '<nav id="koc-conf-panel-tabs"><ul>' + lis + '</ul></nav>' )
+					.append( '<nav id="kocfia-conf-panel-tabs"><ul>' + lis + '</ul></nav>' )
 					.append( $optionsSection )
 					.append( sections )
 					.draggable({
 						helper: "original",
+						appendTo: 'body',
+						containment: 'window',
+						scroll: true,
 						distance: 20,
 						stop: function(event, ui){
-							KOC.conf.confPanel.position = ui.position;
-							KOC.shared.storeConf();
+							KOCFIA.conf.confPanel.position = ui.position;
+							KOCFIA.shared.storeConf();
 						}
 					})
 					.resizable({
@@ -911,149 +923,149 @@ jQuery(document).ready(function(){
 						minHeight: 250,
 						handles: 'n, e, s, w, ne, se, sw, nw',
 						resize: function(event, ui){
-							KOC.$confPanelTabs.css('height', KOC.calcConfPanelInnerHeight());
+							KOCFIA.$confPanelTabs.css('height', KOCFIA.calcConfPanelInnerHeight());
 						},
 						stop: function(event, ui){
-							KOC.conf.confPanel.size = ui.size;
-							KOC.shared.storeConf();
+							KOCFIA.conf.confPanel.size = ui.size;
+							KOCFIA.shared.storeConf();
 						}
 					})
 					.tabs({
 						collapsible: true,
-						selected: KOC.conf.confPanel.selected,
+						selected: KOCFIA.conf.confPanel.selected,
 						select: function(event, ui){
 							//save the selected panel index
-							KOC.conf.confPanel.selected = ui.index;
-							KOC.shared.storeConf();
+							KOCFIA.conf.confPanel.selected = ui.index;
+							KOCFIA.shared.storeConf();
 
 							//dynamic generation of the panel on first call
 							if( $(ui.panel).html().length == 0 ){
 								var mod = ui.panel.id.split('-')[1];
-								KOC[mod].modPanel();
+								KOCFIA[mod].modPanel();
 							}
 						},
 					})
 					.css({
-						'top': KOC.conf.confPanel.position.top,
-						'left': KOC.conf.confPanel.position.left,
-						'width': KOC.conf.confPanel.size.width,
-						'height': KOC.conf.confPanel.size.height
+						'top': KOCFIA.conf.confPanel.position.top,
+						'left': KOCFIA.conf.confPanel.position.left,
+						'width': KOCFIA.conf.confPanel.size.width,
+						'height': KOCFIA.conf.confPanel.size.height
 					})
 					.find('.ui-icon-close').click(function(e){
 						e.preventDefault();
-						KOC.$confPanel.hide();
-						KOC.conf.confPanel.visible = 0;
-						KOC.shared.storeConf();
+						KOCFIA.$confPanel.hide();
+						KOCFIA.conf.confPanel.visible = 0;
+						KOCFIA.shared.storeConf();
 					});
 
-				var $kocConfPanelToggle = $('<button id="koc-conf-panel-toggle">').html('KOC');
-				$kocConfPanelToggle.click(function(){
+				var $confPanelToggle = $('<button id="kocfia-conf-panel-toggle">').html('KOCFIA');
+				$confPanelToggle.click(function(){
 					console.info('$kocConfPanelToggle click');
-					KOC.$confPanel.toggle();
-					KOC.conf.confPanel.visible = (KOC.$confPanel.is(':visible') ? 1 : 0);
-					KOC.shared.storeConf();
+					KOCFIA.$confPanel.toggle();
+					KOCFIA.conf.confPanel.visible = (KOCFIA.$confPanel.is(':visible') ? 1 : 0);
+					KOCFIA.shared.storeConf();
 
-					KOC.$confPanelTabs.css('height', KOC.calcConfPanelInnerHeight());
+					KOCFIA.$confPanelTabs.css('height', KOCFIA.calcConfPanelInnerHeight());
 				});
 
 				$body.append( $confPanel );
-				$('#koc-options').accordion({collapsible: true, autoHeight: false});
+				$('#kocfia-options').accordion({collapsible: true, autoHeight: false});
 
-				$('<div id="koc-buttons">')
-					.html( $kocConfPanelToggle )
+				$('<div id="kocfia-buttons">')
+					.html( $confPanelToggle )
 					.insertBefore( $('#main_engagement_tabs') );
-				KOC.$buttons = $('#koc-buttons');
+				KOCFIA.$buttons = $('#kocfia-buttons');
 
-				KOC.$confPanel = $('#koc-conf-panel');
-				KOC.$confPanelNav = $('#koc-conf-panel-tabs');
-				KOC.$confPanelTabs = KOC.$confPanel.find('.ui-tabs-panel');
+				KOCFIA.$confPanel = $('#kocfia-conf-panel');
+				KOCFIA.$confPanelNav = $('#kocfia-conf-panel-tabs');
+				KOCFIA.$confPanelTabs = KOCFIA.$confPanel.find('.ui-tabs-panel');
 
 				for( i = 0; i < modulesLength; i += 1 ){
-					var mod = KOC.modules[i];
-					if( typeof KOC[ mod ].modPanel == 'function' ) KOC[ mod ].modPanel();
+					var mod = KOCFIA.modules[i];
+					if( typeof KOCFIA[ mod ].modPanel == 'function' ) KOCFIA[ mod ].modPanel();
 				}
 
-				if( KOC.conf.confPanel.visible ){
-					KOC.$confPanel.show();
-					KOC.$confPanelTabs.css('height', KOC.calcConfPanelInnerHeight());
+				if( KOCFIA.conf.confPanel.visible ){
+					KOCFIA.$confPanel.show();
+					KOCFIA.$confPanelTabs.css('height', KOCFIA.calcConfPanelInnerHeight());
 				}
 			},
 			'calcConfPanelInnerHeight': function(){
-				return KOC.$confPanel.innerHeight() - KOC.$confPanelNav.height() - 20;
+				return KOCFIA.$confPanel.innerHeight() - KOCFIA.$confPanelNav.height() - 20;
 			},
 		/* SHARED */
 			'shared': {
 				'storeConf': function(){
-					console.info('KOC storeConf function', KOC.conf);
-					localStorage.setObject('koc_conf_' + KOC.storeUniqueId, KOC.conf);
+					console.info('KOCFIA storeConf function', KOCFIA.conf);
+					localStorage.setObject('kocfia_conf_' + KOCFIA.storeUniqueId, KOCFIA.conf);
 				},
 				'cleanLocalStorage': function(){
-					console.info('KOC shared cleanLocalStorage function');
-					var i, length = KOC.stored.length;
+					console.info('KOCFIA shared cleanLocalStorage function');
+					var i, length = KOCFIA.stored.length;
 					for( i = 0; i < length; i += 1 ){
-						localStorage.removeItem('koc_' + KOC.stored[i] + '_' + KOC.storeUniqueId);
+						localStorage.removeItem('kocfia_' + KOCFIA.stored[i] + '_' + KOCFIA.storeUniqueId);
 					}
-					$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
+					$('#kocfia-map-load-saved').find('option').filter(':gt(0)').remove();
 				},
 				'optionPanel': function($optionsSection){
-					console.info('KOC shared optionPanel function');
+					console.info('KOCFIA shared optionPanel function');
 					var code = '<h3>Global</h3>';
 						code += '<div>';
-						code += KOC.shared.generateButton('shared', 'cleanLocalStorage', 'Remise à zèro des données persistantes', null);
-						code += KOC.shared.generateButton('shared', 'reloadGame', 'Recharger la page');
-						code += KOC.shared.generateCheckbox('general', 'refresh', 'Rafraîchir les données toutes les ', KOC.conf.general.refresh).replace(/<\/p>/, '');
-						code += KOC.shared.generateInput('general', 'refreshFrequency', ' minutes', KOC.conf.general.refreshFrequency).replace(/<p>/, '');
-						code += KOC.shared.generateCheckbox('general', 'reload', 'Recharger toutes les ', KOC.conf.general.reload).replace(/<\/p>/, '');
-						code += KOC.shared.generateInput('general', 'reloadFrequency', ' minutes', KOC.conf.general.reloadFrequency).replace(/<p>/, '');
-						code += KOC.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin', KOC.conf.general.hideMagicalBoxPreview);
-						code += KOC.shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOC.conf.general.hideOtherPlayersCourtInvitation);
-						code += KOC.shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fêtes foraines (avec envoie)', KOC.conf.general.hideFairPopup);
+						code += KOCFIA.shared.generateButton('shared', 'cleanLocalStorage', 'Remise Ã  zÃ¨ro des donnÃ©es persistantes', null);
+						code += KOCFIA.shared.generateButton('shared', 'reloadGame', 'Recharger la page');
+						code += KOCFIA.shared.generateCheckbox('general', 'refresh', 'RafraÃ®chir les donnÃ©es toutes les ', KOCFIA.conf.general.refresh).replace(/<\/p>/, '');
+						code += KOCFIA.shared.generateInput('general', 'refreshFrequency', ' minutes', KOCFIA.conf.general.refreshFrequency).replace(/<p>/, '');
+						code += KOCFIA.shared.generateCheckbox('general', 'reload', 'Recharger toutes les ', KOCFIA.conf.general.reload).replace(/<\/p>/, '');
+						code += KOCFIA.shared.generateInput('general', 'reloadFrequency', ' minutes', KOCFIA.conf.general.reloadFrequency).replace(/<p>/, '');
+						code += KOCFIA.shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boÃ®te magique de Merlin', KOCFIA.conf.general.hideMagicalBoxPreview);
+						code += KOCFIA.shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOCFIA.conf.general.hideOtherPlayersCourtInvitation);
+						code += KOCFIA.shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fÃªtes foraines (avec envoie)', KOCFIA.conf.general.hideFairPopup);
 						code += '</div>';
 					$optionsSection.append( code );
 
-					var i, length = KOC.modules.length;
+					var i, length = KOCFIA.modules.length;
 					for( i = 0; i < length; i += 1 ){
-						KOC[ KOC.modules[i] ].confPanel( $optionsSection );
+						KOCFIA[ KOCFIA.modules[i] ].confPanel( $optionsSection );
 					}
 				},
 				'reloadCountdown': function(status){
-					console.info('KOC shared reloadCountdown function', status);
+					console.info('KOCFIA shared reloadCountdown function', status);
 					if( status ){
-						reloadTimer = parseFloat(KOC.conf.general.reloadFrequency) * 60 * 1000;
+						reloadTimer = parseFloat(KOCFIA.conf.general.reloadFrequency) * 60 * 1000;
 						reloadTimeout = window.setTimeout(function(){
-							console.info('KOC shared reloadCountdown timeout function');
-							$('#koc-reload').submit();
+							console.info('KOCFIA shared reloadCountdown timeout function');
+							$('#kocfia-reload').submit();
 							clearInterval( reloadInterval );
 						}, reloadTimer - 1);
 
-						KOC.$reloadTimer.show().find('.koc-timer').html( KOC.shared.readableDuration(reloadTimer / 1000) );
+						KOCFIA.$reloadTimer.show().find('.kocfia-timer').html( KOCFIA.shared.readableDuration(reloadTimer / 1000) );
 						reloadInterval = window.setInterval(function(){
 							reloadTimer -= 1000;
-							KOC.$reloadTimer.find('.koc-timer').html( KOC.shared.readableDuration(reloadTimer / 1000) );
+							KOCFIA.$reloadTimer.find('.kocfia-timer').html( KOCFIA.shared.readableDuration(reloadTimer / 1000) );
 						}, 1000);
 					} else if( reloadTimeout ){
 						clearTimeout( reloadTimeout );
 						clearInterval( reloadInterval );
-						KOC.$reloadTimer.hide();
+						KOCFIA.$reloadTimer.hide();
 					}
 				},
 				'refreshCountdown': function(status){
-					console.info('KOC shared refreshCountdown function', status);
+					console.info('KOCFIA shared refreshCountdown function', status);
 					if( status ){
 						refreshTimeout = window.setTimeout(function(){
-							console.info('KOC shared refreshCountdown timeout function');
-							$('#koc-refresh-seed').trigger('click');
-						}, parseFloat(KOC.conf.general.refreshFrequency) * 60 * 1000);
+							console.info('KOCFIA shared refreshCountdown timeout function');
+							$('#kocfia-refresh-seed').trigger('click');
+						}, parseFloat(KOCFIA.conf.general.refreshFrequency) * 60 * 1000);
 					} else if( refreshTimeout ){
 						clearTimeout( refreshTimeout );
 					}
 				},
 				'getServer': function(){
-					console.info('koc shared getServer function');
+					console.info('kocfia shared getServer function');
 					return window.domainName;
 				},
 				'getUserId': function(){
-					console.info('koc shared getUserId function');
+					console.info('kocfia shared getUserId function');
 					return window.kabamuid;
 				},
 				'getCities': function(){
@@ -1061,17 +1073,17 @@ jQuery(document).ready(function(){
 					var i, length = window.seed.cities.length;
 					for( i = 0; i < length; i += 1 ){
 						var c = window.seed.cities[i];
-						KOC.cities.push( {'id': c[0], 'name': c[1], 'coords': {'x': c[2], 'y': c[3]}, 'roman': window.roman[i]} );
-						KOC.citiesId.push( c[0] );
+						KOCFIA.cities.push( {'id': c[0], 'name': c[1], 'coords': {'x': c[2], 'y': c[3]}, 'roman': window.roman[i]} );
+						KOCFIA.citiesId.push( c[0] );
 					}
 					console.timeEnd('cities');
 				},
 				'getCityById': function( cityId ){
 					if( cityId.indexOf('city') != 0 ) cityId = cityId.replace(/city/, '');
-					var i, length = KOC.cities.length;
+					var i, length = KOCFIA.cities.length;
 					for( i = 0; i < length; i += 1 ){
-						if( KOC.cities[i].id == cityId ){
-							return KOC.cities[i];
+						if( KOCFIA.cities[i].id == cityId ){
+							return KOCFIA.cities[i];
 						}
 					}
 					return false;
@@ -1226,11 +1238,11 @@ jQuery(document).ready(function(){
 					return code;
 				},
 				'marchTimeCalculator': function(cityId, troops, from_x, from_y, is_round_trip, items_applied){
-					console.info('koc shared marchTimeCalculator function', cityId, troops, from_x, from_y, is_round_trip, items_applied);
+					console.info('kocfia shared marchTimeCalculator function', cityId, troops, from_x, from_y, is_round_trip, items_applied);
 					var speed = 99999,
 						total_troops = 0,
 						time = 0,
-						city = KOC.shared.getCityById( cityId ),
+						city = KOCFIA.shared.getCityById( cityId ),
 						d = new Date(),
 						ts = parseInt(d.getTime() / 1000, 10);
 
@@ -1277,21 +1289,6 @@ jQuery(document).ready(function(){
 
 					return time;
 				},
-				'getRallyPointLevel': function( cityId ){
-					var level = 0;
-					if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
-					for( var b in window.seed.buildings[cityId] ){
-						if( window.seed.buildings[cityId].hasOwnProperty(b) ){
-							var building = window.seed.buildings[cityId][b];
-
-							if( building[0] == 12 ){
-								level = parseInt(building[1], 10);
-								break;
-							}
-						}
-					}
-					return level;
-				},
 				'getAvailableKnights': function( cityId ){
 					if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
 					var leaders = window.seed.leaders[cityId],
@@ -1320,7 +1317,7 @@ jQuery(document).ready(function(){
 					return code;
 				},
 				'freeKnights': function( cityId ){
-					console.info('KOC shared freeKnights function', cityId);
+					console.info('KOCFIA shared freeKnights function', cityId);
 					if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
 					var leaders = window.seed.leaders[cityId],
 						attacks = window.seed.queue_atkp[cityId],
@@ -1350,25 +1347,11 @@ jQuery(document).ready(function(){
 				},
 				'updatingSeed': false,
 				'updateSeed': function(){
-					if( !KOC.shared.updatingSeed ){
-						KOC.shared.updatingSeed = true;
+					if( !KOCFIA.shared.updatingSeed ){
+						KOCFIA.shared.updatingSeed = true;
 						window.update_seed_ajax(true, null);
-						window.setTimeout(function(){ KOC.shared.updatingSeed = false; }, 10000);
+						window.setTimeout(function(){ KOCFIA.shared.updatingSeed = false; }, 10000);
 					}
-				},
-				'fetchMarch': function( id ){
-					console.info('KOC shared fetchMarch function', id);
-					var params = window.g_ajaxparams;
-					params.rid = id;
-					$.ajax({
-						url: window.g_ajaxpath + "ajax/fetchMarch.php" + window.g_ajaxsuffix,
-						type: 'post',
-						data: params,
-						dataType: 'json',
-						success: function(result){
-							console.debug( result );
-						}
-					});
 				},
 				'getDistance': function( fromX, fromY, toX, toY ){
 					var max = 750;
@@ -1384,7 +1367,7 @@ jQuery(document).ready(function(){
 					return Math.round(100 * Math.sqrt(x * x + y * y)) / 100;
 				},
 				'buildingHighestLevel': function( cityId, buildingId ){
-					console.info('KOC shared buildingHighestLevel function');
+					console.info('KOCFIA shared buildingHighestLevel function');
 
 					if( cityId.indexOf('city') == -1 ){
 						cityId = 'city' + cityId;
@@ -1401,8 +1384,23 @@ jQuery(document).ready(function(){
 					}
 					return level;
 				},
+				'barracksCount': function( cityId ){
+					console.info('KOCFIA shared barracksCount function');
+
+					if( cityId.indexOf('city') == -1 ){
+						cityId = 'city' + cityId;
+					}
+
+					var b, count = 0;
+					for( b in window.seed.buildings[cityId] ){
+						if( window.seed.buildings[cityId].hasOwnProperty(b) ){
+							if( window.seed.buildings[cityId][b][0] == 13 ) count += 1;
+						}
+					}
+					return count;
+				},
 				'forceMarchUpdate': function( attack ){
-					console.info('KOC shared forceMarchUpdate function');
+					console.info('KOCFIA shared forceMarchUpdate function');
 					if( window.seed.queue_atkp[ 'city' + attack.cityId ] ){
 						var mParams = window.g_ajaxparams,
 							i = 0, j, march,
@@ -1414,12 +1412,12 @@ jQuery(document).ready(function(){
 						}
 
 						var checkMarch = function(i){
-							console.info('KOC shared forceMarchUpdate checkMarch function');
+							console.info('KOCFIA shared forceMarchUpdate checkMarch function');
 							status[i] = false;
 							march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
 							//console.log('march', i, march);
 							if( march ){
-								if( !march.hasOwnProperty('kocUpdated') ){
+								if( !march.hasOwnProperty('kocfiaUpdated') ){
 									var mParams = window.g_ajaxparams;
 									mParams.rid = attack.marching[i];
 									$.ajax({
@@ -1448,7 +1446,7 @@ jQuery(document).ready(function(){
 												window.attack_recall(attack.marching[i], 1, attack.cityId);
 											}
 
-											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
+											window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocfiaUpdated = true;
 										} else {
 											console.log(data);
 										}
@@ -1459,7 +1457,7 @@ jQuery(document).ready(function(){
 											checkMarch(i);
 										} else {
 											for( var j = 0; j < status.length; j += 1 ){
-												if( !status ) return setTimeout(function(){ KOC.shared.forceMarchUpdate( attack ); }, 10000);
+												if( !status ) return setTimeout(function(){ KOCFIA.shared.forceMarchUpdate( attack ); }, 10000);
 											}
 										}
 									});
@@ -1472,7 +1470,7 @@ jQuery(document).ready(function(){
 									 checkMarch(i);
 								} else {
 									for( var j = 0; j < status.length; j += 1 ){
-										if( !status ) return setTimeout(function(){ KOC.shared.forceMarchUpdate( attack ); }, 10000);
+										if( !status ) return setTimeout(function(){ KOCFIA.shared.forceMarchUpdate( attack ); }, 10000);
 									}
 								}
 							}
@@ -1482,7 +1480,7 @@ jQuery(document).ready(function(){
 					}
 				},
 				'recallWaves': function( attack ){
-					console.info('KOC shared recallWaves function', attack);
+					console.info('KOCFIA shared recallWaves function', attack);
 					if( attack.marching.length ){
 						//recall previous waves
 						var k, length = attack.marching.length;
@@ -1496,35 +1494,35 @@ jQuery(document).ready(function(){
 
 	//modules
 		/* FACEBOOK WALL POST POPUP */
-			KOC.fbWallPopup = {
+			KOCFIA.fbWallPopup = {
 				'options': {
 					'active': 0,
 					'cancel': 0,
 					'post': 0,
 					'privacyLevel': null,
 				},
-				'privacyLevelList': {'values': [80, 50, 40, 10], 'labels': ['public', 'amis d\'amis', 'amis', 'privé']},
+				'privacyLevelList': {'values': [80, 50, 40, 10], 'labels': ['public', 'amis d\'amis', 'amis', 'privÃ©']},
 				'confPanel': function( $section ){
-					console.info('KOC fbWallPopup confPanel function');
+					console.info('KOCFIA fbWallPopup confPanel function');
 					var code = '<h3>Popup facebook pour poster sur le mur</h3>';
 						code += '<div>';
-						code += KOC.shared.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOC.conf.fbWallPopup.active);
-						code += KOC.shared.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOC.conf.fbWallPopup.cancel, KOC.conf.fbWallPopup.post]);
-						code += KOC.shared.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilité', KOC.conf.fbWallPopup.privacyLevel, KOC.fbWallPopup.privacyLevelList);
+						code += KOCFIA.shared.generateCheckbox('fbWallPopup', 'active', 'Activer le module', KOCFIA.conf.fbWallPopup.active);
+						code += KOCFIA.shared.generateRadio('fbWallPopup', 'action', ['cancel', 'post'], ['annulation automatique', 'publication automatique'], [KOCFIA.conf.fbWallPopup.cancel, KOCFIA.conf.fbWallPopup.post]);
+						code += KOCFIA.shared.generateSelect('fbWallPopup', 'privacyLevel', 'niveau de visibilitÃ©', KOCFIA.conf.fbWallPopup.privacyLevel, KOCFIA.fbWallPopup.privacyLevelList);
 						code += '</div>';
 
 					$section.append( code );
 				},
 				'on': function(){
-					console.info('koc fbWallPopup on function');
+					console.info('kocfia fbWallPopup on function');
 				},
 				'off': function(){
-					console.info('koc fbWallPopup off function');
+					console.info('kocfia fbWallPopup off function');
 				},
 			};
 
 		/* CHAT */
-			KOC.chat = {
+			KOCFIA.chat = {
 				'options': {
 					'active': 1,
 					'moveable': 1,
@@ -1542,49 +1540,49 @@ jQuery(document).ready(function(){
 				'foesList': [],
 				'leaders': {},
 				'confPanel': function( $section ){
-					console.info('KOC chat confPanel function');
+					console.info('KOCFIA chat confPanel function');
 					var code = '<h3>Chat</h3>';
 						code += '<div>';
-						code += KOC.shared.generateCheckbox('chat', 'active', 'Activer le module', KOC.conf.chat.active);
-						code += KOC.shared.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOC.conf.chat.moveable);
-						code += KOC.shared.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOC.conf.chat.cleanHelp);
-						code += KOC.shared.generateButton('chat', 'onRight', 'Repositionner le chat à droite');
-						code += KOC.shared.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOC.conf.chat.highlightLeaders);
-						code += KOC.shared.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie');
-						code += KOC.shared.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat Général)', KOC.conf.chat.highlightFriends);
-						code += KOC.shared.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat Général)', KOC.conf.chat.highlightFoes);
-						code += KOC.shared.generateButton('chat', 'cleanFriendsList', 'Vider la liste d\'amis');
-						code += KOC.shared.generateButton('chat', 'cleanFoesList', 'Vider la liste d\'ennemis');
+						code += KOCFIA.shared.generateCheckbox('chat', 'active', 'Activer le module', KOCFIA.conf.chat.active);
+						code += KOCFIA.shared.generateCheckbox('chat', 'moveable', 'Chat dÃ©placable et redimensionnable', KOCFIA.conf.chat.moveable);
+						code += KOCFIA.shared.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOCFIA.conf.chat.cleanHelp);
+						code += KOCFIA.shared.generateButton('chat', 'onRight', 'Repositionner le chat Ã  droite');
+						code += KOCFIA.shared.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats GÃ©nÃ©ral et Alliance)', KOCFIA.conf.chat.highlightLeaders);
+						code += KOCFIA.shared.generateButton('chat', 'getLeadersList', 'RaffraÃ®chir la liste des joueurs de la chancellerie');
+						code += KOCFIA.shared.generateCheckbox('chat', 'highlightFriends', 'Changer la couleur des messages des amis (chat GÃ©nÃ©ral)', KOCFIA.conf.chat.highlightFriends);
+						code += KOCFIA.shared.generateCheckbox('chat', 'highlightFoes', 'Changer la couleur des messages des ennemis (chat GÃ©nÃ©ral)', KOCFIA.conf.chat.highlightFoes);
+						code += KOCFIA.shared.generateButton('chat', 'cleanFriendsList', 'Vider la liste d\'amis');
+						code += KOCFIA.shared.generateButton('chat', 'cleanFoesList', 'Vider la liste d\'ennemis');
 						code += '</div>';
 
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC chat modPanel function');
-					var $section = KOC.$confPanel.find('#koc-chat').html('');
+					console.info('KOCFIA chat modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-chat').html('');
 
 					var friends = '',
-						i, length = KOC.chat.friendsList.length;
+						i, length = KOCFIA.chat.friendsList.length;
 					for( i = 0; i < length; i += 1 ){
-						friends += '<li><a href="#">'+ KOC.chat.friendsList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
+						friends += '<li><a href="#">'+ KOCFIA.chat.friendsList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 					}
 
 					var foes = '';
-					length = KOC.chat.foesList.length;
+					length = KOCFIA.chat.foesList.length;
 					for( i = 0; i < length; i += 1 ){
-						foes += '<li><a href="#">'+ KOC.chat.foesList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
+						foes += '<li><a href="#">'+ KOCFIA.chat.foesList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 					}
 
 					var code = '<h3>Liste d\'amis</h3>';
-						code += '<p><label for="koc-friend">Joueur : </label>';
-						code += '<input type="text" name="koc-friend" id="koc-friend" />';
+						code += '<p><label for="kocfia-friend">Joueur : </label>';
+						code += '<input type="text" name="kocfia-friend" id="kocfia-friend" />';
 						code += '<button rel="friends">Ajouter</button></p>';
-						code += '<ul class="koc-chat-list" rel="friends">' + friends + '</ul>';
+						code += '<ul class="kocfia-chat-list" rel="friends">' + friends + '</ul>';
 						code += '<h3>Liste d\'ennemis</h3>';
-						code += '<p><label for="koc-foe">Joueur : </label>';
-						code += '<input type="text" name="koc-foe" id="koc-foe" />';
+						code += '<p><label for="kocfia-foe">Joueur : </label>';
+						code += '<input type="text" name="kocfia-foe" id="kocfia-foe" />';
 						code += '<button rel="foes">Ajouter</button></p>';
-						code += '<ul class="koc-chat-list" rel="foes">' + foes + '</ul>';
+						code += '<ul class="kocfia-chat-list" rel="foes">' + foes + '</ul>';
 
 					$section.append( code )
 						.on('click', 'button', function(e){
@@ -1594,22 +1592,22 @@ jQuery(document).ready(function(){
 								rel = $this.attr('rel'),
 								list = rel + 'List',
 								name = $this.parent().find('input').val(),
-								$ul = $('#koc-chat').find('ul').filter('[rel='+ rel +']');
+								$ul = $('#kocfia-chat').find('ul').filter('[rel='+ rel +']');
 
 							if( !$ul.find('li').find('a').filter(':contains("'+ name +'")').length ){
-								KOC.chat[list].push( name );
-								KOC.chat[list].sort();
-								var f = '', i, length = KOC.chat[list].length;
+								KOCFIA.chat[list].push( name );
+								KOCFIA.chat[list].sort();
+								var f = '', i, length = KOCFIA.chat[list].length;
 								for( i = 0; i < length; i += 1 ){
-									f += '<li><a href="#">'+ KOC.chat[list][ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
+									f += '<li><a href="#">'+ KOCFIA.chat[list][ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>'
 								}
 								$ul.html( f );
 
-								if( rel == 'friends' ) KOC.chat.storeFriendsList();
-								else if( rel == 'foes' ) KOC.chat.storeFoesList();
+								if( rel == 'friends' ) KOCFIA.chat.storeFriendsList();
+								else if( rel == 'foes' ) KOCFIA.chat.storeFoesList();
 
-								if( KOC.chat.highlightFriends || KOC.chat.highlightFoes ){
-									KOC.chat.highlightFriendsAndFoes(0);
+								if( KOCFIA.chat.highlightFriends || KOCFIA.chat.highlightFoes ){
+									KOCFIA.chat.highlightFriendsAndFoes(0);
 								}
 							}
 						})
@@ -1617,9 +1615,9 @@ jQuery(document).ready(function(){
 							var $li = $(this).parent(),
 								rel = $li.parent().attr('rel'),
 								list = rel + 'List';
-							KOC.chat[list].splice(KOC.chat[list].indexOf( $li.find('a').text() ), 1);
-							if( rel == 'friends' ) KOC.chat.storeFriendsList();
-							else if( rel == 'foes' ) KOC.chat.storeFoesList();
+							KOCFIA.chat[list].splice(KOCFIA.chat[list].indexOf( $li.find('a').text() ), 1);
+							if( rel == 'friends' ) KOCFIA.chat.storeFriendsList();
+							else if( rel == 'foes' ) KOCFIA.chat.storeFoesList();
 							$li.remove();
 						})
 						.on('click', 'a', function(e){
@@ -1629,19 +1627,19 @@ jQuery(document).ready(function(){
 						});
 				},
 				'on': function(){
-					console.info('KOC chat on function');
+					console.info('KOCFIA chat on function');
 					//placement
-						if( KOC.conf.chat.moveable ){
-							KOC.chat.moveableOn();
+						if( KOCFIA.conf.chat.moveable ){
+							KOCFIA.chat.moveableOn();
 						}
 
-						if( KOC.conf.chat.onRight && KOC.conf.chat.position.top == 0 ){
-							KOC.chat.onRight();
+						if( KOCFIA.conf.chat.onRight && KOCFIA.conf.chat.position.top == 0 ){
+							KOCFIA.chat.onRight();
 						}
 
 					//clean help
-						if( KOC.conf.chat.cleanHelp ){
-							KOC.chat.cleanHelpOn();
+						if( KOCFIA.conf.chat.cleanHelp ){
+							KOCFIA.chat.cleanHelpOn();
 						} else {
 							var hideChatRules = function(){
 								var tmp = $chatAlliance.find('.noalliance');
@@ -1655,16 +1653,16 @@ jQuery(document).ready(function(){
 						}
 
 					//highlightleaders
-						if( KOC.conf.chat.highlightLeaders ){
-							KOC.chat.highlightLeadersOn();
+						if( KOCFIA.conf.chat.highlightLeaders ){
+							KOCFIA.chat.highlightLeadersOn();
 						}
 
 					//highlightFriendsAndFoes
-						if( $.isEmptyObject( KOC.chat.friendsList ) ){
+						if( $.isEmptyObject( KOCFIA.chat.friendsList ) ){
 							try{
-								var persistentFriendsList = localStorage.getObject('koc_chat_friends_list_' + KOC.storeUniqueId);
+								var persistentFriendsList = localStorage.getObject('kocfia_chat_friends_list_' + KOCFIA.storeUniqueId);
 								if( persistentFriendsList ){
-									KOC.chat.friendsList = persistentFriendsList;
+									KOCFIA.chat.friendsList = persistentFriendsList;
 								}
 							} catch(e){
 								console.error(e);
@@ -1672,45 +1670,48 @@ jQuery(document).ready(function(){
 						}
 
 					//highlightFoes
-						if( $.isEmptyObject( KOC.chat.foesList ) ){
+						if( $.isEmptyObject( KOCFIA.chat.foesList ) ){
 							try{
-								var persistentFoesList = localStorage.getObject('koc_chat_foes_list_' + KOC.storeUniqueId);
+								var persistentFoesList = localStorage.getObject('kocfia_chat_foes_list_' + KOCFIA.storeUniqueId);
 								if( persistentFoesList ){
-									KOC.chat.foesList = persistentFoesList;
+									KOCFIA.chat.foesList = persistentFoesList;
 								}
 							} catch(e){
 								console.error(e);
 							}
 						}
 
-						if( KOC.conf.chat.highlightFriends ){
-							KOC.chat.highlightFriendsOn();
+						if( KOCFIA.conf.chat.highlightFriends ){
+							KOCFIA.chat.highlightFriendsOn();
 						}
 
-						if( KOC.conf.chat.highlightFoes ){
-							KOC.chat.highlightFoesOn();
+						if( KOCFIA.conf.chat.highlightFoes ){
+							KOCFIA.chat.highlightFoesOn();
 						}
 				},
 				'off': function(){
-					console.info('KOC chat off function');
-					KOC.chat.moveableOff();
-					KOC.chat.cleanHelpOff();
-					KOC.chat.highlightLeadersOff();
-					KOC.chat.highlightFriendsOff();
-					KOC.chat.highlightFoesOff();
+					console.info('KOCFIA chat off function');
+					KOCFIA.chat.moveableOff();
+					KOCFIA.chat.cleanHelpOff();
+					KOCFIA.chat.highlightLeadersOff();
+					KOCFIA.chat.highlightFriendsOff();
+					KOCFIA.chat.highlightFoesOff();
 				},
 				/* moveable */
 					'moveableOn': function(){
-						console.info('KOC chat moveableOn function');
-						$head.append( $('<style id="koc-chat-moveable">').html(kocChatMoveableCss) );
+						console.info('KOCFIA chat moveableOn function');
+						$head.append( $('<style id="kocfia-chat-moveable">').html(chatMoveableCss) );
 
 						$chat
 							.draggable({
 								helper: "original",
+								appendTo: 'body',
+								containment: 'window',
+								scroll: true,
 								distance: 20,
 								stop: function(event, ui){
-									KOC.conf.chat.position = ui.position;
-									KOC.shared.storeConf();
+									KOCFIA.conf.chat.position = ui.position;
+									KOCFIA.shared.storeConf();
 								}
 							})
 							.resizable({
@@ -1727,23 +1728,23 @@ jQuery(document).ready(function(){
 										.siblings('.button20').css('left', function(){ return ui.size.width - 55; });
 								},
 								'stop': function(event, ui){
-									KOC.conf.chat.size = ui.size;
-									KOC.shared.storeConf();
+									KOCFIA.conf.chat.size = ui.size;
+									KOCFIA.shared.storeConf();
 								}
 							})
 							.css({
-								'top': KOC.conf.chat.position.top,
-								'left': KOC.conf.chat.position.left,
+								'top': KOCFIA.conf.chat.position.top,
+								'left': KOCFIA.conf.chat.position.left,
 							});
 
-						if( KOC.conf.chat.size.width ){
-							$chat.css('width', KOC.conf.chat.size.width);
+						if( KOCFIA.conf.chat.size.width ){
+							$chat.css('width', KOCFIA.conf.chat.size.width);
 
-							$chatInput.width(function(){ return KOC.conf.chat.size.width - 65; })
-								.siblings('.button20').css('left', function(){ return KOC.conf.chat.size.width - 55; });
+							$chatInput.width(function(){ return KOCFIA.conf.chat.size.width - 65; })
+								.siblings('.button20').css('left', function(){ return KOCFIA.conf.chat.size.width - 55; });
 						}
 
-						if( KOC.conf.chat.size.height ) $chat.css('height', KOC.conf.chat.size.height);
+						if( KOCFIA.conf.chat.size.height ) $chat.css('height', KOCFIA.conf.chat.size.height);
 						else $chat.css('height', $chat.parent().css('height')); //original height
 
 						$chat
@@ -1753,11 +1754,11 @@ jQuery(document).ready(function(){
 								.css('height', function(){ return $(this).parent().height() - 43; });
 						var $jeu = $chat.find('.mod_comm_mmb');
 						$jeu.data('ori', $jeu.html())
-							.removeClass('mod_comm_mmb').addClass('kocMerlinSmall').html('Boîtes Magiques');
+							.removeClass('mod_comm_mmb').addClass('kocfia-merlin-small').html('BoÃ®tes Magiques');
 					},
 					'moveableOff': function(){
-						console.info('KOC chat moveableOff function');
-						$('#koc-chat-moveable').remove();
+						console.info('KOCFIA chat moveableOff function');
+						$('#kocfia-chat-moveable').remove();
 						$chat[0].style = '';
 						$chat
 							.draggable('destroy')
@@ -1768,31 +1769,31 @@ jQuery(document).ready(function(){
 						$chat
 							.find('.comm_body').css('height', '')
 							.find('.chatlist').css('height', '');
-						var $jeu = $chat.find('.kocMerlinSmall');
-							$jeu.removeClass('kocMerlinSmall').addClass('mod_comm_mmb').html( $jeu.data('ori') ).removeData('ori');
+						var $jeu = $chat.find('.kocfia-merlin-small');
+							$jeu.removeClass('kocfia-merlin-small').addClass('mod_comm_mmb').html( $jeu.data('ori') ).removeData('ori');
 					},
 					'onRight': function(){
-						console.info('KOC chat onRight function');
-						KOC.conf.chat.position = {
-							'top': KOC.conf.chat.onRightPosition.top,
-							'left': KOC.conf.chat.onRightPosition.left
+						console.info('KOCFIA chat onRight function');
+						KOCFIA.conf.chat.position = {
+							'top': KOCFIA.conf.chat.onRightPosition.top,
+							'left': KOCFIA.conf.chat.onRightPosition.left
 						};
-						$chat.css(KOC.conf.chat.position);
-						KOC.shared.storeConf();
+						$chat.css(KOCFIA.conf.chat.position);
+						KOCFIA.shared.storeConf();
 					},
 				/* cleanHelp */
 					'cleanHelpOn': function(){
-						console.info('KOC chat cleanHelpOn function');
-						$head.append( $('<style id="koc-chat-help">').html(kocChatHelpCss) );
+						console.info('KOCFIA chat cleanHelpOn function');
+						$head.append( $('<style id="kocfia-chat-help">').html(chatHelpCss) );
 					},
 					'cleanHelpOff': function(){
-						console.info('KOC chat cleanHelpOff function');
-						$('#koc-chat-help').remove();
+						console.info('KOCFIA chat cleanHelpOff function');
+						$('#kocfia-chat-help').remove();
 					},
 					'cleanHelp': function( nbMsg ){
-						console.info('KOC chat cleanHelp function');
-						//suppression du superflu (demande aide et son résultat)
-						if( KOC.conf.chat.active && KOC.conf.chat.cleanHelp ){
+						console.info('KOCFIA chat cleanHelp function');
+						//suppression du superflu (demande aide et son rÃ©sultat)
+						if( KOCFIA.conf.chat.active && KOCFIA.conf.chat.cleanHelp ){
 							window.setTimeout(function(){
 								var $messages = $chatAlliance.find('.chatwrap');
 								if( nbMsg > 0 ){
@@ -1805,7 +1806,7 @@ jQuery(document).ready(function(){
 											$helpLink
 												.click() //clic auto sur les demandes d'aides
 												.closest('.chatwrap').remove(); //et suppression de la demande d'aide
-											//suppression du résultat -> masqué en css .noalliance
+											//suppression du rÃ©sultat -> masquÃ© en css .noalliance
 										}
 									});
 							}, 250);
@@ -1813,13 +1814,13 @@ jQuery(document).ready(function(){
 					},
 				/* highlight leaders */
 					'highlightLeaders': function( $targetChat, nbMsg ){
-						console.info('koc chat highlightLeaders function');
+						console.info('kocfia chat highlightLeaders function');
 						if( $targetChat == null ){
-							KOC.chat.highlightLeadersReset();
-							KOC.chat.highlightLeaders( $chatAlliance, 0 );
-							KOC.chat.highlightLeaders( $chatGeneral, 0 );
+							KOCFIA.chat.highlightLeadersReset();
+							KOCFIA.chat.highlightLeaders( $chatAlliance, 0 );
+							KOCFIA.chat.highlightLeaders( $chatGeneral, 0 );
 						} else {
-							console.info('KOC chat highlightLeaders function', $targetChat, nbMsg);
+							console.info('KOCFIA chat highlightLeaders function', $targetChat, nbMsg);
 							var $messages = $targetChat.find('.chatwrap');
 							if( nbMsg > 0 ){
 								$messages.filter(':lt('+ nbMsg +')');
@@ -1827,74 +1828,74 @@ jQuery(document).ready(function(){
 
 							$messages.find('.nm').each2(function(i, $nm){
 								var name = $nm.text();
-								if( KOC.chat.leaders[ name ] ){
-									$nm.closest('.chatwrap').removeClass('chancellor vice_chancellor officer').addClass( KOC.chat.leaders[ name ] );
+								if( KOCFIA.chat.leaders[ name ] ){
+									$nm.closest('.chatwrap').removeClass('chancellor vice_chancellor officer').addClass( KOCFIA.chat.leaders[ name ] );
 								}
 							});
 						}
 					},
 					'getLeadersList': function(){
-						console.info('koc chat getLeadersList function');
+						console.info('kocfia chat getLeadersList function');
 						//ajax call to get the leaders, highlighting will be done in the ajax response listener
 						window.getDirectoryTabAllianceMembers();
 					},
 					'highlightLeadersOn': function(){
-						console.info('KOC chat highlightLeadersOn function');
-						KOC.chat.getLeadersList();
+						console.info('KOCFIA chat highlightLeadersOn function');
+						KOCFIA.chat.getLeadersList();
 
-						$head.append( $('<style id="koc-chat-highlight-leaders">').html(kocChatHighlightLeadersCss) );
+						$head.append( $('<style id="kocfia-chat-highlight-leaders">').html(chatHighlightLeadersCss) );
 					},
 					'highlightLeadersOff': function(){
-						console.info('KOC chat highlightLeadersOff function');
-						$('#koc-chat-highlight-leaders').remove();
-						KOC.chat.leaders = {};
+						console.info('KOCFIA chat highlightLeadersOff function');
+						$('#kocfia-chat-highlight-leaders').remove();
+						KOCFIA.chat.leaders = {};
 					},
 				/* highlight friends */
 					'highlightFriendsOn': function( highlight ){
-						console.info('KOC chat highlightFriendsOn function');
-						$head.append( $('<style id="koc-chat-highlight-friends">').html(kocChatHighlightFriendsCss) );
-						KOC.chat.highlightFriendsAndFoes(0);
+						console.info('KOCFIA chat highlightFriendsOn function');
+						$head.append( $('<style id="kocfia-chat-highlight-friends">').html(chatHighlightFriendsCss) );
+						KOCFIA.chat.highlightFriendsAndFoes(0);
 					},
 					'highlightFriendsOff': function(){
-						console.info('KOC chat highlightFriendsOff function');
-						$('#koc-chat-highlight-friends').remove();
+						console.info('KOCFIA chat highlightFriendsOff function');
+						$('#kocfia-chat-highlight-friends').remove();
 					},
 					'storeFriendsList': function(){
-						console.info('KOC storeFriendsList function');
-						localStorage.setObject('koc_chat_friends_list_' + KOC.storeUniqueId, KOC.chat.friendsList);
+						console.info('KOCFIA storeFriendsList function');
+						localStorage.setObject('kocfia_chat_friends_list_' + KOCFIA.storeUniqueId, KOCFIA.chat.friendsList);
 					},
 					'cleanFriendsList': function(){
-						console.info('KOC cleanFriendsList function');
-						KOC.chat.friendsList = [];
-						localStorage.setObject('koc_chat_friends_list_' + KOC.storeUniqueId, '');
-						$('#koc-chat').find('ul').filter('[rel=friends]').empty();
+						console.info('KOCFIA cleanFriendsList function');
+						KOCFIA.chat.friendsList = [];
+						localStorage.setObject('kocfia_chat_friends_list_' + KOCFIA.storeUniqueId, '');
+						$('#kocfia-chat').find('ul').filter('[rel=friends]').empty();
 					},
 				/* highlight foes */
 					'highlightFoesOn': function(){
-						console.info('KOC chat highlightFoesOn function');
-						$head.append( $('<style id="koc-chat-highlight-foes">').html(kocChatHighlightFoesCss) );
-						KOC.chat.highlightFriendsAndFoes(0);
+						console.info('KOCFIA chat highlightFoesOn function');
+						$head.append( $('<style id="kocfia-chat-highlight-foes">').html(chatHighlightFoesCss) );
+						KOCFIA.chat.highlightFriendsAndFoes(0);
 					},
 					'highlightFoesOff': function(){
-						console.info('KOC chat highlightFoesOff function');
-						$('#koc-chat-highlight-foes').remove();
+						console.info('KOCFIA chat highlightFoesOff function');
+						$('#kocfia-chat-highlight-foes').remove();
 					},
 					'storeFoesList': function(){
-						console.info('KOC storeFoesList function');
-						localStorage.setObject('koc_chat_foes_list_' + KOC.storeUniqueId, KOC.chat.foesList);
+						console.info('KOCFIA storeFoesList function');
+						localStorage.setObject('kocfia_chat_foes_list_' + KOCFIA.storeUniqueId, KOCFIA.chat.foesList);
 					},
 					'cleanFoesList': function(){
-						console.info('KOC cleanFoesList function');
-						KOC.chat.foesList = [];
-						localStorage.setObject('koc_chat_foes_list_' + KOC.storeUniqueId, '');
-						$('#koc-chat').find('ul').filter('[rel=foes]').empty();
+						console.info('KOCFIA cleanFoesList function');
+						KOCFIA.chat.foesList = [];
+						localStorage.setObject('kocfia_chat_foes_list_' + KOCFIA.storeUniqueId, '');
+						$('#kocfia-chat').find('ul').filter('[rel=foes]').empty();
 					},
 				/* highlight friends and foes */
 					'highlightFriendsAndFoes': function( nbMsg ){
-						console.info('KOC chat highlightFriendsAndFoes function', nbMsg);
+						console.info('KOCFIA chat highlightFriendsAndFoes function', nbMsg);
 						var $messages = $chatGeneral.find('.chatwrap'),
-							highlightFriends = KOC.conf.chat.highlightFriends && KOC.chat.friendsList.length,
-							highlightFoes = KOC.conf.chat.highlightFoes && KOC.chat.foesList.length;
+							highlightFriends = KOCFIA.conf.chat.highlightFriends && KOCFIA.chat.friendsList.length,
+							highlightFoes = KOCFIA.conf.chat.highlightFoes && KOCFIA.chat.foesList.length;
 
 						if( nbMsg > 0 ){
 							$messages.filter(':lt('+ nbMsg +')');
@@ -1902,10 +1903,10 @@ jQuery(document).ready(function(){
 
 						$messages.removeClass('friend foe').find('.nm').each2(function(i, $nm){
 							var name = $nm.text().replace(/^(Lady |Lord )/, '');
-							if( highlightFriends && $.inArray(name, KOC.chat.friendsList) > -1 ){
+							if( highlightFriends && $.inArray(name, KOCFIA.chat.friendsList) > -1 ){
 								$nm.closest('.chatwrap').addClass('friend');
 							}
-							if( highlightFoes && $.inArray(name, KOC.chat.foesList) > -1 ){
+							if( highlightFoes && $.inArray(name, KOCFIA.chat.foesList) > -1 ){
 								$nm.closest('.chatwrap').addClass('foe');
 							}
 						});
@@ -1913,7 +1914,7 @@ jQuery(document).ready(function(){
 			};
 
 		/* OVERVIEW */
-			KOC.overview = {
+			KOCFIA.overview = {
 				'options': {
 					'active': 1,
 					'position': {'top': 100, 'left': 100},
@@ -1938,49 +1939,50 @@ jQuery(document).ready(function(){
 				'updating' : false,
 				'parts': {
 					'population': 'population',
-					'troops': 'unités',
-					'troops_barbarian': 'unités en camps barbares',
+					'troops': 'unitÃ©s',
+					'troops_barbarian': 'unitÃ©s en camps barbares',
 					'defenses': 'fortifications',
 					'resources': 'ressources',
 					'resources_cap': 'plafond',
-					'resources_production_detail': 'détail production',
+					'resources_production_detail': 'dÃ©tail production',
 					'resources_production_barbarian': 'production camps barbares',
-					'resources_consumption': 'dépense',
+					'resources_consumption': 'dÃ©pense',
 					'resources_production_total': 'total production',
 					'resources_autonomy': 'autonomie',
 				},
 				'confPanel': function( $section ){
-					console.info('KOC overview confPanel function');
+					console.info('KOCFIA overview confPanel function');
 					var code = '<h3>Vue globale</h3>';
 						code += '<div>';
-						code += KOC.shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'Vue globale déplacable et redimensionnable'], [KOC.conf.overview.replace, KOC.conf.overview.moveable]);
-						code += KOC.shared.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position');
-						code += KOC.shared.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions');
+						code += KOCFIA.shared.generateCheckbox('overview', 'active', 'Activer le module', KOCFIA.conf.overview.active);
+						code += KOCFIA.shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat Ã  droite)', 'Vue globale dÃ©placable et redimensionnable'], [KOCFIA.conf.overview.replace, KOCFIA.conf.overview.moveable]);
+						code += KOCFIA.shared.generateButton('overview', 'resetPlacement', 'Remise Ã  zÃ©ro de la position');
+						code += KOCFIA.shared.generateButton('overview', 'resetDimensions', 'Remise Ã  zÃ©ro des dimensions');
 						code += '</div>';
 
 					$section.append( code )
 						.on('click', '#overview-replace, #overview-moveable', function(){
 							$(this).closest('div').find('button').toggle( $(this).is('#overview-moveable') );
 						})
-						.find('#overview-replace').closest('div').find('button').toggle( KOC.conf.overview.moveable );
+						.find('#overview-replace').closest('div').find('button').toggle( KOCFIA.conf.overview.moveable );
 				},
 				'on': function(){
-					console.info('KOC overview on function');
+					console.info('KOCFIA overview on function');
 
-					$head.append( $('<style id="koc-overview-css">').html(kocOverviewCss) );
+					$head.append( $('<style id="kocfia-overview-css">').html(overviewCss) );
 
-					var dataTable = '<table id="koc-overview-data">',
+					var dataTable = '<table id="kocfia-overview-data">',
 						headers = '<thead><tr><th class="img">&nbsp;</th><th class="label">&nbsp;</th><th class="sum">Total</th>',
 						dataLine = '',
 						sizer = '<tr class="sizer"><td class="img"></td><td class="label"></td><td class="sum"></td>';
 						cols = 3,
-						$overview = $('<div id="koc-overview" class="ui-widget ui-widget-content ui-corner-all">');
+						$overview = $('<div id="kocfia-overview" class="ui-widget ui-widget-content ui-corner-all">');
 
 					//headers
 					//data line for cities
-						var i, length = KOC.cities.length;
+						var i, length = KOCFIA.cities.length;
 						for( i = 0; i < length; i += 1 ){
-							headers += '<th title="'+ KOC.cities[i].name +'">'+ window.roman[i] +'</th>';
+							headers += '<th title="'+ KOCFIA.cities[i].name +'">'+ window.roman[i] +'</th>';
 							dataLine += '<td>&nbsp;</td>';
 							sizer += '<td></td>';
 						}
@@ -1991,52 +1993,52 @@ jQuery(document).ready(function(){
 					dataTable += headers + '<tbody>' + sizer;
 
 					//body lines
-					var left = 0, i, j, length, part, koc_part;
-					for( part in KOC.overview.parts ){
-						if( KOC.overview.parts.hasOwnProperty( part ) ){
+					var left = 0, i, j, length, part, kocfia_part;
+					for( part in KOCFIA.overview.parts ){
+						if( KOCFIA.overview.parts.hasOwnProperty( part ) ){
 							dataTable += '<tr class="'+ part +' toggle"><th colspan="'+ cols +'">';
-							dataTable += '<span class="ui-icon ui-icon-triangle-1-'+ (KOC.conf.overview.parts_visible[ part ] ? 'se' : 'e') +'"></span>';
-							dataTable += KOC.overview.parts[ part ].capitalize();
+							dataTable += '<span class="ui-icon ui-icon-triangle-1-'+ (KOCFIA.conf.overview.parts_visible[ part ] ? 'se' : 'e') +'"></span>';
+							dataTable += KOCFIA.overview.parts[ part ].capitalize();
 							if( part == 'troops' ){
 								dataTable += '<span class="details-toggle">(';
-								dataTable += '<input type="checkbox" id="koc-overview-troops-barbian-toogle" value="troops_barbarian" '+ (KOC.conf.overview.parts_visible['troops_barbarian'] ? 'checked' : '') +'><label for="koc-overview-troops-barbian-toogle">CB</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-troops-barbian-toogle" value="troops_barbarian" '+ (KOCFIA.conf.overview.parts_visible['troops_barbarian'] ? 'checked' : '') +'><label for="kocfia-overview-troops-barbian-toogle">CB</label>';
 								dataTable += ')</span>';
 							} else if( part == 'resources' ){
 								dataTable += '<span class="details-toggle">(';
-								dataTable += '<input type="checkbox" id="koc-overview-resources-cap-toogle" value="resources_cap" '+ (KOC.conf.overview.parts_visible['resources_cap'] ? 'checked' : '') +'>';
-								dataTable += '<label for="koc-overview-resources-cap-toogle">Plafond</label>';
-								dataTable += '<input type="checkbox" id="koc-overview-resources-production-detail-toogle" value="resources_production_detail" '+ (KOC.conf.overview.parts_visible['resources_production_detail'] ? 'checked' : '') +'>';
-								dataTable += '<label for="koc-overview-resources-production-detail-toogle">Prod</label>';
-								dataTable += '<input type="checkbox" id="koc-overview-resources-production-barbarian-toogle" value="resources_production_barbarian" '+ (KOC.conf.overview.parts_visible['resources_production_detail'] ? 'checked' : '') +'>';
-								dataTable += '<label for="koc-overview-resources-production-barbarian-toogle">CB</label>';
-								dataTable += '<input type="checkbox" id="koc-overview-resources-consumption-toogle" value="resources_consumption" '+ (KOC.conf.overview.parts_visible['resources_consumption'] ? 'checked' : '') +'>';
-								dataTable += '<label for="koc-overview-resources-consumption-toogle">Conso</label>';
-								dataTable += '<input type="checkbox" id="koc-overview-resources-production-total-toogle" value="resources_production_total" '+ (KOC.conf.overview.parts_visible['resources_production_total'] ? 'checked' : '') +'>';
-								dataTable += '<label for="koc-overview-resources-production-total-toogle">Total</label>';
-								dataTable += '<input type="checkbox" id="koc-overview-resources-autonomy-toogle" value="resources_autonomy" '+ (KOC.conf.overview.parts_visible['resources_autonomy'] ? 'checked' : '') +'>';
-								dataTable += '<label for="koc-overview-resources-autonomy-toogle">Autonomie</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-resources-cap-toogle" value="resources_cap" '+ (KOCFIA.conf.overview.parts_visible['resources_cap'] ? 'checked' : '') +'>';
+								dataTable += '<label for="kocfia-overview-resources-cap-toogle">Plafond</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-resources-production-detail-toogle" value="resources_production_detail" '+ (KOCFIA.conf.overview.parts_visible['resources_production_detail'] ? 'checked' : '') +'>';
+								dataTable += '<label for="kocfia-overview-resources-production-detail-toogle">Prod</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-resources-production-barbarian-toogle" value="resources_production_barbarian" '+ (KOCFIA.conf.overview.parts_visible['resources_production_detail'] ? 'checked' : '') +'>';
+								dataTable += '<label for="kocfia-overview-resources-production-barbarian-toogle">CB</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-resources-consumption-toogle" value="resources_consumption" '+ (KOCFIA.conf.overview.parts_visible['resources_consumption'] ? 'checked' : '') +'>';
+								dataTable += '<label for="kocfia-overview-resources-consumption-toogle">Conso</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-resources-production-total-toogle" value="resources_production_total" '+ (KOCFIA.conf.overview.parts_visible['resources_production_total'] ? 'checked' : '') +'>';
+								dataTable += '<label for="kocfia-overview-resources-production-total-toogle">Total</label>';
+								dataTable += '<input type="checkbox" id="kocfia-overview-resources-autonomy-toogle" value="resources_autonomy" '+ (KOCFIA.conf.overview.parts_visible['resources_autonomy'] ? 'checked' : '') +'>';
+								dataTable += '<label for="kocfia-overview-resources-autonomy-toogle">Autonomie</label>';
 								dataTable += ')</span>';
 							}
 							dataTable += '</th></tr>';
-							koc_part = KOC[ part ];
-							length = koc_part.length;
+							kocfia_part = KOCFIA[ part ];
+							length = kocfia_part.length;
 							for( i = 0; i < length; i += 1 ){
-								if( !koc_part[i].hasOwnProperty('label') && koc_part[i].hasOwnProperty('key') ){
-									koc_part[i].label = window.resourceinfo[ koc_part[i].key ];
+								if( !kocfia_part[i].hasOwnProperty('label') && kocfia_part[i].hasOwnProperty('key') ){
+									kocfia_part[i].label = window.resourceinfo[ kocfia_part[i].key ];
 								}
-								var rowspan = koc_part[i].rows;
+								var rowspan = kocfia_part[i].rows;
 								if( rowspan ){
 									for( j = 0; j < rowspan; j += 1 ){
 										dataTable += '<tr class="'+ part + (part == 'troops' && j == 1 ? '_barbarian' : '' ) +'">';
-										dataTable += (j == 0 ? '<td class="img" rowspan="'+ rowspan +'"><img src="'+ koc_part[i].icon +'"></td>' : '');
-										dataTable += '<td class="label">'+ koc_part[i].label[j] +'</td>';
+										dataTable += (j == 0 ? '<td class="img" rowspan="'+ rowspan +'"><img src="'+ kocfia_part[i].icon +'"></td>' : '');
+										dataTable += '<td class="label">'+ kocfia_part[i].label[j] +'</td>';
 										dataTable += '<td class="sum"></td>';
 										dataTable += dataLine + '</tr>';
 									}
 								} else {
 									dataTable += '<tr class="'+ part +'">';
-									dataTable += '<td class="img"><img src="'+ koc_part[i].icon +'"></td>';
-									dataTable += '<td class="label">'+ koc_part[i].label +'</td>';
+									dataTable += '<td class="img"><img src="'+ kocfia_part[i].icon +'"></td>';
+									dataTable += '<td class="label">'+ kocfia_part[i].label +'</td>';
 									dataTable += '<td class="sum"></td>';
 									dataTable += dataLine + '</tr>';
 								}
@@ -2048,19 +2050,19 @@ jQuery(document).ready(function(){
 					$overview.append('<div class="wrap">' + dataTable + '</div>');
 
 					$body.append( $overview );
-					KOC.overview.$div = $('#koc-overview');
+					KOCFIA.overview.$div = $('#kocfia-overview');
 
-					KOC.overview.$div
+					KOCFIA.overview.$div
 						//highlight from headers
 							.on('mouseenter', 'th', function(){
-								var col = KOC.overview.$headersThs.index( $(this).addClass('highlight') );
-								KOC.overview.$tbodyTrs.find('tr').each2(function(j, $tr){
+								var col = KOCFIA.overview.$headersThs.index( $(this).addClass('highlight') );
+								KOCFIA.overview.$tbodyTrs.find('tr').each2(function(j, $tr){
 									$tr.find('td').eq(col).addClass('highlight');
 								});
 							})
 							.on('mouseleave', 'th', function(){
-								var col = KOC.overview.$headersThs.index( $(this).removeClass('highlight') );
-								KOC.overview.$tbodyTrs.find('tr').each2(function(j, $tr){
+								var col = KOCFIA.overview.$headersThs.index( $(this).removeClass('highlight') );
+								KOCFIA.overview.$tbodyTrs.find('tr').each2(function(j, $tr){
 									$tr.find('td').eq(col).removeClass('highlight');
 								});
 							})
@@ -2068,12 +2070,12 @@ jQuery(document).ready(function(){
 							.on('mouseenter', 'tbody td', function(){
 								var $this = $(this),
 									col = $this.parent().addClass('highlight').find('td').index( $this );
-								KOC.overview.$headersThs.eq(col).addClass('highlight');
+								KOCFIA.overview.$headersThs.eq(col).addClass('highlight');
 							})
 							.on('mouseleave', 'tbody td', function(){
 								var $this = $(this),
 									col = $this.parent().removeClass('highlight').find('td').index( $this );
-								KOC.overview.$headersThs.eq(col).removeClass('highlight');
+								KOCFIA.overview.$headersThs.eq(col).removeClass('highlight');
 							})
 						//toggles
 							.on('click', '.toggle', function(){
@@ -2085,7 +2087,7 @@ jQuery(document).ready(function(){
 								if( opened ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
 								else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
 
-								var $trs = KOC.overview.$tbodyTrs.filter( '.' + part );
+								var $trs = KOCFIA.overview.$tbodyTrs.filter( '.' + part );
 
 								$trs.filter(':not(.toggle)').toggle( opened );
 
@@ -2096,95 +2098,92 @@ jQuery(document).ready(function(){
 											var detail = $input.val();
 
 											$input.prop('checked', false);
-											KOC.overview.$tbodyTrs.filter( '.' + detail ).hide();
-											KOC.conf.overview.parts_visible[ detail ] = false;
+											KOCFIA.overview.$tbodyTrs.filter( '.' + detail ).hide();
+											KOCFIA.conf.overview.parts_visible[ detail ] = false;
 										});
 									}
 								}
 
-								KOC.conf.overview.parts_visible[ part ] = opened;
+								KOCFIA.conf.overview.parts_visible[ part ] = opened;
 
-								KOC.shared.storeConf();
-							})
-							.on('click', '.details-toggle input', function(e){
+								KOCFIA.shared.storeConf();
+							});
+
+					KOCFIA.overview.$div
+						.find('.details-toggle').each2(function(i, $detail){
+							$detail.bind('click', function(e){
 								e.stopPropagation();
-
+							}).on('change', 'input', function(e){
 								var $this = $(this),
 									checked = $this.prop('checked'),
 									part = $this.val();
 
-								var $trs = KOC.overview.$tbodyTrs.filter( '.' + part ).toggle( checked ),
+								var $trs = KOCFIA.overview.$tbodyTrs.filter( '.' + part ).toggle( checked ),
 									$triangle = $trs.filter('.toggle').find('.ui-icon');
 
 								if( checked ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
 								else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
 
-								KOC.conf.overview.parts_visible[ part ] = checked;
-								KOC.shared.storeConf();
+								KOCFIA.conf.overview.parts_visible[ part ] = checked;
+								KOCFIA.shared.storeConf();
 							});
+						});
 
-					KOC.overview.$wrap = KOC.overview.$div.find('.wrap');
-					KOC.overview.$table = KOC.overview.$div.find('#koc-overview-data');
-					KOC.overview.$header = KOC.overview.$table.find('thead');
-					KOC.overview.$headersThs = KOC.overview.$header.find('th');
-					KOC.overview.$tbody = KOC.overview.$table.find('tbody');
-					KOC.overview.$cityTds = KOC.overview.$tbody.find('.sizer').find('td');
-					KOC.overview.$tbodyTrs = KOC.overview.$tbody.find('tr').filter(':not(.sizer)');
+					KOCFIA.overview.$wrap = KOCFIA.overview.$div.find('.wrap');
+					KOCFIA.overview.$table = KOCFIA.overview.$div.find('#kocfia-overview-data');
+					KOCFIA.overview.$header = KOCFIA.overview.$table.find('thead');
+					KOCFIA.overview.$headersThs = KOCFIA.overview.$header.find('th');
+					KOCFIA.overview.$tbody = KOCFIA.overview.$table.find('tbody');
+					KOCFIA.overview.$cityTds = KOCFIA.overview.$tbody.find('.sizer').find('td');
+					KOCFIA.overview.$tbodyTrs = KOCFIA.overview.$tbody.find('tr').filter(':not(.sizer)');
 
 					var trs, $details, detail;
-					for( part in KOC.conf.overview.parts_visible ){
-						if( KOC.conf.overview.parts_visible.hasOwnProperty(part) ){
-							$trs = KOC.overview.$tbodyTrs.filter( '.' + part );
+					for( part in KOCFIA.conf.overview.parts_visible ){
+						if( KOCFIA.conf.overview.parts_visible.hasOwnProperty(part) ){
+							$trs = KOCFIA.overview.$tbodyTrs.filter( '.' + part );
 
-							if( !KOC.conf.overview.parts_visible[part] ){
+							if( !KOCFIA.conf.overview.parts_visible[part] ){
 								$trs.filter(':not(.toggle)').hide();
-							}
-
-							$details = $trs.filter('.toggle').find('.details-toggle');
-							if( $details.length ){
-								$details.find('input').each2(function(i, $input){
-									$input.prop('checked', false);
-									detail = $input.val();
-									KOC.overview.$tbodyTrs.filter( '.' + detail ).toggle( KOC.conf.overview.parts_visible[detail] );
-								});
 							}
 						}
 					}
 
-					window.setTimeout(function(){ KOC.overview.updateFromSeed(); }, 1000);
+					window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 1000);
 
-					if( KOC.conf.overview.replace ){
-						KOC.overview.replaceOn();
+					if( KOCFIA.conf.overview.replace ){
+						KOCFIA.overview.replaceOn();
 					} else {
-						KOC.overview.moveableOn();
+						KOCFIA.overview.moveableOn();
 					}
 				},
 				'off': function(){
-					console.info('KOC overview off function');
-					$('#koc-overview-css').remove();
-					KOC.overview.$div.remove();
-					KOC.overview.$div = null;
+					console.info('KOCFIA overview off function');
+					$('#kocfia-overview-css').remove();
+					KOCFIA.overview.$div.remove();
+					KOCFIA.overview.$div = null;
 				},
 				'updateFromSeed': function(){
-					if( KOC.overview.updating ) return;
-					KOC.overview.updating = true;
+					if( !KOCFIA.conf.overview.active ) return;
 
-					console.info('KOC overview updateFromSeed function');
-					var $popTrs = KOC.overview.$tbodyTrs.filter('.population').filter(':not(:first)'),
-						$resTrs = KOC.overview.$tbodyTrs.filter('.resources').filter(':not(:first)'),
-						$resCapTrs = KOC.overview.$tbodyTrs.filter('.resources_cap').filter(':not(:first)'),
-						$resProdDetailTrs = KOC.overview.$tbodyTrs.filter('.resources_production_detail').filter(':not(:first)'),
-						$resProdBarbarianTrs = KOC.overview.$tbodyTrs.filter('.resources_production_barbarian').filter(':not(:first)'),
-						$resConsoTrs = KOC.overview.$tbodyTrs.filter('.resources_consumption').filter(':not(:first)'),
-						$resProdTotalTrs = KOC.overview.$tbodyTrs.filter('.resources_production_total').filter(':not(:first)'),
-						$resAutonomyTrs = KOC.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
-						$troopsTrs = KOC.overview.$tbodyTrs.filter('.troops').filter(':not(:first)'),
-						$troopsBarbarianTrs = KOC.overview.$tbodyTrs.filter('.troops_barbarian').filter(':not(:first)'),
-						$defensesTrs = KOC.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)');
+					if( KOCFIA.overview.updating ) return;
+					KOCFIA.overview.updating = true;
 
-					var i, j, k, length = KOC.citiesId.length, subLength;
+					console.info('KOCFIA overview updateFromSeed function');
+					var $popTrs = KOCFIA.overview.$tbodyTrs.filter('.population').filter(':not(:first)'),
+						$resTrs = KOCFIA.overview.$tbodyTrs.filter('.resources').filter(':not(:first)'),
+						$resCapTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_cap').filter(':not(:first)'),
+						$resProdDetailTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_detail').filter(':not(:first)'),
+						$resProdBarbarianTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_barbarian').filter(':not(:first)'),
+						$resConsoTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_consumption').filter(':not(:first)'),
+						$resProdTotalTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_total').filter(':not(:first)'),
+						$resAutonomyTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
+						$troopsTrs = KOCFIA.overview.$tbodyTrs.filter('.troops').filter(':not(:first)'),
+						$troopsBarbarianTrs = KOCFIA.overview.$tbodyTrs.filter('.troops_barbarian').filter(':not(:first)'),
+						$defensesTrs = KOCFIA.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)');
+
+					var i, j, k, length = KOCFIA.citiesId.length, subLength;
 					for( i = 0; i < length; i += 1 ){
-						var cityId = 'city' + KOC.citiesId[i];
+						var cityId = 'city' + KOCFIA.citiesId[i];
 						var stats = window.seed.citystats[ cityId ];
 						var seed = {
 								'pop': stats.pop,
@@ -2221,7 +2220,7 @@ jQuery(document).ready(function(){
 
 											barbariansRes.push( barbarianRes );
 
-											subLength = KOC.troops.length;
+											subLength = KOCFIA.troops.length;
 											for( j = 0; j < subLength; j += 1 ){
 												if( !barbariansTroops[j] ) barbariansTroops[j] = 0;
 												barbariansTroops[j] += parseFloat(marche['unit'+ ( j + 1 ) +'Count']);
@@ -2233,32 +2232,32 @@ jQuery(document).ready(function(){
 
 						//population
 							var line = 0;
-							subLength = KOC.population.length;
+							subLength = KOCFIA.population.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.population[j];
+								var type = KOCFIA.population[j];
 								if( type.rows ){
 									var rowsLength = type.rows;
 									for( k = 0; k < rowsLength; k += 1 ){
-										var inSeed = KOC.inSeed.population[ type.name[k] ],
+										var inSeed = KOCFIA.inSeed.population[ type.name[k] ],
 											$tds = $popTrs.eq(line).find('td'),
 											$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 											n = null;
 										if( inSeed ){
 											n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 										} else if( type.name[k] == 'availablePopulation' ){
-											var take = KOC.inSeed.population[ type.name[0] ],
-												substract = KOC.inSeed.population[ type.name[2] ];
+											var take = KOCFIA.inSeed.population[ type.name[0] ],
+												substract = KOCFIA.inSeed.population[ type.name[2] ];
 
 											n = parseFloat( seed[ take.var ][ take.index ] ) - parseFloat( seed[ substract.var ][ substract.index ] );
 										}
 
 										if( n != null ){
-											$td.html( KOC.shared.format( n ) )
-												.attr('title', KOC.shared.readable( n ))
+											$td.html( KOCFIA.shared.format( n ) )
+												.attr('title', KOCFIA.shared.readable( n ))
 												.data('ori', n);
 										} else {
 											$td.html('&nbsp;')
-												.attr('title', KOC.shared.readable( n ))
+												.attr('title', KOCFIA.shared.readable( n ))
 												.data('ori', 0);
 										}
 
@@ -2266,19 +2265,19 @@ jQuery(document).ready(function(){
 									}
 
 								} else {
-									var inSeed = KOC.inSeed.population[ type.name ],
+									var inSeed = KOCFIA.inSeed.population[ type.name ],
 										$tds = $popTrs.eq(line).find('td'),
 										$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 									if( inSeed ){
 										var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 
-										$td.html( KOC.shared.format( n ) )
-											.attr('title', KOC.shared.readable( n ))
+										$td.html( KOCFIA.shared.format( n ) )
+											.attr('title', KOCFIA.shared.readable( n ))
 											.data('ori', n);
 
 									} else {
 										$td.html('&nbsp;')
-											.attr('title', KOC.shared.readable( n ))
+											.attr('title', KOCFIA.shared.readable( n ))
 											.data('ori', 0);
 									}
 
@@ -2287,10 +2286,10 @@ jQuery(document).ready(function(){
 							}
 
 						//resources
-							subLength = KOC.resources.length;
+							subLength = KOCFIA.resources.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.resources[j],
-									inSeed = KOC.inSeed.resources[ type.name ],
+								var type = KOCFIA.resources[j],
+									inSeed = KOCFIA.inSeed.resources[ type.name ],
 									$tds = $resTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 								if( inSeed ){
@@ -2302,8 +2301,8 @@ jQuery(document).ready(function(){
 
 									if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-									$td.html( KOC.shared.format( n ) )
-										.attr('title', KOC.shared.readable(n))
+									$td.html( KOCFIA.shared.format( n ) )
+										.attr('title', KOCFIA.shared.readable(n))
 										.data('ori', n);
 								} else {
 									$td.html('&nbsp;')
@@ -2313,18 +2312,18 @@ jQuery(document).ready(function(){
 							}
 
 						//resources cap
-							subLength = KOC.resources_cap.length;
+							subLength = KOCFIA.resources_cap.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.resources_cap[j],
-									inSeed = KOC.inSeed.resources_cap[ type.name ],
+								var type = KOCFIA.resources_cap[j],
+									inSeed = KOCFIA.inSeed.resources_cap[ type.name ],
 									$tds = $resCapTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 								if( inSeed ){
 									var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
 									if( n > 0 ) n = n / 3600;
 
-									$td.html( KOC.shared.format( n ) )
-										.attr('title', KOC.shared.readable(n))
+									$td.html( KOCFIA.shared.format( n ) )
+										.attr('title', KOCFIA.shared.readable(n))
 										.data('ori', n);
 								} else {
 									$td.html('&nbsp;')
@@ -2337,7 +2336,7 @@ jQuery(document).ready(function(){
 							var base = [],
 								total = [0, 0, 0, 0, 0],
 								line = 0,
-								nbLine = KOC.resources_production_detail.length / 4,
+								nbLine = KOCFIA.resources_production_detail.length / 4,
 								d = new Date(),
 								timestamp = parseFloat(d.getTime() / 1000);
 
@@ -2379,9 +2378,9 @@ jQuery(document).ready(function(){
 									populationModifier = population / hapiness;
 								}
 
-							subLength = KOC.resources_production_detail.length;
+							subLength = KOCFIA.resources_production_detail.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.resources_production_detail[j],
+								var type = KOCFIA.resources_production_detail[j],
 									r = j + 1; //no gold
 								if( type.rows ){
 									var rowsLength = type.rows;
@@ -2421,8 +2420,8 @@ jQuery(document).ready(function(){
 										}
 
 										if( n != null ){
-											$td.html( KOC.shared.format( n ) )
-												.attr('title', KOC.shared.readable( n ))
+											$td.html( KOCFIA.shared.format( n ) )
+												.attr('title', KOCFIA.shared.readable( n ))
 												.data('ori', n);
 										} else {
 											$td.html( '&nbsp;' )
@@ -2436,7 +2435,7 @@ jQuery(document).ready(function(){
 							}
 
 						//resources from barbarian camps
-							subLength = KOC.resources_production_barbarian.length;
+							subLength = KOCFIA.resources_production_barbarian.length;
 							for( j = 0; j < subLength; j += 1 ){
 								var $tds = $resProdBarbarianTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
@@ -2448,8 +2447,8 @@ jQuery(document).ready(function(){
 									}
 									total[j] += n;
 
-									$td.html( KOC.shared.format( n ) )
-										.attr('title', KOC.shared.readable( n ))
+									$td.html( KOCFIA.shared.format( n ) )
+										.attr('title', KOCFIA.shared.readable( n ))
 										.data('ori', n );
 								} else {
 									$td.html( '&nbsp;' )
@@ -2460,19 +2459,19 @@ jQuery(document).ready(function(){
 
 						//resources consumption
 							var line = 0;
-							subLength = KOC.resources_consumption.length;
+							subLength = KOCFIA.resources_consumption.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.resources_consumption[j];
+								var type = KOCFIA.resources_consumption[j];
 								if( type.rows ){
 									var rowsLength = type.rows;
 									for( k = 0; k < rowsLength; k += 1 ){
 										var $tds = $resConsoTrs.eq(line).find('td'),
 											$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 											n = null;
-										//'dépense', 'formation'
+										//'dÃ©pense', 'formation'
 										switch( type.label[k] ){
-											case 'dépense':
-												var inSeed = KOC.inSeed.resources_consumption[ type.name ];
+											case 'dÃ©pense':
+												var inSeed = KOCFIA.inSeed.resources_consumption[ type.name ];
 												if( inSeed ){
 													if( inSeed.hasOwnProperty('type') ){
 														n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
@@ -2489,8 +2488,8 @@ jQuery(document).ready(function(){
 										}
 
 										if( n != null ){
-											$td.html( KOC.shared.format( n ) )
-												.attr('title', KOC.shared.readable( n ))
+											$td.html( KOCFIA.shared.format( n ) )
+												.attr('title', KOCFIA.shared.readable( n ))
 												.data('ori', n);
 										} else {
 											$td.html( '&nbsp;' )
@@ -2504,15 +2503,15 @@ jQuery(document).ready(function(){
 							}
 
 						//resources production total
-							subLength = KOC.resources_production_total.length;
+							subLength = KOCFIA.resources_production_total.length;
 							for( j = 0; j < subLength; j += 1 ){
 								var $tds = $resProdTotalTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 
 								if( total[j] ){
 									total[j] += 100;
-									$td.html( KOC.shared.format( total[j] ) )
-										.attr('title', KOC.shared.readable( total[j] ))
+									$td.html( KOCFIA.shared.format( total[j] ) )
+										.attr('title', KOCFIA.shared.readable( total[j] ))
 										.data('ori', total[j] );
 								} else {
 									$td.html('&nbsp;');
@@ -2520,10 +2519,10 @@ jQuery(document).ready(function(){
 							}
 
 						//resources autonomy
-							subLength = KOC.resources_autonomy.length;
+							subLength = KOCFIA.resources_autonomy.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var stock = KOC.resources[j],
-									stockInSeed = KOC.inSeed.resources[ stock.name ],
+								var stock = KOCFIA.resources[j],
+									stockInSeed = KOCFIA.inSeed.resources[ stock.name ],
 									$tds = $resAutonomyTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 									s = 0;
@@ -2541,7 +2540,7 @@ jQuery(document).ready(function(){
 										$td.html('0s');
 									} else {
 										var n = s / ( -1 * total[j] ) * 3600;
-										$td.html( KOC.shared.readableDuration( n ) );
+										$td.html( KOCFIA.shared.readableDuration( n ) );
 									}
 								} else {
 									$td.html('-');
@@ -2549,9 +2548,9 @@ jQuery(document).ready(function(){
 							}
 
 						//troops
-							subLength = KOC.troops.length;
+							subLength = KOCFIA.troops.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.troops[j],
+								var type = KOCFIA.troops[j],
 									$tds = $troopsTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 									n = null;
@@ -2561,8 +2560,8 @@ jQuery(document).ready(function(){
 								}
 
 								if( n != null ){
-									$td.html( KOC.shared.format( n ) )
-										.attr('title', KOC.shared.readable(n))
+									$td.html( KOCFIA.shared.format( n ) )
+										.attr('title', KOCFIA.shared.readable(n))
 										.data('ori', n);
 								} else {
 									$td.html('&nbsp;')
@@ -2572,9 +2571,9 @@ jQuery(document).ready(function(){
 							}
 
 						//troops barbarian
-							subLength = KOC.troops_barbarian.length;
+							subLength = KOCFIA.troops_barbarian.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var type = KOC.troops_barbarian[j],
+								var type = KOCFIA.troops_barbarian[j],
 									$tds = $troopsBarbarianTrs.eq(j).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 									n = null;
@@ -2584,8 +2583,8 @@ jQuery(document).ready(function(){
 								}
 
 								if( n != null ){
-									$td.html( KOC.shared.format( n ) )
-										.attr('title', KOC.shared.readable(n))
+									$td.html( KOCFIA.shared.format( n ) )
+										.attr('title', KOCFIA.shared.readable(n))
 										.data('ori', n);
 								} else {
 									$td.html('&nbsp;')
@@ -2595,9 +2594,9 @@ jQuery(document).ready(function(){
 							}
 
 						//defenses
-							subLength = KOC.defenses.length;
+							subLength = KOCFIA.defenses.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var fort = KOC.defenses[j];
+								var fort = KOCFIA.defenses[j];
 								var $tds = $defensesTrs.eq( j ).find('td'),
 									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
 									n = null;
@@ -2607,8 +2606,8 @@ jQuery(document).ready(function(){
 								}
 
 								if( n != null ){
-									$td.html( KOC.shared.format( n ) )
-										.attr('title', KOC.shared.readable(n))
+									$td.html( KOCFIA.shared.format( n ) )
+										.attr('title', KOCFIA.shared.readable(n))
 										.data('ori', n);
 								} else {
 									$td.html('&nbsp;')
@@ -2618,11 +2617,11 @@ jQuery(document).ready(function(){
 							}
 					}
 
-					KOC.overview.sums();
-					KOC.overview.updating = false;
+					KOCFIA.overview.sums();
+					KOCFIA.overview.updating = false;
 				},
 				'sums': function(){
-					KOC.overview.$tbodyTrs.each2(function(i, $tr){
+					KOCFIA.overview.$tbodyTrs.each2(function(i, $tr){
 						if( !$tr.hasClass('resources_autonomy') ){
 							var sum = 0,
 								$tds = $tr.find('td');
@@ -2637,126 +2636,127 @@ jQuery(document).ready(function(){
 									$sumTd.html( '-' )
 										.attr('title', '');
 								} else {
-									$sumTd.html( KOC.shared.format( sum ) )
-										.attr('title', KOC.shared.readable(sum));
+									$sumTd.html( KOCFIA.shared.format( sum ) )
+										.attr('title', KOCFIA.shared.readable(sum));
 								}
 							}
 						}
 					});
 				},
 				'getCityColWidth': function( tableWidth ){
-					console.info('koc overview getCityColWidth function');
+					console.info('kocfia overview getCityColWidth function');
 					var cityColWidth = tableWidth - 25;
-					cityColWidth -= KOC.overview.$cityTds.eq(0).width();
-					cityColWidth -= KOC.overview.$cityTds.eq(1).width();
-					cityColWidth -= KOC.overview.$cityTds.eq(2).width();
-					cityColWidth /= KOC.cities.length;
+					cityColWidth -= KOCFIA.overview.$cityTds.eq(0).width();
+					cityColWidth -= KOCFIA.overview.$cityTds.eq(1).width();
+					cityColWidth -= KOCFIA.overview.$cityTds.eq(2).width();
+					cityColWidth /= KOCFIA.cities.length;
 
 					return Math.floor(cityColWidth);
 				},
 				'calcInnerSizes': function( size ){
-					console.info('koc overview calcInnerSizes function');
-					KOC.overview.$cityTds.filter(':gt(2)').css('width', '');
+					console.info('kocfia overview calcInnerSizes function');
+					KOCFIA.overview.$cityTds.filter(':gt(2)').css('width', '');
 
-					var tableH = size.height - 30 - (KOC.overview.movable ? KOC.overview.$div.find('h3').outerHeight(true) : 0);
-					KOC.overview.$wrap.css('height', tableH);
-					KOC.overview.$tbody.css('height', tableH - KOC.overview.$header.height());
+					var tableH = size.height - 30 - (KOCFIA.overview.movable ? KOCFIA.overview.$div.find('h3').outerHeight(true) : 0);
+					KOCFIA.overview.$wrap.css('height', tableH);
+					KOCFIA.overview.$tbody.css('height', tableH - KOCFIA.overview.$header.height());
 
-					KOC.overview.$cityTds.filter(':gt(2)').css('width', KOC.overview.getCityColWidth( size.width ) + 'px');
+					KOCFIA.overview.$cityTds.filter(':gt(2)').css('width', KOCFIA.overview.getCityColWidth( size.width ) + 'px');
 
-					KOC.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
-						$th.css('width', KOC.overview.$cityTds.eq(i + 3).css('width'));
+					KOCFIA.overview.$headersThs.filter(':gt(2)').each2(function(i, $th){
+						$th.css('width', KOCFIA.overview.$cityTds.eq(i + 3).css('width'));
 					});
 				},
 				/* moveable */
 					'moveableOn': function(){
-						console.info('KOC overview moveableOn function');
+						console.info('KOCFIA overview moveableOn function');
 
-						KOC.overview.$div
+						KOCFIA.overview.$div
 							.prepend('<h3>Vue Globale</h3>')
 							.prepend('<span class="ui-icon ui-icon-close"></span>')
 							.draggable({
 								helper: "original",
-								handle: 'h3',
+								appendTo: 'body',
+								containment: 'window',
+								scroll: true,
 								distance: 20,
 								stop: function(event, ui){
-									KOC.conf.overview.position = ui.position;
-									KOC.shared.storeConf();
+									KOCFIA.conf.overview.position = ui.position;
+									KOCFIA.shared.storeConf();
 								}
 							})
 							.resizable({
 								'minWidth': 250,
 								'minHeight': 250,
 								'resize': function(event, ui){
-									KOC.overview.calcInnerSizes( ui.size );
+									KOCFIA.overview.calcInnerSizes( ui.size );
 								},
 								'stop': function(event, ui){
-									KOC.conf.overview.size = ui.size;
-									KOC.shared.storeConf();
+									KOCFIA.conf.overview.size = ui.size;
+									KOCFIA.shared.storeConf();
 								}
 							})
 							.css({
-								'top': KOC.conf.overview.position.top,
-								'left': KOC.conf.overview.position.left,
-								'width': KOC.conf.overview.size.width,
-								'height': KOC.conf.overview.size.height,
+								'top': KOCFIA.conf.overview.position.top,
+								'left': KOCFIA.conf.overview.position.left,
+								'width': KOCFIA.conf.overview.size.width,
+								'height': KOCFIA.conf.overview.size.height,
 							})
 							.on('click', '.ui-icon-close', function(e){
 								e.preventDefault();
-								KOC.overview.$div.hide();
-								KOC.conf.overview.visible = 0;
-								KOC.shared.storeConf();
+								KOCFIA.overview.$div.hide();
+								KOCFIA.conf.overview.visible = 0;
+								KOCFIA.shared.storeConf();
 							});
 
-						if( KOC.conf.overview.visible ){
-							KOC.overview.$div.show();
+						if( KOCFIA.conf.overview.visible ){
+							KOCFIA.overview.$div.show();
 
-							KOC.overview.calcInnerSizes( KOC.conf.overview.size );
+							KOCFIA.overview.calcInnerSizes( KOCFIA.conf.overview.size );
 						} else {
-							KOC.overview.$div.hide();
+							KOCFIA.overview.$div.hide();
 						}
 
-						var $kocOverviewToggle = $('<button id="koc-overview-toggle">').html('Vue Globale');
-						$kocOverviewToggle.click(function(){
-							console.info('$kocOverviewToggle click');
-							KOC.overview.$div.toggle();
+						var $overviewToggle = $('<button id="kocfia-overview-toggle">').html('Vue Globale');
+						$overviewToggle.click(function(){
+							KOCFIA.overview.$div.toggle();
 
-							if( KOC.overview.$div.is(':visible') ){
-								KOC.overview.calcInnerSizes( KOC.conf.overview.size );
+							if( KOCFIA.overview.$div.is(':visible') ){
+								KOCFIA.overview.calcInnerSizes( KOCFIA.conf.overview.size );
 							}
 
-							KOC.conf.overview.visible = (KOC.overview.$div.is(':visible') ? 1 : 0);
-							KOC.shared.storeConf();
+							KOCFIA.conf.overview.visible = (KOCFIA.overview.$div.is(':visible') ? 1 : 0);
+							KOCFIA.shared.storeConf();
 						});
 
-						KOC.$buttons.append($kocOverviewToggle);
+						KOCFIA.$buttons.append($overviewToggle);
 					},
 					'moveableOff': function(){
-						console.info('KOC overview moveableOff function');
-						KOC.overview.$div
+						console.info('KOCFIA overview moveableOff function');
+						KOCFIA.overview.$div
 							.draggable('destroy')
 							.resizable('destroy')
 							.find('h3, .ui-icon-close').remove();
 					},
 					'resetPlacement': function(){
-						console.info('KOC overview resetPlacement function');
-						if( KOC.conf.overview.moveable ){
-							KOC.overview.$div.css( KOC.overview.options.position );
-							KOC.conf.overview.position = KOC.overview.options.position;
-							KOC.shared.storeConf();
+						console.info('KOCFIA overview resetPlacement function');
+						if( KOCFIA.conf.overview.moveable ){
+							KOCFIA.overview.$div.css( KOCFIA.overview.options.position );
+							KOCFIA.conf.overview.position = KOCFIA.overview.options.position;
+							KOCFIA.shared.storeConf();
 						}
 					},
 					'resetDimensions': function(){
-						console.info('KOC overview resetDimensions function');
-						if( KOC.conf.overview.moveable ){
-							KOC.overview.$div.css( KOC.overview.options.size );
-							KOC.conf.overview.size = KOC.overview.options.size;
-							KOC.shared.storeConf();
+						console.info('KOCFIA overview resetDimensions function');
+						if( KOCFIA.conf.overview.moveable ){
+							KOCFIA.overview.$div.css( KOCFIA.overview.options.size );
+							KOCFIA.conf.overview.size = KOCFIA.overview.options.size;
+							KOCFIA.shared.storeConf();
 						}
 					},
 				/* replace */
 					'replaceOn': function(){
-						console.info('KOC overview replaceOn function');
+						console.info('KOCFIA overview replaceOn function');
 
 						var $b = $('#kocmain_bottom'),
 							$f = $b.siblings('.panel_friendlist');
@@ -2764,7 +2764,7 @@ jQuery(document).ready(function(){
 						var h = $b.outerHeight() + $f.outerHeight(),
 							w = $b.outerWidth();
 
-						KOC.overview.$div.css({
+						KOCFIA.overview.$div.css({
 							'height': $b.outerHeight() + $f.outerHeight(),
 							'width': $b.outerWidth(),
 							'top': p.top,
@@ -2773,22 +2773,22 @@ jQuery(document).ready(function(){
 
 						//$b.hide();
 						$f.hide();
-						KOC.overview.$div.show();
+						KOCFIA.overview.$div.show();
 						$b.find('.mod_comm').css('display', 'block');
 
-						KOC.overview.calcInnerSizes({'height': h, 'width': w});
+						KOCFIA.overview.calcInnerSizes({'height': h, 'width': w});
 
-						$('#koc-overview-toggle').remove();
+						$('#kocfia-overview-toggle').remove();
 					},
 					'replaceOff': function(){
-						console.info('KOC overview replaceOff function');
+						console.info('KOCFIA overview replaceOff function');
 
 						$('#kocmain_bottom').show().siblings('.panel_fiendlist').show();
 					},
 			};
 
 		/* WILDERNESS */
-			KOC.wilderness = {
+			KOCFIA.wilderness = {
 				'options': {
 					'active': 1,
 					'automatic': 0,
@@ -2796,23 +2796,23 @@ jQuery(document).ready(function(){
 				'stored': ['attacks'],
 				'attacks': {}, //by city id and attack id
 				'confPanel': function( $section ){
-					console.info('KOC wilderness confPanel function');
+					console.info('KOCFIA wilderness confPanel function');
 					var code = '<h3>Armoiries</h3>';
 					code += '<div>';
-					code += KOC.shared.generateCheckbox('wilderness', 'active', 'Activer le module', KOC.conf.wilderness.active);
-					code += KOC.shared.generateCheckbox('wilderness', 'automatic', 'Lancer les attaques automatiques', KOC.conf.wilderness.automatic);
-					code += KOC.shared.generateButton('wilderness', 'deleteAllPlans', 'Supprimer toutes les attaques enregistrées');
+					code += KOCFIA.shared.generateCheckbox('wilderness', 'active', 'Activer le module', KOCFIA.conf.wilderness.active);
+					code += KOCFIA.shared.generateCheckbox('wilderness', 'automatic', 'Lancer les attaques automatiques', KOCFIA.conf.wilderness.automatic);
+					code += KOCFIA.shared.generateButton('wilderness', 'deleteAllPlans', 'Supprimer toutes les attaques enregistrÃ©es');
 					code += '</div>';
 
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC wilderness modPanel function');
-					var $section = KOC.$confPanel.find('#koc-wilderness').html('');
+					console.info('KOCFIA wilderness modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-wilderness').html('');
 
 					var header = '<div class="infos cf">';
 					header += '<span class="ui-icon ui-icon-info"></span>';
-					header += '<span><input type="checkbox" id="wilderness-panel-automatic" '+ (KOC.conf.wilderness.automatic ? 'checked' : '') +' autocomplete="off" />';
+					header += '<span><input type="checkbox" id="wilderness-panel-automatic" '+ (KOCFIA.conf.wilderness.automatic ? 'checked' : '') +' autocomplete="off" />';
 					header += '<label for="wilderness-panel-automatic">attaques automatiques</label></span>';
 					header += '</div>'
 
@@ -2824,11 +2824,11 @@ jQuery(document).ready(function(){
 					form += '<fieldset>';
 					form += '<legend>Ville</legend>';
 
-					var i, length = KOC.cities.length;
+					var i, length = KOCFIA.cities.length;
 					for( i = 0; i < length; i += 1 ){
-						var city = KOC.cities[i];
-						form += '<input id="koc-wilderness-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" autocomplete="off" />';
-						form += '<label for="koc-wilderness-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
+						var city = KOCFIA.cities[i];
+						form += '<input id="kocfia-wilderness-city'+ city.id +'" name="city" value="'+ city.id +'" type="radio" class="city-choice" autocomplete="off" />';
+						form += '<label for="kocfia-wilderness-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
 					}
 
 					form += '</fieldset>';
@@ -2845,7 +2845,7 @@ jQuery(document).ready(function(){
 					form += '</div>';
 					form += '</fieldset>';
 					form += '<fieldset>';
-					form += '<legend>Coordonnées</legend>';
+					form += '<legend>CoordonnÃ©es</legend>';
 					form += '<label>Niveau&nbsp;:&nbsp;</label>';
 					form += '<input type="text" class="targetLevel" />';
 					form += '<small>format: x,y x,y x,y ...</small>';
@@ -2858,24 +2858,24 @@ jQuery(document).ready(function(){
 					skel += '<option value="">N\'importe lequel</option>';
 					skel += '</select>';
 					skel += '<div class="unit-block">';
-					skel += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
+					skel += '<label>UnitÃ©&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
 					skel += '<option value="">Choisir</option>';
 					skel += '</select>';
-					skel += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
+					skel += '<label>QuantitÃ©&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
 					skel += '</div>';
-					skel += '<button class="add-unit">Ajouter une autre unité</button>';
+					skel += '<button class="add-unit">Ajouter une autre unitÃ©</button>';
 					skel += '</fieldset>';
-					KOC.wilderness.$waveSkeleton = $(skel);
+					KOCFIA.wilderness.$waveSkeleton = $(skel);
 
 					form += '<fieldset class="keep">';
 					form += '<legend>Conserver</legend>';
 					form += '<div class="unit-block">';
-					form += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">';
+					form += '<label>UnitÃ©&nbsp;:&nbsp;</label><select class="unit-choice">';
 					form += '<option value="">Choisir</option>';
 					form += '</select>';
-					form += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
+					form += '<label>QuantitÃ©&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
 					form += '</div>';
-					form += '<button class="add-unit">Ajouter une autre unité</button>';
+					form += '<button class="add-unit">Ajouter une autre unitÃ©</button>';
 					form += '</fieldset>';
 					form +=  '<button class="add-wave">Ajouter une vague</button>';
 					form += '<button class="launch">Lancer</button>';
@@ -2891,24 +2891,24 @@ jQuery(document).ready(function(){
 					onGoing += '<th class="action">Actions</th>';
 					onGoing += '<th class="from">Ville</th>';
 					onGoing += '<th class="to">Cible</th>';
-					onGoing += '<th class="coords">Coordonnées</th>';
+					onGoing += '<th class="coords">CoordonnÃ©es</th>';
 					onGoing += '<th class="current">Cible</th>';
 					onGoing += '<th class="info">Info</th>';
 					onGoing += '</tr></thead>';
 
-					var savedPlans = '<h3>Attaques enregistrées</h3>';
+					var savedPlans = '<h3>Attaques enregistrÃ©es</h3>';
 					savedPlans += '<div class="attack-list saved">';
 					savedPlans += '<table><thead><tr>';
 					savedPlans += '<th class="action">Actions</th>';
 					savedPlans += '<th class="from">Ville</th>';
 					savedPlans += '<th class="to">Cible</th>';
-					savedPlans += '<th class="coords">Coordonnées</th>';
+					savedPlans += '<th class="coords">CoordonnÃ©es</th>';
 					savedPlans += '<th class="waves">Vagues</th>';
 					savedPlans += '<th class="keep">Converser</th>';
 					savedPlans += '</tr></thead>';
 
 					for( i = 0; i < length; i += 1 ){
-						var city = KOC.cities[i];
+						var city = KOCFIA.cities[i];
 						var line = '<tbody data-city="'+ city.id +'"></tbody>';
 
 						onGoing += line;
@@ -2917,23 +2917,23 @@ jQuery(document).ready(function(){
 					onGoing += '</table></div>';
 					savedPlans += '</table></div>';
 
-					var help = '<div id="koc-wilderness-help" class="help" title="Aide armoiries"><h4>Règles, limitations et informations :</h4><ul>';
-					help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
-					help += '<li>Une attaque sera annulée au bout de 10 erreurs consécutives <br />(coordonnée occupée, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
-					help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique</li>';
-					help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-					help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
-					help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant > 1min)</li>';
-					help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
-					help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
-					help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-					help += '</ul><h4>Méthode :</h4><ol>';
-					help += '<li>Sélectionner une ville</li>';
-					help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
-					help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
-					help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
-					help += '<li>Les quantités de troupes peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
-					help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
+					var help = '<div id="kocfia-wilderness-help" class="help" title="Aide armoiries"><h4>RÃ¨gles, limitations et informations :</h4><ul>';
+					help += '<li>Les terres sauvages occupÃ©es ne seront pas attaquÃ©es (vÃ©rification pour chaque coordonnÃ©e Ã  chaque attaque)</li>';
+					help += '<li>Une attaque sera annulÃ©e au bout de 10 erreurs consÃ©cutives <br />(coordonnÃ©e occupÃ©e, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
+					help += '<li>Les attaques sauvegardÃ©es peuvent Ãªtre lancÃ©es manuellement ou via le mode automatique</li>';
+					help += '<li>Pour le formulaire les erreurs seront listÃ©es au-dessus</li>';
+					help += '<li>Aucune vague n\'est lancÃ©e si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
+					help += '<li>Si une vague est en erreur les vagues prÃ©cÃ©dentes seront rappelÃ©es (sous rÃ©serves des limitations de temps de marche restant > 1min)</li>';
+					help += '<li>Lors du dÃ©marrage du mode automatique, 20 secondes s\'Ã©coulent entre chaque lancement de plan d\'attaque sauvegardÃ©</li>';
+					help += '<li>Dix secondes s\'Ã©coulent entre chaque lancement de vague</li>';
+					help += '<li>Chaque requÃªte au serveur est exÃ©cutÃ©e au maximum 3 fois lors de problÃ¨me rÃ©seau ou serveur</li>';
+					help += '</ul><h4>MÃ©thode :</h4><ol>';
+					help += '<li>SÃ©lectionner une ville</li>';
+					help += '<li>SpÃ©cifier une ou plusieurs coordonnÃ©es (sÃ©parÃ©es par un retour Ã  la ligne, sous le format x,y)</li>';
+					help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques prÃ©programmÃ©es)</li>';
+					help += '<li>SpÃ©cifier les chevaliers (optionnel, par dÃ©faut le premier chevalier disponible est utilisÃ©)</li>';
+					help += '<li>Les quantitÃ©s de troupes peuvent Ãªtre spÃ©cifiÃ©es via un nombre ou un abrÃ©viation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
+					help += '<li>SpÃ©cifier les quantitÃ©s de troupes Ã  conserver (optionnel)</li>';
 					help += '</ol></div>';
 
 					$section.append( header + '<div class="accordion">' + form + savedPlans + onGoing + '</div>' + help )
@@ -2942,12 +2942,12 @@ jQuery(document).ready(function(){
 						})
 						//load knights and units on city change )
 						.on('change', '.city-choice', function(){
-							var $waves = KOC.wilderness.$form.find('.wave');
+							var $waves = KOCFIA.wilderness.$form.find('.wave');
 							if( $waves.length ) $waves.remove();
 
-							KOC.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
+							KOCFIA.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
-							KOC.wilderness.addWaves(2, $(this).val());
+							KOCFIA.wilderness.addWaves(2, $(this).val());
 						})
 						//add unit button
 						.on('click', '.add-unit', function(){
@@ -2955,7 +2955,7 @@ jQuery(document).ready(function(){
 								$b = $this.siblings('.unit-block').eq(0).clone();
 
 							$b.find('input, select').val('');
-							$b.append('<button class="remove">Supprimer cette unité</button>')
+							$b.append('<button class="remove">Supprimer cette unitÃ©</button>')
 							  .insertBefore( $this );
 						})
 						//remove unit button
@@ -2964,113 +2964,113 @@ jQuery(document).ready(function(){
 						})
 						//add wave button
 						.on('click', '.add-wave', function(){
-							var $clone = KOC.wilderness.$form.find('.wave').eq(0).clone();
+							var $clone = KOCFIA.wilderness.$form.find('.wave').eq(0).clone();
 							$clone.find('input, select').val('');
-							$clone.insertBefore( KOC.wilderness.$form.find('.add-wave') );
+							$clone.insertBefore( KOCFIA.wilderness.$form.find('.add-wave') );
 						})
 						//reset form
-						.on('click', '.reset', KOC.wilderness.resetForm)
+						.on('click', '.reset', KOCFIA.wilderness.resetForm)
 						//launch
 						.on('click', '.launch', function(){
 							console.info('attack launch click');
-							if( KOC.conf.wilderness.active ){
-								var result = KOC.wilderness.planAttack();
+							if( KOCFIA.conf.wilderness.active ){
+								var result = KOCFIA.wilderness.planAttack();
 								if( result.errors.length ){
-									KOC.wilderness.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+									KOCFIA.wilderness.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 								} else {
-									KOC.wilderness.$form.find('.message').empty();
+									KOCFIA.wilderness.$form.find('.message').empty();
 									var d = new Date();
 									result.attack.id = Math.floor(d.getTime() / 1000);
-									KOC.wilderness.launchAttack( result.attack );
+									KOCFIA.wilderness.launchAttack( result.attack );
 
 									//open ongoing accordion
-									KOC.wilderness.$accordion.accordion('activate', 2);
+									KOCFIA.wilderness.$accordion.accordion('activate', 2);
 								}
 							} else {
-								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
+								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloquÃ©s.');
 							}
 						})
 						//save
 						.on('click', '.save, .saveAndLaunch', function(){
 							console.info('attack save click');
-							var result = KOC.wilderness.planAttack();
+							var result = KOCFIA.wilderness.planAttack();
 							if( result.errors.length ){
-								KOC.wilderness.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								KOCFIA.wilderness.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 							} else {
-								KOC.wilderness.$form.find('.message').empty();
+								KOCFIA.wilderness.$form.find('.message').empty();
 
-								if( !KOC.wilderness.attacks[ result.attack.cityId ] ){
-									KOC.wilderness.attacks[ result.attack.cityId ] = {};
+								if( !KOCFIA.wilderness.attacks[ result.attack.cityId ] ){
+									KOCFIA.wilderness.attacks[ result.attack.cityId ] = {};
 								}
 
-								var editAttackId = KOC.wilderness.$form.find('.edit-attackId').val(),
-									editCityId = KOC.wilderness.$form.find('.edit-cityId').val();
+								var editAttackId = KOCFIA.wilderness.$form.find('.edit-attackId').val(),
+									editCityId = KOCFIA.wilderness.$form.find('.edit-cityId').val();
 								if( editAttackId != '' && editCityId != '' ){
-									KOC.wilderness.deletePlan( editAttackId, editCityId, false );
-									KOC.wilderness.$saved.find('li')
-										.filter('[data-city='+ editCityId +'][data-attack='+ editAttackId +']')
+									KOCFIA.wilderness.deletePlan( editAttackId, editCityId, false );
+									KOCFIA.wilderness.$saved.find('tbody').filter('[data-city='+ editCityId +']')
+										.find('tr').filter('[data-attack='+ editAttackId +']')
 										.remove();
 								}
 
 								var d = new Date();
 								result.attack.id = Math.floor(d.getTime() / 1000);
 
-								KOC.wilderness.attacks[ result.attack.cityId ][ result.attack.id ] = result.attack;
+								KOCFIA.wilderness.attacks[ result.attack.cityId ][ result.attack.id ] = result.attack;
 
-								KOC.wilderness.$saved.find('ul').filter('[data-city='+ result.attack.cityId +']')
-									.append( KOC.wilderness.attackInfo( result.attack, null ) );
+								KOCFIA.wilderness.$saved.find('tbody').filter('[data-city='+ cityId +']')
+									.append( KOCFIA.wilderness.attackInfo( result.attack, null ) );
 
-								KOC.wilderness.storeAttacks();
+								KOCFIA.wilderness.storeAttacks();
 
-								if( KOC.conf.wilderness.active && $(this).hasClass('saveAndLaunch') ){
+								if( KOCFIA.conf.wilderness.active && $(this).hasClass('saveAndLaunch') ){
 									result.attack.id = Math.floor(d.getTime() / 1000);
-									KOC.wilderness.launchAttack( result.attack );
+									KOCFIA.wilderness.launchAttack( result.attack );
 
 									//open ongoing accordion
-									KOC.wilderness.$accordion.accordion('activate', 2);
+									KOCFIA.wilderness.$accordion.accordion('activate', 2);
 								} else {
 									//open saved accordion
-									KOC.wilderness.$accordion.accordion('activate', 1);
+									KOCFIA.wilderness.$accordion.accordion('activate', 1);
 								}
 							}
 						})
 						//attack plan delete
 						.on('click', '.delete', function(){
-							if( confirm('Etes-vous sûr ?') ){
+							if( confirm('Etes-vous sÃ»r ?') ){
 								var $this = $(this),
 									$tr = $(this).parent().parent(),
 									isEdit = $this.hasClass('edit'),
 									attackId = $tr.data('attack'),
 									cityId = $tr.data('city');
 
-								KOC.wilderness.deletePlan( attackId, cityId, true );
+								KOCFIA.wilderness.deletePlan( attackId, cityId, true );
 								$tr.remove();
 							}
 						})
 						//attack plan edit and duplication
 						.on('click', '.edit, .duplicate', function(){
-							KOC.wilderness.resetForm();
+							KOCFIA.wilderness.resetForm();
 							var $this = $(this),
 								$tr = $this.parent(),
 								attackId = $tr.data('attack'),
 								cityId = $tr.data('city'),
-								attack = KOC.wilderness.attacks[ cityId ][ attackId ];
+								attack = KOCFIA.wilderness.attacks[ cityId ][ attackId ];
 
 							if( attack ){
-								KOC.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
+								KOCFIA.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').show();
 
 								if( $this.hasClass('edit') ){
-									KOC.wilderness.$form.find('.edit-attackId').val( attack.id );
-									KOC.wilderness.$form.find('.edit-cityId').val( attack.cityId );
+									KOCFIA.wilderness.$form.find('.edit-attackId').val( attack.id );
+									KOCFIA.wilderness.$form.find('.edit-cityId').val( attack.cityId );
 								}
 
-								KOC.wilderness.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
-								KOC.wilderness.$form.find('.targetLevel').val(attack.targetLevel);
-								KOC.wilderness.$form.find('textarea').val(attack.coords.join("\n"));
+								KOCFIA.wilderness.$form.find('.city-choice').filter('[value='+ cityId +']').prop('checked', true);
+								KOCFIA.wilderness.$form.find('.targetLevel').val(attack.targetLevel);
+								KOCFIA.wilderness.$form.find('textarea').val(attack.coords.join("\n"));
 
-								KOC.wilderness.addWaves( attack.waves.length, attack.cityId );
+								KOCFIA.wilderness.addWaves( attack.waves.length, attack.cityId );
 
-								var $waves = KOC.wilderness.$form.find('.wave');
+								var $waves = KOCFIA.wilderness.$form.find('.wave');
 								var i, j, wavesLength = attack.waves.length, unitsLength;
 								for( i = 0; i < wavesLength; i += 1 ){
 									var $wave = $waves.eq(i),
@@ -3090,11 +3090,11 @@ jQuery(document).ready(function(){
 										var $b = $blocks.eq(j),
 											unit = wave.units[j];
 										$b.find('.unit-choice').val( unit.id );
-										$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
+										$b.find('.unit-qty').val( KOCFIA.shared.format( unit.qty ) );
 									}
 								}
 
-								var $keep = KOC.wilderness.$form.find('.keep');
+								var $keep = KOCFIA.wilderness.$form.find('.keep');
 								if( attack.keep.length > 1 ){
 									var keepLength = attack.keep.length;
 									for( i = 1; i < keepLength; i += 1 ){
@@ -3108,11 +3108,11 @@ jQuery(document).ready(function(){
 
 									var $b = $blocks.eq(i);
 									$b.find('.unit-choice').val( unit.id );
-									$b.find('.unit-qty').val( KOC.shared.format( unit.qty ) );
+									$b.find('.unit-qty').val( KOCFIA.shared.format( unit.qty ) );
 								}
 
 								//open form accordion
-								KOC.wilderness.$accordion.accordion('activate', 0);
+								KOCFIA.wilderness.$accordion.accordion('activate', 0);
 							} else {
 								alert('Plan d\'attaque introuvable.')
 							}
@@ -3121,53 +3121,53 @@ jQuery(document).ready(function(){
 						.on('change', '.knight-choice', function(){
 							var id = $(this).val();
 							if( id != '' ){
-								KOC.wilderness.$form.find('.knight-choice').not( this ).each2(function(i, $kc){
+								KOCFIA.wilderness.$form.find('.knight-choice').not( this ).each2(function(i, $kc){
 									if( $kc.val() == id ) $kc.val('');
 								});
 							}
 						})
 						//stop on next round
 						.on('click', '.stop', function(){
-							if( confirm('Etes-vous sûr ?') ){
+							if( confirm('Etes-vous sÃ»r ?') ){
 								var $tr = $(this).parent().parent();
 								$tr.data('stop', 1);
 							}
 						})
 						//manual launch
 						.on('click', '.charge', function(){
-							if( KOC.conf.wilderness.active ){
-								if( !KOC.conf.wilderness.automatic ){
+							if( KOCFIA.conf.wilderness.active ){
+								if( !KOCFIA.conf.wilderness.automatic ){
 									var $tr = $(this).hide().parent().parent();
-									var attack = KOC.wilderness.attacks[ $tr.data('city') ][ $tr.data('attack') ];
+									var attack = KOCFIA.wilderness.attacks[ $tr.data('city') ][ $tr.data('attack') ];
 									if( attack ){
 										attack.lastCoordIndex = 0;
 										attack.abort = 0;
 										attack.aborts = [];
 										attack.marching = [];
-										KOC.wilderness.refreshOngoingInfo( attack, false );
-										KOC.wilderness.launchAttack( attack );
+										KOCFIA.wilderness.refreshOngoingInfo( attack, false );
+										KOCFIA.wilderness.launchAttack( attack );
 
 										//open ongoing accordion
-										KOC.wilderness.$accordion.accordion('activate', 2);
+										KOCFIA.wilderness.$accordion.accordion('activate', 2);
 									} else {
 										alert('Plan d\'attaque introuvable.')
 									}
 								} else {
-									alert('Le mode automatic est activé. Le lancement d\'attaque sauvegardée est bloqué (attaque déjà en cours).');
+									alert('Le mode automatic est activÃ©. Le lancement d\'attaque sauvegardÃ©e est bloquÃ© (attaque dÃ©jÃ  en cours).');
 								}
 							} else {
-								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
+								alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloquÃ©s.');
 							}
 						})
 						//attack templates
 						.on('click', '.build', function(){
 							var rel = $(this).attr('rel');
-							KOC.wilderness.$form.find('.wave').remove();
-							KOC.wilderness.addWaves(2, 'city' + KOC.wilderness.$form.find('.city-choice').filter(':checked').val());
+							KOCFIA.wilderness.$form.find('.wave').remove();
+							KOCFIA.wilderness.addWaves(2, 'city' + KOCFIA.wilderness.$form.find('.city-choice').filter(':checked').val());
 
-							var $waves = KOC.wilderness.$form.find('.wave');
+							var $waves = KOCFIA.wilderness.$form.find('.wave');
 							var $addUnit = $waves.find('.add-unit');
-							var $level = KOC.wilderness.$form.find('.targetLevel');
+							var $level = KOCFIA.wilderness.$form.find('.targetLevel');
 							$addUnit.eq(1).trigger('click')
 							if( rel == '8' || rel == '9' || rel == '9bis' ){
 								$addUnit.eq(0).trigger('click');
@@ -3271,47 +3271,47 @@ jQuery(document).ready(function(){
 						})
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
-					KOC.wilderness.$accordion = $section.find('.accordion');
-					KOC.wilderness.$form = $section.find('.attack-form');
-					KOC.wilderness.$saved = $section.find('.attack-list.saved');
-					KOC.wilderness.$ongoing = $section.find('.attack-list.ongoing');
+					KOCFIA.wilderness.$accordion = $section.find('.accordion');
+					KOCFIA.wilderness.$form = $section.find('.attack-form');
+					KOCFIA.wilderness.$saved = $section.find('.attack-list.saved');
+					KOCFIA.wilderness.$ongoing = $section.find('.attack-list.ongoing');
 
-					KOC.wilderness.$accordion.accordion({collapsible: true, autoHeight: false}).accordion('activate', false);
+					KOCFIA.wilderness.$accordion.accordion({collapsible: true, autoHeight: false}).accordion('activate', false);
 				},
 				'on': function(){
-					console.info('KOC wilderness on function');
-					if( $.isEmptyObject( KOC.wilderness.attacks ) ){
+					console.info('KOCFIA wilderness on function');
+					if( $.isEmptyObject( KOCFIA.wilderness.attacks ) ){
 						try{
-							var persistentwildernessAttacks = localStorage.getObject('koc_wilderness_attacks_' + KOC.storeUniqueId);
+							var persistentwildernessAttacks = localStorage.getObject('kocfia_wilderness_attacks_' + KOCFIA.storeUniqueId);
 							if( persistentwildernessAttacks ){
-								KOC.wilderness.attacks = persistentwildernessAttacks;
+								KOCFIA.wilderness.attacks = persistentwildernessAttacks;
 							}
 						} catch(e){
 							console.error(e);
 						}
 					}
 
-					var i, length = KOC.citiesId.length;
+					var i, length = KOCFIA.citiesId.length;
 					for( i = 0; i < length; i += 1 ){
-						KOC.wilderness.listCityAttacks( KOC.citiesId[i] );
+						KOCFIA.wilderness.listCityAttacks( KOCFIA.citiesId[i] );
 					}
 
-					KOC.wilderness.$saved.find('.charge').toggle( KOC.conf.wilderness.automatic );
+					KOCFIA.wilderness.$saved.find('.charge').toggle( KOCFIA.conf.wilderness.automatic );
 
-					if( KOC.conf.wilderness.automatic ){
-						KOC.wilderness.automaticOn();
+					if( KOCFIA.conf.wilderness.automatic ){
+						KOCFIA.wilderness.automaticOn();
 					}
 				},
 				'off': function(){
-					console.info('KOC wilderness off function');
+					console.info('KOCFIA wilderness off function');
 
-					KOC.wilderness.automaticOff();
+					KOCFIA.wilderness.automaticOff();
 				},
 				'automaticOn': function(){
-					console.info('KOC wilderness automaticOn function');
+					console.info('KOCFIA wilderness automaticOn function');
 					$('#wilderness-panel-automatic').prop('checked', true);
 
-					KOC.wilderness.$saved.find('.charge').hide(); //hide manual launch button
+					KOCFIA.wilderness.$saved.find('.charge').hide(); //hide manual launch button
 
 					//using closure to have a "copy" of the attack plan
 					var i = 1;
@@ -3320,17 +3320,17 @@ jQuery(document).ready(function(){
 							console.info('launching automatic attack', attack.id, attack.cityId, attack);
 							attack.abort = 0;
 							attack.aborts = [];
-							KOC.wilderness.launchAttack( attack );
+							KOCFIA.wilderness.launchAttack( attack );
 						}, i * 20000);
 					};
 
 					//launching stored attacks
-					for( var c in KOC.wilderness.attacks ){
-						if( KOC.wilderness.attacks.hasOwnProperty(c) ){
-							//console.log(KOC.wilderness.attacks[c]);
-							for( var a in KOC.wilderness.attacks[c] ){
-								if( KOC.wilderness.attacks[c].hasOwnProperty(a) ){
-									schredule(KOC.wilderness.attacks[c][a], i);
+					for( var c in KOCFIA.wilderness.attacks ){
+						if( KOCFIA.wilderness.attacks.hasOwnProperty(c) ){
+							//console.log(KOCFIA.wilderness.attacks[c]);
+							for( var a in KOCFIA.wilderness.attacks[c] ){
+								if( KOCFIA.wilderness.attacks[c].hasOwnProperty(a) ){
+									schredule(KOCFIA.wilderness.attacks[c][a], i);
 									i += 1;
 								}
 							}
@@ -3338,32 +3338,32 @@ jQuery(document).ready(function(){
 					}
 				},
 				'automaticOff': function(){
-					console.info('KOC wilderness automaticOff function');
+					console.info('KOCFIA wilderness automaticOff function');
 					$('#wilderness-panel-automatic').prop('checked', false);
 
 					//show all manual launch buttons
-					KOC.wilderness.$saved.find('.charge').show();
+					KOCFIA.wilderness.$saved.find('.charge').show();
 
 					//hide the on going attacks one
-					KOC.wilderness.$ongoing.find('tr').each2(function(i, $tr){
-						KOC.wilderness.$saved.find('tr').filter('[data-city='+ $tr.data('city') +'][data-attack='+ $tr.data('attack') +']').find('.charge').hide();
+					KOCFIA.wilderness.$ongoing.find('tr').each2(function(i, $tr){
+						KOCFIA.wilderness.$saved.find('tr').filter('[data-city='+ $tr.data('city') +'][data-attack='+ $tr.data('attack') +']').find('.charge').hide();
 					});
 				},
 				'storeAttacks': function(){
-					console.info('KOC wilderness storeAttacks function');
+					console.info('KOCFIA wilderness storeAttacks function');
 					try{
-						localStorage.setObject('koc_wilderness_attacks_' + KOC.storeUniqueId, KOC.wilderness.attacks);
+						localStorage.setObject('kocfia_wilderness_attacks_' + KOCFIA.storeUniqueId, KOCFIA.wilderness.attacks);
 					} catch(e){
 						alert(e);
 					}
 				},
 				'planAttack': function(){
-					console.info('KOC wilderness planAttack function');
-					var $waves = KOC.wilderness.$form.find('.wave'),
-						$keep = KOC.wilderness.$form.find('.keep'),
-						$cityChoice = KOC.wilderness.$form.find('.city-choice').filter(':checked'),
-						level = $.trim( KOC.wilderness.$form.find('.targetLevel').val() ),
-						coords = $.trim( KOC.wilderness.$form.find('textarea').val().replace(/\n/g, ' ') ),
+					console.info('KOCFIA wilderness planAttack function');
+					var $waves = KOCFIA.wilderness.$form.find('.wave'),
+						$keep = KOCFIA.wilderness.$form.find('.keep'),
+						$cityChoice = KOCFIA.wilderness.$form.find('.city-choice').filter(':checked'),
+						level = $.trim( KOCFIA.wilderness.$form.find('.targetLevel').val() ),
+						coords = $.trim( KOCFIA.wilderness.$form.find('textarea').val().replace(/\n/g, ' ') ),
 						errors = [],
 						regexp = /[^0-9, ]/,
 						attack = { 'type': 'attack', 'waves': [], 'lastCoordIndex': 0, 'keep': [] };
@@ -3371,27 +3371,27 @@ jQuery(document).ready(function(){
 					//check form
 						//city
 						if( !$cityChoice.length ){
-							errors.push('Ville de départ obligatoire.');
+							errors.push('Ville de dÃ©part obligatoire.');
 						} else {
 							attack.cityId = $cityChoice.val();
 						}
 
 						//targetLevel
 						if( level == '' ){
-							errors.push('Le niveau des terres sauvages ciblées est requis.');
+							errors.push('Le niveau des terres sauvages ciblÃ©es est requis.');
 						} else if( level == Number.NaN ){
-							errors.push('Le niveau des terres sauvages ciblées est éronné, il doit être un chiffre.');
+							errors.push('Le niveau des terres sauvages ciblÃ©es est Ã©ronnÃ©, il doit Ãªtre un chiffre.');
 						} else if( level < 1 || level > 10 ){
-							errors.push('Le niveau des terres sauvages ciblées est éronné, il doit être compris entre 1 et 10.');
+							errors.push('Le niveau des terres sauvages ciblÃ©es est Ã©ronnÃ©, il doit Ãªtre compris entre 1 et 10.');
 						} else {
 							attack.targetLevel = level;
 						}
 
 						//coords
 						if( coords.length == 0 ){
-							errors.push('Au moins une coordonnée est requise.');
+							errors.push('Au moins une coordonnÃ©e est requise.');
 						} else if( regexp.test( coords ) ){
-							errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnées.');
+							errors.push('Pour les coordonnÃ©es, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnÃ©es.');
 						} else {
 							coords = coords.split(' ');
 							var wrongGPS = false, i, length = coords.length;
@@ -3402,7 +3402,7 @@ jQuery(document).ready(function(){
 								}
 							}
 							if( wrongGPS ){
-								errors.push('Une des coordonnées est erronée.');
+								errors.push('Une des coordonnÃ©es est erronÃ©e.');
 							} else {
 								attack.coords = coords;
 							}
@@ -3420,7 +3420,7 @@ jQuery(document).ready(function(){
 								$wave.find('.unit-block').each2(function(i, $b){
 									var valid = true;
 									var u = $b.find('.unit-choice').val(),
-										q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+										q = KOCFIA.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
 
 									if( u.length == 0 ){
 										valid = false;
@@ -3442,20 +3442,20 @@ jQuery(document).ready(function(){
 						});
 
 						if( !attack.waves.length ){
-							errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
-							errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
+							errors.push('Au moins une unitÃ© de l\'attaque doit Ãªtre spÃ©cifiÃ©e.');
+							errors.push('Au moins une unitÃ© de l\'attaque doit avoir une quantitÃ© valide.');
 						}
 
 						//keep
 						$keep.find('.unit-block').each2(function(i, $b){
 							var k = {},
 								u = $.trim( $b.find('.unit-choice').val() ),
-								q = KOC.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+								q = KOCFIA.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
 
 							if( u.length == 0 && q != false && q > 0 ){
-								errors.push('L\'unité à conserver doit être spécifiée.');
+								errors.push('L\'unitÃ© Ã  conserver doit Ãªtre spÃ©cifiÃ©e.');
 							} else if( u.length > 0 && (q == false || q < 1) ){
-								errors.push('L\'unité à conserver doit avoir une quantité.');
+								errors.push('L\'unitÃ© Ã  conserver doit avoir une quantitÃ©.');
 							} else if( u.length > 0 && unitList.length && $.inArray(u, unitList) > -1 ){
 								attack.keep.push({'id': u, 'qty': q});
 							}
@@ -3468,46 +3468,46 @@ jQuery(document).ready(function(){
 					return {'attack': attack, 'errors': errors};
 				},
 				'launchAttack': function( attack ){
-					console.info('KOC wilderness launchAttack function', attack);
+					console.info('KOCFIA wilderness launchAttack function', attack);
 					attack.lastCoordIndex = 0;
 					attack.abort = 0;
 					attack.aborts = [];
 					attack.marching = [];
-					KOC.wilderness.refreshOngoingInfo( attack, false );
-					KOC.checkAndLaunchAttack( attack, 'wilderness' );
+					KOCFIA.wilderness.refreshOngoingInfo( attack, false );
+					KOCFIA.checkAndLaunchAttack( attack, 'wilderness' );
 				},
 				'resetForm': function(){
-					console.info('KOC wilderness resetForm function');
-					KOC.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
-					KOC.wilderness.$form.find('.wave').remove();
-					var $keep = KOC.wilderness.$form.find('.keep');
+					console.info('KOCFIA wilderness resetForm function');
+					KOCFIA.wilderness.$form.find('.keep, .add-wave, .save, .launch, .saveAndLaunch, .builds').hide();
+					KOCFIA.wilderness.$form.find('.wave').remove();
+					var $keep = KOCFIA.wilderness.$form.find('.keep');
 					$keep.find('.unit-block').filter(':gt(0)').remove();
 					$keep.find('.unit-choice').find('option').filter(':gt(0)').remove();
-					var $inputs = KOC.wilderness.$form.find('input');
+					var $inputs = KOCFIA.wilderness.$form.find('input');
 					$inputs.filter('[type="text"], [type="hidden"]').val('');
 					$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
-					KOC.wilderness.$form.find('select, textarea').val('');
-					KOC.wilderness.$form.find('.message').empty();
+					KOCFIA.wilderness.$form.find('select, textarea').val('');
+					KOCFIA.wilderness.$form.find('.message').empty();
 				},
 				'deletePlan': function( attackId, cityId, save ){
-					console.info('KOC wilderness deletePlan function', attackId, cityId, save);
-					delete KOC.wilderness.attacks[ cityId ][ attackId ];
+					console.info('KOCFIA wilderness deletePlan function', attackId, cityId, save);
+					delete KOCFIA.wilderness.attacks[ cityId ][ attackId ];
 
-					if( save ) KOC.wilderness.storeAttacks();
+					if( save ) KOCFIA.wilderness.storeAttacks();
 				},
 				'deleteAllPlans': function(){
-					console.info('KOC wilderness deleteAllPlans function');
-					KOC.wilderness.attacks = {};
-					KOC.wilderness.storeAttacks();
+					console.info('KOCFIA wilderness deleteAllPlans function');
+					KOCFIA.wilderness.attacks = {};
+					KOCFIA.wilderness.storeAttacks();
 
-					$('#koc-wilderness').find('.attack-list').find('ul').empty();
+					$('#kocfia-wilderness').find('.attack-list').find('ul').empty();
 				},
 				'attackInfo': function( attack, city ){
-					console.info('KOC wilderness attackInfo function', attack, city);
+					console.info('KOCFIA wilderness attackInfo function', attack, city);
 					if( city == null ){
-						city = KOC.shared.getCityById( attack.cityId );
+						city = KOCFIA.shared.getCityById( attack.cityId );
 					} else if( !city.id ){
-						city = KOC.shared.getCityById( city );
+						city = KOCFIA.shared.getCityById( city );
 					}
 
 					var code = '<tr data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
@@ -3519,7 +3519,7 @@ jQuery(document).ready(function(){
 					code += '</td>';
 					code += '<td class="form">' + city.roman + ' ' + city.name + '</td>';
 					code += '<td class="to">TS ' + attack.targetLevel + '</td>';
-					code += '<td class="coords">' + KOC.shared.mapLink( attack.coords ) +'</td>';
+					code += '<td class="coords">' + KOCFIA.shared.mapLink( attack.coords ) +'</td>';
 					code += '<td class="waves">';
 
 					var knights = window.seed.knights[ 'city' + city.id ],
@@ -3528,9 +3528,9 @@ jQuery(document).ready(function(){
 						var wave = attack.waves[j];
 						code += '<div class="wave">Vague '+ (j + 1) + '&nbsp;:&nbsp;';
 						code += '<div class="knight">chevalier&nbsp;:&nbsp;';
-						code += ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].skillPointsApplied +', '+ KOC.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' );
+						code += ( wave.knight ? knights[ wave.knight ].knightName + '(niveau '+ knights[ attack.knight ].skillPointsApplied +', '+ KOCFIA.shared.getKnightStatText( knight ) +')' : 'n\'importe lequel' );
 						code += '</div>';
-						code += '<div class="troops">unités&nbsp;:&nbsp;';
+						code += '<div class="troops">unitÃ©s&nbsp;:&nbsp;';
 
 						var unitsCode = '';
 						unitsLength = wave.units.length;
@@ -3538,7 +3538,7 @@ jQuery(document).ready(function(){
 							var unit = wave.units[k];
 							if( unitsCode.length ) unitsCode += ', ';
 
-							unitsCode += KOC.shared.format( unit.qty );
+							unitsCode += KOCFIA.shared.format( unit.qty );
 							unitsCode +=  '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_';
 							unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
 						}
@@ -3550,7 +3550,7 @@ jQuery(document).ready(function(){
 						var unit = attack.keep[j];
 						if( unitsCode.length ) unitsCode += ', ';
 
-						unitsCode += KOC.shared.format( unit.qty );
+						unitsCode += KOCFIA.shared.format( unit.qty );
 						unitsCode += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_';
 						unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
 					}
@@ -3559,22 +3559,22 @@ jQuery(document).ready(function(){
 					return code;
 				},
 				'refreshOngoingInfo': function(attack, noButton){
-					console.info('KOC wilderness refreshOngoingInfo function');
+					console.info('KOCFIA wilderness refreshOngoingInfo function');
 
-					var $tr = KOC.wilderness.$ongoing.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']');
+					var $tr = KOCFIA.wilderness.$ongoing.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']');
 					if( $tr.length == 0 ){
-						var city = city = KOC.shared.getCityById( attack.cityId );
+						var city = city = KOCFIA.shared.getCityById( attack.cityId );
 						var code = '<tr data-city="'+ attack.cityId +'" data-attack="'+ attack.id +'">';
-						code += '<td class="action"><span class="ui-icon ui-icon-cancel" title="Arrêter au retour des troupes"></span></td>';
+						code += '<td class="action"><span class="ui-icon ui-icon-cancel" title="ArrÃªter au retour des troupes"></span></td>';
 						code += '<td class="form">' + city.roman + ' ' + city.name + '</td>';
 						code += '<td class="to">TS ' + attack.targetLevel + '</td>';
-						code += '<td class="coords">' + KOC.shared.mapLink( attack.coords ) +'</td>';
+						code += '<td class="coords">' + KOCFIA.shared.mapLink( attack.coords ) +'</td>';
 						code += '<td class="current"></td>';
 						code += '<td class="info"></td></tr>';
 
 						$tr = $( code );
 
-						KOC.wilderness.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').append( $tr );
+						KOCFIA.wilderness.$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').append( $tr );
 					}
 
 					//attack stopped
@@ -3582,9 +3582,9 @@ jQuery(document).ready(function(){
 						$tr.find('.stop').removeClass('stop').addClass('trash').attr('title', 'Enlever les informations sur cette attaque.');
 
 						//show the manual launch button
-						KOC.wilderness.$saved.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']').find('.charge').show();
+						KOCFIA.wilderness.$saved.find('tr').filter('[data-city='+ attack.cityId +'][data-attack='+ attack.id +']').find('.charge').show();
 					} else {
-						$tr.find('.current').html( KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) + '(' + (attack.lastCoordIndex + 1) + 'e / ' + attack.coords.length + ')' );
+						$tr.find('.current').html( KOCFIA.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) + '(' + (attack.lastCoordIndex + 1) + 'e / ' + attack.coords.length + ')' );
 					}
 
 					if( attack.aborts.length ){
@@ -3595,16 +3595,16 @@ jQuery(document).ready(function(){
 					}
 				},
 				'listCityAttacks': function( cityId ){
-					console.info('KOC wilderness listCityAttacks function', cityId);
-					var $tbody = KOC.wilderness.$saved.find('tbody').filter('[data-city='+ cityId +']');
+					console.info('KOCFIA wilderness listCityAttacks function', cityId);
+					var $tbody = KOCFIA.wilderness.$saved.find('tbody').filter('[data-city='+ cityId +']');
 					$tbody.empty();
 
-					var attacks = KOC.wilderness.attacks[ cityId ],
+					var attacks = KOCFIA.wilderness.attacks[ cityId ],
 						code = '';
 					if( attacks ){
 						for( var a in attacks ){
 							if( attacks.hasOwnProperty(a) ){
-								code += KOC.wilderness.attackInfo( attacks[a], cityId );
+								code += KOCFIA.wilderness.attackInfo( attacks[a], cityId );
 							}
 						}
 					}
@@ -3613,22 +3613,22 @@ jQuery(document).ready(function(){
 				},
 				//fill the keep <select> options too
 				'addWaves': function( num, cityId ){
-					console.info('KOC wilderness addWaves function', num, cityId);
+					console.info('KOCFIA wilderness addWaves function', num, cityId);
 					if( cityId.indexOf('city') != 0 ) cityId = 'city' + cityId;
-					var $clone = KOC.wilderness.$waveSkeleton.clone(), i;
-					$clone.insertBefore( KOC.wilderness.$form.find('.keep') );
+					var $clone = KOCFIA.wilderness.$waveSkeleton.clone(), i;
+					$clone.insertBefore( KOCFIA.wilderness.$form.find('.keep') );
 					for( i = 1; i < num; i += 1 ){
-						$clone.clone().insertBefore( KOC.wilderness.$form.find('.keep') );
+						$clone.clone().insertBefore( KOCFIA.wilderness.$form.find('.keep') );
 					}
 
-					var knights = KOC.shared.getAvailableKnights( cityId ),
+					var knights = KOCFIA.shared.getAvailableKnights( cityId ),
 						choices = '', i, length = knights.length;
 					for( i = 0; i < length; i += 1 ){
 						var knight = knights[i];
-						choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.skillPointsApplied + ', ' + KOC.shared.getKnightStatText( knight ) +')</option>';
+						choices += '<option value="'+ knight.knightId +'">'+ knight.knightName + '(niveau '+ knight.skillPointsApplied + ', ' + KOCFIA.shared.getKnightStatText( knight ) +')</option>';
 					}
 
-					KOC.wilderness.$form.find('.knight-choice').each2(function(i, $kc){
+					KOCFIA.wilderness.$form.find('.knight-choice').each2(function(i, $kc){
 						$kc.append( choices );
 					});
 
@@ -3637,21 +3637,21 @@ jQuery(document).ready(function(){
 					for( var u in units ){
 						if( units.hasOwnProperty(u) ){
 							var name = window.unitcost[u][0];
-							if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
-							choices += '<option value="'+ u +'">'+ name + ' ('+ KOC.shared.format(units[u]) +')</option>';
+							if( name == 'UnitÃ© de Ravitaillement' ) name = 'Ravitailleur';
+							choices += '<option value="'+ u +'">'+ name + ' ('+ KOCFIA.shared.format(units[u]) +')</option>';
 						}
 					}
 
-					KOC.wilderness.$form.find('.unit-choice').each2(function(i, $uc){
+					KOCFIA.wilderness.$form.find('.unit-choice').each2(function(i, $uc){
 						$uc.append( choices );
 					});
 				},
 			};
 
 		/* NOTEPAD */
-			KOC.notepad = {
+			KOCFIA.notepad = {
 				'options': {
-					'active': 0,
+					'active': 1,
 					'visible': 0,
 					'moveable': 1,
 					'position': {'top': 10, 'left': 10},
@@ -3660,82 +3660,86 @@ jQuery(document).ready(function(){
 				'stored': ['notes'],
 				'notes': {},
 				'confPanel': function( $section ){
-					console.info('KOC notepad confPanel function');
+					console.info('KOCFIA notepad confPanel function');
 					var code = '<h3>Bloc-note</h3>';
 					code += '<div>';
-					code += KOC.shared.generateButton('notepad', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions');
-					code += KOC.shared.generateButton('notepad', 'clean', 'Supprimer les notes');
+					code += KOCFIA.shared.generateCheckbox('notepad', 'active', 'Activer le module', KOCFIA.conf.notepad.active);
+					code += KOCFIA.shared.generateButton('notepad', 'resetPositionAndDimension', 'Remise Ã  zÃ©ro de la position et des dimensions');
+					code += KOCFIA.shared.generateButton('notepad', 'clean', 'Supprimer les notes');
 					code += '</div>';
 
 					$section.append( code );
 				},
 				'on': function(){
-					console.info('KOC notepad on function');
-					$head.append( $('<style id="koc-notepad-css">').html(kocNotepadCss) );
+					console.info('KOCFIA notepad on function');
+					$head.append( $('<style id="kocfia-notepad-css">').html(notepadCss) );
 
-					if( $.isEmptyObject( KOC.notepad.notes ) ){
+					if( $.isEmptyObject( KOCFIA.notepad.notes ) ){
 						try{
-							var notes = localStorage.getObject('koc_notepad_notes_' + KOC.storeUniqueId);
+							var notes = localStorage.getObject('kocfia_notepad_notes_' + KOCFIA.storeUniqueId);
 							if( notes ){
-								KOC.notepad.notes = notes;
+								KOCFIA.notepad.notes = notes;
 							}
 						} catch(e){
 							alert(e);
 						}
 					}
 
-					var $notepad = $('<div id="koc-notepad" class="ui-widget ui-widget-content ui-corner-all">');
+					var $notepad = $('<div id="kocfia-notepad" class="ui-widget ui-widget-content ui-corner-all">');
 
 					var code = '<h3>Bloc Note</h3><div class="wrap">';
-					code += '<label for="koc-notepad-note-name">Nom de la note&nbsp;:&nbsp;</label>';
-					code += '<input type="text" id="koc-notepad-note-name" />';
-					code += '<label for="koc-notepad-note-text"><span class="charsLeft">1000 caractères restant</span>Contenu&nbsp;:&nbsp;</label>';
-					code += '<textarea id="koc-notepad-note-text"></textarea>';
+					code += '<label for="kocfia-notepad-note-name">Nom de la note&nbsp;:&nbsp;</label>';
+					code += '<input type="text" id="kocfia-notepad-note-name" />';
+					code += '<label for="kocfia-notepad-note-text"><span class="charsLeft">1000 caractÃ¨res restant</span>Contenu&nbsp;:&nbsp;</label>';
+					code += '<textarea id="kocfia-notepad-note-text"></textarea>';
 					code += '<br /><button class="save">Enregistrer</button>';
 					code += '<button class="cancel">Annuler</button>';
 
 					code += '<h3>Notes :</h3><ul class="notes">';
-					for( var n in KOC.notepad.notes ){
-						if( KOC.notepad.notes.hasOwnProperty(n) ){
-							var note = KOC.notepad.notes[n];
+					for( var n in KOCFIA.notepad.notes ){
+						if( KOCFIA.notepad.notes.hasOwnProperty(n) ){
+							var note = KOCFIA.notepad.notes[n];
 							code += '<li><button data-id="'+ n +'">'+ note.name +'</button><span class="ui-icon ui-icon-trash"></span></li>';
 						}
 					}
-					code += '</ul>';
+					code += '</ul></div>';
 
 					$notepad
 						.append( '<span class="ui-icon ui-icon-close"></span>' )
 						.append( code )
 						.draggable({
 							helper: "original",
+							appendTo: 'body',
+							containment: 'window',
+							scroll: true,
 							distance: 20,
 							stop: function(event, ui){
-								KOC.conf.notepad.position = ui.position;
-								KOC.shared.storeConf();
+								KOCFIA.conf.notepad.position = ui.position;
+								KOCFIA.shared.storeConf();
 							}
 						})
 						.resizable({
 							'minWidth': 200,
 							'minHeight': 200,
 							'stop': function(event, ui){
-								KOC.conf.notepad.size = ui.size;
-								KOC.shared.storeConf();
+								KOCFIA.conf.notepad.size = ui.size;
+								KOCFIA.shared.storeConf();
 							}
 						})
 						.css({
-							'top': KOC.conf.notepad.position.top,
-							'left': KOC.conf.notepad.position.left,
-							'width': KOC.conf.notepad.size.width,
-							'height': KOC.conf.notepad.size.height,
+							'top': KOCFIA.conf.notepad.position.top,
+							'left': KOCFIA.conf.notepad.position.left,
+							'width': KOCFIA.conf.notepad.size.width,
+							'height': KOCFIA.conf.notepad.size.height,
 						})
 						.on('click', '.ui-icon-close', function(){
-							KOC.$notepad.hide();
-							KOC.conf.notepad.visible = 0;
-							KOC.shared.storeConf();
+							KOCFIA.notepad.$div.hide();
+							KOCFIA.conf.notepad.visible = 0;
+							KOCFIA.shared.storeConf();
 						})
 						.on('click', '.save', function(){
-							var name = $.trim( KOC.notepad.$name.val() ),
-								text = $.trim( KOC.notepad.$textarea.val() );
+							var name = $.trim( KOCFIA.notepad.$name.val() ),
+								text = $.trim( KOCFIA.notepad.$textarea.val() );
 
 							if( name.length ){
 								if( text.length > 1000 ){
@@ -3743,132 +3747,132 @@ jQuery(document).ready(function(){
 								} else {
 									var d = new Date(),
 										id = Math.floor( d.getTime() / 1000 );
-									KOC.notepad.notes[ id ] = {'name': name, 'text': text};
-									KOC.notepad.storeNotes();
+									KOCFIA.notepad.notes[ id ] = {'name': name, 'text': text};
+									KOCFIA.notepad.storeNotes();
 
-									KOC.notepad.$notes.append( '<li><button data-id="'+ id +'">'+ name +'</button><span class="ui-icon ui-icon-trash"></span></li>' );
+									KOCFIA.notepad.$notes.append( '<li><button data-id="'+ id +'">'+ name +'</button><span class="ui-icon ui-icon-trash"></span></li>' );
 								}
 							} else {
 								alert('Nom de la note invalide.');
 							}
 						})
 						.on('click', '.cancel', function(){
-							KOC.notepad.$name.val('');
-							KOC.notepad.$textarea.val('');
+							KOCFIA.notepad.$name.val('');
+							KOCFIA.notepad.$textarea.val('');
 						})
 						.on('click', '.notes button', function(){
-							KOC.notepad.load( $(this).data('id') );
+							KOCFIA.notepad.load( $(this).data('id') );
 						})
 						.on('click', '.notes .ui-icon-trash', function(){
 							var $this = $(this);
-							KOC.notepad.delete( $this.siblings().data('id') );
+							KOCFIA.notepad.delete( $this.siblings().data('id') );
 							$this.parent().remove();
 						});
 
 					$body.append( $notepad );
 
-					KOC.$notepad =	$('#koc-notepad');
-					KOC.notepad.$notes = KOC.$notepad.find('.notes');
-					KOC.notepad.$wrap = KOC.$notepad.find('.wrap');
-					KOC.notepad.$span = KOC.notepad.$wrap.find('pre span');
-					KOC.notepad.$name = $('#koc-notepad-note-name');
-					KOC.notepad.$textarea = $('#koc-notepad-note-text');
-					KOC.notepad.$charsLeft = KOC.$notepad.find('.charsLeft');
+					KOCFIA.notepad.$div = $('#kocfia-notepad');
+					KOCFIA.notepad.$notes = KOCFIA.notepad.$div.find('.notes');
+					KOCFIA.notepad.$wrap = KOCFIA.notepad.$div.find('.wrap');
+					KOCFIA.notepad.$span = KOCFIA.notepad.$wrap.find('pre span');
+					KOCFIA.notepad.$name = $('#kocfia-notepad-note-name');
+					KOCFIA.notepad.$textarea = $('#kocfia-notepad-note-text');
+					KOCFIA.notepad.$charsLeft = KOCFIA.notepad.$div.find('.charsLeft');
 
-					KOC.notepad.$textarea[0].addEventListener('input', function(){
-							var text = KOC.notepad.$textarea.val(),
+					KOCFIA.notepad.$textarea[0].addEventListener('input', function(){
+							var text = KOCFIA.notepad.$textarea.val(),
 								l = 1000 - parseFloat(text.length);
 							if( l < 2 ){
-								KOC.notepad.$charsLeft.html(l + ' caractère restant');
+								KOCFIA.notepad.$charsLeft.html(l + ' caractÃ¨re restant');
 							} else {
-								KOC.notepad.$charsLeft.html(l + ' caractères restant')
+								KOCFIA.notepad.$charsLeft.html(l + ' caractÃ¨res restant')
 							}
 					}, false);
 
-					if( KOC.conf.notepad.visible ){
-						KOC.$notepad.show();
+					if( KOCFIA.conf.notepad.visible ){
+						KOCFIA.notepad.$div.show();
 					}
 
-					var $kocNotepadToggle = $('<button id="koc-notepad-toggle">').html('Bloc Note');
-					$kocNotepadToggle.click(function(){
-						console.info('$kocNotepadToggle click');
-						KOC.$notepad.toggle();
+					var $notepadToggle = $('<button id="kocfia-notepad-toggle">').html('Bloc Note');
+					$notepadToggle.click(function(){
+						KOCFIA.notepad.$div.toggle();
 
-						KOC.conf.notepad.visible = (KOC.$notepad.is(':visible') ? 1 : 0);
-						KOC.shared.storeConf();
+						KOCFIA.conf.notepad.visible = (KOCFIA.notepad.$div.is(':visible') ? 1 : 0);
+						KOCFIA.shared.storeConf();
 					});
 
-					KOC.$buttons.append($kocNotepadToggle);
+					KOCFIA.$buttons.append($notepadToggle);
 				},
 				'off': function(){
-					console.info('KOC notepad off function');
-					$('#koc-notepad-toggle').remove();
-					$('#koc-notepad-css').remove();
+					console.info('KOCFIA notepad off function');
+					KOCFIA.notepad.$div.remove();
+					$('#kocfia-notepad-toggle').remove();
+					$('#kocfia-notepad-css').remove();
 				},
 				'resetPositionAndDimension': function(){
-					console.info('KOC notepad resetPositionAndDimension function');
+					console.info('KOCFIA notepad resetPositionAndDimension function');
 
-					KOC.$notepad.css({
-						top: KOC.notepad.options.position.top,
-						left: KOC.notepad.options.position.left,
-						width: KOC.notepad.options.size.width,
-						height: KOC.notepad.options.size.height,
+					KOCFIA.notepad.$div.css({
+						top: KOCFIA.notepad.options.position.top,
+						left: KOCFIA.notepad.options.position.left,
+						width: KOCFIA.notepad.options.size.width,
+						height: KOCFIA.notepad.options.size.height,
 					});
 
-					KOC.conf.notepad.position.top = KOC.notepad.options.position.top;
-					KOC.conf.notepad.position.left = KOC.notepad.options.position.left;
-					KOC.conf.notepad.size.width = KOC.notepad.options.size.width;
-					KOC.conf.notepad.size.height = KOC.notepad.options.size.height;
+					KOCFIA.conf.notepad.position.top = KOCFIA.notepad.options.position.top;
+					KOCFIA.conf.notepad.position.left = KOCFIA.notepad.options.position.left;
+					KOCFIA.conf.notepad.size.width = KOCFIA.notepad.options.size.width;
+					KOCFIA.conf.notepad.size.height = KOCFIA.notepad.options.size.height;
 
-					KOC.shared.storeConf();
+					KOCFIA.shared.storeConf();
 				},
 				'clean': function(){
-					console.info('KOC notepad clean function');
+					console.info('KOCFIA notepad clean function');
 
-					localStorage.setObject('koc_notepad_notes_' + KOC.storeUniqueId, '');
+					localStorage.setObject('kocfia_notepad_notes_' + KOCFIA.storeUniqueId, '');
 
-					KOC.notepad.$notes.empty();
+					KOCFIA.notepad.$notes.empty();
 				},
 				'load': function( id ){
-					console.info('KOC notepad load function');
+					console.info('KOCFIA notepad load function');
 
-					if( KOC.notepad.notes[id] ){
-						KOC.notepad.$name.val( KOC.notepad.notes[id].name );
-						KOC.notepad.$textarea.val( KOC.notepad.notes[id].text );
+					if( KOCFIA.notepad.notes[id] ){
+						KOCFIA.notepad.$name.val( KOCFIA.notepad.notes[id].name );
+						KOCFIA.notepad.$textarea.val( KOCFIA.notepad.notes[id].text );
 					} else {
 						alert('Note introuvable.');
 					}
 				},
 				'delete': function( id ){
-					console.info('koc notepad delete function');
-					delete KOC.notepad.notes[id];
-					KOC.notepad.storeNotes();
+					console.info('kocfia notepad delete function');
+					delete KOCFIA.notepad.notes[id];
+					KOCFIA.notepad.storeNotes();
 				},
 				'storeNotes': function(){
-					console.info('KOC notepad storeNotes function');
-					localStorage.setObject('koc_notepad_notes_' + KOC.storeUniqueId, KOC.notepad.notes);
+					console.info('KOCFIA notepad storeNotes function');
+					localStorage.setObject('kocfia_notepad_notes_' + KOCFIA.storeUniqueId, KOCFIA.notepad.notes);
 				},
 			};
 
 		/* MAP */
-			KOC.map = {
+			KOCFIA.map = {
 				'options': {
 					'active': 1,
 				},
 				'stored': ['search'],
 				'search': {},/*{by city, tiles}*/
 				'currentSearch': [],
-				'loadTypeLabels': { 'C': 'cités', 'CB': 'Camps Barbares', 'TS': 'Terres Sauvages', 'FS': 'Forêts Sombres' },
+				'loadTypeLabels': { 'C': 'citÃ©s', 'CB': 'Camps Barbares', 'TS': 'Terres Sauvages', 'FS': 'ForÃªts Sombres' },
 				'confPanel': function( $section ){
-					console.info('KOC map confPanel function');
+					console.info('KOCFIA map confPanel function');
 					var code = '<h3>Carte</h3>';
 					code += '<div>';
-					code += KOC.shared.generateButton('map', 'cleanSearch', 'Supprimer toutes les recherches géographiques');
+					code += KOCFIA.shared.generateButton('map', 'cleanSearch', 'Supprimer toutes les recherches gÃ©ographiques');
 
-					for( var c in KOC.cities ){
-						if( KOC.cities.hasOwnProperty(c) ){
-							var city = KOC.cities[c];
-							code += KOC.shared.generateButton('map', 'cleanSearchForCity', 'Supprimer les recherches géographiques de ' + city.roman + ' ' +city.name, city.id).replace(/<\/p>/, '');
+					for( var c in KOCFIA.cities ){
+						if( KOCFIA.cities.hasOwnProperty(c) ){
+							var city = KOCFIA.cities[c];
+							code += KOCFIA.shared.generateButton('map', 'cleanSearchForCity', 'Supprimer les recherches gÃ©ographiques de ' + city.roman + ' ' +city.name, city.id).replace(/<\/p>/, '');
 						}
 					}
 					code += '</p></div>';
@@ -3876,24 +3880,24 @@ jQuery(document).ready(function(){
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC map modPanel function');
-					var $section = KOC.$confPanel.find('#koc-map').html('');
+					console.info('KOCFIA map modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-map').html('');
 
 					var code = '<fieldset class="search"><legend>Recherche</legend>';
-					code += '<label for="koc-map-near-x">Autour de&nbsp;:&nbsp;</label>';
-					code += '<input type="text" id="koc-map-near-x" class="coord" value="1" />';
-					code += '<input type="text" id="koc-map-near-y" class="coord" value="20"  />';
-					code += '<select id="koc-map-city-coord"><option value="">Villes</option>';
+					code += '<label for="kocfia-map-near-x">Autour de&nbsp;:&nbsp;</label>';
+					code += '<input type="text" id="kocfia-map-near-x" class="coord" />';
+					code += '<input type="text" id="kocfia-map-near-y" class="coord" />';
+					code += '<select id="kocfia-map-city-coord"><option value="">Villes</option>';
 
-					var loadOptions = '';
-					for( var c in KOC.cities ){
-						if( KOC.cities.hasOwnProperty(c) ){
-							var city = KOC.cities[c];
+					var loadOptions = '', c, city;
+					for( c in KOCFIA.cities ){
+						if( KOCFIA.cities.hasOwnProperty(c) ){
+							city = KOCFIA.cities[c];
 							code += '<option value="'+ city.coords.x + '|' + city.coords.y +'">'+ city.roman + ' ' + city.name +'</option>';
 
-							if( KOC.map.search.hasOwnProperty( city.id ) ){
-								for( var t in KOC.map.search[ city.id ] ){
-									if( KOC.map.search[ city.id ].hasOwnProperty(t) ){
+							if( KOCFIA.map.search.hasOwnProperty( city.id ) ){
+								for( var t in KOCFIA.map.search[ city.id ] ){
+									if( KOCFIA.map.search[ city.id ].hasOwnProperty(t) ){
 										loadOptions += '<option value="'+ city.id +'">'+ city.roman + ' ' + city.name +'</option>';
 									}
 								}
@@ -3902,109 +3906,109 @@ jQuery(document).ready(function(){
 					}
 
 					code += '</select>';
-					code += '<br /><label for="koc-map-range-min">Distance entre&nbsp;:&nbsp;</label>';
-					code += '<input type="text" id="koc-map-range-min" class="coord" />';
-					code += '<label for="koc-map-range-max">&nbsp;et&nbsp;</label>';
-					code += '<input type="text" id="koc-map-range-max" class="coord" />';
+					code += '<br /><label for="kocfia-map-range-min">Distance entre&nbsp;:&nbsp;</label>';
+					code += '<input type="text" id="kocfia-map-range-min" class="coord" value="1" />';
+					code += '<label for="kocfia-map-range-max">&nbsp;et&nbsp;</label>';
+					code += '<input type="text" id="kocfia-map-range-max" class="coord" value="20" />';
 					code += '<button class="go">Rechercher</button>';
 					code += '<button class="cancel">Annuler</button>';
-					code += '<br /><label for="koc-map-load-saved">Ou charger une recherche sauvegardée&nbsp;:&nbsp;</label>';
-					code += '<br /><select id="koc-map-load-saved"><option value="">Choisir</option>'+ loadOptions +'</select>';
+					code += '<br /><label for="kocfia-map-load-saved">Ou charger une recherche sauvegardÃ©e&nbsp;:&nbsp;</label>';
+					code += '<br /><select id="kocfia-map-load-saved"><option value="">Choisir</option>'+ loadOptions +'</select>';
 					code += '</fieldset><fieldset class="save"><legend>Sauvegarde</legend>';
-					code += '<label for="koc-map-city-save">Sauvegarder la recherche dans la cité&nbsp;:&nbsp;</label>';
-					code += '<select id="koc-map-city-save"><option value="">Choisir</option>';
+					code += '<label for="kocfia-map-city-save">Sauvegarder la recherche dans la citÃ©&nbsp;:&nbsp;</label>';
+					code += '<select id="kocfia-map-city-save"><option value="">Choisir</option>';
 
-					for( var c in KOC.cities ){
-						if( KOC.cities.hasOwnProperty(c) ){
-							var city = KOC.cities[c];
+					for( var c in KOCFIA.cities ){
+						if( KOCFIA.cities.hasOwnProperty(c) ){
+							var city = KOCFIA.cities[c];
 							code += '<option value="'+ city.id +'">'+ city.roman + ' ' + city.name +'</option>';
 						}
 					}
 
 					code += '</select><button>Sauvegarder</button></fieldset>';
-					code += '<fieldset class="filter"><legend>Filter les résultats</legend>';
-					code += '<div class="category"><label for="koc-map-category">Catégorie&nbsp;:&nbsp;</label>';
-					code += '<select id="koc-map-category">';
+					code += '<fieldset class="filter"><legend>Filter les rÃ©sultats</legend>';
+					code += '<div class="category"><label for="kocfia-map-category">CatÃ©gorie&nbsp;:&nbsp;</label>';
+					code += '<select id="kocfia-map-category">';
 					code += '<option value="">Choisir</option>';
-					code += '<option value="C">Cités</option>';
+					code += '<option value="C">CitÃ©s</option>';
 					code += '<option value="CB">Camps Barbares</option>';
 					code += '<option value="TS">Terres Sauvages</option>';
-					code += '<option value="FS">Forêts Sombres</option>';
+					code += '<option value="FS">ForÃªts Sombres</option>';
 					code += '</select></div>';
-					code += '<div class="level"><label for="koc-map-level-min">Niveau entre&nbsp;:&nbsp;</label>';
-					code += '<input type="text" id="koc-map-level-min" class="coord" />';
-					code += '<label for="koc-map-level-max">&nbsp;et&nbsp;:&nbsp;</label>';
-					code += '<input type="text" id="koc-map-level-max" class="coord" />';
+					code += '<div class="level"><label for="kocfia-map-level-min">Niveau entre&nbsp;:&nbsp;</label>';
+					code += '<input type="text" id="kocfia-map-level-min" class="coord" />';
+					code += '<label for="kocfia-map-level-max">&nbsp;et&nbsp;:&nbsp;</label>';
+					code += '<input type="text" id="kocfia-map-level-max" class="coord" />';
 					code += '</div><div class="type"><label>Type&nbsp;:&nbsp;</label>';
-					code += '<input type="checkbox" id="koc-map-type-grassland" value="10" />';
-					code += '<label for="koc-map-type-grassland">Prairie</label>';
-					code += '<input type="checkbox" id="koc-map-type-lake" value="11" />';
-					code += '<label for="koc-map-type-lake">Lac</label>';
-					code += '<input type="checkbox" id="koc-map-type-forest" value="20" />';
-					code += '<label for="koc-map-type-forest">Forêt</label>';
-					code += '<input type="checkbox" id="koc-map-type-hill" value="30" />';
-					code += '<label for="koc-map-type-hill">Colline</label>';
-					code += '<input type="checkbox" id="koc-map-type-mountain" value="40" />';
-					code += '<label for="koc-map-type-mountain">Montagne</label>';
-					code += '<input type="checkbox" id="koc-map-type-plain" value="50" />';
-					code += '<label for="koc-map-type-plain">Prairie</label>';
+					code += '<input type="checkbox" id="kocfia-map-type-grassland" value="10" />';
+					code += '<label for="kocfia-map-type-grassland">Prairie</label>';
+					code += '<input type="checkbox" id="kocfia-map-type-lake" value="11" />';
+					code += '<label for="kocfia-map-type-lake">Lac</label>';
+					code += '<input type="checkbox" id="kocfia-map-type-forest" value="20" />';
+					code += '<label for="kocfia-map-type-forest">ForÃªt</label>';
+					code += '<input type="checkbox" id="kocfia-map-type-hill" value="30" />';
+					code += '<label for="kocfia-map-type-hill">Colline</label>';
+					code += '<input type="checkbox" id="kocfia-map-type-mountain" value="40" />';
+					code += '<label for="kocfia-map-type-mountain">Montagne</label>';
+					code += '<input type="checkbox" id="kocfia-map-type-plain" value="50" />';
+					code += '<label for="kocfia-map-type-plain">Prairie</label>';
 					code += '</div><div class="status">';
-					code += '<label for="koc-map-status">Libre</label>';
-					code += '<input type="checkbox" id="koc-map-status" />';
+					code += '<label for="kocfia-map-status">Libre</label>';
+					code += '<input type="checkbox" id="kocfia-map-status" />';
 					code += '</div><div class="mist">';
-					code += '<label for="koc-map-mist">Sous brumes</label>';
-					code += '<input type="checkbox" id="koc-map-mist" />';
+					code += '<label for="kocfia-map-mist">Sous brumes</label>';
+					code += '<input type="checkbox" id="kocfia-map-mist" />';
 					code += '</div></fieldset><div class="search-status"></div><div class="search-result"></div>';
 
 					$section
 						.append( code )
-						.on('change', '#koc-map-city-coord', function(){
+						.on('change', '#kocfia-map-city-coord', function(){
 							var v = $(this).val();
 							if( v != '' ){
 								var cityCoord = v.split('|');
-								$('#koc-map-near-x').val( cityCoord[0] );
-								$('#koc-map-near-y').val( cityCoord[1] );
+								$('#kocfia-map-near-x').val( cityCoord[0] );
+								$('#kocfia-map-near-y').val( cityCoord[1] );
 							}
 						})
 						.on('click', '.search .go', function(event){
 							console.log('search click');
 							event.stopPropagation();
-							KOC.map.$save.hide();
-							KOC.map.$filter.hide();
-							KOC.map.$results.empty();
+							KOCFIA.map.$save.hide();
+							KOCFIA.map.$filter.hide();
+							KOCFIA.map.$results.empty();
 							$(this).attr('disabled', 'disabled').html('Chargement');
 
-							var coordX = $.trim( $('#koc-map-near-x').val() ),
-								coordY = $.trim( $('#koc-map-near-y').val() ),
-								rangeMin = $.trim( $('#koc-map-range-min').val() ),
-								rangeMax = $.trim( $('#koc-map-range-max').val() ),
+							var coordX = $.trim( $('#kocfia-map-near-x').val() ),
+								coordY = $.trim( $('#kocfia-map-near-y').val() ),
+								rangeMin = $.trim( $('#kocfia-map-range-min').val() ),
+								rangeMax = $.trim( $('#kocfia-map-range-max').val() ),
 								errors = [];
 
 							if( coordX == '' || coordY == '' ){
-								errors.push('Veuillez spécifier une coordonnée.');
+								errors.push('Veuillez spÃ©cifier une coordonnÃ©e.');
 							} else {
 								coordX = parseInt(coordX, 10);
 								coordY = parseInt(coordY, 10);
 								if( coordX != Number.NaN && coordY != Number.NaN ){
 									if( coordX < 0 || coordX > 749 || coordY < 0 || coordY > 749 ){
-										errors.push('Coordonnée invalide.');
+										errors.push('CoordonnÃ©e invalide.');
 									}
 								} else {
-									errors.push('Veuillez spécifier une coordonnée.');
+									errors.push('Veuillez spÃ©cifier une coordonnÃ©e.');
 								}
 							}
 
 							if( rangeMin == '' && rangeMax == '' ){
-								errors.push('Veuillez spécifier une distance.');
+								errors.push('Veuillez spÃ©cifier une distance.');
 							} else {
 								rangeMin = parseInt(rangeMin, 10);
 								rangeMax = parseInt(rangeMax, 10);
 								if( rangeMin != Number.NaN && rangeMax != Number.NaN ){
 									if( rangeMin < 1 || rangeMax < 1 || rangeMin > rangeMax ){
-										errors.push('Distance invalide. Minimum 1 de distance et distance minimum inférieure ou égale à la distance max.');
+										errors.push('Distance invalide. Minimum 1 de distance et distance minimum infÃ©rieure ou Ã©gale Ã  la distance max.');
 									}
 								} else {
-									errors.push('Veuillez spécifier une distance.');
+									errors.push('Veuillez spÃ©cifier une distance.');
 								}
 							}
 
@@ -4012,97 +4016,97 @@ jQuery(document).ready(function(){
 								alert( errors.join("\n") );
 								$(this).removeAttr('disabled').html('Rechercher');
 							} else {
-								KOC.map.explore( coordX, coordY, rangeMin, rangeMax );
+								KOCFIA.map.explore( coordX, coordY, rangeMin, rangeMax );
 							}
 						})
 						.on('click', '.search .cancel', function(event){
 							event.stopPropagation();
-							if( KOC.map.xhr ) KOC.map.xhr.abort(); //kill the ajax request
-							KOC.map.searching = false;
-							KOC.map.$search.find('input, select').val('');
-							KOC.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
-							//KOC.map.$save.hide();
-							//KOC.map.$filter.hide();
-							//KOC.map.$results.empty();
-							KOC.map.$status.empty();
+							if( KOCFIA.map.xhr ) KOCFIA.map.xhr.abort(); //kill the ajax request
+							KOCFIA.map.searching = false;
+							KOCFIA.map.$search.find('input, select').val('');
+							KOCFIA.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
+							//KOCFIA.map.$save.hide();
+							//KOCFIA.map.$filter.hide();
+							//KOCFIA.map.$results.empty();
+							KOCFIA.map.$status.empty();
 						})
 						.on('click', '.save button', function(event){
 							event.stopPropagation();
-							var cityId = $('#koc-map-city-save').val();
+							var cityId = $('#kocfia-map-city-save').val();
 							if( cityId && cityId != '' ){
-								if( !KOC.map.search.hasOwnProperty( cityId ) ) KOC.map.search[cityId] = {};
-								KOC.map.search[cityId] = KOC.map.currentSearch;
-								KOC.map.storeSearch();
+								if( !KOCFIA.map.search.hasOwnProperty( cityId ) ) KOCFIA.map.search[cityId] = {};
+								KOCFIA.map.search[cityId] = KOCFIA.map.currentSearch;
+								KOCFIA.map.storeSearch();
 
 								var loadOptions = '<option value="">Choisir</option>';
-								for( var c in KOC.map.search ){
-									if( KOC.map.search.hasOwnProperty(c) ){
-										var city = KOC.shared.getCityById(c);
+								for( var c in KOCFIA.map.search ){
+									if( KOCFIA.map.search.hasOwnProperty(c) ){
+										var city = KOCFIA.shared.getCityById(c);
 										loadOptions += '<option value="'+ c +'">'+ city.roman + ' ' + city.name +'</option>';
 									}
 								}
-								$('#koc-map-load-saved').html( loadOptions );
+								$('#kocfia-map-load-saved').html( loadOptions );
 							} else {
-								alert('Vous devez spécifier une ville pour sauvegarder cette recherche.');
+								alert('Vous devez spÃ©cifier une ville pour sauvegarder cette recherche.');
 							}
 						})
-						.on('change', '#koc-map-load-saved', function(){
+						.on('change', '#kocfia-map-load-saved', function(){
 							event.stopPropagation();
 							var cityId = $(this).val();
 							if( cityId != '' ){
-								KOC.map.$save.hide();
-								KOC.map.$filter.show();
-								KOC.map.$category.val('').trigger('change');
-								KOC.map.currentSearch = KOC.map.search[ cityId ];
+								KOCFIA.map.$save.hide();
+								KOCFIA.map.$filter.show();
+								KOCFIA.map.$category.val('').trigger('change');
+								KOCFIA.map.currentSearch = KOCFIA.map.search[ cityId ];
 							}
 						})
-						.on('change', '#koc-map-category', function(event){
+						.on('change', '#kocfia-map-category', function(event){
 							event.stopPropagation();
-							var $inputs = KOC.map.$filter.find('input');
+							var $inputs = KOCFIA.map.$filter.find('input');
 
 							$inputs.filter('[type=checkbox]').prop('checked', false);
 							$inputs.filter('[type=text]').val('');
 
 							var category = $(this).val();
-							KOC.map.$filter.find('.level, .type, .status, .mist').hide();
+							KOCFIA.map.$filter.find('.level, .type, .status, .mist').hide();
 							if( category != '' ){
-								if( category != 'C' ) KOC.map.$filter.find('.level').show();
+								if( category != 'C' ) KOCFIA.map.$filter.find('.level').show();
 
 								if( category == 'TS' ){
-									KOC.map.$filter.find('.type, .status').show();
+									KOCFIA.map.$filter.find('.type, .status').show();
 								} else if( category == 'C' ){
-									KOC.map.$filter.find('.mist').show();
+									KOCFIA.map.$filter.find('.mist').show();
 								}
 
-								KOC.map.displayResultsByCategory();
+								KOCFIA.map.displayResultsByCategory();
 							} else {
-								KOC.map.$results.empty();
+								KOCFIA.map.$results.empty();
 							}
 						})
 						.on('change', '.filter input[type=checkbox]', function(event){
 							event.stopPropagation();
-							KOC.map.filterResults();
+							KOCFIA.map.filterResults();
 						})
 						.on('keyup', '.filter input[type=text]', function(event){
 							event.stopPropagation();
-							KOC.map.filterResults();
+							KOCFIA.map.filterResults();
 						});
 
-					KOC.map.$search = $('#koc-map').find('.search');
-					KOC.map.$save = $('#koc-map').find('.save');
-					KOC.map.$filter = $('#koc-map').find('.filter');
-					KOC.map.$category = $('#koc-map-category');
-					KOC.map.$results = $('#koc-map').find('.search-result');
-					KOC.map.$status = $('#koc-map').find('.search-status');
+					KOCFIA.map.$search = $('#kocfia-map').find('.search');
+					KOCFIA.map.$save = $('#kocfia-map').find('.save');
+					KOCFIA.map.$filter = $('#kocfia-map').find('.filter');
+					KOCFIA.map.$category = $('#kocfia-map-category');
+					KOCFIA.map.$results = $('#kocfia-map').find('.search-result');
+					KOCFIA.map.$status = $('#kocfia-map').find('.search-status');
 				},
 				'on': function(){
-					console.info('KOC map on function');
+					console.info('KOCFIA map on function');
 
-					if( $.isEmptyObject( KOC.map.search ) ){
+					if( $.isEmptyObject( KOCFIA.map.search ) ){
 						try{
-							var search = localStorage.getObject('koc_map_search_' + KOC.storeUniqueId);
+							var search = localStorage.getObject('kocfia_map_search_' + KOCFIA.storeUniqueId);
 							if( search ){
-								KOC.map.search = search;
+								KOCFIA.map.search = search;
 							}
 						} catch(e){
 							console.log(e);
@@ -4110,30 +4114,30 @@ jQuery(document).ready(function(){
 					}
 				},
 				'cleanSearch': function(){
-					console.info('KOC map cleanSearch function');
-					localStorage.removeItem('koc_map_search_' + KOC.storeUniqueId);
+					console.info('KOCFIA map cleanSearch function');
+					localStorage.removeItem('kocfia_map_search_' + KOCFIA.storeUniqueId);
 
-					$('#koc-map-load-saved').find('option').filter(':gt(0)').remove();
+					$('#kocfia-map-load-saved').find('option').filter(':gt(0)').remove();
 				},
 				'cleanSearchForCity': function( cityId ){
-					console.info('KOC map cleanSearchForCity function');
-					KOC.map.search[cityId] = {};
-					localStorage.setObject('koc_map_search_' + KOC.storeUniqueId, KOC.map.search);
+					console.info('KOCFIA map cleanSearchForCity function');
+					KOCFIA.map.search[cityId] = {};
+					localStorage.setObject('kocfia_map_search_' + KOCFIA.storeUniqueId, KOCFIA.map.search);
 
-					$('#koc-map-load-saved').find('option').filter('[value='+ cityId +']').remove();
+					$('#kocfia-map-load-saved').find('option').filter('[value='+ cityId +']').remove();
 				},
 				'storeSearch': function(){
-					console.info('KOC map storeSearch function');
-					localStorage.setObject('koc_map_search_' + KOC.storeUniqueId, KOC.map.search);
+					console.info('KOCFIA map storeSearch function');
+					localStorage.setObject('kocfia_map_search_' + KOCFIA.storeUniqueId, KOCFIA.map.search);
 				},
 				'explore': function( coordX, coordY, rangeMin, rangeMax ){
-					if( KOC.map.searching ) return;
-					console.info('KOC map explore function');
+					if( KOCFIA.map.searching ) return;
+					console.info('KOCFIA map explore function');
 
 					/* deferred functions */
 						//display the partialExplore results, while merging them with previous results
 						var parseResults = function( dfd, coordX, coordY, rangeMin, rangeMax, result ){
-							console.info('KOC map explore deferred parseResults function');
+							console.info('KOCFIA map explore deferred parseResults function');
 							var leftRangeMax = coordX - rangeMax,
 								leftRangeMin = coordX - rangeMin,
 								rightRangeMax = coordX + rangeMax,
@@ -4145,21 +4149,21 @@ jQuery(document).ready(function(){
 
 							var tiles = { city: [], barbarian: [], darkForest: [], wilderness: [] };
 							//merge results with previous deferred partialExplore results
-							if( KOC.map.currentSearch.tiles ){
-								tiles = KOC.map.currentSearch.tiles;
+							if( KOCFIA.map.currentSearch.tiles ){
+								tiles = KOCFIA.map.currentSearch.tiles;
 							}
 
 							for( var id in result.data ){
 								if( result.data.hasOwnProperty(id) ){
 									var tile = result.data[id];
-									var range = KOC.shared.getDistance(coordX, coordY, tile.xCoord, tile.yCoord);
+									var range = KOCFIA.shared.getDistance(coordX, coordY, tile.xCoord, tile.yCoord);
 									if( range >= rangeMin && range <= rangeMax ){
 										//city
 											if( tile.tileType == 51 ){
 												if( tile.tileCityId != null ){
 													var user = result.userInfo['u'+ tile.tileUserId];
 													var name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
-													tiles.city.push({ 'category': 'C', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': KOC.shared.format(user.m), 'player': name, 'city': tile.cityName, 'misted': 0 });
+													tiles.city.push({ 'category': 'C', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'might': KOCFIA.shared.format(user.m), 'player': name, 'city': tile.cityName, 'misted': 0 });
 												} else {
 										//barbarian
 													tiles.barbarian.push({ 'category': 'CB', 'range': range, 'x': tile.xCoord, 'y': tile.yCoord, 'level': tile.tileLevel });
@@ -4175,7 +4179,7 @@ jQuery(document).ready(function(){
 
 												if( tile.tileType == 10 ) label = 'Prairie';
 												else if( tile.tileType == 11 ) label = 'Lac';
-												else if( tile.tileType == 20 ) label = 'Forêt';
+												else if( tile.tileType == 20 ) label = 'ForÃªt';
 												else if( tile.tileType == 30 ) label = 'Colline';
 												else if( tile.tileType == 40 ) label = 'Montagne';
 												else if( tile.tileType == 50 ) label = 'Plaine';
@@ -4191,7 +4195,7 @@ jQuery(document).ready(function(){
 													} else {
 														user = (tile.tileUserId != null ? result.userInfo['u'+ tile.tileUserId] : null);
 														name = (user != null ? (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n : '?');
-														might = (user != null ? KOC.shared.format(user.m) : '?');
+														might = (user != null ? KOCFIA.shared.format(user.m) : '?');
 													}
 												}
 
@@ -4204,9 +4208,9 @@ jQuery(document).ready(function(){
 							tiles = uniqueObject( tiles );
 							tiles.sort(function(a, b){ return a.range - b.range });
 
-							KOC.map.currentSearch = {'x': coordX, 'y': coordY, 'rangeMin': rangeMin, 'rangeMax': rangeMax, 'tiles': tiles};
+							KOCFIA.map.currentSearch = {'x': coordX, 'y': coordY, 'rangeMin': rangeMin, 'rangeMax': rangeMax, 'tiles': tiles};
 
-							if( KOC.map.$category.val() != '' ) KOC.map.displayResultsByCategory();
+							if( KOCFIA.map.$category.val() != '' ) KOCFIA.map.displayResultsByCategory();
 
 							if( !loop ) return dfd.resolve();
 							else {
@@ -4218,18 +4222,18 @@ jQuery(document).ready(function(){
 
 						//split the full coordinates search in small requests of 100 coordinates
 						var partialExplore = function(dfd){
-							console.info('KOC map explore deferred partialExplore function', start, end, length);
+							console.info('KOCFIA map explore deferred partialExplore function', start, end, length);
 							loop = true;
 							if( end > length ){
 								end = length;
 								loop = false;
 							}
 
-							KOC.map.$status.html('Recherche des coordonnées ' + start + ' à ' + end + ' sur ' + length + '.');
+							KOCFIA.map.$status.html('Recherche des coordonnÃ©es ' + start + ' Ã  ' + end + ' sur ' + length + '.');
 
 							if( start == end ) end += 1; //avoid the start = end case with the slice which need a difference
 							params.blocks = blocks.slice(start, end).join(',');
-							KOC.map.xhr = $.ajax({
+							KOCFIA.map.xhr = $.ajax({
 								url: window.g_ajaxpath + "ajax/fetchMapTiles.php" + window.g_ajaxsuffix,
 								type: 'post',
 								data: params,
@@ -4238,12 +4242,12 @@ jQuery(document).ready(function(){
 							.done(function(result){
 								if( result.ok && result.data ){
 									if( start == 0 ){
-										var chosenCityIndex = $('#koc-map-city-coord')[0].selectedIndex;
+										var chosenCityIndex = $('#kocfia-map-city-coord')[0].selectedIndex;
 										if( chosenCityIndex ){
-											$('#koc-map-city-save').prop('selectedIndex', chosenCityIndex);
+											$('#kocfia-map-city-save').prop('selectedIndex', chosenCityIndex);
 										}
-										KOC.map.$filter.show();
-										KOC.map.$category.val('').trigger('change');
+										KOCFIA.map.$filter.show();
+										KOCFIA.map.$category.val('').trigger('change');
 									}
 
 									return dfd.pipe( parseResults( dfd, coordX, coordY, rangeMin, rangeMax, result ) );
@@ -4257,17 +4261,17 @@ jQuery(document).ready(function(){
 						};
 
 						var searchSequence = function(){
-							console.info('KOC map explore deferred searchSequence function');
+							console.info('KOCFIA map explore deferred searchSequence function');
 							return $.Deferred(function(dfd){
 								return dfd.pipe( partialExplore(dfd) );
 							}).promise();
 						};
 
-					KOC.map.searching = true;
+					KOCFIA.map.searching = true;
 
-					KOC.map.currentSearch = {};
+					KOCFIA.map.currentSearch = {};
 
-					KOC.map.$status.empty();
+					KOCFIA.map.$status.empty();
 
 					var params = window.g_ajaxparams,
 						blocks = [];
@@ -4285,7 +4289,7 @@ jQuery(document).ready(function(){
 					for( i = coordX - radiusMax; i <= maxX; i += 1 ){
 						for( j = coordY - radiusMax; j <= maxY; j += 1 ){
 							if( (i <= leftCoordMin || i >= rightCoordMin) && (j <= topCoordMin || j >= bottomCoordMin) ){
-								var range = KOC.shared.getDistance(coordX, coordY, i, j);
+								var range = KOCFIA.shared.getDistance(coordX, coordY, i, j);
 								if( range >= rangeMin && range <= rangeMax ){
 									blocks.push("bl_" + ( i >= 750 ? i - 750 : i ) + "_bt_" + ( j >= 750 ? j - 750 : j ));
 								}
@@ -4295,21 +4299,21 @@ jQuery(document).ready(function(){
 					var loop, start = 0, end = 99, length = blocks.length;
 					$.when( searchSequence() )
 						.done(function(){
-							KOC.map.$status.html('Recherche finie.');
+							KOCFIA.map.$status.html('Recherche finie.');
 						})
 						.fail(function(){
-							KOC.map.$status.html('Recherche échouée avant la fin.');
+							KOCFIA.map.$status.html('Recherche Ã©chouÃ©e avant la fin.');
 						})
 						.always(function(){
-							KOC.map.$save.show();
-							KOC.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
-							KOC.map.searching = false;
+							KOCFIA.map.$save.show();
+							KOCFIA.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
+							KOCFIA.map.searching = false;
 						});
 				},
 				'displayResultsByCategory': function(){
-					console.info('KOC map displayResultsByCategory function');
-					var tiles = KOC.map.currentSearch.tiles,
-						category = KOC.map.$category.val(),
+					console.info('KOCFIA map displayResultsByCategory function');
+					var tiles = KOCFIA.map.currentSearch.tiles,
+						category = KOCFIA.map.$category.val(),
 						code = '<table><thead><tr>',
 						coords = [],
 						i, tile, lenght;
@@ -4317,7 +4321,7 @@ jQuery(document).ready(function(){
 						case 'C' : //cities
 							length = tiles.city.length;
 							code += '<th>Distance</th>';
-							code += '<th>Coordonnée</th>';
+							code += '<th>CoordonnÃ©e</th>';
 							code += '<th>Nom</th>';
 							code += '<th>Joueur</th>';
 							code += '<th>Puissance</th>';
@@ -4329,7 +4333,7 @@ jQuery(document).ready(function(){
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="'+ ( tile.misted ? 'misted' : '' ) +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOCFIA.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.city +'</td>';
 									code += '<td>'+ tile.player +'</td>';
 									code += '<td>'+ tile.might +'</td>';
@@ -4341,7 +4345,7 @@ jQuery(document).ready(function(){
 						case 'CB' : //barbarian
 							length = tiles.barbarian.length;
 							code += '<th>Distance</th>';
-							code += '<th>Coordonnée</th>';
+							code += '<th>CoordonnÃ©e</th>';
 							code += '<th>Niveau</th>';
 							code += '</tr></thead><tbody class="'+ category +'">';
 							for( i = 0; i < length; i += 1 ){
@@ -4350,7 +4354,7 @@ jQuery(document).ready(function(){
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOCFIA.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.level +'</td>';
 									code += '</tr>';
 								}
@@ -4359,7 +4363,7 @@ jQuery(document).ready(function(){
 						case 'FS' : //dark forests
 							length = tiles.darkForest.length;
 							code += '<th>Distance</th>';
-							code += '<th>Coordonnée</th>';
+							code += '<th>CoordonnÃ©e</th>';
 							code += '<th>Niveau</th>';
 							code += '</tr></thead><tbody class="'+ category +'">';
 							for( i = 0; i < length; i += 1 ){
@@ -4368,7 +4372,7 @@ jQuery(document).ready(function(){
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOCFIA.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.level +'</td>';
 									code += '</tr>';
 								}
@@ -4377,7 +4381,7 @@ jQuery(document).ready(function(){
 						case 'TS' : //wilderness
 							length = tiles.wilderness.length;
 							code += '<th>Distance</th>';
-							code += '<th>Coordonnée</th>';
+							code += '<th>CoordonnÃ©e</th>';
 							code += '<th>Type</th>';
 							code += '<th>Niveau</th>';
 							code += '<th>Joueur</th>';
@@ -4389,7 +4393,7 @@ jQuery(document).ready(function(){
 									coords.push( tile.x + ',' + tile.y );
 									code += '<tr class="level'+ tile.level +' type'+ tile.type +' '+ ( tile.player == '' ? 'free' : '' ) +'" data-coord="'+ tile.x + ',' + tile.y +'">';
 									code += '<td>'+ tile.range +'</td>';
-									code += '<td>'+ KOC.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
+									code += '<td>'+ KOCFIA.shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 									code += '<td>'+ tile.label +'</td>';
 									code += '<td>'+ tile.level +'</td>';
 									code += '<td>'+ tile.player +'</td>';
@@ -4403,16 +4407,16 @@ jQuery(document).ready(function(){
 
 					var coordsList = '<textarea id="coordsList">'+ coords.join("\n") +'</textarea>';
 
-					KOC.map.$results.html( coordsList + code );
-					KOC.map.filterResults();
+					KOCFIA.map.$results.html( coordsList + code );
+					KOCFIA.map.filterResults();
 				},
 				'filterResults': function(){
-					console.info('KOC map filterResults function');
-					var category = KOC.map.$category.val(),
-						$tbody = KOC.map.$results.find('tbody'),
+					console.info('KOCFIA map filterResults function');
+					var category = KOCFIA.map.$category.val(),
+						$tbody = KOCFIA.map.$results.find('tbody'),
 						$trs = $tbody.find('tr'),
-						min = parseInt( $.trim( $('#koc-map-level-min').val() ), 10 ),
-						max = parseInt( $.trim( $('#koc-map-level-max').val() ), 10 ),
+						min = parseInt( $.trim( $('#kocfia-map-level-min').val() ), 10 ),
+						max = parseInt( $.trim( $('#kocfia-map-level-max').val() ), 10 ),
 						classes = [],
 						levels = [],
 						types = [],
@@ -4429,7 +4433,7 @@ jQuery(document).ready(function(){
 					}
 
 					if( category == 'TS' ){
-						var $types = KOC.map.$filter.find('.type').find('input').filter(':checked');
+						var $types = KOCFIA.map.$filter.find('.type').find('input').filter(':checked');
 						if( $types.length ){
 							$types.each(function(){
 								if( this.value == 10 ) types.push( '.type50' ); //two possible values for plains
@@ -4437,14 +4441,14 @@ jQuery(document).ready(function(){
 							});
 							if( types.length ) classes.push( types );
 						}
-						if( KOC.map.$filter.find('.status').find('input').filter(':checked').length ){
+						if( KOCFIA.map.$filter.find('.status').find('input').filter(':checked').length ){
 							status.push('.free');
 							classes.push( status );
 						}
 					}
 
 					if( category == 'C' ){
-						if( KOC.map.$filter.find('.status').find('input').filter(':checked').length ){
+						if( KOCFIA.map.$filter.find('.status').find('input').filter(':checked').length ){
 							status.push('.misted');
 							classes.push( status );
 						}
@@ -4465,12 +4469,12 @@ jQuery(document).ready(function(){
 					}
 
 					//inject style
-					$head.find('#koc-map-search-result-filter').remove();
+					$head.find('#kocfia-map-search-result-filter').remove();
 					if( classes.length ){
-						var rule = '#koc-map .search-result table tr { display: none; }';
-						rule += '#koc-map .search-result table ' + classes.join(', #koc-map .search-result table ') + '{ display: table-row; }';
+						var rule = '#kocfia-map .search-result table tr { display: none; }';
+						rule += '#kocfia-map .search-result table ' + classes.join(', #kocfia-map .search-result table ') + '{ display: table-row; }';
 
-						$head.append( $('<style id="koc-map-search-result-filter">').html( rule ) );
+						$head.append( $('<style id="kocfia-map-search-result-filter">').html( rule ) );
 					}
 
 					var list = [];
@@ -4484,28 +4488,27 @@ jQuery(document).ready(function(){
 			};
 
 		/* FORMATION */
-			KOC.formation = {
+			KOCFIA.formation = {
 				'options': {
 					'active': 1,
 					'automatic': 0,
 				},
 				'stored': ['rules'],
 				'rules': {}, //by city id
-				'schredules': {}, //by city id
 				'confPanel': function( $section ){
-					console.info('KOC formation confPanel function');
+					console.info('KOCFIA formation confPanel function');
 					var code = '<h3>Formation</h3>';
 					code += '<div>';
-					code += KOC.shared.generateCheckbox('formation', 'active', 'Activer le module', KOC.conf.formation.active);
-					code += KOC.shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOC.conf.formation.automatic);
-					code += KOC.shared.generateButton('formation', 'deleteAllRules', 'Supprimer toutes les règles de formation enregistrées');
+					code += KOCFIA.shared.generateCheckbox('formation', 'active', 'Activer le module', KOCFIA.conf.formation.active);
+					code += KOCFIA.shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOCFIA.conf.formation.automatic);
+					code += KOCFIA.shared.generateButton('formation', 'deleteAllRules', 'Supprimer toutes les rÃ¨gles de formation enregistrÃ©es');
 					code += '</div>';
 
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC formation modPanel function');
-					var $section = KOC.$confPanel.find('#koc-formation').html('');
+					console.info('KOCFIA formation modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-formation').html('');
 
 					var form = '<h3>Formulaires<span class="ui-icon ui-icon-info"></span></h3><div class="forms">';
 					form += '<h3>Formations automatiques</h3>';
@@ -4514,114 +4517,14 @@ jQuery(document).ready(function(){
 					form += '<button class="save">Enregistrer</button>';
 
 					var i, j, u, d, f, res,
-						cLength = KOC.citiesId.length,
+						cLength = KOCFIA.citiesId.length,
 						cityId, city,
-						rule, units, defenses, availableUnits,
-						rLength = KOC.resources.length;
+						rule, units, defenses, availableUnits;
 					//by city
 					for( i = 0; i < cLength; i += 1 ){
-						cityId = KOC.citiesId[i];
-						city = KOC.shared.getCityById( cityId );
-						rule = KOC.formation.rules[ cityId ];
-						//available units
-						availableUnits = window.seed.units[ 'city' + cityId ];
-						availableDefenses = window.seed.fortifications[ 'city' + cityId ];
-						units = KOC.formation.getTrainableUnits( cityId );
-						defenses = KOC.formation.getTrainableDefenses( cityId );
+						cityId = KOCFIA.citiesId[i];
 
-						form += '<fieldset>';
-						form += '<legend>';
-						form += '<input type="checkbox" class="train-city" id="koc-formation-auto-city-'+ cityId +'" name="city" '+ ( rule && rule.active ? 'checked' : '' ) +' value="'+ cityId +'" autocomplete="off" />';
-						form += city.roman +' '+ city.name +'</legend><p>';
-
-						//choose unit (check building requirements and tech requirements)
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-unit">Unités&nbsp;:&nbsp;</label>';
-							form += '<select id="koc-formation-auto-city-'+ cityId +'-unit" class="train-unit" name="unit" autocomplete="off">';
-							form += '<option value=""></option>';
-
-							for( u in units ){
-								if( units.hasOwnProperty(u) ){
-									var name = window.unitcost[u][0];
-									if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
-
-									form += '<option value="'+ u +'">'+ name + ' ('+ (availableUnits.hasOwnProperty(u) ? KOC.shared.format(availableUnits[u]) : '0' ) +')</option>';
-								}
-							}
-							form += '</select>';
-
-						//choose pack size min and max]
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-min">Min&nbsp;:&nbsp;</label>';
-							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-min" name="min" class="train-min" autocomplete="off" />';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-max">Max&nbsp;:&nbsp;</label>';
-							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-max" name="max" class="train-max" autocomplete="off" />';
-							form += '<button class="train-unit-max">max</button>';
-
-						//choose speed
-							form += '<br /><label for="koc-formation-auto-city-'+ cityId +'-speed">Vitesse&nbsp;:&nbsp;</label>';
-							form += '<select id="koc-formation-auto-city-'+ cityId +'-speed" name="speed" class="train-speed" autocomplete="off">';
-							form += '<option value="0">Normal</option>';
-							form += '<option value="1">5-15% (coût x2)</option>';
-							form += '<option value="2">10-25% (coût x4)</option>';
-							form += '</select>';
-
-						//choose boost
-						// /!\ boost incompatible avec speed
-						/*
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-item">Objet ?</label>';
-							form += '<select id="koc-formation-auto-city-'+ cityId +'-item" name="item" autocomplete="off">';
-							form += '<option value="">Non</option>';
-							form += '<option value="36">"+ window.itemlist.i36.name + '(' + (window.seed.items.i36 ? window.seed.items.i36 : 0) + ')</option>';
-							form += '<option value="37">"+ window.itemlist.i37.name + '(' + (window.seed.items.i37 ? window.seed.items.i37 : 0) + ')</option>';
-							form += '<option value="38">"+ window.itemlist.i38.name + '(' + (window.seed.items.i38 ? window.seed.items.i38 : 0) + ')</option>';
-							form += '</select>';
-						*/
-
-						//choose workforce percentage
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-workforce">Travailleurs&nbsp;:&nbsp;</label>';
-							form += '<select id="koc-formation-auto-city-'+ cityId +'-workforce" name="workforce" class="train-workforce" autocomplete="off">';
-							form += '<option value="0">0%</option>';
-							form += '<option value="0.25">25%</option>';
-							form += '<option value="0.50">50%</option>';
-							form += '<option value="0.75">75%</option>';
-							form += '<option value="1">100%</option>';
-							form += '</select>';
-
-						//nice to have
-							/*
-							form += '<label>Durée</label>';
-							form += '<output></output>';
-							*/
-						form += '</p>';
-
-						//defenses
-							form += '<p>';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-defense">Défenses&nbsp;:&nbsp;</label>';
-							form += '<select id="koc-formation-auto-city-'+ cityId +'-defense" name="defense" class="train-defense" autocomplete="off">';
-							form += '<option value=""></option>';
-							for( d in defenses ){
-								if( defenses.hasOwnProperty(d) ){
-									f = d.replace(/frt/, 'fort');
-									form += '<option value="'+ d +'">'+ window.fortcost[d][0] + ' ('+ (availableDefenses.hasOwnProperty(f) ? KOC.shared.format(availableDefenses[f]) : '0' ) +')</option>';
-								}
-							}
-							form += '</select>';
-							form += '<label for="koc-formation-auto-city-'+ cityId +'-qty">Quantité&nbsp;:&nbsp;</label>';
-							form += '<input type="text" id="koc-formation-auto-'+ cityId +'-quantity" name="quantity" class="train-quantity" autocomplete="off" />';
-							form += '<button class="train-defense-max">max</button>';
-							form += '</p>';
-
-						//keep resources ? (in easy format, with validation)
-							form += '<p class="train-keep">';
-							form += '<label>Garder&nbsp;:&nbsp;</label>';
-							for( j = 0; j < rLength; j += 1 ){
-								res = KOC.resources[j];
-								form += '<label for="koc-formation-auto-city-keep-'+ res.name +'">';
-								form += '<img src="'+ res.icon +'" title="'+ res.label +'">';
-								form += '</label>';
-								form += '<input type="text" id="koc-formation-auto-city-keep-'+ res.name +'" name="'+ res.name +'" autocomplete="off" />';
-							}
-							form += '</p>';
-							form += '</fieldset>';
+						form += KOCFIA.formation.getFieldset( cityId, true );
 					}
 
 					form += '<button class="save">Enregistrer</button>';
@@ -4631,177 +4534,385 @@ jQuery(document).ready(function(){
 						form += '<h3>Formations manuelles</h3>';
 						form += '<div class="manual-train-form">';
 						form += '<ul class="message"></ul>';
+						form += '<fieldset>';
+
+						form += '<select id="kocfia-formation-city"><option value="">Villes</option>';
+						for( i = 0; i < cLength; i += 1 ){
+							cityId = KOCFIA.citiesId[i];
+							city = KOCFIA.shared.getCityById( cityId );
+							form += '<option value="'+ cityId +'">'+ city.roman + ' ' + city.name +'</option>';
+						}
+						form += '</select>';
+						form += '<div class="dynamic"></div>';
 						form += '<button class="launch">Former</button>'
 						form += '<button class="reset">Annuler</button>'
+						form += '</fieldset>';
 						form += '</div>';
 
 					form += '</div>';
 
 					//formations list
 					var onGoing = '<h3>Formations en cours</h3><div class="formation-list ongoing">';
-
+					onGoing += '<table><thead><tr><th class="unit">Formations</th><th class="fort">Fortifications</th><th class="info">Infos</th></tr></thead>';
 					for( i = 0; i < cLength; i += 1 ){
-						cityId = KOC.citiesId[i];
-						city = KOC.shared.getCityById( cityId );
-						onGoing += '<h3>' + city.roman + ' ' + city.name + '</h3><ul data-city="'+ city.id +'"></ul>';
-					}
-					onGoing += '</div>';
+						cityId = KOCFIA.citiesId[i];
+						city = KOCFIA.shared.getCityById( cityId );
 
-					var help = '<div id="koc-formation-help" class="help" title="Aide formation"><ul>';
-					/*help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
-					help += '<li>Une attaque sera annulée au bout de 10 erreurs consécutives <br />(coordonnée occupée, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
-					help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique</li>';
-					help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-					help += '<li>Pour les attaques sauvegardées les erreurs seront listées en-dessous</li>';
-					help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant)</li>';
-					help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
-					help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';*/
+						onGoing += '<tbody data-city="'+ cityId +'"><tr class="toggle"><th colspan="3">';
+						onGoing += '<span class="ui-icon ui-icon-triangle-1-se"></span>';
+						onGoing	+= city.roman + ' ' + city.name + '</th></tr></tbody>';
+					}
+					onGoing += '</table></div>';
+
+					var help = '<div id="kocfia-formation-help" class="help" title="Aide formation"><ul>';
+					/*help += '<li>Les terres sauvages occupÃ©es ne seront pas attaquÃ©es (vÃ©rification pour chaque coordonnÃ©e Ã  chaque attaque)</li>';
+					help += '<li>Une attaque sera annulÃ©e au bout de 10 erreurs consÃ©cutives <br />(coordonnÃ©e occupÃ©e, aucun chevalier, point de ralliement plein, pas assez de troupes, ...)</li>';
+					help += '<li>Les attaques sauvegardÃ©es peuvent Ãªtre lancÃ©es manuellement ou via le mode automatique</li>';
+					help += '<li>Pour le formulaire les erreurs seront listÃ©es au-dessus</li>';
+					help += '<li>Pour les attaques sauvegardÃ©es les erreurs seront listÃ©es en-dessous</li>';
+					help += '<li>Si une vague est en erreur les vagues prÃ©cÃ©dentes seront rappelÃ©es (sous rÃ©serves des limitations de temps de marche restant)</li>';
+					help += '<li>Lors du dÃ©marrage du mode automatique, 20 secondes s\'Ã©coulent entre chaque lancement de plan d\'attaque sauvegardÃ©</li>';
+					help += '<li>Dix secondes s\'Ã©coulent entre chaque lancement de vague</li>';*/
 					help += '</ul></div>';
 
 					$section.append( form + onGoing + help )
 						.on('change', '#formation-panel-automatic', function(){
 							$('#formation-automatic').prop('checked', $(this).prop('checked')).change();
 						})
-						//launch
-						.on('change', '.city', function(){
-							console.info('auto formation toggle click');
-							if( KOC.conf.formation.active ){
-								var $this = $(this),
-									cityId = $this.value(),
-									isChecked = $this.prop('checked');
-								if( isChecked ){
-									KOC.formation.startAutoFormation( cityId );
-								} else {
-									KOC.formation.stopAutoFormation( cityId );
-								}
-							} else {
-								alert('Le module n\'est pas actif. Les lancements de formations automatiques sont bloqués.');
-							}
-						})
 						//save auto formation
 						.on('click', '.save', function(){
 							console.info('automatic rule save click');
-							var result = KOC.formation.planAutomaticRule();
+							var result = KOCFIA.formation.planAutomaticRules();
 							if( result.errors.length ){
-								KOC.formation.$autoForm.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								KOCFIA.formation.$autoForm.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 							} else {
-								KOC.formation.$autoForm.find('.message').empty();
+								KOCFIA.formation.$autoForm.find('.message').empty();
 
-								KOC.formation.rules = result.rules;
-								KOC.formation.storeRules();
-
-								if( KOC.conf.formation.active ){
-									KOC.formation.startAutomaticFormations();
+								KOCFIA.formation.rules = result.rules;
+								KOCFIA.formation.storeRules();
+							}
+						})
+						//city change in manual formation
+						.on('change', '#kocfia-formation-city', function(){
+							var $this = $(this),
+								$fieldset = $this.closest('fieldset'),
+								$dynamic = $fieldset.find('.dynamic'),
+								cityId = $this.val();
+							if( cityId == '' ){
+								//saving the form values
+								$fieldset.data('values', $dynamic.find(':input').serializeArray());
+								$dynamic.html('');
+							} else {
+								$dynamic.html( KOCFIA.formation.getFieldset(cityId, false) );
+								var data = $fieldset.data('values'),
+									$inputs = $dynamic.find(':input'),
+									field;
+								if( data ){
+									for( var i = 0; i < data.length; i += 1 ){
+										field = data[i];
+										$inputs.filter('[name='+ field.name +']').val( field.value );
+									}
+									$inputs.find('.train-max, .train-quantity').trigger('change');
 								}
 							}
 						})
 						//save manual formation
 						.on('click', '.launch', function(){
 							console.log('manual formation launch');
-							var result = KOC.formation.planManualRule();
+							var result = KOCFIA.formation.planManualRule();
 							if( result.errors.length ){
-								KOC.formation.$manualForm.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								KOCFIA.formation.$manualForm.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 							} else {
-								KOC.formation.$manualForm.find('.message').empty();
+								KOCFIA.formation.$manualForm.find('.message').empty();
 
-								KOC.formation.launchFormation( result.rule );
+								KOCFIA.formation.launchFormation( result.rule );
 							}
 						})
 						//reset manual form
-						.on('click', '.reset', KOC.formation.resetForm)
+						.on('click', '.reset', KOCFIA.formation.resetForm)
+						//unit train max change affect duration
+						.on('change', '.train-max', function(){
+							var $fieldset = $(this).closest('fieldset');
+
+							var unit = $fieldset.find('.train-unit').val(),
+								max = $fieldset.find('.train-max').val(),
+								$output = $fieldset.find('.unit-duration');
+
+							if( unit == '' || max == '' ){
+								$output.html('');
+								return;
+							}
+
+							var cityId = 'city' + $fieldset.find('.train-city').val();
+
+							var time = KOCFIA.formation.unitTrainDuration( city, unit, max );
+
+							$output.html( KOCFIA.shared.readableDuration(time) );
+						})
+						//fortification quantity change affect duration
+						.on('change', '.train-quantity', function(){
+							var $fieldset = $(this).closest('fieldset');
+
+							var def = $fieldset.find('.train-defense').val(),
+								qty = $fieldset.find('.train-quantity').val(),
+								$output = $fieldset.find('.def-duration');
+
+							if( def == '' || qty == '' ){
+								$output.html('');
+								return;
+							}
+
+							var cityId = 'city' + $fieldset.find('.train-city').val();
+
+							var time = KOCFIA.formation.defenseTrainDuration( city, def, qty );
+
+							$output.html( KOCFIA.shared.readableDuration(time) );
+						})
 						//calc max trainable units
 						.on('click', '.train-unit-max', function(){
 							var $fieldset = $(this).closest('fieldset');
-							KOC.formation.calcMaxTrainable( $fieldset );
+
+							var unit = $fieldset.find('.train-unit').val(),
+								$max = $fieldset.find('.train-max');
+
+							if( unit == '' ){
+								$max.val('').attr('title', '').trigger('change');
+								return;
+							}
+
+							var speed = $fieldset.find('.train-speed').val(),
+								cityId = 'city' + $fieldset.find('.train-city').val();
+
+							var nb = KOCFIA.formation.calcMaxUnit( cityId, unit, speed );
+
+							$max.val( KOCFIA.shared.format(nb) || 0 ).attr('title', nb || 0).trigger('change');
 						})
-						//calc max trainable units
+						//calc max fortifications
 						.on('click', '.train-defense-max', function(){
 							var $fieldset = $(this).closest('fieldset');
-							KOC.formation.calcMaxDefense( $fieldset );
+
+							var def = $fieldset.find('.train-defense').val(),
+								$qty = $fieldset.find('.train-quantity');
+
+							if( def == '' ){
+								$qty.val('').attr('title', '');
+								return;
+							}
+
+							var cityId = 'city' + $fieldset.find('.train-city').val();
+
+							var nb = KOCFIA.formation.calcMaxDefense( cityId, def );
+
+							$qty.val( KOCFIA.shared.format(nb) || 0 ).attr('title', nb);
 						})
-						//speed change, affect max
+						//speed change, affect max unit
 						.on('change', '.train-speed', function(){
 							var $fieldset = $(this).closest('fieldset');
-							KOC.formation.calcMaxTrainable( $fieldset );
+
+							var unit = $fieldset.find('.train-unit').val(),
+								$max = $fieldset.find('.train-max');
+
+							if( unit == '' ){
+								$max.val('').attr('title', '');
+								return;
+							}
+
+							var speed = $fieldset.find('.train-speed').val(),
+								cityId = 'city' + $fieldset.find('.train-city').val();
+
+							var nb = KOCFIA.formation.calcMaxUnit( cityId, unit, speed );
+
+							$max.val( KOCFIA.shared.format(nb) || 0 ).attr('title', nb || 0);
 						})
-						.on('click', '.ongoing .formations .ui-icon-trash', function(){
+						//training and fortification cancel
+						.on('click', '.ongoing .unit .ui-icon-trash', function(){
 							var $this = $(this);
-							KOC.formation.cancelTraining( $this.attr('rel'), $this.parent() );
+							KOCFIA.formation.cancelTraining( $this.attr('rel'), $this.parent(), 3 );
 						})
-						.on('click', '.ongoing .defenses .ui-icon-trash', function(){
+						.on('click', '.ongoing .fort .ui-icon-trash', function(){
 							var $this = $(this);
-							KOC.formation.cancelFortification( $this.attr('rel'), $this.parent() );
+							KOCFIA.formation.cancelFortification( $this.attr('rel'), $this.parent(), 3 );
 						})
+						//toggle
+						.on('click', '.toggle', function(){
+							var $this = $(this),
+								$triangle = $this.find('.ui-icon'),
+								$trs = $this.parent().find('tr').filter(':gt(0)');
+								opened = !$triangle.hasClass('ui-icon-triangle-1-se');
+
+							if( opened ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
+							else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
+
+							$trs.toggle( opened );
+						})
+						//help dialog
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
-					KOC.formation.$autoForm = $section.find('.automatic-rule-form');
-					KOC.formation.$manualForm = $section.find('.manual-rule-form');
-					KOC.formation.$ongoing = $section.find('.formation-list.ongoing');
+					KOCFIA.formation.$autoForm = $section.find('.automatic-rule-form');
+					KOCFIA.formation.$manualForm = $section.find('.manual-rule-form');
+					KOCFIA.formation.$ongoing = $section.find('.formation-list.ongoing');
 
-					$section.find('.forms').accordion({collapsible: true, autoHeight: false}).find('h3').eq(0).click().blur();
-					KOC.formation.$ongoing.accordion({collapsible: true, autoHeight: false}).find('h3').eq(0).click().blur();
+					$section.find('.forms').accordion({collapsible: true, autoHeight: false}).accordion('activate', false);
 				},
 				'on': function(){
-					console.info('KOC formation on function');
+					console.info('KOCFIA formation on function');
 					try{
-						var persistentFormationRules = localStorage.getObject('koc_formation_attacks_' + KOC.storeUniqueId);
+						var persistentFormationRules = localStorage.getObject('kocfia_formation_attacks_' + KOCFIA.storeUniqueId);
 						if( persistentFormationRules ){
-							KOC.formation.rules = persistentFormationRules;
+							KOCFIA.formation.rules = persistentFormationRules;
 						}
 					} catch(e){
 						console.error(e);
 					}
 
-					var i, length = KOC.citiesId.length;
+					var i, length = KOCFIA.citiesId.length;
 					for( i = 0; i < length; i += 1 ){
-						KOC.formation.listCityFormations( KOC.citiesId[i] );
+						KOCFIA.formation.listCityFormations( KOCFIA.citiesId[i] );
 					}
 
-					if( KOC.conf.formation.automatic ){
-						KOC.formation.automaticOn();
+					if( KOCFIA.conf.formation.automatic ){
+						KOCFIA.formation.automaticOn();
 					}
 				},
 				'off': function(){
-					console.info('KOC formation off function');
+					console.info('KOCFIA formation off function');
 
-					KOC.formation.automaticOff();
+					KOCFIA.formation.automaticOff();
 				},
 				'automaticOn': function(){
-					console.info('KOC formation automaticOn function');
+					console.info('KOCFIA formation automaticOn function');
 					$('#formation-panel-automatic').prop('checked', true);
+
+					KOCFIA.formation.launchAutomaticFormations();
 				},
 				'automaticOff': function(){
-					console.info('KOC formation automaticOff function');
+					console.info('KOCFIA formation automaticOff function');
 					$('#formation-panel-automatic').prop('checked', false);
+				},
+				'getFieldset': function( cityId, withWrapper ){
+					console.info('KOCFIA formation getFieldset function');
+					var city = KOCFIA.shared.getCityById( cityId ),
+						rule = KOCFIA.formation.rules[ cityId ],
+						availableUnits = window.seed.units[ 'city' + cityId ],
+						availableDefenses = window.seed.fortifications[ 'city' + cityId ],
+						units = KOCFIA.formation.getTrainableUnits( cityId ),
+						defenses = KOCFIA.formation.getTrainableDefenses( cityId ),
+						rLength = KOCFIA.resources.length;
 
-					for( var c in KOC.formation.rules ){
-						if( KOC.formation.rules.hasOwnProperty(c) ){
-							KOC.formation.schredules[ c ] = false;
-						}
+					var form = '';
+					if( withWrapper ){
+						form += '<fieldset>';
+						form += '<legend>';
+						form += '<input type="checkbox" class="train-city" id="kocfia-formation-auto-city-'+ cityId +'" name="city" '+ ( rule && rule.active ? 'checked' : '' ) +' value="'+ cityId +'" autocomplete="off" />';
+						form += city.roman +' '+ city.name +'</legend>';
 					}
-				},
-				'startAutomaticFormation': function( cityId ){
-					console.info('KOC formation automaticOn function');
-					KOC.formation.schredules[ cityId ] = true;
-					KOC.formation.launchRule( KOC.formation.rules[ cityId ] );
-				},
-				'stopAutomaticFormation': function( cityId ){
-					console.info('KOC formation automaticOn function');
-					KOC.formation.schredules[ cityId ] = false;
+
+					form += '<p>';
+
+					//choose unit (check building requirements and tech requirements)
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-unit">UnitÃ©s&nbsp;:&nbsp;</label>';
+						form += '<select id="kocfia-formation-auto-city-'+ cityId +'-unit" class="train-unit" name="unit" autocomplete="off">';
+						form += '<option value=""></option>';
+
+						for( u in units ){
+							if( units.hasOwnProperty(u) ){
+								var name = window.unitcost[u][0];
+								if( name == 'UnitÃ© de Ravitaillement' ) name = 'Ravitailleur';
+
+								form += '<option value="'+ u +'">'+ name + ' ('+ (availableUnits.hasOwnProperty(u) ? KOCFIA.shared.format(availableUnits[u]) : '0' ) +')</option>';
+							}
+						}
+						form += '</select>';
+
+					//choose pack size min and max
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-min">Min&nbsp;:&nbsp;</label>';
+						form += '<input type="text" id="kocfia-formation-auto-'+ cityId +'-min" name="min" class="train-min" autocomplete="off" />';
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-max">Max&nbsp;:&nbsp;</label>';
+						form += '<input type="text" id="kocfia-formation-auto-'+ cityId +'-max" name="max" class="train-max" autocomplete="off" />';
+						form += '<button class="train-unit-max">max</button>';
+
+					//choose speed
+						form += '<br /><label for="kocfia-formation-auto-city-'+ cityId +'-speed">Vitesse&nbsp;:&nbsp;</label>';
+						form += '<select id="kocfia-formation-auto-city-'+ cityId +'-speed" name="speed" class="train-speed" autocomplete="off">';
+						form += '<option value="0">Normal</option>';
+						form += '<option value="1">5-15% (coÃ»t x2)</option>';
+						form += '<option value="2">10-25% (coÃ»t x4)</option>';
+						form += '</select>';
+
+					//choose boost
+					// /!\ boost incompatible avec speed
+					/*
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-item">Objet ?</label>';
+						form += '<select id="kocfia-formation-auto-city-'+ cityId +'-item" name="item" autocomplete="off">';
+						form += '<option value="">Non</option>';
+						form += '<option value="36">"+ window.itemlist.i36.name + '(' + (window.seed.items.i36 ? window.seed.items.i36 : 0) + ')</option>';
+						form += '<option value="37">"+ window.itemlist.i37.name + '(' + (window.seed.items.i37 ? window.seed.items.i37 : 0) + ')</option>';
+						form += '<option value="38">"+ window.itemlist.i38.name + '(' + (window.seed.items.i38 ? window.seed.items.i38 : 0) + ')</option>';
+						form += '</select>';
+					*/
+
+					//choose workforce percentage
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-workforce">Travailleurs&nbsp;:&nbsp;</label>';
+						form += '<select id="kocfia-formation-auto-city-'+ cityId +'-workforce" name="workforce" class="train-workforce" autocomplete="off">';
+						form += '<option value="0">0%</option>';
+						form += '<option value="0.25">25%</option>';
+						form += '<option value="0.50">50%</option>';
+						form += '<option value="0.75">75%</option>';
+						form += '<option value="1">100%</option>';
+						form += '</select>';
+
+					//duration
+						form += '<label>DurÃ©e&nbsp;:&nbsp;</label>';
+						form += '<output class="unit-duration"></output>';
+					form += '</p>';
+
+					//defenses
+						form += '<p>';
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-defense">DÃ©fenses&nbsp;:&nbsp;</label>';
+						form += '<select id="kocfia-formation-auto-city-'+ cityId +'-defense" name="defense" class="train-defense" autocomplete="off">';
+						form += '<option value=""></option>';
+						for( d in defenses ){
+							if( defenses.hasOwnProperty(d) ){
+								f = d.replace(/frt/, 'fort');
+								form += '<option value="'+ d +'">'+ window.fortcost[d][0] + ' ('+ (availableDefenses.hasOwnProperty(f) ? KOCFIA.shared.format(availableDefenses[f]) : '0' ) +')</option>';
+							}
+						}
+						form += '</select>';
+						form += '<label for="kocfia-formation-auto-city-'+ cityId +'-qty">QuantitÃ©&nbsp;:&nbsp;</label>';
+						form += '<input type="text" id="kocfia-formation-auto-'+ cityId +'-quantity" name="quantity" class="train-quantity" autocomplete="off" />';
+						form += '<button class="train-defense-max">max</button>';
+						form += '<label>DurÃ©e&nbsp;:&nbsp;</label>';
+						form += '<output class="def-duration"></output>';
+						form += '</p>';
+
+					//keep resources ? (in easy format, with validation)
+						form += '<p class="train-keep">';
+						form += '<label>Garder&nbsp;:&nbsp;</label>';
+						for( j = 0; j < rLength; j += 1 ){
+							res = KOCFIA.resources[j];
+							form += '<label for="kocfia-formation-auto-city-keep-'+ res.name +'">';
+							form += '<img src="'+ res.icon +'" title="'+ res.label +'">';
+							form += '</label>';
+							form += '<input type="text" id="kocfia-formation-auto-city-keep-'+ res.name +'" name="j" autocomplete="off" />';
+						}
+					form += '</p>';
+					if( withWrapper ) form += '</fieldset>';
+
+					return form;
 				},
 				'storeRules': function(){
-					console.info('KOC formation storeRules function');
+					console.info('KOCFIA formation storeRules function');
 					try{
-						localStorage.setObject('koc_formation_rules_' + KOC.storeUniqueId, KOC.formation.rules);
+						localStorage.setObject('kocfia_formation_rules_' + KOCFIA.storeUniqueId, KOCFIA.formation.rules);
 					} catch(e){
 						alert(e);
 					}
 				},
-				'planAutomaticRule': function(){
-					console.info('KOC formation planAutomaticAttack function');
+				'planAutomaticRules': function(){
+					console.info('KOCFIA formation planAutomaticRules function');
 					var rules = {},
 						errors = {},
-						$fieldsets = KOC.formation.$autoForm.find('fieldset'),
+						$fieldsets = KOCFIA.formation.$autoForm.find('fieldset'),
 						rule, nbErr, hasTroop, hasDef, cityLabel, $city, troop, defense, min, max, quantity, $res, rkeep;
 
 					$fieldsets.each2(function(i, $fieldset){
@@ -4814,6 +4925,7 @@ jQuery(document).ready(function(){
 						//city
 						rule.city = $city.val();
 						rule.active = $city.prop('checked') ? 1 : 0;
+
 						//check troop
 						troop = $fieldset.find('.train-unit').val();
 						if( troop != '' ){
@@ -4821,14 +4933,14 @@ jQuery(document).ready(function(){
 							rule.troop = troop;
 
 							//check min and max
-							min = KOC.shared.decodeFormat( $.trim( $fieldset.find('.train-min').val() ) );
-							max = KOC.shared.decodeFormat( $.trim( $fieldset.find('.train-max').val() ) );
+							min = KOCFIA.shared.decodeFormat( $.trim( $fieldset.find('.train-min').val() ) );
+							max = KOCFIA.shared.decodeFormat( $.trim( $fieldset.find('.train-max').val() ) );
 
 							if( min != false && max != false && min >= 1 && max >= min ){
 								rule.min = min;
 								rule.max = max;
 							} else {
-								errors.push('Quantités de troupes invalide pour '+ cityLabel +'.');
+								errors.push('QuantitÃ©s de troupes invalide pour '+ cityLabel +'.');
 								nbErr += 1;
 							}
 
@@ -4846,7 +4958,7 @@ jQuery(document).ready(function(){
 							rule.defense = defense;
 
 							//check quantity
-							quantity = KOC.shared.decodeFormat( $.trim( $fieldset.find('.train-quantity').val() ) );
+							quantity = KOCFIA.shared.decodeFormat( $.trim( $fieldset.find('.train-quantity').val() ) );
 							if( qty != false && qty > 1 ){
 								rule.qty = qty;
 							}
@@ -4855,106 +4967,207 @@ jQuery(document).ready(function(){
 						//check keep
 						rule.keep = {};
 						$fieldset.find('.train-keep').find('input').each2(function(i, $res){
-							res = KOC.shared.decodeFormat( $.trim( $res ) );
-							if( res != false && res > 1 ){
-								rule.keep[ $res.attr('name') ] = res;
-							} else {
+							res = KOCFIA.shared.decodeFormat( $.trim( $res ) );
+							if( res == false ){
 								nbErr += 1;
-								errors.push('Au moins une des quantité de ressources à conserver est invalide pour '+ cityLabel +'.');
+								errors.push('Au moins une des quantitÃ© de ressources Ã  conserver est invalide pour '+ cityLabel +'.');
+							} else {
+								rule.keep[ $res.attr('name') ] = res;
 							}
 						});
 
 						if( !hasTroop && !hasDef ){
-							errors.push('Règle invalide pour '+ cityLabel +', non prise en compte.');
+							errors.push('RÃ¨gle invalide pour '+ cityLabel +', non prise en compte.');
 						} else if( nbErr == 0 ){
 							rules[ rule.city ] = rule;
 						}
 					});
 
-
 					return {'rules': rules, 'errors': errors};
 				},
-				'startAutomaticFormations': function(){
-					console.info('KOC formation startAutomaticFormations function');
-				},
-				'planManualRule': function(){
-					console.info('KOC formation planManualAttack function');
+				'planRule': function(){
+					console.info('KOCFIA formation planRule function');
 					var rule = {},
-						errors = {};
+						errors = {},
+						$fieldset = KOCFIA.formation.$manualForm.find('fieldset'),
+						nbErr, hasTroop, hasDef, cityLabel, $city, troop, defense, min, max, quantity, $res, rkeep;
+
+					nbErr = 0;
+					hasTroop = false;
+					hasDef = false;
+					$city = $fieldset.find('.train-city');
+					cityLabel = $.trim( $fieldset.find('legend').html() );
+
+					//city
+					rule.city = $city.val();
+					rule.active = 1;
+
+					//check troop
+					troop = $fieldset.find('.train-unit').val();
+					if( troop != '' ){
+						hasTroop = true;
+						rule.troop = troop;
+
+						//check min and max
+						min = KOCFIA.shared.decodeFormat( $.trim( $fieldset.find('.train-min').val() ) );
+						max = KOCFIA.shared.decodeFormat( $.trim( $fieldset.find('.train-max').val() ) );
+
+						if( min != false && max != false && min >= 1 && max >= min ){
+							rule.min = min;
+							rule.max = max;
+						} else {
+							errors.push('QuantitÃ©s de troupes invalide pour '+ cityLabel +'.');
+							nbErr += 1;
+						}
+
+						//speed
+						rule.speed = $fieldset.find('.train-speed').val();
+
+						//workforce
+						rule.workforce = parseFloat( $fieldset.find('.train-workforce').val() );
+					}
+
+					//check defense
+					defense = $fieldset.find('.train-defense').val();
+					if( defense != '' ){
+						hasDef = false;
+						rule.defense = defense;
+
+						//check quantity
+						quantity = KOCFIA.shared.decodeFormat( $.trim( $fieldset.find('.train-quantity').val() ) );
+						if( qty != false && qty > 1 ){
+							rule.qty = qty;
+						}
+					}
+
+					//check keep
+					rule.keep = {};
+					$fieldset.find('.train-keep').find('input').each2(function(i, $res){
+						res = KOCFIA.shared.decodeFormat( $.trim( $res ) );
+						if( res != false && res > 1 ){
+							rule.keep[ $res.attr('name') ] = res;
+						} else {
+							nbErr += 1;
+							errors.push('Au moins une des quantitÃ© de ressources Ã  conserver est invalide pour '+ cityLabel +'.');
+						}
+					});
+
+					if( !hasTroop && !hasDef ){
+						errors.push('RÃ¨gle invalide pour '+ cityLabel +', non prise en compte.');
+					} else if( nbErr == 0 ){
+						rules[ rule.city ] = rule;
+					}
+
 					return {'rule': rule, 'errors': errors};
 				},
-				'launchRule': function( rule ){
-					console.info('KOC formation launchRule function', rule);
+				'launchAutomaticFormations': function(){
+					console.info('KOCFIA formation launchAutomaticFormations function');
+					if( !KOCFIA.conf.formation.active || !KOCFIA.conf.formation.automatic ){
+						return;
+					}
 
-					//walls_train_defense
-					//
+					var delayedTrain = function(i, rule){
+						window.setTimeout(function(){
+							KOCFIA.formation.addToQueue( rule, null );
+						}, i * 12000);
+					};
+
+					var cityId, rule, i = 1;
+					for( cityId in KOCFIA.formation.rules ){
+						if( KOCFIA.formation.rules.hasOwnProperty(cityId) ){
+							rule = KOCFIA.formation.rules.cityId;
+							if( rule.active ){
+								delayedTrain( i, KOCFIA.formation.rules[cityId] );
+							}
+						}
+					}
+
+					//self call every 2 minutes
+					window.setTimeout(function(){
+						KOCFIA.formation.launchAutomaticFormations();
+					}, 120000);
+				},
+				'launchFormations': function( rule ){
+					console.info('KOCFIA formation launchFormations function');
+					if( !KOCFIA.conf.formation.active || KOCFIA.conf.formation.automatic ){
+						return;
+					}
+
+					var delayedTrain = function(i, rule){
+						window.setTimeout(function(){
+							KOCFIA.formation.fillQueue( rule );
+						}, i * 12000);
+					};
+
+					var cityId, rule, i = 1;
+					for( cityId in KOCFIA.formation.rules ){
+						if( KOCFIA.formation.rules.hasOwnProperty(cityId) ){
+							delayedTrain( i, KOCFIA.formation.rules[cityId] );
+						}
+					}
 				},
 				'resetForm': function(){
-					console.info('KOC formation resetForm function');
-					var $inputs = KOC.formation.$manualForm.find('input');
+					console.info('KOCFIA formation resetForm function');
+					var $inputs = KOCFIA.formation.$manualForm.find('input');
 					inputs.filter('[type=checkbox]').prop('checked', false);
 					inputs.filter('[type=text]').val('');
 
-					KOC.formation.$manualForm.find('select').val('');
+					KOCFIA.formation.$manualForm.find('select').val('');
 
-					KOC.formation.$manualForm.find('.message').empty();
+					KOCFIA.formation.$manualForm.find('.message').empty();
 				},
 				'listCityFormations': function( cityId ){
-					console.info('KOC formation listCityFormations function', cityId);
-					var $ul = KOC.formation.$ongoing.find('ul').filter('[data-city='+ cityId +']');
-					$ul.empty();
+					console.info('KOCFIA formation listCityFormations function', cityId);
+					var $tbody = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ cityId +']');
+					$tbody.find('tr').filter(':gt(0)').remove();
 
-					city = 'city' + cityId;
-
-					var code = '', i, formation, unit,
+					var city = 'city' + cityId,
+						code = '', formations = '', fortifications = '',
+						i, formation, unit,
 						queue = window.seed.queue_unt[city];
 					//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
 
-					code += '<table border="0">';
-					code += '<thead><tr><th>Formations</th><th>Fortifications</th></tr></thead>';
-					code += '<tbody><tr><td>';
-
 					//troops
-					code += '<ol class="formations">';
+					formations += '<ol class="formations">';
 					for( i = 0; i < queue.length; i += 1 ){
 						formation = queue[i];
-						for( j = 0; j < KOC.troops.length; j += 1 ){
-							if( KOC.troops[j].name == 'unt' + formation[0] ){
-								unit = KOC.troops[j];
+						for( j = 0; j < KOCFIA.troops.length; j += 1 ){
+							if( KOCFIA.troops[j].name == 'unt' + formation[0] ){
+								unit = KOCFIA.troops[j];
 								break;
 							}
 						}
 
-						code += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityId +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
-						code += '<img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />&nbsp;';
-						code += '<span class="unit">'+ KOC.shared.format( formation[1] ) +'</span>';
-						code += KOC.shared.readableDuration( formation[3] - formation[2] ) +'</li>';
+						formations += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityId +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
+						formations += '<img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />&nbsp;';
+						formations += '<span class="unit">'+ KOCFIA.shared.format( formation[1] ) +'</span>';
+						formations += '<span class="time">'+ KOCFIA.shared.readableDuration( formation[3] - formation[2] ) +'</span></li>';
 					}
-					code += '</ol></td><td>';
+					formations += '</ol></td><td>';
 
 					//defenses
-					code += '<ol class="defenses">';
+					fortifications += '<ol class="defenses">';
 					queue = window.seed.queue_fort[city];
 					for( i = 0; i < queue.length; i += 1 ){
 						formation = queue[i];
-						for( j = 0; j < KOC.defenses.length; j += 1 ){
-							if( KOC.defenses[j].name == 'fort' + formation[0] ){
-								unit = KOC.defenses[j];
+						for( j = 0; j < KOCFIA.defenses.length; j += 1 ){
+							if( KOCFIA.defenses[j].name == 'fort' + formation[0] ){
+								unit = KOCFIA.defenses[j];
 								break;
 							}
 						}
 
-						code += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityId +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
-						code += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
-						code += '<span class="unit">'+ KOC.shared.format( formation[1] ) +'</span>';
-						code += KOC.shared.readableDuration( formation[3] - formation[2] ) +'</li>';
+						fortifications += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityId +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
+						fortifications += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
+						fortifications += '<span class="unit">'+ KOCFIA.shared.format( formation[1] ) +'</span>';
+						fortifications += KOCFIA.shared.readableDuration( formation[3] - formation[2] ) +'</li>';
 					}
-					code += '</ol></td></tr></tbody></table>';
+					fortifications += '</ol></td></tr></tbody></table>';
 
-					$ul.append( code );
+					$tbody.append( '<tr><td class="unit">' + formations + '</td><td class="fort">' + fortifications + '</td><td class="info"></td></tr>' );
 				},
 				'getTrainableUnits': function( cityId ){
-					console.info('KOC formation getTrainableUnits function', cityId);
+					console.info('KOCFIA formation getTrainableUnits function', cityId);
 
 					var units = {}, u, unitc, building, tech, b, t;
 
@@ -4967,7 +5180,7 @@ jQuery(document).ready(function(){
 									b = false;
 									for( building in unitc[8] ){
 										if( unitc[8].hasOwnProperty( building ) ){
-											if( KOC.shared.buildingHighestLevel( cityId, building.substr(1) ) >= unitc[8][building][1] ){
+											if( KOCFIA.shared.buildingHighestLevel( cityId, building.substr(1) ) >= unitc[8][building][1] ){
 												b = true;
 											}
 										}
@@ -4992,7 +5205,7 @@ jQuery(document).ready(function(){
 					return units;
 				},
 				'getTrainableDefenses': function( cityId ){
-					console.info('KOC formation getTrainableDefenses function', cityId);
+					console.info('KOCFIA formation getTrainableDefenses function', cityId);
 
 					var forts = {}, f, fortc, building, tech, b, t;
 
@@ -5005,7 +5218,7 @@ jQuery(document).ready(function(){
 									b = false;
 									for( building in fortc[8] ){
 										if( fortc[8].hasOwnProperty( building ) ){
-											if( KOC.shared.buildingHighestLevel( cityId, building.substr(1) ) >= fortc[8][building][1] ){
+											if( KOCFIA.shared.buildingHighestLevel( cityId, building.substr(1) ) >= fortc[8][building][1] ){
 												b = true;
 											}
 										}
@@ -5029,19 +5242,10 @@ jQuery(document).ready(function(){
 					}
 					return forts;
 				},
-				'calcMaxTrainable': function( $fieldset ){
-					console.info('KOC formation calcMaxTrainable function');
-					var unit = $fieldset.find('.train-unit').val(),
-						$max = $fieldset.find('.train-max');
-
-					if( unit == '' ){
-						$max.val('').attr('title', '');
-						return;
-					}
+				'calcMaxUnit': function( cityId, unit, speed ){
+					console.info('KOCFIA formation calcMaxUnit function');
 
 					var mod, i, nb, cost = [], res = [],
-						speed = $fieldset.find('.train-speed').val(),
-						cityId = 'city' + $fieldset.find('.train-city').val(),
 						unitcost = window.unitcost[unit],
 						resources = window.seed.resources[cityId],
 						cityStat = window.seed.citystats[cityId];
@@ -5068,25 +5272,15 @@ jQuery(document).ready(function(){
 					nb = res[0] / cost[0];
 					for( i = 1; i < cost.length; i += 1 ){
 						if( cost[i] != 0 ){
-							console.log(res[i], cost[i], res[i] / cost[i]);
 							nb = Math.min(nb, res[i] / cost[i]);
 						}
 					}
 
-					$max.val( KOC.shared.format(nb) || 0 ).attr('title', nb || 0);
+					return nb;
 				},
-				'calcMaxDefense': function( $fieldset ){
-					console.info('KOC formation calcMaxDefense function');
-					var def = $fieldset.find('.train-defense').val(),
-						$qty = $fieldset.find('.train-quantity');
-
-					if( def == '' ){
-						$qty.val('').attr('title', '');
-						return;
-					}
-
+				'calcMaxDefense': function( cityId, def ){
+					console.info('KOCFIA formation calcMaxDefense function');
 					var mod, i, d, nb, check, slot, cost = [], res = [],
-						cityId = 'city' + $fieldset.find('.train-city').val(),
 						fortcost = window.fortcost[def],
 						resources = window.seed.resources[cityId],
 						buildings = window.seed.buildings[cityId];
@@ -5104,14 +5298,14 @@ jQuery(document).ready(function(){
 					nb = parseInt(nb, 10);
 
 					mod = 0;
-					d = parseInt(buildings.pos1[1], 10);
-					for( i = 1; i < (d + 1); i += 1 ){
+					wallLevel = parseInt(buildings.pos1[1], 10);
+					for( i = 1; i < (wallLevel + 1); i += 1 ){
 						mod += (i * 1000);
 					}
 
 					mod = mod / 2;
 
-					slot = KOC.formation.getWallSlots(cityId, 2);
+					slot = KOCFIA.formation.getWallSlots(cityId, true);
 					check = 0;
 					def = def.replace(/frt/, '');
 					if( def < 60 ){
@@ -5124,10 +5318,97 @@ jQuery(document).ready(function(){
 						nb = check;
 					}
 
-					$qty.val( KOC.shared.format(nb) || 0 ).attr('title', nb);
+					return nb;
+				},
+				'unitTrainDuration': function( city, unit, qty ){
+					console.info('KOCFIA formation unitTrainDuration function');
+					if( city.indexOf('city') == -1 ){
+						city = 'city' + city;
+					}
+
+					var time = parseInt(window.unitcost['unt' + unit][7], 10) * qty,
+						buildings = window.seed.buildings[city],
+						b, building,
+						barracksMod = 0,
+						workshopMod = 0,
+						stableMod = 0,
+						level, modifier, techBoost,
+						knightCombat, knightBoost, knights, knight, k,
+						date = new Date(),
+						timestamp = date.getTime() / 1000;
+
+					for( b in buildings ){
+						if( buildings.hasOwnProperty(b) ){
+							building = buildings[b];
+							level = parseInt(building[1], 10);
+							if( building[0] == 13 && level > 0 ){
+								barracksMod += parseInt(building[1], 10) + 9;
+
+							} else if( building[0] == 16 && level > workshopMod ){
+								if( unit >= 9 ){
+									workshopMod = level;
+								}
+
+							} else if( building[0] == 17 && level > stableMod ){
+								if( unit >= 7 ){
+									stableMod = level;
+								}
+							}
+						}
+					}
+
+					modifier = barracksMod / 10;
+					techBoost = 0;
+					knightCombat = 0;
+
+					knights = window.seed.knights[city];
+					time = Math.max(1, Math.ceil(time / modifier));
+
+					modifier = 1;
+					l = workshopMod + stableMod;
+					if( knights ){
+						knight = knights["knt" + window.seed.leaders[city].combatKnightId];
+						if( knight ){
+							knightCombat = parseInt(knight.combat, 10);
+							knightBoost = ( parseInt(knight.combatBoostExpireUnixtime, 10) - timestamp > 0 ? knightCombat * 1.25 : knightCombat );
+							modifier += 0.005 * knightBoost;
+						}
+					}
+
+					if( window.seed.tech ){
+						techBoost += window.seed.tech.tch5;
+					}
+					modifier += (0.1 * techBoost);
+
+					return Math.max(1, Math.ceil(time / modifier));
+				},
+				'defenseTrainDuration': function( city, fort, qty ){
+					console.info('KOCFIA formation defenseTrainDuration function');
+
+					if( city.indexOf('city') == -1 ){
+						city = 'city' + city;
+					}
+
+					var time = parseInt(window.fortcost['frt' + fort][7], 10) * qty,
+						modifier = 1 + 0.1 * parseInt(window.seed.tech.tch16, 10),
+						a = 0,
+						knights = seed.knights[city],
+						knight, knightCombat, knightBoost,
+						date = new Date(),
+						timestamp = date.getTime() / 1000;
+					if( knights ){
+						knight = knights["knt" + window.seed.leaders[city].politicsKnightId];
+						if( knight ){
+							knightCombat = parseInt(knight.combat, 10);
+							knightBoost = ( parseInt(knight.politicsBoostExpireUnixtime, 10) - timestamp > 0 ? knightCombat * 1.25 : knightCombat );
+							modifier += 0.005 * knightBoost;
+						}
+					}
+
+					return Math.max(1, Math.ceil(time / modifier));
 				},
 				'getWallSlots': function(cityId, withQueue ){
-					console.info('KOC formation getWallSlots function');
+					console.info('KOCFIA formation getWallSlots function');
 					var fortifications = window.seed.fortifications[cityId],
 						result = [0, 0],
 						f, def, fortification;
@@ -5144,7 +5425,7 @@ jQuery(document).ready(function(){
 						}
 					}
 
-					if( withQueue == 2 ){
+					if( withQueue ){
 						var queue = window.seed.queue_fort[cityId];
 						for( var i = 0; i < queue.length; i += 1 ){
 							def = parseInt(queue[i][0], 10);
@@ -5158,8 +5439,8 @@ jQuery(document).ready(function(){
 
 					return result;
 				},
-				'cancelTraining': function( info, $li ){
-					console.info('KOC formation cancelTraining function');
+				'cancelTraining': function( info, $li, attempts ){
+					console.info('KOCFIA formation cancelTraining function');
 					var i, j, totalReturn,
 						params = $.extend({}, window.g_ajaxparams);
 
@@ -5201,14 +5482,23 @@ jQuery(document).ready(function(){
 
 								$li.addClass('canceled');
 
-								setTimeout(function(){ KOC.formation.listCityFormations( info[1] ); }, 500);
-							} else if( result.msg ){
-								alert( result.msg );
+								setTimeout(function(){ KOCFIA.formation.listCityFormations( info[1] ); }, 500);
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									KOCFIA.formation.cancelFortification( info, $li, attempts );
+								}
+							}
+						}).fail(function(){
+							//network or server error
+							attempts -= 1;
+							if( attempts > 0 ){
+								KOCFIA.formation.cancelFortification( info, $li, attempts );
 							}
 						});
 				},
-				'cancelFortification': function( info, $li ){
-					console.info('KOC formation cancelFortification function');
+				'cancelFortification': function( info, $li, attempts ){
+					console.info('KOCFIA formation cancelFortification function');
 					var i, j, totalReturn,
 						params = $.extend({}, window.g_ajaxparams);
 
@@ -5251,111 +5541,392 @@ jQuery(document).ready(function(){
 
 								$li.addClass('canceled');
 
-								setTimeout(function(){ KOC.formation.listCityFormations( info[1] ); }, 500);
-							} else if( result.msg ){
-								alert( result.msg );
+								setTimeout(function(){ KOCFIA.formation.listCityFormations( info[1] ); }, 500);
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									KOCFIA.formation.cancelFortification( info, $li, attempts );
+								}
+							}
+						}).fail(function(){
+							//network or server error
+							attempts -= 1;
+							if( attempts > 0 ){
+								KOCFIA.formation.cancelFortification( info, $li, attempts );
 							}
 						});
 				},
-				'train': function(qty, unitId, boost, speed){
-					console.info('KOC formation train function');
+				'addToQueue': function( rule, dfd ){
+					console.info('KOCFIA formation addToQueue function', rule);
+					//automatic launch, will add one formation to the queue according to the rule parameters
+					//called by fillQueue with a deferred object, pipe on self until queue is filled or adding is not possible
 
-					/*if( boost != null ) window.train_unit(unitId, qty, boost, null);
-					else if( speed != null) window.train_unit(unitId, qty, null, speed);*/
+					//step 1 of 3 for trainUnitSequence
+					var checkUnitRequirements = function( sdfd ){
+						console.info('KOCFIA formation addToQueue deferred checkUnitRequirements function');
+						var modifier = 1;
+						if( rule.speed == 1 ) modifier = 2;
+						else if( rule.speed == 2 ) modifier = 4;
 
-						/*function train_unit(tid, num, iid, gambleId) {
-							var time = modal_barracks_traintime(tid, num);
-							if (iid == 36) {
-								time = parseInt(time * 0.7)
-							} else {
-								if (iid == 37) {
-									time = parseInt(time * 0.5)
-								} else {
-									if (iid == 38) {
-										time = parseInt(time * 0.3)
+						var costs = window.unitcost[unit],
+							res = window.seed.resources[city],
+							stats = window.seed.citystats[city];
+
+						if( !$.emptyObject(costs[8]) ){
+							var k, level;
+							for( k in costs[8] ){  // check building requirement
+								if( costs[8].hasOwnProperty(k) ){
+									level = KOCFIA.shared.buildingHighestLevel( city, k.substr(1) );
+									if( level < costs[8][k][1] ){
+										msg.push('Cette unitÃ© ne peut Ãªtre entraÃ®nÃ©e dans cette ville (niveau de bÃ¢timent requis trop bas).');
+										return sdfd.resolve();
 									}
 								}
 							}
-							var params = Object.clone(g_ajaxparams);
-							params.cid = currentcityid;
-							params.type = tid;
-							params.quant = num;
-							params.items = iid;
-							params.gambleId = gambleId;
-							var profiler = new cm.Profiler("ResponseTime", "train.php");
-							new Ajax.Request(g_ajaxpath + "ajax/train.php" + g_ajaxsuffix, {
-								method: "post",
-								parameters: params,
-								onSuccess: function (transport) {
-									profiler.stop();
-									var rslt = eval("(" + transport.responseText + ")");
-									if (rslt.ok) {
-										var resourceFactors = [],
-											resourceLost, i;
-										if (gambleId != null) {
-											time = rslt.timeNeeded
-										}
-										for( i = 1; i < 5; i += 1 ){
-											if (rslt.gamble) {
-												resourceFactors.push(rslt.gamble[i.toString()])
-											} else {
-												resourceFactors.push(1)
-											}
-											resourceLost = parseInt(unitcost["unt" + tid][i]) * 3600 * parseInt(num);
-											resourceLost = resourceLost * resourceFactors[i - 1];
-											seed.resources["city" + currentcityid]["rec" + i][0] = parseInt(seed.resources["city" + currentcityid]["rec" + i][0]) - resourceLost
-										}
-										seed.citystats["city" + currentcityid].gold[0] = parseInt(seed.citystats["city" + currentcityid].gold[0]) - parseInt(unitcost["unt" + tid][5]) * parseInt(num);
-										seed.citystats["city" + currentcityid].pop[0] = parseInt(seed.citystats["city" + currentcityid].pop[0]) - parseInt(unitcost["unt" + tid][6]) * parseInt(num);
-										seed.queue_unt["city" + currentcityid].push([tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]);
-										queue_changetab_train();
-										changeBarracksModalTabs(1);
-										seed.items["i" + iid] = Number(seed.items["i" + iid]) - 1;
-										ksoItems[iid].subtract();
-										if (rslt.updateSeed) {
-											update_seed(rslt.updateSeed)
-										}
-										UserEngagement.popViralModalUEP(1)
-									} else {
-										Modal.showAlert(printLocalError((rslt.error_code || null), (rslt.msg || null), (rslt.feedback || null)))
+						}
+
+						if( !$.emptyObject(costs[9]) ){
+							var t;
+							for( t in costs[9] ){  // check tech requirement
+								if( costs[9].hasOwnProperty(t) ){
+									if( parseInt(window.seed.tech['tch' + t.substr(1)], 10) < costs[9][t][1] ){
+										msg.push('Cette unitÃ© ne peut Ãªtre entraÃ®nÃ©e (niveau de recherche trop bas).');
+										return sdfd.resolve();
 									}
-								},
-								onFailure: function () {
-									profiler.stop()
+								}
+							}
+						}
+
+						//population and resources
+						for( r = 1; r < 5; r += 1 ){
+							resNeeded.push( parseInt(costs[r], 10) * 3600 * modifier );
+
+							//take into account the rule keep parameter
+							resAvailable.push( parseInt(res["rec" + r][0], 10) - rule.keep[r] );
+						}
+
+						resNeeded.push( parseInt(costs[5], 10) * modifier );
+						resAvailable.push( parseInt(stats.gold[0], 10) );
+
+						resNeeded.push( parseInt(costs[6], 10) );
+
+						var pop = parseInt(stats[city].pop[0], 10) - parseInt(stats.pop[3], 10);
+						if( rule.workforce > 0 ){
+							pop += parseInt( (parseInt(stats[city].pop[3], 10) * rule.workforce), 10);
+						}
+						resAvailable.push( pop );
+
+						qty = resAvailable[0] / resNeeded[0];
+						for( i = 1; i < resNeeded.length; i += 1 ){
+							if( resNeeded[i] !=0 ){
+								num = Math.min(num, resAvailable[i] / resNeeded[i]);
+							}
+						}
+
+						if( qty < rule.min ){
+							msg.push('Pas assez de population ou de ressources disponibles (unitÃ©).');
+							return sdfd.resolve();
+						}
+
+						if( qty > rule.max ) qty = rule.max;
+
+						return sdfd.pipe( checkBarracks(sdfd) );
+					};
+
+					//step 2 of 3 for trainUnitSequence
+					var checkBarracks = function( sdfd ){
+						console.info('KOCFIA formation addToQueue deferred checkBarracks function');
+						var barracksCount = KOCFIA.shared.barracksCount( city ),
+							queue = window.seed.queue_unt[ city ],
+							slotsUsed = queue.length || 0;
+						if( barracksCount - slotsUsed > 0 ){
+							return sdfd.pipe( train(sdfd) );
+						} else {
+							msg.push('Pas de caserne disponible.');
+							return sdfd.resolve();
+						}
+					};
+
+					//step 3 of 3 for trainUnitSequence
+					var train = function( sdfd ){
+						console.info('KOCFIA formation addToQueue deferred train function');
+						var wParams = $.extend({}, baseParams);
+						wParams.type = rule.troop;
+						wParams.quant = qty;
+						wParams.items = '';
+						wParams.gambleId = rule.speed;
+
+						$.ajax({
+								url: window.g_ajaxpath + "ajax/train.php" + window.g_ajaxsuffix,
+								type: 'post',
+								data: wParams,
+								dataType: 'json'
+							})
+							.done(function( result ){
+								if( result.ok ){
+									var resourceFactors = [],
+										resourceLost, r;
+
+									for( r = 1; r < 5; r += 1 ){
+										resourceFactors.push( result.gamble ? result.gamble[i] : 1 );
+										resourceLost = parseInt(window.unitcost[unit][i], 10) * 3600 * qty * resourceFactors[i - 1];
+										window.seed.resources[city]["rec" + r][0] = parseInt(window.seed.resources[city]["rec" + r][0], 10) - resourceLost;
+									}
+									window.seed.citystats[city].gold[0] = parseInt(window.seed.citystats[city].gold[0], 10) - parseInt(window.unitcost[unit][5], 10) * qty;
+									window.seed.citystats[city].pop[0] = parseInt(window.seed.citystats[city].pop[0], 10) - parseInt(window.unitcost[unit][6], 10) * qty;
+
+									window.seed.queue_unt[city].push([rule.troop, qty, result.initTS, parseInt(result.initTS) + result.timeNeeded, 0, result.timeNeeded, null]);
+
+									/*
+									seed.items["i" + iid] = Number(seed.items["i" + iid]) - 1;
+									ksoItems[iid].subtract();
+									*/
+
+									return sdfd.resolve();
+								} else {
+									if( result.msg ){
+										msg.push('Formation refusÃ©e ('+ result.msg +').');
+										return sdfd.resolve();
+									} else {
+										trainAttempts -= 1;
+										if( trainAttempts > 0 ){
+											return sdfd.pipe( train(sdfd) );
+										} else {
+											msg.push('Formation refusÃ©e.');
+											return sdfd.resolve();
+										}
+									}
 								}
 							})
-						};*/
-					//by city
-					//check
-						//population
-						//barracks
-							/*var availableTrainingSlots = 0;
-							try{
-							var barracksTotal = getCityBuilding(cityId, 13).count;
-							var trainingSlotsUsed = Seed.queue_unt['city'+cityId].length;
-							if(trainingSlotsUsed!=null){
-								var availableTrainingSlots = barracksTotal-trainingSlotsUsed;
-							}*/
-						//ressources
-							//enough for the pack size
-							//will leave enough resources after ?
-					//try to train
-						 /*var params = unsafeWindow.Object.clone(unsafeWindow.g_ajaxparams);
-						 params.cid = cityId;
-						 params.type = unitId;
-						 params.quant = num;
-						 params.items = 0;
-						 params.gambleId = gam;
-						 new MyAjaxRequest(unsafeWindow.g_ajaxpath + "ajax/train.php" + unsafeWindow.g_ajaxsuffix, {
-						   method: "post",
-						   parameters: params,*/
-					//
-					//
-				}
+							.fail(function(){
+								//network or server error
+								trainAttempts -= 1;
+								if( trainAttempts > 0 ){
+									return sdfd.pipe( train(sdfd) );
+								} else {
+									msg.push('Formation refusÃ©e (requÃªte KO).');
+									return sdfd.resolve();
+								}
+							});
+					};
+
+					//units training sequence
+					var trainUnitSequence = function(){
+						console.info('KOCFIA formation addToQueue deferred trainUnitSequence function');
+						return $.Deferred(function( sdfd ){
+							if( rule.troop ){ //units
+								unit = 'unt' + rule.troop;
+								sfdf.pipe( checkUnitRequirements(sdfd) );
+							} else sdfd.resolve();
+						}).promise();
+					};
+
+					//step 1 of 3 for buildFortificationSequence
+					var checkFortificationRequirements = function(sdfd){
+						console.info('KOCFIA formation addToQueue deferred checkFortificationRequirements function');
+						var costs = window.fortcost[unit],
+							res = window.seed.resources[city];
+
+						if( !$.emptyObject(costs[8]) ){
+							var k, level;
+							for( k in costs[8] ){  // check building requirement
+								if( costs[8].hasOwnProperty(k) ){
+									level = KOCFIA.shared.buildingHighestLevel( city, k.substr(1) );
+									if( level < costs[8][k][1] ){
+										msg.push('Cette fortification ne peut Ãªtre construite dans cette ville (niveau de bÃ¢timent requis trop bas).');
+										return sdfd.resolve();
+									}
+								}
+							}
+						}
+
+						if( !$.emptyObject(costs[9]) ){
+							var t;
+							for( t in costs[9] ){  // check tech requirement
+								if( costs[9].hasOwnProperty(t) ){
+									if( parseInt(window.seed.tech['tch' + t.substr(1)], 10) < costs[9][t][1] ){
+										msg.push('Cette fortification ne peut Ãªtre construite (niveau de recherche trop bas).');
+										return sdfd.resolve();
+									}
+								}
+							}
+						}
+
+						//resources
+						for( r = 1; r < 5; r += 1 ){
+							resNeeded.push( parseInt(costs[r], 10) * 3600 );
+
+							//take into account the rule keep parameter
+							resAvailable.push( parseInt(res["rec" + r][0], 10) - rule.keep[r] );
+						}
+
+						resNeeded.push( parseInt(costs[5], 10) * modifier );
+						resAvailable.push( parseInt(stats.gold[0], 10) );
+
+						qty = resAvailable[0] / resNeeded[0];
+						for( i = 1; i < resNeeded.length; i += 1 ){
+							if( resNeeded[i] !=0 ){
+								num = Math.min(num, resAvailable[i] / resNeeded[i]);
+							}
+						}
+
+						if( qty < rule.min ){
+							msg.push('Pas assez de ressources disponibles (fortifications).');
+							return sdfd.resolve();
+						}
+
+						if( qty > rule.max ) qty = rule.max;
+
+						return sdfd.pipe( checkWall(sdfd) );
+					};
+
+					//step 2 of 3 for buildFortificationSequence
+					var checkWall = function(sdfd){
+						console.info('KOCFIA formation addToQueue deferred checkWall function');
+						var i, wallSlots = KOCFIA.formation.getWallSlots(city, false),
+							queue = window.seed.queue_fort[ city ],
+							slotsUsed = queue.length || 0;
+
+						if( wallSlots - slotsUsed > 0 ){
+							return sdfd.pipe( build(sdfd) );
+						} else {
+							msg.push('Rempart dÃ©jÃ  occupÃ© (queue pleine).');
+							return sdfd.resolve();
+						}
+					};
+
+					//step 3 of 3 for buildFortificationSequence
+					var build = function(sdfd){
+						console.info('KOCFIA formation addToQueue deferred build function');
+						var wParams = $.extend({}, baseParams);
+						wParams.type = rule.defense;
+						wParams.quant = qty;
+						wParams.items = '';
+
+						$.ajax({
+								url: window.g_ajaxpath + "ajax/fortify.php" + window.g_ajaxsuffix,
+								type: 'post',
+								data: wParams,
+								dataType: 'json'
+							})
+							.done(function( result ){
+								console.log(result);
+								if( result.ok ){
+									var r, city = 'city' + rule.city,
+										fortcost = window.fortcost["frt" + rule.defense],
+										time = KOCFIA.formation.defenseTrainDuration(rule.city, rule.defense, qty);
+
+									/*
+									if(iid == 26) {
+										time = parseInt(time * 0.7)
+										window.seed.items.i26 = parseInt(window.seed.items.i26) - 1;
+										window.ksoItems[26].subtract()
+									}
+									*/
+									for( r = 1; r < 5; r += 1 ){
+										window.seed.resources[city]["rec" + r][0] = parseInt(resources["rec" + r][0], 10) - parseInt(fortcost[i], 10) * 3600 * qty;
+									}
+									window.seed.citystats[city].gold[0] = parseInt(window.seed.citystats[city].gold[0], 10) - parseInt(fortcost[5], 10) * qty;
+									window.seed.citystats[city].pop[0] = parseInt(window.seed.citystats[city].pop[0], 10) - parseInt(fortcost[6], 10) * qty;
+
+									window.seed.queue_fort[city].push([rule.defense, qty, result.initTS, parseInt(result.initTS) + time, 0, time, result.fortifyId]);
+
+									return sdfd.resolve();
+								} else {
+									if( result.msg ){
+										msg.push('Formation refusÃ©e ('+ result.msg +').');
+										return sdfd.resolve();
+									} else {
+										trainAttempts -= 1;
+										if( trainAttempts > 0 ){
+											return sdfd.pipe( train(sdfd) );
+										} else {
+											msg.push('Formation refusÃ©e.');
+											return sdfd.resolve();
+										}
+									}
+								}
+							})
+							.fail(function(){
+								//network or server error
+								trainAttempts -= 1;
+								if( trainAttempts > 0 ){
+									return sdfd.pipe( train(sdfd) );
+								} else {
+									msg.push('Formation refusÃ©e (requÃªte KO).');
+									return sdfd.resolve();
+								}
+							});
+					};
+
+					//fortifications building sequence
+					var buildFortificationSequence = function(){
+						console.info('KOCFIA formation addToQueue deferred buildFortificationSequence function');
+						return $.Deferred(function( sdfd ){
+							if( rule.defense ){
+								unit = 'frt' + rule.defense;
+								sfdf.pipe( checkFortificationRequirements(sdfd) );
+							} else sdfd.resolve();
+						}).promise();
+					};
+
+					var city = 'city' + rule.city, unit,
+						qty, r, msg = [], resNeeded = [], resAvailable = [],
+						trainAttempts = 3;
+
+					var baseParams = jQuery.extend(true, {}, window.g_ajaxparams);
+					if( baseParams == null ){
+						alert('ParamÃ¨tres ajax manquant. RaffraÃ®chissez la page.');
+						return;
+					}
+					baseParams.cid = rule.city;
+
+					var $info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ rule.city +']').find('.info');
+					if( dfd == null ){
+						//clean information
+						$info.empty();
+					}
+
+					$.when( trainUnitSequence(), buildFortificationSequence() )
+						.always(function(){
+							//user information
+							$info.append( msg.join('<br />') );
+
+							//manual launch
+							if( dfd ){
+								if( msg.length ){
+									dfd.reject();
+								} else {
+									dfd.pipe( KOCFIA.formation.addToQueue(rule, dfd) );
+								}
+							}
+						});
+				},
+				'fillQueue': function( rule ){
+					console.info('KOCFIA formation fillQueue function', rule);
+					//manual launch, will fill the training queue according to the rule parameters
+
+					var fillSequence = function(){
+						return $.Deferred(function( dfd ){
+							return dfd.pipe( KOCFIA.formation.addToQueue(rule, dfd) );
+						}).promise();
+					};
+
+					var $info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ rule.city +']').find('.info');
+
+					//clean information
+					$info.empty();
+
+					$.when( fillSequence() )
+						.always(function(){
+							//user information by city
+							$info.append( '<br />Lancement des formations fini.' );
+						});
+				},
 			};
 
 		/* TRANSPORT */
-			KOC.transport = {
+			KOCFIA.transport = {
 				'options': {
 					'active': 1,
 					'automatic': 0,
@@ -5363,69 +5934,69 @@ jQuery(document).ready(function(){
 				'stored': ['rules'],
 				'rules': {},
 				'confPanel': function( $section ){
-					console.info('KOC transport confPanel function');
+					console.info('KOCFIA transport confPanel function');
 					var code = '<h3>Transport</h3>'
 						+ '<div>'
-						+ KOC.shared.generateCheckbox('transport', 'active', 'Activer le module', KOC.conf.transport.active)
+						+ KOCFIA.shared.generateCheckbox('transport', 'active', 'Activer le module', KOCFIA.conf.transport.active)
 						+ '</div>';
 
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC transport modPanel function');
-					var $section = KOC.$confPanel.find('#koc-transport').html('');
+					console.info('KOCFIA transport modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-transport').html('');
 
 					//envoie manuel
-						//ville expéditrice
+						//ville expÃ©ditrice
 						//ville destinataire
-							//une par défaut
+							//une par dÃ©faut
 							//plusieurs possibles (*)
 								//un ou plusieurs envoies
-								//-> règle automatique temporaire
-						//ou coordonnées
+								//-> rÃ¨gle automatique temporaire
+						//ou coordonnÃ©es
 							//manuelle
 							//via liste
 							//plusieurs possibles (*)
 						//choix troupes
-							//une par défaut
+							//une par dÃ©faut
 							//plusieurs possible
-						//-> capacité totale
+						//-> capacitÃ© totale
 						//choix des ressources
-							//une par défaut
+							//une par dÃ©faut
 							//plusieurs possible
-						//temps du trajet (recalculé à chaque changement de troupe)
+						//temps du trajet (recalculÃ© Ã  chaque changement de troupe)
 						//bouton envoie
 					//envoie automatique
-						//garder x minerais dans la ville 1, le reste va à la ville 2
-						//approvisionnement ville x à partri de ville y si ressources < z
-						//activation / désactivation par ville
+						//garder x minerais dans la ville 1, le reste va Ã  la ville 2
+						//approvisionnement ville x Ã  partri de ville y si ressources < z
+						//activation / dÃ©sactivation par ville
 				},
 				'on': function(){
-					console.info('KOC transport on function');
+					console.info('KOCFIA transport on function');
 
-					KOC.conf.transport.active = 1;
-					KOC.shared.storeConf();
+					KOCFIA.conf.transport.active = 1;
+					KOCFIA.shared.storeConf();
 				},
 				'off': function(){
-					console.info('KOC transport off function');
+					console.info('KOCFIA transport off function');
 
-					KOC.conf.transport.active = 0;
-					KOC.conf.transport.automatic = 0;
-					KOC.shared.storeConf();
+					KOCFIA.conf.transport.active = 0;
+					KOCFIA.conf.transport.automatic = 0;
+					KOCFIA.shared.storeConf();
 
-					KOC.transport.automaticOff();
+					KOCFIA.transport.automaticOff();
 				},
 				'automaticOn': function(){
-					console.info('KOC transport automaticOn function');
+					console.info('KOCFIA transport automaticOn function');
 
-					KOC.conf.transport.automatic = 1;
-					KOC.shared.storeConf();
+					KOCFIA.conf.transport.automatic = 1;
+					KOCFIA.shared.storeConf();
 
-					if( $.isEmptyObject( KOC.transport.rules ) ){
+					if( $.isEmptyObject( KOCFIA.transport.rules ) ){
 						try{
-							var persistentTransportRules = localStorage.getObject('koc_transport_rules_' + KOC.storeUniqueId);
+							var persistentTransportRules = localStorage.getObject('kocfia_transport_rules_' + KOCFIA.storeUniqueId);
 							if( persistentTransportRules ){
-								KOC.transport.rules = persistentTransportRules;
+								KOCFIA.transport.rules = persistentTransportRules;
 							}
 						} catch(e){
 							console.error(e);
@@ -5433,14 +6004,14 @@ jQuery(document).ready(function(){
 					}
 				},
 				'automaticOff': function(){
-					console.info('KOC transport automaticOff function');
+					console.info('KOCFIA transport automaticOff function');
 
-					KOC.conf.transport.automatic = 0;
-					KOC.shared.storeConf();
+					KOCFIA.conf.transport.automatic = 0;
+					KOCFIA.shared.storeConf();
 				},
 				'storeAutomaticRules': function(){
-					console.info('koc transport storeAutomaticRules function');
-					localStorage.setObject('koc_transport_rules_' + KOC.storeUniqueId, KOC.transport.rules);
+					console.info('kocfia transport storeAutomaticRules function');
+					localStorage.setObject('kocfia_transport_rules_' + KOCFIA.storeUniqueId, KOCFIA.transport.rules);
 				},
 				//'generateTransport': function(origin, destination, troops, ressources)
 				//getCitiesForPlayer
@@ -5450,7 +6021,7 @@ jQuery(document).ready(function(){
 			};
 
 		/* GLORY TOURNAMENT */
-			/*KOC.gloryTournament = {
+			/*KOCFIA.gloryTournament = {
 				'options': {
 					'active': 1,
 					'automatic': 0,
@@ -5458,50 +6029,50 @@ jQuery(document).ready(function(){
 				'stored': ['rule'],
 				'rule': {},
 				'confPanel': function( $section ){
-					console.info('KOC gloryTournament confPanel function');
+					console.info('KOCFIA gloryTournament confPanel function');
 					var code = '<h3>Tournoi de Gloire</h3>';
 					code += '<div>';
-					code += KOC.shared.generateCheckbox('gloryTournament', 'active', 'Activer le module', KOC.conf.gloryTournament.active);
-					code += KOC.shared.generateCheckbox('gloryTournament', 'automatic', 'Lancer les éclairages automatiques', KOC.conf.gloryTournament.automatic);
-					code += KOC.shared.generateButton('gloryTournament', 'deleteRule', 'Supprimer la règle enregistrée');
+					code += KOCFIA.shared.generateCheckbox('gloryTournament', 'active', 'Activer le module', KOCFIA.conf.gloryTournament.active);
+					code += KOCFIA.shared.generateCheckbox('gloryTournament', 'automatic', 'Lancer les Ã©clairages automatiques', KOCFIA.conf.gloryTournament.automatic);
+					code += KOCFIA.shared.generateButton('gloryTournament', 'deleteRule', 'Supprimer la rÃ¨gle enregistrÃ©e');
 					code += '</div>';
 
 					$section.append( code );
 				},
 				'modPanel': function(){
-					console.info('KOC gloryTournament modPanel function');
-					var $section = KOC.$confPanel.find('#koc-gloryTournament').html('');
+					console.info('KOCFIA gloryTournament modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-gloryTournament').html('');
 
 					var form = '<h3><span class="ui-icon ui-icon-info"></span>';
-					form += '<span><input type="checkbox" id="gloryTournament-panel-automatic" '+ (KOC.conf.gloryTournament.automatic ? 'checked' : '') +' autocomplete="off" />';
-					form += '<label for="gloryTournament-panel-automatic">éclairages automatiques</label></span>';
-					form += 'Configurer un éclairage</h3>';
+					form += '<span><input type="checkbox" id="gloryTournament-panel-automatic" '+ (KOCFIA.conf.gloryTournament.automatic ? 'checked' : '') +' autocomplete="off" />';
+					form += '<label for="gloryTournament-panel-automatic">Ã©clairages automatiques</label></span>';
+					form += 'Configurer un Ã©clairage</h3>';
 					form += '<div class="scout-form">';
 					form += '<ul class="message"></ul>';
 					form += '<fieldset><div><label>Envoyer depuis&nbsp;:&nbsp;</label><br />';
 
-					var i, length = KOC.cities.length;
+					var i, length = KOCFIA.cities.length;
 					for( i = 0; i < length; i += 1 ){
-						var city = KOC.cities[i],
-							checked = ( KOC.gloryTournament.rule.hasOwnProperty('cities') ? $.inArray(city.id, KOC.gloryTournament.rule.cities) > -1 : false );
-						form += '<input id="koc-gloryTournament-city'+ city.id +'" name="city" value="'+ city.id +'" type="checkbox" class="city-choice" '+ (checked ? 'checked' : '') +' autocomplete="off" />';
-						form += '<label for="koc-gloryTournament-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
+						var city = KOCFIA.cities[i],
+							checked = ( KOCFIA.gloryTournament.rule.hasOwnProperty('cities') ? $.inArray(city.id, KOCFIA.gloryTournament.rule.cities) > -1 : false );
+						form += '<input id="kocfia-gloryTournament-city'+ city.id +'" name="city" value="'+ city.id +'" type="checkbox" class="city-choice" '+ (checked ? 'checked' : '') +' autocomplete="off" />';
+						form += '<label for="kocfia-gloryTournament-city'+ city.id +'">'+ city.roman + ' ' + city.name +'</label>';
 					}
 
 					form += '</div><div>';
-					var c = ( KOC.gloryTournament.rule.hasOwnProperty('coord') ? KOC.gloryTournament.rule.coord : '' );
-					form += '<label>Coordonnée&nbsp;:&nbsp;</label><input type="text" name="coord" id="gloryTournament-coord" value="'+ c +'" autocomplete="off" />';
+					var c = ( KOCFIA.gloryTournament.rule.hasOwnProperty('coord') ? KOCFIA.gloryTournament.rule.coord : '' );
+					form += '<label>CoordonnÃ©e&nbsp;:&nbsp;</label><input type="text" name="coord" id="gloryTournament-coord" value="'+ c +'" autocomplete="off" />';
 					form += '</div>';
 					form += '<button class="save">Sauvegarder</button>';
 					form += '<button class="reset">Annuler</button>';
 					form += '</fieldset></div>';
 
-					var help = '<div id="koc-gloryTournament-help" class="help" title="Aide Tournoi de Gloire"><ul>';
-					help += '<li>Envoie 2 éclaireurs en éclairage sur une coordonnée donnée à partir des villes cochées</li>';
-					help += '<li>Utilise la règle définie à chaque tentative</li>';
-					help += '<li>Ne vérifie pas si un boost d\'attaque est actif (gardien, objet, bonus, ...)</li>';
+					var help = '<div id="kocfia-gloryTournament-help" class="help" title="Aide Tournoi de Gloire"><ul>';
+					help += '<li>Envoie 2 Ã©claireurs en Ã©clairage sur une coordonnÃ©e donnÃ©e Ã  partir des villes cochÃ©es</li>';
+					help += '<li>Utilise la rÃ¨gle dÃ©finie Ã  chaque tentative</li>';
+					help += '<li>Ne vÃ©rifie pas si un boost d\'attaque est actif (gardien, objet, bonus, ...)</li>';
 					help += '<li>Utilise tous les slots des points de ralliements disponibles</li>';
-					help += '<li>Les éclairages sont actifs quand le module et les éclairages automatiques sont actifs (cochés)</li>';
+					help += '<li>Les Ã©clairages sont actifs quand le module et les Ã©clairages automatiques sont actifs (cochÃ©s)</li>';
 					help += '</ul></div>';
 
 					$section.append( form + help )
@@ -5510,79 +6081,79 @@ jQuery(document).ready(function(){
 						})
 						//reset form
 						.on('click', '.reset', function(){
-							var $inputs = KOC.gloryTournament.$form.find('input');
+							var $inputs = KOCFIA.gloryTournament.$form.find('input');
 							$inputs.filter('[type=text]').val('');
 							$inputs.filter('[type=cgeckbox]').prop('checked', false);
 						})
 						//launch
 						.on('click', '.save', function(){
-							var result = KOC.gloryTournament.planScout();
+							var result = KOCFIA.gloryTournament.planScout();
 							if( result.errors.length ){
-								KOC.gloryTournament.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+								KOCFIA.gloryTournament.$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 							} else {
-								KOC.gloryTournament.$form.find('.message').empty();
-								KOC.gloryTournament.rule = result.rule;
-								KOC.gloryTournament.storeRule();
+								KOCFIA.gloryTournament.$form.find('.message').empty();
+								KOCFIA.gloryTournament.rule = result.rule;
+								KOCFIA.gloryTournament.storeRule();
 							}
 						})
 						.find('.help').dialog({ autoOpen: false, zIndex: 100002 });
 
-					KOC.gloryTournament.$form = $section.find('.scout-form');
+					KOCFIA.gloryTournament.$form = $section.find('.scout-form');
 				},
 				'on': function(){
-					console.info('KOC gloryTournament on function');
-					if( $.isEmptyObject( KOC.gloryTournament.rule ) ){
+					console.info('KOCFIA gloryTournament on function');
+					if( $.isEmptyObject( KOCFIA.gloryTournament.rule ) ){
 						try{
-							var persistentGloryTournamentRule = localStorage.getObject('koc_gloryTournament_rule_' + KOC.storeUniqueId);
+							var persistentGloryTournamentRule = localStorage.getObject('kocfia_gloryTournament_rule_' + KOCFIA.storeUniqueId);
 							if( persistentGloryTournamentRule ){
-								KOC.gloryTournament.rule = persistentGloryTournamentRule;
+								KOCFIA.gloryTournament.rule = persistentGloryTournamentRule;
 							}
 						} catch(e){
 							console.error(e);
 						}
 					}
 
-					if( KOC.conf.gloryTournament.automatic ){
-						KOC.gloryTournament.automaticOn();
+					if( KOCFIA.conf.gloryTournament.automatic ){
+						KOCFIA.gloryTournament.automaticOn();
 					}
 				},
 				'off': function(){
-					console.info('KOC gloryTournament off function');
+					console.info('KOCFIA gloryTournament off function');
 
-					KOC.gloryTournament.automaticOff();
+					KOCFIA.gloryTournament.automaticOff();
 				},
 				'automaticOn': function(){
-					console.info('KOC gloryTournament automaticOn function');
+					console.info('KOCFIA gloryTournament automaticOn function');
 					$('#gloryTournament-panel-automatic').prop('checked', true);
 
-					if( !$.isEmptyObject( KOC.gloryTournament.rule ) ){
-						console.info('launching automatic scout', KOC.gloryTournament.rule);
-						KOC.gloryTournament.launchScout();
+					if( !$.isEmptyObject( KOCFIA.gloryTournament.rule ) ){
+						console.info('launching automatic scout', KOCFIA.gloryTournament.rule);
+						KOCFIA.gloryTournament.launchScout();
 					}
 				},
 				'automaticOff': function(){
-					console.info('KOC gloryTournament automaticOff function');
+					console.info('KOCFIA gloryTournament automaticOff function');
 					$('#gloryTournament-panel-automatic').prop('checked', false);
 				},
 				'storeRule': function(){
-					console.info('KOC gloryTournament storeRule function');
+					console.info('KOCFIA gloryTournament storeRule function');
 					try{
-						localStorage.setObject('koc_gloryTournament_rule_' + KOC.storeUniqueId, KOC.gloryTournament.rule);
+						localStorage.setObject('kocfia_gloryTournament_rule_' + KOCFIA.storeUniqueId, KOCFIA.gloryTournament.rule);
 					} catch(e){
 						alert(e);
 					}
 				},
 				'deleteRule': function(){
-					console.info('KOC gloryTournament deleteRule function');
-					KOC.gloryTournament.rule = {};
-					KOC.gloryTournament.storeRule();
+					console.info('KOCFIA gloryTournament deleteRule function');
+					KOCFIA.gloryTournament.rule = {};
+					KOCFIA.gloryTournament.storeRule();
 
-					$('#koc-wilderness').find('.attack-list').find('ul').empty();
+					$('#kocfia-wilderness').find('.attack-list').find('ul').empty();
 				},
 				'planScout': function(){
-					console.info('KOC gloryTournament planScout function');
-					var $cities = KOC.gloryTournament.$form.find('.city-choice').filter(':checked'),
-						coord = $.trim( KOC.gloryTournament.$form.find('#gloryTournament-coord').val().replace(/\n/g, ' ') ),
+					console.info('KOCFIA gloryTournament planScout function');
+					var $cities = KOCFIA.gloryTournament.$form.find('.city-choice').filter(':checked'),
+						coord = $.trim( KOCFIA.gloryTournament.$form.find('#gloryTournament-coord').val().replace(/\n/g, ' ') ),
 						errors = [],
 						regexp = /[^0-9, ]/,
 						rule = {};
@@ -5590,20 +6161,20 @@ jQuery(document).ready(function(){
 					//check form
 						//city
 						if( !$cities.length ){
-							errors.push('Au moins une ville de départ obligatoire.');
+							errors.push('Au moins une ville de dÃ©part obligatoire.');
 						} else {
 							rule.cities = $cities.map(function(){ return this.value; }).get();
 						}
 
 						//coord
 						if( coord.length == 0 ){
-							errors.push('Coordonnée requise.');
+							errors.push('CoordonnÃ©e requise.');
 						} else if( regexp.test( coord ) ){
-							errors.push('Pour la coordonnée, veuillez respecter le format x,y.');
+							errors.push('Pour la coordonnÃ©e, veuillez respecter le format x,y.');
 						} else {
 							var c = coord.split(',');
 							if( c[0] < 0 || c[0] > 750 || c[0] < 0 || c[0] > 750 ){
-								errors.push('Coordonnée erronée.');
+								errors.push('CoordonnÃ©e erronÃ©e.');
 							} else {
 								rule.coord = coord;
 							}
@@ -5618,21 +6189,21 @@ jQuery(document).ready(function(){
 					return {'rule': rule, 'errors': errors};
 				},
 				'launchScout': function(){
-					var rule = KOC.gloryTournament.rule;
-					console.info('KOC gloryTournament launchScout function', rule);
+					var rule = KOCFIA.gloryTournament.rule;
+					console.info('KOCFIA gloryTournament launchScout function', rule);
 					if( $.isEmptyObject( rule ) ){
 						return false;
 					}
 
-					if( !KOC.conf.gloryTournament.active || !KOC.conf.gloryTournament.automatic ){
+					if( !KOCFIA.conf.gloryTournament.active || !KOCFIA.conf.gloryTournament.automatic ){
 						return false;
 					}
 
 					//by city steps
 					var byCity = function( dfd ){
-						console.info('KOC gloryTournament deferred byCity function', cityIndex + 1);
+						console.info('KOCFIA gloryTournament deferred byCity function', cityIndex + 1);
 
-						if( !KOC.conf.gloryTournament.active || !KOC.conf.gloryTournament.automatic ){
+						if( !KOCFIA.conf.gloryTournament.active || !KOCFIA.conf.gloryTournament.automatic ){
 							return dfd.reject();
 						}
 
@@ -5649,8 +6220,8 @@ jQuery(document).ready(function(){
 
 					//step 1 of the sequence
 					var checkRaillyPoint = function( dfd ){
-						console.info('KOC gloryTournament deferred checkRaillyPoint function');
-						slots = KOC.shared.getRallyPointLevel( city );
+						console.info('KOCFIA gloryTournament deferred checkRaillyPoint function');
+						slots = KOCFIA.shared.buildingHighestLevel( city, 12 );
 						if( slots == 12 ) slots -= 1; //eleven armies at level 12
 						for( a in window.seed.queue_atkp[ city ] ){
 							if( window.seed.queue_atkp[ city ].hasOwnProperty(a) ) slots -= 1;
@@ -5665,7 +6236,7 @@ jQuery(document).ready(function(){
 
 					//step 2 of the sequence
 					var checkUnit = function( dfd ){
-						console.info('KOC gloryTournament deferred checkUnit function');
+						console.info('KOCFIA gloryTournament deferred checkUnit function');
 
 						units = window.seed.units[ city ];
 
@@ -5685,7 +6256,7 @@ jQuery(document).ready(function(){
 
 					//step 3 of the sequence
 					var launchScouts = function( dfd ){
-						console.info('KOC gloryTournament deferred launchScouts function');
+						console.info('KOCFIA gloryTournament deferred launchScouts function');
 						$.when( subSequence( dfd ) )
 							.done(function(){
 								return dfd.resolve();
@@ -5694,14 +6265,14 @@ jQuery(document).ready(function(){
 
 					//sub sequence, launch scout for each ralliement point slot available
 					var subSequence = function( dfd ){
-						console.info('KOC gloryTournament deferred subSequence function');
+						console.info('KOCFIA gloryTournament deferred subSequence function');
 						return $.Deferred(function( sdfd ){
 							return sdfd.pipe( launch( dfd, sdfd ) );
 						}).promise();
 					};
 
 					var checkMarch = function( city, mid ){
-						console.info('KOC gloryTournament deferred checkMarch function');
+						console.info('KOCFIA gloryTournament deferred checkMarch function');
 						var march = window.seed.queue_atkp[ city ][ 'm' + mid ];
 						if( march ){
 							var mParams = window.g_ajaxparams;
@@ -5736,7 +6307,7 @@ jQuery(document).ready(function(){
 					};
 
 					var removeMarch = function( city, mid ){
-						console.info('KOC gloryTournament deferred checkMarch function');
+						console.info('KOCFIA gloryTournament deferred checkMarch function');
 						var march = window.seed.queue_atkp[ city ][ 'm' + mid ];
 						if( march ){
 							delete window.seed.queue_atkp[ city ][ 'm' + mid ];
@@ -5747,7 +6318,7 @@ jQuery(document).ready(function(){
 
 					//sub sequence, launch scout
 					var launch = function( dfd, sdfd ){
-						console.info('KOC gloryTournament deferred launch function');
+						console.info('KOCFIA gloryTournament deferred launch function');
 						var p = wParams, //params is redefined in $.ajax, need for attach_addoutgoingmarch call
 							captcha = false;
 						$.ajax({
@@ -5783,7 +6354,7 @@ jQuery(document).ready(function(){
 								console.log('error', result);
 								if( result.hasOwnProperty('user_action') && result.user_action == 'marchCaptcha' ){
 									$('#gloryTournament-panel-automatic').prop('checked', false).change();
-									alert('Kabam capcha ! Eclairages stoppés en attendant ! Faite un éclairage manuel en validant le capcha puis relancer.');
+									alert('Kabam capcha ! Eclairages stoppÃ©s en attendant ! Faite un Ã©clairage manuel en validant le capcha puis relancer.');
 									captcha = true;
 								}
 							}
@@ -5807,7 +6378,7 @@ jQuery(document).ready(function(){
 
 					//main sequence
 					var sequence = function(){
-						console.info('KOC gloryTournament deferred sequence function');
+						console.info('KOCFIA gloryTournament deferred sequence function');
 						return $.Deferred( function( dfd ){
 							return dfd.pipe( byCity( dfd ) );
 						}).promise();
@@ -5816,7 +6387,7 @@ jQuery(document).ready(function(){
 
 					var wParams = jQuery.extend(true, {}, window.g_ajaxparams);
 					if( wParams == null ){
-						alert('Paramètres ajax manquant. Raffraîchissez la page.');
+						alert('ParamÃ¨tres ajax manquant. RaffraÃ®chissez la page.');
 						return;
 					}
 					wParams.type = 3; //MARCH_TYPE_SCOUT
@@ -5841,28 +6412,128 @@ jQuery(document).ready(function(){
 
 					$.when( sequence() )
 						.always(function(){
-							if( KOC.conf.gloryTournament.active && KOC.conf.gloryTournament.automatic ){
-								setTimeout(function(){ KOC.gloryTournament.launchScout(); }, 30000);
+							if( KOCFIA.conf.gloryTournament.active && KOCFIA.conf.gloryTournament.automatic ){
+								setTimeout(function(){ KOCFIA.gloryTournament.launchScout(); }, 30000);
 							}
 						});
 				}
 			};*/
 
+		/* MAP VISUALISATION WITH CANVAS */
+			KOCFIA.canvas = {
+				'options': {
+					'active': 1,
+				},
+				/*
+				'provinces': [
+					{name: 'Tintagel', x: 75, y: 75},
+					{name: 'Cornouailles', x: 225, y: 75},
+					{name: 'Astolat', x: 375, y: 75},
+					{name: 'Lyonesse', x: 525, y: 75},
+					{name: 'Corbenic', x: 625, y: 75},
+					{name: 'Paimpont', x: 75, y: 225},
+					{name: 'CamÃ©liard', x: 225, y: 225},
+					{name: 'Sarras', x: 375, y: 225},
+					{name: 'Canoel', x: 525, y: 225},
+					{name: 'Avalon', x: 625, y: 225},
+					{name: 'Carmathen', x: 75, y: 375},
+					{name: 'Shallot', x: 225, y: 375},
+					{name: '-------', x: 375, y: 375},
+					{name: 'Cadbury', x: 525, y: 375},
+					{name: 'Glaston Bury', x: 625, y: 375},
+					{name: 'Camlann', x: 75, y: 525},
+					{name: 'Orkney', x: 225, y: 525},
+					{name: 'Dore', x: 375, y: 525},
+					{name: 'Loegrie', x: 525, y: 525},
+					{name: 'Caerleon', x: 625, y: 525},
+					{name: 'ParmÃ©nie', x: 75, y: 675},
+					{name: 'Bodmin Moor', x: 225, y: 675},
+					{name: 'Celwig', x: 375, y: 675},
+					{name: 'Listenoise', x: 525, y: 675},
+					{name: 'Albion', x: 625, y: 675},
+				],
+				*/
+				'confPanel': function( $section ){
+					console.info('KOCFIA canvas confPanel function');
+					var code = '<h3>Carte</h3>';
+					code += '<div>';
+					code += KOCFIA.shared.generateCheckbox('canvas', 'active', 'Activer le module', KOCFIA.conf.canvas.active);
+					code += '</div>';
+
+					$section.append( code );
+				},
+				'modPanel': function(){
+					console.info('KOCFIA canvas modPanel function');
+					var $section = KOCFIA.$confPanel.find('#kocfia-canvas').html(''),
+						code = '<canvas id="kocfia-map-canvas" width="'+ width +'" height="'+ height +'"></canvas>';
+
+					$section.append( code );
+
+					KOCFIA.canvas.cv = $('#kocfia-map-canvas')[0];
+					KOCFIA.canvas.ctx = KOCFIA.canvas.cv.getContext('2d');
+
+					KOCFIA.canvas.grid();
+				},
+				'on': function(){
+					console.info('KOCFIA formation on function');
+				},
+				'off': function(){
+					console.info('KOCFIA formation off function');
+				},
+				'grid': function(){
+					console.info('KOCFIA canvas grid function');
+					var width = 375, height = 375, size = 75, x;
+
+					//clear the canvas
+					KOCFIA.canvas.ctx.setTransform(1, 0, 0, 1, 0, 0);
+					KOCFIA.canvas.ctx.clearRect(0, 0, KOCFIA.canvas.cv.width, KOCFIA.canvas.cv.height);
+
+					for( x = 0; x <= width; x += size ){
+						KOCFIA.canvas.ctx.moveTo(0 + x, 0);
+						KOCFIA.canvas.ctx.lineTo(0 + x, height);
+					}
+
+					for( x = 0; x <= height; x += size ){
+						KOCFIA.canvas.ctx.moveTo(0, 0 + x);
+						KOCFIA.canvas.ctx.lineTo(width, 0 + x);
+					}
+
+					KOCFIA.canvas.ctx.strokeStyle = '#ede55a';
+					KOCFIA.canvas.ctx.stroke();
+				},
+				'drawCoords': function( coords ){
+					console.info('KOCFIA canvas drawCoords function');
+					if( !$.isArray( coords ) ) coords = [ coords ];
+
+					var size = KOCFIA.canvas.cv.width,
+						scale = size / 750,
+						i, x, y, c;
+					KOCFIA.canvas.ctx.fillStyle = '#fa501a';
+					for( i = 0; i < coords.length; i += 1 ){
+						c = coords[i];
+						x = c.x * scale;
+						y = c.y * scale;
+
+						KOCFIA.canvas.ctx.fillRect(x, y, x, y);
+					}
+				},
+			},
+
 	/* CHECK AND LAUNCH ATTACK */
-		KOC.checkAndLaunchAttack = function( attack, mod ){
-			console.info('KOC checkAndLaunchAttack function', attack.id, attack.cityId, attack);
-			var check = KOC.conf[ mod ] && KOC.conf[ mod ].hasOwnProperty('active') && KOC.conf[ mod ].active;
+		KOCFIA.checkAndLaunchAttack = function( attack, mod ){
+			console.info('KOCFIA checkAndLaunchAttack function', attack.id, attack.cityId, attack);
+			var check = KOCFIA.conf[ mod ] && KOCFIA.conf[ mod ].hasOwnProperty('active') && KOCFIA.conf[ mod ].active;
 			if( !check ){
 				return false;
 			}
 
 			if( !attack.hasOwnProperty('abort') ) attack.abort = 0;
 
-			var $tr = KOC[mod].$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').find('tr').filter('[data-attack='+ attack.id +']');
+			var $tr = KOCFIA[mod].$ongoing.find('tbody').filter('[data-city='+ attack.cityId +']').find('tr').filter('[data-attack='+ attack.id +']');
 			if( $tr.length && $tr.data('stop') ){
-				attack.aborts.push('Attaque stoppée sur demande.');
-				KOC[mod].refreshOngoingInfo(attack, true);
-				KOC[mod].$saved
+				attack.aborts.push('Attaque stoppÃ©e sur demande.');
+				KOCFIA[mod].refreshOngoingInfo(attack, true);
+				KOCFIA[mod].$saved
 					.find('tbody').filter('[data-city='+ attack.cityId +']')
 					.find('tr').filter('[data-attack='+ attack.id +']')
 					.find('.charge').show();
@@ -5870,8 +6541,8 @@ jQuery(document).ready(function(){
 			}
 
 			if( attack.abort > 10 ){
-				attack.aborts.push('Trop d\'erreurs détectées. Attaque stoppée.');
-				KOC[mod].refreshOngoingInfo(attack, true);
+				attack.aborts.push('Trop d\'erreurs dÃ©tectÃ©es. Attaque stoppÃ©e.');
+				KOCFIA[mod].refreshOngoingInfo(attack, true);
 				return false;
 			}
 
@@ -5883,11 +6554,11 @@ jQuery(document).ready(function(){
 
 			//attacks loop only if in automatic mode
 			if( attack.lastCoordIndex >= attack.coords.length ){
-				if( KOC.conf[mod].automatic && KOC[mod].attacks[ attack.cityId ] && KOC[mod].attacks[ attack.cityId ][ attack.id ]){
+				if( KOCFIA.conf[mod].automatic && KOCFIA[mod].attacks[ attack.cityId ] && KOCFIA[mod].attacks[ attack.cityId ][ attack.id ]){
 					attack.lastCoordIndex = 0;
 				} else {
 					attack.aborts.push('Attaque finie');
-					KOC[mod].refreshOngoingInfo(attack, true);
+					KOCFIA[mod].refreshOngoingInfo(attack, true);
 					return;
 				}
 			}
@@ -5898,7 +6569,7 @@ jQuery(document).ready(function(){
 				//check previous marches for "away without leave" troops
 				//first in attack sequence, will pipe the deferred resolution to resetTracks function
 				var previousMarchingCheck = function(dfd){
-					console.info('KOC checkAndLaunchAttack deferred previousMarchingCheck function');
+					console.info('KOCFIA checkAndLaunchAttack deferred previousMarchingCheck function');
 					if( window.seed.queue_atkp[ 'city' + attack.cityId ] ){
 						var mParams = window.g_ajaxparams,
 							i = 0, j, march,
@@ -5908,10 +6579,10 @@ jQuery(document).ready(function(){
 						}
 
 						var checkMarch = function(dfd, i){
-							console.info('KOC checkAndLaunchAttack deferred checkMarch function');
+							console.info('KOCFIA checkAndLaunchAttack deferred checkMarch function');
 							march = window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ];
 							//console.log('march', i, march);
-							if( march && !march.hasOwnProperty('kocUpdated') ){
+							if( march && !march.hasOwnProperty('kocfiaUpdated') ){
 								var mParams = window.g_ajaxparams;
 								mParams.rid = attack.marching[i];
 								$.ajax({
@@ -5937,7 +6608,7 @@ jQuery(document).ready(function(){
 										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].marchStatus = data.march.marchStatus;
 										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].hasUpdated = true;
 
-										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocUpdated = true;
+										window.seed.queue_atkp[ 'city' + attack.cityId ][ 'm' + attack.marching[i] ].kocfiaUpdated = true;
 
 										if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
 											window.attack_recall(attack.marching[i], 1, attack.cityId);
@@ -5988,7 +6659,7 @@ jQuery(document).ready(function(){
 				//attack tracking arrays reset
 				//second in attack sequence, will pipe the deferred resolution to checkRallyPoint function
 				var resetTracks = function(dfd){
-					console.info('KOC checkAndLaunchAttack deferred resetTracks function');
+					console.info('KOCFIA checkAndLaunchAttack deferred resetTracks function');
 					//force refresh of attack queue for current city with march from the attack
 					if( attack.marching.length && window.currentcityid == attack.cityId ){
 						window.attack_generatequeue();
@@ -6006,8 +6677,8 @@ jQuery(document).ready(function(){
 				//check rally point slots
 				//third in attack sequence, will pipe the deferred resolution to checkCoords function
 				var checkRallyPoint = function(dfd){
-					console.info('KOC checkAndLaunchAttack deferred checkRallyPoint function');
-					var slots = KOC.shared.getRallyPointLevel(attack.cityId),
+					console.info('KOCFIA checkAndLaunchAttack deferred checkRallyPoint function');
+					var slots = KOCFIA.shared.buildingHighestLevel(attack.cityId, 12),
 						a;
 					if( slots == 12 ) slots -= 1; //eleven armies at level 12
 					for( a in window.seed.queue_atkp[attack.cityId] ){
@@ -6024,7 +6695,7 @@ jQuery(document).ready(function(){
 				//loop function for checking each coords until one valid is found, use deferred.pipe() to iterate
 				//fourth in attack sequence, will pipe the deferred resolution to checkCoord function
 				var checkCoords = function(dfd){
-					console.info('KOC checkAndLaunchAttack deferred checkCoords function');
+					console.info('KOCFIA checkAndLaunchAttack deferred checkCoords function');
 					coordIndex = attack.lastCoordIndex;
 					attempts = 3;
 					return dfd.pipe(checkCoord(dfd));
@@ -6033,7 +6704,7 @@ jQuery(document).ready(function(){
 				//check one coord and return the result using the deferred object in parameter
 				//fifth in attack sequence, will pipe the deferred resolution to checkAndLaunchWaves function if a suitable coordinate is found
 				var checkCoord = function( dfd ){
-					console.info('KOC checkAndLaunchAttack deferred checkCoord function');
+					console.info('KOCFIA checkAndLaunchAttack deferred checkCoord function');
 
 					var cParams = jQuery.extend(true, {}, window.g_ajaxparams),
 						gps = attack.coords[ coordIndex ].split(',');
@@ -6053,12 +6724,12 @@ jQuery(document).ready(function(){
 								//console.log('fetchMapTiles info', info);
 								var type = parseInt(info.tileType, 10);
 								if( type <= 0 || type > 50 ){
-									attack.aborts.push('Coordonnées '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) n\'est pas une terre sauvage.');
+									attack.aborts.push('CoordonnÃ©es '+ attack.coords[ coordIndex ] +' ('+ (coordIndex + 1) +'e) n\'est pas une terre sauvage.');
 									coordIndex += 1;
 									return dfd.pipe( checkCoord(dfd) );
 
 								} else if( info.tileUserId != null || info.tileCityId != null ){ //"0" -> under mists, "xxx" -> no mists
-									attack.aborts.push( KOC.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) occupées.');
+									attack.aborts.push( KOCFIA.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) occupÃ©es.');
 									coordIndex += 1;
 									return dfd.pipe( checkCoord(dfd) );
 
@@ -6069,13 +6740,13 @@ jQuery(document).ready(function(){
 									return dfd.pipe( checkAndLaunchWaves(dfd) );
 								}
 							} else {
-								attack.aborts.push('Informations sur '+ KOC.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) manquantes.');
+								attack.aborts.push('Informations sur '+ KOCFIA.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) manquantes.');
 
 								coordIndex += 1;
 
 								if( coordIndex >= attack.coords.length ){
 									attack.lastCoordIndex = coordIndex - 1;
-									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
+									attack.aborts.push('Aucune coordonnÃ©e validÃ©e pour l\'attaque.');
 									return dfd.reject();
 								}
 
@@ -6093,7 +6764,7 @@ jQuery(document).ready(function(){
 
 								if( coordIndex >= attack.coords.length ){
 									attack.lastCoordIndex = coordIndex - 1;
-									attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
+									attack.aborts.push('Aucune coordonnÃ©e validÃ©e pour l\'attaque.');
 									return dfd.reject();
 								}
 
@@ -6104,13 +6775,13 @@ jQuery(document).ready(function(){
 						}
 					})
 					.fail(function(){
-						attack.aborts.push('Informations sur '+ KOC.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) introuvables.');
+						attack.aborts.push('Informations sur '+ KOCFIA.shared.mapLink( attack.coords[ coordIndex ] ) +' ('+ (coordIndex + 1) +'e) introuvables.');
 
 						coordIndex += 1;
 
 						if( coordIndex >= attack.coords.length ){
 							attack.lastCoordIndex = coordIndex - 1;
-							attack.aborts.push('Aucune coordonnée validée pour l\'attaque.');
+							attack.aborts.push('Aucune coordonnÃ©e validÃ©e pour l\'attaque.');
 							return dfd.reject();
 						}
 
@@ -6122,27 +6793,27 @@ jQuery(document).ready(function(){
 				//loop function for checking and launching each wave, use deferred.pipe() to iterate
 				//sixth in attack sequence, will pipe the deferred resolution to checkAndLaunchWave function
 				var checkAndLaunchWaves = function(dfd){
-					console.info('KOC checkAndLaunchAttack deferred checkAndLaunchWaves function');
+					console.info('KOCFIA checkAndLaunchAttack deferred checkAndLaunchWaves function');
 					waveIndex = 0;
 					return dfd.pipe(checkAndLaunchWave(dfd));
 				};
 
 				//seventh in attack sequence, will pipe the deferred resolution to checkAndLaunchWave function until all waves are launched
 				var checkAndLaunchWave = function( dfd ){
-					console.info('KOC checkAndLaunchAttack deferred checkAndLaunchWave function');
+					console.info('KOCFIA checkAndLaunchAttack deferred checkAndLaunchWave function');
 
 					/* deferred wave specific functions */
 						//first in wave sequence, will pipe the deferred resolution to checkKnight function
 						var findLostKnights = function(wdfd){
-							console.info('KOC checkAndLaunchAttack deferred findLostKnights function');
-							KOC.shared.freeKnights( attack.cityId );
+							console.info('KOCFIA checkAndLaunchAttack deferred findLostKnights function');
+							KOCFIA.shared.freeKnights( attack.cityId );
 							return wdfd.pipe( checkKnight(wdfd) );
 						};
 
 						//second in wave sequence, will pipe the deferred resolution to checkUnits function
 						var checkKnight = function(wdfd){
-							console.info('KOC checkAndLaunchAttack deferred checkKnight function');
-							var knights = KOC.shared.getAvailableKnights( attack.cityId ),
+							console.info('KOCFIA checkAndLaunchAttack deferred checkKnight function');
+							var knights = KOCFIA.shared.getAvailableKnights( attack.cityId ),
 								k;
 							if( waveIndex == 0 && knights.length < attack.waves.length ){
 								attack.aborts.push('Pas assez de chevalier disponible pour lancer les '+ attack.waves.length +' vagues.');
@@ -6177,7 +6848,7 @@ jQuery(document).ready(function(){
 
 						//third in wave sequence, will pipe the deferred resolution to launchWave function
 						var checkUnits = function(wdfd){
-							console.info('KOC checkAndLaunchAttack deferred checkUnits function');
+							console.info('KOCFIA checkAndLaunchAttack deferred checkUnits function');
 							var j, k, unit, unitKey, unitNum, qty, available, keep;
 							uLength = wave.units.length;
 							for( j = 0; j < uLength; j += 1 ){
@@ -6207,7 +6878,7 @@ jQuery(document).ready(function(){
 
 						//fourth and last in wave sequence
 						var launchWave = function(wdfd){
-							console.info('KOC checkAndLaunchAttack deferred launchWave function');
+							console.info('KOCFIA checkAndLaunchAttack deferred launchWave function');
 							//console.log('wave', waveIndex + 1, attack.id, attack.cityId, wave);
 							var p = wParams; //params is redefined in $.ajax, need for attach_addoutgoingmarch call
 							$.ajax({
@@ -6244,10 +6915,10 @@ jQuery(document).ready(function(){
 
 								} else {
 									if( result.msg ){
-										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé ('+ result.msg +').');
+										attack.aborts.push('Plan d\'attaque sur '+ KOCFIA.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusÃ© ('+ result.msg +').');
 										return wdfd.reject();
 									} else if( result.user_action == 'marchCaptcha' ){
-										attack.aborts.push('Plan d\'attaque sur '+ KOC.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusé (captcha !).');
+										attack.aborts.push('Plan d\'attaque sur '+ KOCFIA.shared.mapLink( attack.coords[ attack.lastCoordIndex ] ) +' refusÃ© (captcha !).');
 										return wdfd.reject();
 									} else {
 										launchAttempts -= 1;
@@ -6260,7 +6931,7 @@ jQuery(document).ready(function(){
 								}
 							}).fail(function(){
 								//network or server error
-								attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusé (requête KO).');
+								attack.aborts.push('Plan d\'attaque sur '+ attack.coords[ lastCoordIndex ] +' refusÃ© (requÃªte KO).');
 
 								launchAttempts -= 1;
 								if( launchAttempts > 0 ){
@@ -6305,7 +6976,7 @@ jQuery(document).ready(function(){
 						}).fail(function(){
 							if( attack.marching.length ){
 								//console.log('calling back previous waves', attack.marching.length);
-								KOC.shared.recallWaves( attack );
+								KOCFIA.shared.recallWaves( attack );
 							}
 							return dfd.reject();
 						});
@@ -6321,7 +6992,7 @@ jQuery(document).ready(function(){
 
 			var baseParams = jQuery.extend(true, {}, window.g_ajaxparams);
 			if( baseParams == null ){
-				alert('Paramètres ajax manquant. Raffraîchissez la page.');
+				alert('ParamÃ¨tres ajax manquant. RaffraÃ®chissez la page.');
 				return;
 			}
 
@@ -6345,24 +7016,24 @@ jQuery(document).ready(function(){
 				})
 				.always(function(){
 					//console.log('after launching waves');
-					KOC[mod].refreshOngoingInfo(attack, false);
+					KOCFIA[mod].refreshOngoingInfo(attack, false);
 
 					attack.lastCoordIndex = attack.lastCoordIndex + 1;
 
 					//save the last coord if the attack is a stored one
-					if( KOC[mod].attacks[ attack.cityId ]
-						&& KOC[mod].attacks[ attack.cityId ][ attack.id ]
+					if( KOCFIA[mod].attacks[ attack.cityId ]
+						&& KOCFIA[mod].attacks[ attack.cityId ][ attack.id ]
 					){
-						KOC[mod].attacks[ attack.cityId ][ attack.id ].lastCoordIndex = attack.lastCoordIndex;
-						KOC[mod].storeAttacks();
+						KOCFIA[mod].attacks[ attack.cityId ][ attack.id ].lastCoordIndex = attack.lastCoordIndex;
+						KOCFIA[mod].storeAttacks();
 					}
 
-					//console.log('time', KOC.shared.readableDuration(time), time, KOC.shared.readableDuration(time*2));
+					//console.log('time', KOCFIA.shared.readableDuration(time), time, KOCFIA.shared.readableDuration(time*2));
 					time *= 1000; //timestamp in milliseconds in javascript
 
 					//force march update 10s after impact
 					window.setTimeout(function(){
-						KOC.shared.forceMarchUpdate( attack );
+						KOCFIA.shared.forceMarchUpdate( attack );
 					}, time + 10000);
 
 					time *= 2; //round-trip
@@ -6370,13 +7041,13 @@ jQuery(document).ready(function(){
 					//force refresh
 					window.setTimeout(function(){
 						//console.log('attack seed refresh');
-						KOC.shared.updateSeed();
+						KOCFIA.shared.updateSeed();
 					}, time + 30000);
 
 					//next round
 					window.setTimeout(function(){
 						//console.log('attack next round', attack.id, 'city', attack.cityId);
-						KOC.checkAndLaunchAttack( attack, mod );
+						KOCFIA.checkAndLaunchAttack( attack, mod );
 					}, time + 45000);
 				});
 		};
@@ -6388,10 +7059,10 @@ jQuery(document).ready(function(){
 				/*console.log(window);
 				console.log(window.seed);
 				console.log(window.unitstats);*/
-				console.time('Koc init');
-				console.log('Koc init');
-				KOC.init();
-				console.timeEnd('Koc init');
+				console.time('kocfia init');
+				console.log('kocfia init');
+				KOCFIA.init();
+				console.timeEnd('kocfia init');
 			}, 2000);
 		} else {
 			trys -= 1;
@@ -6405,17 +7076,17 @@ jQuery(document).ready(function(){
 });
 /*
 	//Construction :
-	//- mise en place de la ville (à détailler)
+	//- mise en place de la ville (Ã  dÃ©tailler)
 		//- positionnement
 		//- nombre
 	//- file d'attente des construction par ville
 		//- modifiable (suppression, insertion, ordre)
 		//- gestion des erreurs
 
-	//Entraînement :
-	//- entraînement automatique
-	//- entraînement programmé (x miliciens puis y archers puis ...)
-	//- prise en compte des options (accélérations, ...)
+	//EntraÃ®nement :
+	//- entraÃ®nement automatique
+	//- entraÃ®nement programmÃ© (x miliciens puis y archers puis ...)
+	//- prise en compte des options (accÃ©lÃ©rations, ...)
 
 	//Recherche :
 	//- file d'attente des recherches par ville
@@ -6434,42 +7105,42 @@ jQuery(document).ready(function(){
 
 	//Alerte :
 	//- attaque
-		//- plusieurs niveaux de dangerosité (éclairage, grosse attaque, vidage, ...)
+		//- plusieurs niveaux de dangerositÃ© (Ã©clairage, grosse attaque, vidage, ...)
 	//- manque de nourriture
-	//- manque de ressource (couplée avec les files d'attente)
+	//- manque de ressource (couplÃ©e avec les files d'attente)
 
 	//Rapport :
 	//- auto-suppression
 	//- sauvegarde
-	//- consultation simplifiée
+	//- consultation simplifiÃ©e
 	//- scan des rapports d'alliance
 	//- vision claire des horaires
 
 	//Attaque :
 	//X- TS
-	  //X- vérification vague 1 et 2
-	  //X- liste de coordonnées
+	  //X- vÃ©rification vague 1 et 2
+	  //X- liste de coordonnÃ©es
 	  //- uniquement les vides ou non (exploration)
-	  //X- rappel des quantités de troupes (mode anti-post-it :P)
+	  //X- rappel des quantitÃ©s de troupes (mode anti-post-it :P)
 	//- mode rainbow (1 cible, x attaques de y miliciens)
 
-	//X Avoir des recherches de TS/CB/FS indexées par villes et mémorisées pour ne pas avoir à refaire les recherches à chaque fois qu'on passe d'une recherche sur une ville à une autre.
+	//X Avoir des recherches de TS/CB/FS indexÃ©es par villes et mÃ©morisÃ©es pour ne pas avoir Ã  refaire les recherches Ã  chaque fois qu'on passe d'une recherche sur une ville Ã  une autre.
 
 	//Renforcement :
-	//- garder x miliciens dans la ville 1, le reste va à la ville 2
+	//- garder x miliciens dans la ville 1, le reste va Ã  la ville 2
 	//- prise en compte des attaques (CB, ...)
 	//- envoyer de la nourriture avec les renforts
 
 
 	//Coordination :
-	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des pourfendeurs connectés jusqu'à un point donné, pour un type d'unité à choisir)
+	//Si on pouvait intÃ©grer le planificateur ce serait top (au moins les donnÃ©es source : rÃ©cupÃ©rer tous les temps de marche des pourfendeurs connectÃ©s jusqu'Ã  un point donnÃ©, pour un type d'unitÃ© Ã  choisir)
 
 	//Laboratorie :
 	//-auto search
 	//-liste d'attente
 
 	//mode tournoi
-		//sauvegarde puissance récurrent
+		//sauvegarde puissance rÃ©current
 		//pas de sauvegarde durant un tournois
-		//donner la position avec la différence sur le plus proche avec changement de cadeau
+		//donner la position avec la diffÃ©rence sur le plus proche avec changement de cadeau
 */

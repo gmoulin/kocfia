@@ -3950,7 +3950,7 @@ jQuery(document).ready(function(){
 					code += '<label for="kocfia-map-type-hill">Colline</label>';
 					code += '<input type="checkbox" id="kocfia-map-type-mountain" value="40" />';
 					code += '<label for="kocfia-map-type-mountain">Montagne</label>';
-					code += '<input type="checkbox" id="kocfia-map-type-plain" value="50" />';
+					code += '<input type="checkbox" id="kocfia-map-type-kkkkkkkk" value="50" />';
 					code += '<label for="kocfia-map-type-plain">Prairie</label>';
 					code += '</div><div class="status">';
 					code += '<label for="kocfia-map-status">Libre</label>';
@@ -4436,7 +4436,6 @@ jQuery(document).ready(function(){
 						var $types = KOCFIA.map.$filter.find('.type').find('input').filter(':checked');
 						if( $types.length ){
 							$types.each(function(){
-								if( this.value == 10 ) types.push( '.type50' ); //two possible values for plains
 								types.push( '.type' + this.value );
 							});
 							if( types.length ) classes.push( types );

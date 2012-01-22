@@ -5,6 +5,7 @@
  * http://lexadecimal.com/
  */
 console.info('kocfia start');
+
 /* helpers */
 	/*
 	 * jQuery each2 - v0.2 - 8/02/2010
@@ -149,13 +150,13 @@ jQuery(document).ready(function(){
 		confPanelCss += "\n.ongoing td { vertical-align: top; }";
 		confPanelCss += "\n.ongoing .canceled, .ongoing .canceled span { text-decoration: line-though; }";
 		confPanelCss += "\n.ongoing .canceled .ui-icon-trash { visibility: hidden; }";
-		confPanelCss += "\n#kocfia-formation .ongoing thead th, #kocfia-formation .ongoing td { width: 25%; }";
-		confPanelCss += "\n#kocfia-formation .ongoing thead tr th:last-child, #kocfia-formation .ongoing tr td:last-child { width: 50%; }";
+		confPanelCss += "\n#kocfia-formation .ongoing thead th, #kocfia-formation .ongoing td { width: 30%; }";
+		confPanelCss += "\n#kocfia-formation .ongoing thead tr th:last-child, #kocfia-formation .ongoing tr td:last-child { width: 40%; }";
 		confPanelCss += "\n#kocfia-map-canvas { width: 350px; height: 350px; background: #000; }";
 		confPanelCss += "\n#kocfia-gloryTournament .scout-form input[type=checkbox] + label { margin-right: 10px; }";
 
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
-		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 10px; height: 20px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 0; height: 20px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_body { top: 20px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_body form { height: 25px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .mod_comm_forum { padding-left: 0; }";
@@ -163,7 +164,7 @@ jQuery(document).ready(function(){
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction { width: auto; padding: 3px 5px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .postaction #mod_comm_input { position: absolute; top: 5px; left: 5px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_global .chatlist { width: auto; margin-left: 0; border: none; }";
-		chatMoveableCss += "\n.kocmain .mod_comm .koc-merlin-small { float: right; padding: 4px; font-size: 10px; }";
+		chatMoveableCss += "\n.kocmain .mod_comm .kocfia-merlin-small { float: right; padding: 4px; font-size: 10px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab2, .kocmain .mod_comm .seltab2 a.tab1 { height: 20px; line-height: 20px; padding: 0 5px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1, .kocmain .mod_comm .seltab2 a.tab2 { background: #FCF8DD; height: 20px; line-height: 20px; padding-right: 5px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .seltab1 a.tab1 span, .kocmain .mod_comm .seltab2 a.tab2 span { background: none; height: 20px; line-height: 20px; padding-left: 5px; }";
@@ -266,7 +267,7 @@ jQuery(document).ready(function(){
 					return;
 				}
 
-			//get server id
+			//get user id
 				KOCFIA.kabamuid = KOCFIA.shared.getUserId();
 				console.info('kabamuid', KOCFIA.kabamuid);
 				if( KOCFIA.kabamuid == null ){
@@ -364,6 +365,7 @@ jQuery(document).ready(function(){
 						console.timeEnd('kocfia '+ KOCFIA.modules[i] +' on');
 					}, i * 1000 + 1000);
 				};
+
 				for( i = 0; i < modulesLength; i += 1 ){
 					if( KOCFIA.conf[KOCFIA.modules[i]].active ){
 						initModule(i);
@@ -417,7 +419,7 @@ jQuery(document).ready(function(){
 				}
 
 			//merlin box
-				$body.on('click', '.mod_comm_mmb, .koc-merlin-small', function(){
+				$body.on('click', '.mod_comm_mmb, .kocfia-merlin-small', function(){
 					merlinBoxClick = true;
 				});
 
@@ -475,7 +477,7 @@ jQuery(document).ready(function(){
 				},
 				'confPanel': {
 					'position': {'top': 100, 'left': 100},
-					'size': {'width': 350, 'height': 250},
+					'size': {'width': 550, 'height': 350},
 					'selected': 0,
 					'visible': 0,
 				}
@@ -1176,7 +1178,7 @@ jQuery(document).ready(function(){
 					return num.substr(0, length) + s;
 				},
 				'readableDuration': function( time ){
-					if( !isNaN( parseFloat(time) ) && isFinite(time) ){
+					if( isNaN( parseFloat(time) ) || !isFinite(time) ){
 						return '-';
 					}
 					time = Math.floor( parseFloat(time) );
@@ -1190,14 +1192,14 @@ jQuery(document).ready(function(){
 						[1, 's']
 					];
 
-					var values = [], i, length = time_units.length;
+					var values = [], i, length = time_units.length, v;
 					for( i = 0; i < length; i++ ){
 						if( i === 0 ){
-							values[i] = parseInt(time / time_units[i][0], 10);
+							v = parseInt(time / time_units[i][0], 10);
 						} else {
-							values[i] = parseInt((time % time_units[i][0]) / time_units[i][0], 10);
+							v = parseInt((time % time_units[i-1][0]) / time_units[i][0], 10);
 						}
-						values[i] += time_units[i][1];
+						if( v > 0 ) values.push( v + time_units[i][1] );
 					}
 
 					return values.join(' ');

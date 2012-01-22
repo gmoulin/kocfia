@@ -12,36 +12,41 @@ jQuery.noConflict();
  * http://userscripts.org/scripts/source/68059.user.js -> used to run the whole script inside the page scope
  * else prototypes are not reachable (grease monkey sandbox limitation)
  */
-//var kocFrame = parent.document.getElementById('kocIframes1');
-var kocFrame = parent.document.frames[0];
+var kocFrame = parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
 kocFrame.style.width = '100%';
+
+var kocForm = parent.document.getElementById('kocIframesForm1');
+var kocReload = document.createElement('script');
+kocReload.innerHTML = "var reloadParams = {url: '"+ kocForm.action +"', signed: '"+ kocForm.querySelector('input').value +"'};";
 
 //force wrapping iframe to width 100%
 var style = document.createElement('style')
 style.innerHTML = 'body { margin:0; width:100% !important;}';
 kocFrame.parentNode.appendChild(style);
 
-var koccss = document.createElement('style');
-koccss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
+var kocCss = document.createElement('style');
+kocCss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 
 var domain = 'http://kocfia.kapok.dev/';
+
+//inject the css
+var jquiCss = document.createElement('link');
+jquiCss.rel = "stylesheet";
+jquiCss.href = domain + "jquery-ui-1.8.17.custom.css";
+jquiCss.type = "text/css";
 
 //inject the scripts
 var jqui = document.createElement('script');
 jqui.src = domain + "jquery-ui-1.8.17.custom.min.js";
 
-var koc = document.createElement('script'),
+var kocfia = document.createElement('script'),
 	d = new Date();
-koc.src = domain + "kocfia-0.0.1.js?ts=" + d.getTime();
+kocfia.src = domain + "kocfia-0.0.1.js?ts=" + d.getTime();
 
-//clean and arrange the window
-var jquicss = document.createElement('link');
-jquicss.rel = "stylesheet";
-jquicss.href = domain + "jquery-ui-1.8.17.custom.css";
-jquicss.type = "text/css";
 
-document.head.appendChild( jquicss );
-document.head.appendChild( koccss );
+document.head.appendChild( jquiCss );
+document.head.appendChild( kocCss );
 document.body.appendChild( jqui );
-document.body.appendChild( koc );
+document.body.appendChild( kocReload );
+document.body.appendChild( kocfia );

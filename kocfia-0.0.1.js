@@ -5,6 +5,14 @@
  * http://lexadecimal.com/
  */
 console.info('kocfia start');
+//console.log(reloadParams);
+
+/*
+ * https://www314.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=M&y=0&n=fb149&l=fr_FR&messagebox=&sp=MTMyNzI1MDYxN3ZCHE__I3GaJow-&standalone=1&pf=1&res=1&iframe=1&lang=fr&ts=1327252086.92&entrypt=kabamGameInfo&lp=index
+ * https://www280.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=&y=0&n=&l=fr_FR&messagebox=&sp=MTMyNzI0NjkxNVpEHE916vtk27A-&fbIframeOn=1&standalone=0&res=1&iframe=1&lang=fr&ts=1327252570.5915&s=280&appBar=&signed_request=vqZ8zHGizRd5MFAjJSDtgR9t-SK330EnSqFWL2WgtRA.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEzMjcyNTg4MDAsImlzc3VlZF9hdCI6MTMyNzI1MjU2Niwib2F1dGhfdG9rZW4iOiJBQUFBQUhseVpBcjlzQkFPUVpDUHcyaXpIYTQ2NmNHZnNsNDI4akhnWkFTTUtEU3RhdnB3dTZZaU9wTllxcnRTeUtGeHREMWVXUDEweDExQjRlMVJiZmpKM1pDSVpCd2d1bG1IcWVnYlpDNFpBYzlIV3NBMnhBQUMiLCJ1c2VyIjp7ImNvdW50cnkiOiJmciIsImxvY2FsZSI6ImZyX0ZSIiwiYWdlIjp7Im1pbiI6MjF9fSwidXNlcl9pZCI6IjEwMDAwMTUxNTcxNzg0OCJ9
+ *
+ * open in a iframe on kabam site, get the seed with a grease monkey script and postMessage it to the main window
+ */
 
 /* helpers */
 	/*
@@ -1490,6 +1498,38 @@ jQuery(document).ready(function(){
 							window.attack_recall( attack.marching[k], 2, attack.cityId );
 						}
 					}
+				},
+				'getRallyPointSlots': function( cityId ){
+					console.info('KOCFIA shared barracksCount function');
+
+					if( cityId.indexOf('city') == -1 ){
+						cityId = 'city' + cityId;
+					}
+
+					var slots = KOCFIA.shared.buildingHighestLevel(cityId, 12),
+						a, attack;
+					if( slots == 12 ) slots -= 1; //eleven armies at level 12
+					for( a in window.seed.queue_atkp[attack.cityId] ){
+						if( window.seed.queue_atkp[attack.cityId].hasOwnProperty(a) ){
+							attack = window.seed.queue_atkp[ attack.cityId ][a];
+
+							// cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN 9
+							// cm.BOT_STATUS.BOT_MARCH_STOPPED 3
+							//stopped barbarian camp
+							if( attack.type == 9 && attack.status == 3 ) continue;
+
+							// cm.MARCH_TYPES.MARCH_TYPE_ATTACK 4
+							// cm.MARCH_TYPES.MARCH_TYPE_SCOUT 3
+							// cm.MARCH_STATUS.MARCH_STATUS_UNKNOWN 5
+							// cm.MARCH_STATUS.MARCH_STATUS_INACTIVE 0
+							//attack or scout march
+							if( (attack.type == 4 || attack.type == 4) && (attack.status == 0 || attack.status == 5) ) continue;
+
+							slots -= 1;
+						}
+					}
+
+					return slots;
 				},
 			},
 	};
@@ -6679,12 +6719,8 @@ jQuery(document).ready(function(){
 				//third in attack sequence, will pipe the deferred resolution to checkCoords function
 				var checkRallyPoint = function(dfd){
 					console.info('KOCFIA checkAndLaunchAttack deferred checkRallyPoint function');
-					var slots = KOCFIA.shared.buildingHighestLevel(attack.cityId, 12),
-						a;
-					if( slots == 12 ) slots -= 1; //eleven armies at level 12
-					for( a in window.seed.queue_atkp[attack.cityId] ){
-						if( window.seed.queue_atkp[attack.cityId].hasOwnProperty(a) ) slots -= 1;
-					}
+
+					var slots = KOCFIA.shared.getRallyPointSlots( attack.cityId );
 
 					if( slots < attack.waves ){
 						attack.aborts.push('Pas assez de place dans le point de ralliement.');

@@ -4627,7 +4627,7 @@ jQuery(document).ready(function(){
 
 						onGoing += '<tbody data-city="'+ cityId +'"><tr class="toggle"><th colspan="3">';
 						onGoing += '<span class="ui-icon ui-icon-triangle-1-se"></span>';
-						onGoing	+= city.roman + ' ' + city.name + '</th></tr></tbody>';
+						onGoing += city.roman + ' ' + city.name +'</th></tr></tbody>';
 					}
 					onGoing += '</table></div>';
 
@@ -4718,7 +4718,7 @@ jQuery(document).ready(function(){
 								$output.html( KOCFIA.shared.readableDuration(time[0]) + ' - ' + KOCFIA.shared.readableDuration(time[1]) );
 							} else $output.html( KOCFIA.shared.readableDuration(time) );
 						})
-						//fortification quantity change affect duration
+						//fortification quantit' change affect duration
 						.on('keyup change', '.train-quantity', function(){
 							var $fieldset = $(this).closest('fieldset');
 
@@ -4790,12 +4790,62 @@ jQuery(document).ready(function(){
 						})
 						//training and fortification cancel
 						.on('click', '.ongoing .unit .ui-icon-trash', function(){
-							var $this = $(this);
-							KOCFIA.formation.cancelTraining( $this.attr('rel'), $this.parent(), 3 );
+							var $this = $(this),
+								cityId = $this.closest('tbody').data('city'),
+							if( $this.hasClass('recursive') ){
+								var cancelSequence = function(){
+									return $.Deferred(function(dfd){
+										KOCFIA.formation.cancelTraining(dfd, city, i, null, 3);
+									}).promise();
+								};
+
+								var city = 'city' + cityId,
+									i = window.seed.queue_unt[city].length;
+
+								$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation des formations en masse en cours.');
+
+								$.when( cancelSequence() )
+									.done(function(){
+										$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation des formations en masse finies.');
+									})
+									.fail(function(){
+										$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation des formations en masse échouée.');
+									})
+									.always(function(){
+										KOCFIA.formation.listCityFormations( city );
+									});
+							} else {
+								$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation d\'une formation en cours.');
+								KOCFIA.formation.cancelTraining( null, null, null, $this.attr('rel'), 3 );
+							}
 						})
 						.on('click', '.ongoing .fort .ui-icon-trash', function(){
-							var $this = $(this);
-							KOCFIA.formation.cancelFortification( $this.attr('rel'), $this.parent(), 3 );
+							var $this = $(this),
+								cityId = $this.closest('tbody').data('city'),
+							if( $this.hasClass('recursive') ){
+								var cancelSequence = function(){
+									return $.Deferred(function(dfd){
+										KOCFIA.formation.cancelFortification(dfd, city, i, null, 3);
+									}).promise();
+								};
+
+								var city = 'city' + cityId,
+									i = window.seed.queue_frt[city].length;
+
+								$.when( cancelSequence() )
+									.done(function(){
+										$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation des fortifications en masse finie.');
+									})
+									.fail(function(){
+										$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation des fortifications en masse échouée.');
+									})
+									.always(function(){
+										KOCFIA.formation.listCityFormations( city );
+									});
+							} else {
+								$('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation d\'une fortification en cours.');
+								KOCFIA.formation.cancelFortification( null, null, null, $this.attr('rel'), 3 );
+							}
 						})
 						//toggle
 						.on('click', '.toggle', function(){
@@ -5220,16 +5270,19 @@ jQuery(document).ready(function(){
 				},
 				'listCityFormations': function( cityId ){
 					console.info('KOCFIA formation listCityFormations function', cityId);
-					var $tbody = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ cityId +']');
-					$tbody.find('tr').filter(':gt(0)').remove();
+					var $tbody = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ cityId +']'),
+						$tr = $tbody.find('tr').filter(':gt(0)'),
+						updateOnly = false;
+					if( $tr.length ) updateOnly = true;
 
-					var city = 'city' + cityId,
+					var city = cityId.indexOf('city') > -1 ? cityId : 'city' + cityId,
 						code = '', formations = '', fortifications = '',
 						i, formation, unit,
 						queue = window.seed.queue_unt[city];
 					//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
 
 					//troops
+					formations += 'Supprimer à partir de la seconde <span class="ui-icon ui-icon-trash recursive"></span>'
 					formations += '<ol class="formations">';
 					for( i = 0; i < queue.length; i += 1 ){
 						formation = queue[i];
@@ -5248,6 +5301,7 @@ jQuery(document).ready(function(){
 					formations += '</ol>';
 
 					//defenses
+					fortifications += 'Supprimer à partir de la seconde <span class="ui-icon ui-icon-trash recursive"></span>'
 					fortifications += '<ol class="defenses">';
 					queue = window.seed.queue_fort[city];
 					for( i = 0; i < queue.length; i += 1 ){
@@ -5266,7 +5320,11 @@ jQuery(document).ready(function(){
 					}
 					fortifications += '</ol>';
 
-					$tbody.append( '<tr><td class="unit">' + formations + '</td><td class="fort">' + fortifications + '</td><td class="info"></td></tr>' );
+					if( updateOnly ){
+						$tr.find('.unit').html( formations );
+						$tr.find('.fort').html( fortifications );
+
+					} else $tbody.append( '<tr><td class="unit">' + formations + '</td><td class="fort">' + fortifications + '</td><td class="info"><div id="kocfia-formation-city-'+ cityId +'-info"></div></td></tr>' );
 				},
 				'getTrainableUnits': function( cityId ){
 					console.info('KOCFIA formation getTrainableUnits function', cityId);
@@ -5563,12 +5621,18 @@ jQuery(document).ready(function(){
 
 					return result;
 				},
-				'cancelTraining': function( info, $li, attempts ){
+				'cancelTraining': function( dfd, city, i, info, attempts ){
 					console.info('KOCFIA formation cancelTraining function');
 					var i, j, totalReturn,
 						params = $.extend({}, window.g_ajaxparams);
 
-					info = info.split(',');
+					if( dfd ){
+						if( i == 0 || i > window.seed.queue_unt.length ) return dfd.resolve();
+
+						info = window.seed.queue_unt[city][i];
+					} else {
+						info = info.split(',');
+					}
 
 					params.requestType = "CANCEL_TRAINING";
 					params.cityId      = info[1];
@@ -5605,36 +5669,46 @@ jQuery(document).ready(function(){
 										window.seed.resources[cityId]["rec" + i][0] = parseInt(window.seed.resources[cityId]["rec" + i][0], 10) + totalReturn;
 									}
 
-									KOCFIA.formation.listCityFormations( info[1] );
+									if( dfd != null ) KOCFIA.formation.listCityFormations( info[1] );
 								});
 
-								$li.remove();
-
-								setTimeout(function(){ KOCFIA.formation.listCityFormations( info[1] ); }, 500);
+								if( dfd != null ){
+									return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, city, i-1, null, 3) );
+								}
 							} else {
 								attempts -= 1;
 								if( attempts > 0 ){
-									KOCFIA.formation.cancelFortification( info, $li, attempts );
+									if( dfd ) return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, city, i+1, null, attempts) );
+									else KOCFIA.formation.cancelTraining( null, null, null, info, attempts );
 								} else {
-									$li.closest('tr').find('.info').append( '<br>Annulation échouée.');
+									if( dfd ) return dfd.reject();
+									else $('#kocfia-formation-city'+ cityId +'-info').append( '<br>Annulation de formation échouée (erreur serveur).');
 								}
 							}
 						}).fail(function(){
 							//network or server error
 							attempts -= 1;
 							if( attempts > 0 ){
-								KOCFIA.formation.cancelFortification( info, $li, attempts );
+								if( dfd ) return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, city, i-1, null, attempts) );
+								else KOCFIA.formation.cancelTraining( null, null, null, info, attempts );
 							} else {
-								$li.closest('tr').find('.info').append( '<br>Annulation échouée.');
+								if( dfd ) return dfd.reject();
+								else $('#kocfia-formation-city'+ city +'-info').append( '<br>Annulation de formation échouée (erreur internet).');
 							}
 						});
 				},
-				'cancelFortification': function( info, $li, attempts ){
+				'cancelFortification': function( dfd, city, i, info, attempts ){
 					console.info('KOCFIA formation cancelFortification function');
 					var i, j, totalReturn,
 						params = $.extend({}, window.g_ajaxparams);
 
-					info = info.split(',');
+					if( dfd ){
+						if( i == 0 || i > window.seed.queue_frt.length ) return dfd.resolve();
+
+						info = window.seed.queue_frt[city][i];
+					} else {
+						info = info.split(',');
+					}
 
 					params.requestType = "CANCEL_FORTIFICATIONS";
 					params.cityId      = info[1];
@@ -5671,26 +5745,31 @@ jQuery(document).ready(function(){
 										totalReturn = parseInt(window.fortcost["frt" + info[1]][i], 10) * parseInt(info[2], 10) * 3600 / 2;
 										window.seed.resources[cityId]["rec" + i][0] = parseInt(window.seed.resources[cityId]["rec" + i][0], 10) + totalReturn;
 									}
+									if( dfd != null ) KOCFIA.formation.listCityFormations( info[1] );
 								});
 
-								$li.remove();
-
-								setTimeout(function(){ KOCFIA.formation.listCityFormations( info[1] ); }, 500);
+								if( dfd != null ){
+									return dfd.pipe( KOCFIA.formation.cancelFortification(dfd, city, i-1, null, 3) );
+								}
 							} else {
 								attempts -= 1;
 								if( attempts > 0 ){
-									KOCFIA.formation.cancelFortification( info, $li, attempts );
+									if( dfd ) return dfd.pipe( KOCFIA.formation.cancelFortification(dfd, city, i-1, null, attempts) );
+									else KOCFIA.formation.cancelFortification( null, null, null, info, attempts );
 								} else {
-									$li.closest('tr').find('.info').append( '<br>Annulation échouée.');
+									if( dfd ) return dfd.reject();
+									else $('#kocfia-formation-city'+ city +'-info').append( '<br>Annulation de fortification échouée (erreur serveur).');
 								}
 							}
 						}).fail(function(){
 							//network or server error
 							attempts -= 1;
 							if( attempts > 0 ){
-								KOCFIA.formation.cancelFortification( info, $li, attempts );
+								if( dfd ) return dfd.pipe( KOCFIA.formation.cancelFortification(dfd, city, i-1, null, attempts) );
+								else KOCFIA.formation.cancelFortification( null, null, null, info, attempts );
 							} else {
-								$li.closest('tr').find('.info').append( '<br>Annulation échouée.');
+								if( dfd ) return dfd.reject();
+								else $('#kocfia-formation-city'+ city +'-info').append( '<br>Annulation de fortification échouée (erreur internet).');
 							}
 						});
 				},

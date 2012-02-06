@@ -5,8 +5,6 @@
 // @description		facebook page improvement for KOC (outside the KOC iframe)
 // @include			*apps.facebook.com/kingdomsofcamelot*
 // ==/UserScript==
-console.info('koc-fb start');
-
 var fbCss = "body.canvas div#globalContainer { padding: 0; }"
 	+ "\nbody.canvas #rightCol { display: none; }"
 	+ "\nbody.canvas.center_fixed_width_app #pagelet_canvas_content { width: auto; margin: 0; }"

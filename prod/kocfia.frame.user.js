@@ -28,7 +28,7 @@ kocFrame.parentNode.appendChild(style);
 var kocCss = document.createElement('style');
 kocCss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 
-var domain = 'http://kocfia.kapok.dev/';
+var domain = 'http://kocfia.kapok.fr/';
 
 //inject the css
 var jquiCss = document.createElement('link');

@@ -6,6 +6,20 @@
 //console.info('kocfia start');
 //console.log(reloadParams);
 
+var oldOnError = window.onerror;
+window.onerror = function(msg, url, line){
+	if( url.indexOf('kocfia') > -1 ){
+		$.ajax({
+			url: 'http://kocfia.kapok.fr/errorHandler.php',
+			data: {msg: msg, url: url, line: line, version: KOCFIA.version || 'unknown'},
+			type: 'post',
+			dataType: 'json',
+		});
+	}
+	if( oldOnError ) return gOldOnError(msg, url, line);
+	return false;
+}
+
 /*
  * https://www314.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=M&y=0&n=fb149&l=fr_FR&messagebox=&sp=MTMyNzI1MDYxN3ZCHE__I3GaJow-&standalone=1&pf=1&res=1&iframe=1&lang=fr&ts=1327252086.92&entrypt=kabamGameInfo&lp=index
  * https://www280.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=&y=0&n=&l=fr_FR&messagebox=&sp=MTMyNzI0NjkxNVpEHE916vtk27A-&fbIframeOn=1&standalone=0&res=1&iframe=1&lang=fr&ts=1327252570.5915&s=280&appBar=&signed_request=vqZ8zHGizRd5MFAjJSDtgR9t-SK330EnSqFWL2WgtRA.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEzMjcyNTg4MDAsImlzc3VlZF9hdCI6MTMyNzI1MjU2Niwib2F1dGhfdG9rZW4iOiJBQUFBQUhseVpBcjlzQkFPUVpDUHcyaXpIYTQ2NmNHZnNsNDI4akhnWkFTTUtEU3RhdnB3dTZZaU9wTllxcnRTeUtGeHREMWVXUDEweDExQjRlMVJiZmpKM1pDSVpCd2d1bG1IcWVnYlpDNFpBYzlIV3NBMnhBQUMiLCJ1c2VyIjp7ImNvdW50cnkiOiJmciIsImxvY2FsZSI6ImZyX0ZSIiwiYWdlIjp7Im1pbiI6MjF9fSwidXNlcl9pZCI6IjEwMDAwMTUxNTcxNzg0OCJ9
@@ -58,7 +72,7 @@
 		return a;
 	};
 
-	function uniqueObject( arr ){
+	var uniqueObject = function( arr ){
 		var hash = {}, result = [], i , length = arr.length;
 		for( i = 0; i < length; i += 1 ){
 			var key = JSON.stringify(arr[i]);
@@ -70,7 +84,7 @@
 		return result;
 	}
 
-	function product(){
+	var product = function(){
 		return Array.prototype.reduce.call(arguments, function(as, bs){
 			return [a.concat(b) for each (a in as) for each (b in bs)]
 		}, [[]]);
@@ -84,7 +98,6 @@
 		return Math.min.apply( Math, array );
 	};
 
-var KOCFIA = {};
 
 jQuery(document).ready(function(){
 //CSS rules declarations
@@ -282,7 +295,7 @@ jQuery(document).ready(function(){
 		delete Boolean.prototype.toJSON;
 	}
 
-(function($){
+(function(window, document, $, undefined){
 	//pointers
 		var $head = $('head'),
 			$body = $('body'),
@@ -295,7 +308,7 @@ jQuery(document).ready(function(){
 		resetRaidInterval, autoFormationInterval, autoFormationInfoCleanInterval,
 		merlinBoxClick = false;
 
-	KOCFIA = {
+	var KOCFIA = {
 		version: '0.9.4',
 		debug: false,
 		server: null,
@@ -8314,7 +8327,7 @@ jQuery(document).ready(function(){
 		}
 	}
 	load();
-})(jQuery);
+})(window, document, jQuery);
 
 });
 /*

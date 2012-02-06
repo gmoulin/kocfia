@@ -30,13 +30,13 @@ kocCss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !impor
 
 var domain = 'http://kocfia.kapok.dev/';
 
-//inject the css
+//css
 var jquiCss = document.createElement('link');
 jquiCss.rel = "stylesheet";
 jquiCss.href = domain + "jquery-ui-1.8.17.custom.css";
 jquiCss.type = "text/css";
 
-//inject the scripts
+//scripts
 var jqui = document.createElement('script');
 jqui.src = domain + "jquery-ui-1.8.17.custom.min.js";
 
@@ -44,7 +44,7 @@ var kocfia = document.createElement('script'),
 	d = new Date();
 kocfia.src = domain + "kocfia.js?ts=" + d.getTime();
 
-
+//injection
 document.head.appendChild( jquiCss );
 document.head.appendChild( kocCss );
 document.body.appendChild( jqui );

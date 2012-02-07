@@ -9,34 +9,33 @@
 /*
  * http://userscripts.org/scripts/source/68059.user.js -> used to run the whole script inside the page scope
  * else prototypes are not reachable (grease monkey sandbox limitation)
+ * i.e. no console, no localStorage, ...
  */
 
-jQuery.noConflict();
-
+//console.log('ok');
 var kocFrame = parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
-kocFrame.style.width = '100%';
+if( kocFrame ) kocFrame.style.width = '100%';
 
 var kocForm = parent.document.getElementById('kocIframesForm1');
-var kocReload = document.createElement('script');
-kocReload.innerHTML = "var reloadParams = {url: '"+ kocForm.action +"', signed: '"+ kocForm.querySelector('input').value +"'};";
+if( kocForm ){
+	var kocReload = document.createElement('script');
+	kocReload.innerHTML = "var reloadParams = {url: '"+ kocForm.action +"', signed: '"+ kocForm.querySelector('input').value +"'};";
+	document.body.appendChild( kocReload );
+}
 
 //force wrapping iframe to width 100%
-var style = document.createElement('style')
+var style = document.createElement('style');
 style.innerHTML = 'body { margin:0; width:100% !important;}';
-kocFrame.parentNode.appendChild(style);
+if( kocFrame ) kocFrame.parentNode.appendChild(style);
 
 var kocCss = document.createElement('style');
 kocCss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
-
-//injection
 document.head.appendChild( kocCss );
-document.body.appendChild( kocReload );
 
 //preload KOCFIA but do not execute it
-var domain = 'http://kocfia-dev.kapok.fr/',
+var domain = 'http://kocfia.kapok.dev/',
 	d = new Date(), i,
-	cached = 0,
 	preload = [
 		'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js',
 		domain + "jquery-ui-1.8.17.custom.min.js",
@@ -45,6 +44,7 @@ var domain = 'http://kocfia-dev.kapok.fr/',
 	];
 
 var loadInCache = function(url){
+	//console.log('loadInCache');
 	var obj = document.createElement('object');
 	obj.data = url;
 	obj.width  = 0;
@@ -58,21 +58,30 @@ var isEmptyObject = function(obj) {
 	return Object.keys(obj).length === 0;
 };
 
-var trys = 60, el, anchor = document.getElementsByTagName('script')[0];
-function load(){
+var trys = 60;
+var tag;
+var anchor = document.getElementsByTagName('script')[0];
+var load = function(){
+	//console.log('load');
 	if( window.seed && !isEmptyObject(window.seed.cities) && !isEmptyObject(window.seed.citystats) ){
 		for( i = 0; i < preload.length; i += 1 ){
 			if( preload[i].indexOf('.css') === -1 ){
-				el = document.createElement('script');
-				el.src = preload[i];
+				tag = document.createElement('script');
+				if( preload[i].indexOf('jquery.min.js') > -1 ){
+					tag.onload = function(){
+						tag = document.createElement('script');
+						tag.innerHTML = "jQuery.noConflict();";
+						anchor.parentNode.insertBefore(tag, anchor);
+					};
+				}
+				tag.src = preload[i];
 			} else {
-				el = document.createElement('link');
-				el.rel = "stylesheet";
-				el.href = preload[i];
-				el.type = "text/css";
+				tag = document.createElement('link');
+				tag.rel = "stylesheet";
+				tag.href = preload[i];
+				tag.type = "text/css";
 			}
-			el.onload = se.onreadystatechange = initWhenLoaded;
-			anchor.parentNode.insertBefore(el, anchor);
+			anchor.parentNode.insertBefore(tag, anchor);
 		}
 	} else {
 		trys -= 1;
@@ -83,8 +92,10 @@ function load(){
 
 //if the page is already loaded, call load immediatly, else preload and listen for window load event
 if( "undefined" != typeof(document.readyState) && "complete" === document.readyState ){
+	//console.log('immediate');
 	load();
 } else {
+	//console.log('delayed');
 	for( i = 0; i < preload.length; i += 1 ){
 		loadInCache( preload[i] );
 	}

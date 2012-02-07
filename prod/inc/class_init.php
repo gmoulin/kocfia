@@ -32,7 +32,6 @@ class init {
 			$this->_dbh->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 
 			$this->_dbh->exec( 'SET CHARACTER SET utf8' );
-
 		} catch (PDOException $e) {
 			die( 'Connection failed or database cannot be selected : ' . $e->getMessage() );
 		}

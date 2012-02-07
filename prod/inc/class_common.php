@@ -164,7 +164,6 @@ class common {
 					}
 				}
 			}
-
 		} catch ( PDOException $e ){
 			erreur_pdo( $e, get_class( $this ), __FUNCTION__ );
 		}
@@ -205,65 +204,32 @@ class common {
 			$params = array();
 
 			//insert
-			if( empty($this->_data['id']) ){
-				$action = 'add';
+			//build the insert starting from self::$fields
+			$fields = array();
+			$values = array();
 
-				//build the insert starting from self::$fields
-				$fields = array();
-				$values = array();
+			foreach( self::$_fields[$this->_table] as $key ){
+				if( $key != 'id' ){
+					$fields[] = $key;
 
-				foreach( self::$_fields[$this->_table] as $key ){
-					if( $key != 'id' ){
-						$fields[] = $key;
-
-						if( isset($this->_data[$key]) && !is_null($this->_data[$key]) ){
-							$values[] = ':'.$key;
-							$params[':'.$key] = $this->_data[$key];
-						} else {
-							$values[] = 'NULL';
-						}
-					}
-				}
-
-				$fields = implode(', ', $fields);
-				$values = implode(', ', $values);
-				$sql = "INSERT INTO ".$this->_table." (".$fields.") VALUES (".$values.")";
-
-			//update
-			} else {
-				$action = 'update';
-
-				//build the update starting from self::$fields
-				$where = '';
-				$field_value = '';
-
-				foreach( self::$_fields[$this->_table] as $key ){
-					if( $key == 'id' ){
-						$where = ' '.$key.' = :id';
-						$params[':id'] = $this->_data[$key];
-
-					} elseif( isset($this->_data[$key]) and !is_null($this->_data[$key]) ){
-						$field_value .= ' '.$key.' = :'.$key.',';
+					if( isset($this->_data[$key]) && !is_null($this->_data[$key]) ){
+						$values[] = ':'.$key;
 						$params[':'.$key] = $this->_data[$key];
-
 					} else {
-						$field_value .= ' '.$key.' = NULL,';
+						$values[] = 'NULL';
 					}
 				}
-				$field_value = substr($field_value, 0, -1);
-				$sql = "UPDATE ".$this->_table." SET ".$field_value." WHERE ".$where;
 			}
+
+			$fields = implode(', ', $fields);
+			$values = implode(', ', $values);
+			$sql = "INSERT INTO ".$this->_table." (".$fields.") VALUES (".$values.")";
 
 			$q = $this->_db->prepare($sql);
 
 			$q->execute($params);
 
-			if( empty($this->_data['id']) ){
-				$this->_data['id'] = $this->_db->lastInsertId();
-			}
-
 			return true;
-
 		} catch ( PDOException $e ){
 			erreur_pdo( $e, get_class( $this ), __FUNCTION__ );
 		}

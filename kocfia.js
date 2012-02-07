@@ -6,20 +6,6 @@
 //console.info('kocfia start');
 //console.log(reloadParams);
 
-var oldOnError = window.onerror;
-window.onerror = function(msg, url, line){
-	if( url.indexOf('kocfia') > -1 ){
-		$.ajax({
-			url: 'http://kocfia.kapok.fr/errorHandler.php',
-			data: {msg: msg, url: url, line: line, version: KOCFIA.version || 'unknown'},
-			type: 'post',
-			dataType: 'json',
-		});
-	}
-	if( oldOnError ) return gOldOnError(msg, url, line);
-	return false;
-}
-
 /*
  * https://www314.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=M&y=0&n=fb149&l=fr_FR&messagebox=&sp=MTMyNzI1MDYxN3ZCHE__I3GaJow-&standalone=1&pf=1&res=1&iframe=1&lang=fr&ts=1327252086.92&entrypt=kabamGameInfo&lp=index
  * https://www280.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=&y=0&n=&l=fr_FR&messagebox=&sp=MTMyNzI0NjkxNVpEHE916vtk27A-&fbIframeOn=1&standalone=0&res=1&iframe=1&lang=fr&ts=1327252570.5915&s=280&appBar=&signed_request=vqZ8zHGizRd5MFAjJSDtgR9t-SK330EnSqFWL2WgtRA.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEzMjcyNTg4MDAsImlzc3VlZF9hdCI6MTMyNzI1MjU2Niwib2F1dGhfdG9rZW4iOiJBQUFBQUhseVpBcjlzQkFPUVpDUHcyaXpIYTQ2NmNHZnNsNDI4akhnWkFTTUtEU3RhdnB3dTZZaU9wTllxcnRTeUtGeHREMWVXUDEweDExQjRlMVJiZmpKM1pDSVpCd2d1bG1IcWVnYlpDNFpBYzlIV3NBMnhBQUMiLCJ1c2VyIjp7ImNvdW50cnkiOiJmciIsImxvY2FsZSI6ImZyX0ZSIiwiYWdlIjp7Im1pbiI6MjF9fSwidXNlcl9pZCI6IjEwMDAwMTUxNTcxNzg0OCJ9
@@ -104,9 +90,8 @@ jQuery(document).ready(function(){
 	var confPanelCss  = "\n#kocfia-conf-panel .ui-icon-close { position: absolute; right: -3px; top: -3px; cursor: pointer; }";
 		confPanelCss += "\n#kocfia-conf-panel { display: none; position: absolute; z-index: 100001; }";
 		confPanelCss += "\n#kocfia-conf-panel label + select { margin-left: 5px; }";
-		confPanelCss += "\n#kocfia-conf-panel .ui-icon-close { float: right; cursor: pointer; }";
 		confPanelCss += "\n#kocfia-conf-panel .ui-icon-trash { cursor: pointer; display: inline-block; position: relative; top: 2px; }";
-		confPanelCss += "\n#kocfia-conf-panel .trip .ui-icon-trash { top: 0; }";
+		confPanelCss += "\n#kocfia-conf-panel .trip .ui-icon-trash, #kocfia-conf-panel .actions .ui-icon-trash { top: 0; }";
 		confPanelCss += "\n#kocfia-conf-panel .trip { text-align: center; }";
 		confPanelCss += "\n#kocfia-conf-panel img { position: relative; top: 4px; margin: 0 2px; }";
 		confPanelCss += "\n#kocfia-conf-panel ul:not(.ui-accordion-content) { margin: 5px; }";
@@ -146,9 +131,10 @@ jQuery(document).ready(function(){
 		confPanelCss += "\n#kocfia-scout .attack-form table { width: 100%; }";
 		confPanelCss += "\n#kocfia-scout .attack-form tr td:first-child { text-align: right; white-space: nowrap; }";
 		confPanelCss += "\n#kocfia-scout .attack-form tr td { text-align: center; vertical-align: top; }";
+		confPanelCss += "\n#kocfia-scout .attack-form tr td[colspan] { text-align: left; }";
 		confPanelCss += "\n#kocfia-scout .attack-form tfoot tr td[colspan] { text-align: left; }";
-		confPanelCss += "\n#kocfia-scout .attack-form textarea { width: 100%; height: 30px; }";
-		confPanelCss += "\n#kocfia-scout .attack-form tr td input[type=text] { width: 95%; max-width: 70px; }";
+		confPanelCss += "\n#kocfia-scout .attack-form textarea { width: 80%; height: 100px; }";
+		confPanelCss += "\n#kocfia-scout .attack-form tr td input[type=text] { width: 95%; max-width: 40px; }";
 		confPanelCss += "\n.attack-list.ui-accordion-content { padding: 2px; }";
 		confPanelCss += "\n.attack-list table, .formation-list table { width: 100%; }";
 		confPanelCss += "\n.attack-list .toggle, .formation-list .toggle { cursor: pointer; }";
@@ -164,6 +150,8 @@ jQuery(document).ready(function(){
 		confPanelCss += "\n.attack-list .actions, .attack-list .current { text-align: center; }";
 		confPanelCss += "\n.attack-list .coords, .attack-list .info { white-space: normal; max-width: 200px; }";
 		confPanelCss += "\n.attack-list td .ui-icon { float: left; margin: 0 2px; cursor: pointer; }";
+		confPanelCss += "\n.attack-list td div .ui-icon { float: none; display: inline-block; }";
+		confPanelCss += "\n.attack-list td div { text-align: center; }";
 		confPanelCss += "\n.attack-list td span:not(.ui-icon) { display: inline-block; padding-right: 5px; }";
 		confPanelCss += "\n.attack-list .attack-errors { display: block; }";
 		confPanelCss += "\n.kocfia-timer-div { position: absolute; color: red; font-weight: bold; left: 612px; display: none; font-family: Verdana, Helvetica, sans-serif; }";
@@ -297,19 +285,14 @@ jQuery(document).ready(function(){
 
 (function(window, document, $, undefined){
 	//pointers
-		var $head = $('head'),
-			$body = $('body'),
-			$chatInput = $('#mod_comm_input'),
-			$chatGeneral = $('#mod_comm_list1'),
-			$chatAlliance = $('#mod_comm_list2'),
-			$chat = $('#kocmain_bottom').find('.mod_comm');
-
-	var reloadTimeout, reloadInterval, reloadTimer, refreshTimeout,
+	var $head = $('head'),
+		$body = $('body'),
+		reloadTimeout, reloadInterval, reloadTimer, refreshTimeout,
 		resetRaidInterval, autoFormationInterval, autoFormationInfoCleanInterval,
 		merlinBoxClick = false;
 
 	var KOCFIA = {
-		version: '0.9.4',
+		version: '0.9.5',
 		debug: false,
 		server: null,
 		modules: ['chat', 'fbWallPopup', 'overview', 'wilderness', 'darkForest', 'scout', 'notepad', 'map', 'formation'],
@@ -358,15 +341,10 @@ jQuery(document).ready(function(){
 				if( KOCFIA.debug ) console.timeEnd('default conf gathering');
 
 			//get stored conf if present
-				try {
-					var storedConf = localStorage.getObject('kocfia_conf_' + KOCFIA.storeUniqueId);
-					if( storedConf ){
-						KOCFIA.conf = $.extend(true, {}, KOCFIA.conf, storedConf);
-						if( KOCFIA.debug ) console.info('used stored conf');
-					}
-				} catch( e ){
-					console.error(e);
-					alert(e);
+				var storedConf = localStorage.getObject('kocfia_conf_' + KOCFIA.storeUniqueId);
+				if( storedConf ){
+					KOCFIA.conf = $.extend(true, {}, KOCFIA.conf, storedConf);
+					if( KOCFIA.debug ) console.info('used stored conf');
 				}
 				if( KOCFIA.debug ) console.log(KOCFIA.conf);
 
@@ -399,13 +377,9 @@ jQuery(document).ready(function(){
 						for( j = 0; j < length; j += 1 ){
 							KOCFIA.stored.push( mod + '_' + KOCFIA[ mod ].stored[j] );
 
-							try{
-								stored = localStorage.getObject('kocfia_' + mod + '_' + KOCFIA[ mod ].stored[j] + '_' + KOCFIA.storeUniqueId);
-								if( stored ){
-									KOCFIA[ mod ][ KOCFIA[ mod ].stored[j] ] = stored;
-								}
-							} catch(e){
-								alert(e);
+							stored = localStorage.getObject('kocfia_' + mod + '_' + KOCFIA[ mod ].stored[j] + '_' + KOCFIA.storeUniqueId);
+							if( stored ){
+								KOCFIA[ mod ][ KOCFIA[ mod ].stored[j] ] = stored;
 							}
 						}
 					}
@@ -702,21 +676,16 @@ jQuery(document).ready(function(){
 						case 'getChat.php':
 							this.addEventListener("load", function(){
 								if( KOCFIA.conf.chat.active && ( KOCFIA.conf.chat.cleanHelp || KOCFIA.conf.chat.highlightLeaders || KOCFIA.conf.chat.highlightFriends || KOCFIA.conf.chat.highlightFoes ) ){
-									try {
-										var r = JSON.parse(this.responseText);
-										if( r.data && r.data.newChats ){
-											if( r.data.newChats['2'] && r.data.newChats['2'].length > 0 ){
-												if( KOCFIA.conf.chat.cleanHelp ) KOCFIA.chat.cleanHelp( r.data.newChats[2] );
-												if( KOCFIA.conf.chat.highlightLeaders ) KOCFIA.chat.highlightLeaders( $chatAlliance, r.data.newChats['2'].length );
-											}
-											if( r.data.newChats['1'] && r.data.newChats['1'].length > 0 ){
-												if( KOCFIA.conf.chat.highlightLeaders ) KOCFIA.chat.highlightLeaders( $chatGeneral, r.data.newChats['1'].length );
-												if( KOCFIA.conf.chat.highlightFriends || KOCFIA.conf.chat.highlightFoes ) KOCFIA.chat.highlightFriendsAndFoes( r.data.newChats['1'].length );
-											}
+									var r = JSON.parse(this.responseText);
+									if( r.data && r.data.newChats ){
+										if( r.data.newChats['2'] && r.data.newChats['2'].length > 0 ){
+											if( KOCFIA.conf.chat.cleanHelp ) KOCFIA.chat.cleanHelp( r.data.newChats[2] );
+											if( KOCFIA.conf.chat.highlightLeaders ) KOCFIA.chat.highlightLeaders( KOCFIA.chat.$chatAlliance, r.data.newChats['2'].length );
 										}
-									} catch(e){
-										console.error(e);
-										alert(e);
+										if( r.data.newChats['1'] && r.data.newChats['1'].length > 0 ){
+											if( KOCFIA.conf.chat.highlightLeaders ) KOCFIA.chat.highlightLeaders( KOCFIA.chat.$chatGeneral, r.data.newChats['1'].length );
+											if( KOCFIA.conf.chat.highlightFriends || KOCFIA.conf.chat.highlightFoes ) KOCFIA.chat.highlightFriendsAndFoes( r.data.newChats['1'].length );
+										}
 									}
 								}
 							}, false);
@@ -734,8 +703,8 @@ jQuery(document).ready(function(){
 											}
 										}
 									}
-									KOCFIA.chat.highlightLeaders( $chatAlliance, 0 );
-									KOCFIA.chat.highlightLeaders( $chatGeneral, 0 );
+									KOCFIA.chat.highlightLeaders( KOCFIA.chat.$chatAlliance, 0 );
+									KOCFIA.chat.highlightLeaders( KOCFIA.chat.$chatGeneral, 0 );
 									if( KOCFIA.debug ) console.timeEnd('allianceGetLeaders load');
 								}
 							}, false);
@@ -814,26 +783,14 @@ jQuery(document).ready(function(){
 						case 'levyGold.php':
 						case 'spreadWealth.php':
 							this.addEventListener("load", function(){
-								try{
-									var r = JSON.parse(this.responseText);
-									if( r.updateSeed ) window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
-								} catch(e){
-									window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
-									console.error(e);
-									alert(e);
-								}
+								var r = JSON.parse(this.responseText);
+								if( r.updateSeed ) window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 							}, false);
 							break;
 						case 'march.php':
 							this.addEventListener("load", function(){
-								try{
-									var r = JSON.parse(this.responseText);
-									if( r.ok ) window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
-								} catch(e){
-									window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
-									console.error(e);
-									alert(e);
-								}
+								var r = JSON.parse(this.responseText);
+								if( r.ok ) window.setTimeout(function(){ KOCFIA.overview.updateFromSeed(); }, 500);
 							}, false);
 							break;
 						case 'cancelMarch.php':
@@ -1825,43 +1782,48 @@ jQuery(document).ready(function(){
 				on: function(){
 					if( KOCFIA.debug ) console.info('KOCFIA chat on function');
 
+					KOCFIA.chat.$chatInput = $('#mod_comm_input'),
+					KOCFIA.chat.$chatGeneral = $('#mod_comm_list1'),
+					KOCFIA.chat.$chatAlliance = $('#mod_comm_list2'),
+					KOCFIA.chat.$chat = $('#kocmain_bottom').find('.mod_comm');
+
 					//get leader boards
 					KOCFIA.chat.getLeadersList();
 
 					//dupplicate input
-						$chatInput.clone().attr('id', 'mod_comm_input_clone')
-							.appendTo( $chat.find('.postaction') );
-						$chatInputClone = $('#mod_comm_input_clone');
+						KOCFIA.chat.$chatInput.clone().attr('id', 'mod_comm_input_clone')
+							.appendTo( KOCFIA.chat.$chat.find('.postaction') );
+						KOCFIA.chat.$chatInputClone = $('#mod_comm_input_clone');
 
-						$chat.find('.postaction').find('.button20')
+						KOCFIA.chat.$chat.find('.postaction').find('.button20')
 							.removeAttr('onclick')
 							.click(function(e){
 								e.preventDefault();
 								e.stopPropagation();
-								$chatInput.val( $chatInputClone.val() );
+								KOCFIA.chat.$chatInput.val( KOCFIA.chat.$chatInputClone.val() );
 								window.Chat.sendChat();
-								$chatInputClone.val('');
+								KOCFIA.chat.$chatInputClone.val('');
 							});
 
-						$chat.prepend('<div class="kocfia-chat-top-wrapper">').append('<div class="kocfia-chat-bottom">');
-						$chat.find('.kocfia-merlin-small, .mod_comm_mmb, .comm_tabs').appendTo( $chat.find('.kocfia-chat-top-wrapper') );
+						KOCFIA.chat.$chat.prepend('<div class="kocfia-chat-top-wrapper">').append('<div class="kocfia-chat-bottom">');
+						KOCFIA.chat.$chat.find('.kocfia-merlin-small, .mod_comm_mmb, .comm_tabs').appendTo( KOCFIA.chat.$chat.find('.kocfia-chat-top-wrapper') );
 
-						$chat.find('.comm_body').append('<div class="kocfia-chat-form-wrapper">');
-						$chat.find('.comm_body').find('.mod_comm_forum, form').appendTo( $chat.find('.kocfia-chat-form-wrapper') );
+						KOCFIA.chat.$chat.find('.comm_body').append('<div class="kocfia-chat-form-wrapper">');
+						KOCFIA.chat.$chat.find('.comm_body').find('.mod_comm_forum, form').appendTo( KOCFIA.chat.$chat.find('.kocfia-chat-form-wrapper') );
 
-						$chat.find('.comm_body').append('<div class="kocfia-chat-list-wrapper">');
-						$chat.find('.chatlist').appendTo( $chat.find('.kocfia-chat-list-wrapper') );
+						KOCFIA.chat.$chat.find('.comm_body').append('<div class="kocfia-chat-list-wrapper">');
+						KOCFIA.chat.$chat.find('.chatlist').appendTo( KOCFIA.chat.$chat.find('.kocfia-chat-list-wrapper') );
 
-						KOCFIA.chat.$formWrapper = $chat.find('.kocfia-chat-form-wrapper');
-						KOCFIA.chat.$listWrapper = $chat.find('.kocfia-chat-list-wrapper');
+						KOCFIA.chat.$formWrapper = KOCFIA.chat.$chat.find('.kocfia-chat-form-wrapper');
+						KOCFIA.chat.$listWrapper = KOCFIA.chat.$chat.find('.kocfia-chat-list-wrapper');
 
 						//redefine the whisper function to use the cloned input
 						window.Chat.whisper = function(to){
 							if( typeof to === "string" && to.length != 0 ){
-								var text = $chatInputClone.val().strip();
+								var text = KOCFIA.chat.$chatInputClone.val().strip();
 								if( text.charAt(0) == "@" ) text = "";
 
-								$chatInputClone.val("@" + to + " " + text).focus();
+								KOCFIA.chat.$chatInputClone.val("@" + to + " " + text).focus();
 							}
 						};
 
@@ -1870,7 +1832,7 @@ jQuery(document).ready(function(){
 							KOCFIA.chat.cleanHelpOn();
 						} else {
 							var hideChatRules = function(){
-								var tmp = $chatAlliance.find('.noalliance');
+								var tmp = KOCFIA.chat.$chatAlliance.find('.noalliance');
 								if( tmp.length ){
 									tmp.first().hide();
 								} else {
@@ -1931,7 +1893,7 @@ jQuery(document).ready(function(){
 						if( KOCFIA.debug ) console.info('KOCFIA chat moveableOn function');
 						$head.append( $('<style id="kocfia-chat-moveable">').html(chatMoveableCss) );
 
-						$chat
+						KOCFIA.chat.$chat
 							.draggable({
 								helper: 'original',
 								containment: 'body',
@@ -1950,7 +1912,7 @@ jQuery(document).ready(function(){
 									KOCFIA.chat.$listWrapper
 										.css('height', ui.size.height - 25 - KOCFIA.chat.$formWrapper.height());
 
-									$chatInput
+									KOCFIA.chat.$chatInput
 										.width(function(){ return ui.size.width - 65; })
 										.siblings('.button20').css('left', function(){ return ui.size.width - 55; });
 								},
@@ -1965,36 +1927,36 @@ jQuery(document).ready(function(){
 							});
 
 						if( KOCFIA.conf.chat.size.width ){
-							$chat.css('width', KOCFIA.conf.chat.size.width);
+							KOCFIA.chat.$chat.css('width', KOCFIA.conf.chat.size.width);
 
-							$chatInput.width(function(){ return KOCFIA.conf.chat.size.width - 65; })
+							KOCFIA.chat.$chatInput.width(function(){ return KOCFIA.conf.chat.size.width - 65; })
 								.siblings('.button20').css('left', function(){ return KOCFIA.conf.chat.size.width - 55; });
 						}
 
-						if( KOCFIA.conf.chat.size.height ) $chat.css('height', KOCFIA.conf.chat.size.height);
-						else $chat.css('height', $chat.parent().css('height')); //original height
+						if( KOCFIA.conf.chat.size.height ) KOCFIA.chat.$chat.css('height', KOCFIA.conf.chat.size.height);
+						else KOCFIA.chat.$chat.css('height', KOCFIA.chat.$chat.parent().css('height')); //original height
 
 						KOCFIA.chat.$listWrapper
-							.css('height', $chat.height() - 25 - KOCFIA.chat.$formWrapper.height());
+							.css('height', KOCFIA.chat.$chat.height() - 25 - KOCFIA.chat.$formWrapper.height());
 
-						var $jeu = $chat.find('.mod_comm_mmb');
+						var $jeu = KOCFIA.chat.$chat.find('.mod_comm_mmb');
 						$jeu.data('ori', $jeu.html())
 							.removeClass('mod_comm_mmb').addClass('kocfia-merlin-small').html('Boîtes Magiques');
 					},
 					moveableOff: function(){
 						if( KOCFIA.debug ) console.info('KOCFIA chat moveableOff function');
 						$('#kocfia-chat-moveable').remove();
-						$chat[0].style = '';
-						$chat
+						KOCFIA.chat.$chat[0].style = '';
+						KOCFIA.chat.$chat
 							.draggable('destroy')
 							.resizable('destroy')
 							.css({top: 0, left: 0});
-						$chatInput.css('width', '')
+						KOCFIA.chat.$chatInput.css('width', '')
 							.siblings('.button20').css('left', '');
 
 						KOCFIA.chat.$listWrapper.css('height', '');
 
-						var $jeu = $chat.find('.kocfia-merlin-small');
+						var $jeu = KOCFIA.chat.$chat.find('.kocfia-merlin-small');
 							$jeu.removeClass('kocfia-merlin-small').addClass('mod_comm_mmb').html( $jeu.data('ori') ).removeData('ori');
 					},
 					onRight: function(){
@@ -2003,7 +1965,7 @@ jQuery(document).ready(function(){
 							top: KOCFIA.conf.chat.onRightPosition.top,
 							left: KOCFIA.conf.chat.onRightPosition.left
 						};
-						$chat.css(KOCFIA.conf.chat.position);
+						KOCFIA.chat.$chat.css(KOCFIA.conf.chat.position);
 						KOCFIA.shared.storeConf();
 					},
 				/* cleanHelp */
@@ -2020,7 +1982,7 @@ jQuery(document).ready(function(){
 						//suppression du superflu (demande aide et son résultat)
 						if( KOCFIA.conf.chat.active && KOCFIA.conf.chat.cleanHelp ){
 							window.setTimeout(function(){
-								var $messages = $chatAlliance.find('.chatwrap');
+								var $messages = KOCFIA.chat.$chatAlliance.find('.chatwrap');
 								if( nbMsg > 0 ){
 									$messages.filter(':lt('+ nbMsg +')');
 								}
@@ -2042,8 +2004,8 @@ jQuery(document).ready(function(){
 						if( KOCFIA.debug ) console.info('kocfia chat highlightLeaders function');
 						if( $targetChat == null ){
 							KOCFIA.chat.highlightLeadersReset();
-							KOCFIA.chat.highlightLeaders( $chatAlliance, 0 );
-							KOCFIA.chat.highlightLeaders( $chatGeneral, 0 );
+							KOCFIA.chat.highlightLeaders( KOCFIA.chat.$chatAlliance, 0 );
+							KOCFIA.chat.highlightLeaders( KOCFIA.chat.$chatGeneral, 0 );
 						} else {
 							if( KOCFIA.debug ) console.info('KOCFIA chat highlightLeaders function', $targetChat, nbMsg);
 							var $messages = $targetChat.find('.chatwrap');
@@ -2118,7 +2080,7 @@ jQuery(document).ready(function(){
 				/* highlight friends and foes */
 					highlightFriendsAndFoes: function( nbMsg ){
 						if( KOCFIA.debug ) console.info('KOCFIA chat highlightFriendsAndFoes function', nbMsg);
-						var $messages = $chatGeneral.find('.chatwrap'),
+						var $messages = KOCFIA.chat.$chatGeneral.find('.chatwrap'),
 							highlightFriends = KOCFIA.conf.chat.highlightFriends && KOCFIA.chat.friendsList.length,
 							highlightFoes = KOCFIA.conf.chat.highlightFoes && KOCFIA.chat.foesList.length;
 
@@ -3104,11 +3066,7 @@ jQuery(document).ready(function(){
 				},
 				storeAttacks: function(){
 					if( KOCFIA.debug ) console.info('KOCFIA '+ this.module +' storeAttacks function');
-					try{
-						localStorage.setObject('kocfia_'+ this.module +'_attacks_' + KOCFIA.storeUniqueId, KOCFIA[ this.module ].attacks);
-					} catch(e){
-						alert(e);
-					}
+					localStorage.setObject('kocfia_'+ this.module +'_attacks_' + KOCFIA.storeUniqueId, KOCFIA[ this.module ].attacks);
 				},
 				deletePlan: function( attackId, cityKey, save ){
 					if( KOCFIA.debug ) console.info('KOCFIA '+ this.module +' deletePlan function', attackId, cityKey, save);
@@ -3167,11 +3125,12 @@ jQuery(document).ready(function(){
 					var code = '<tr data-city="'+ attack.cityKey +'" data-attack="'+ attack.id +'">';
 					code += '<td class="trip">'+ city.roman + ' ' + city.name;
 					code += '<br />Vers : '+ (this.module == 'wilderness' ? 'TS' : 'FS') + attack.targetLevel;
-					code += '<br /><span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
+					code += '<div>Garder '+ attack.rpSlot +' place(s) dans le point de ralliement</div>';
+					code += '<div><span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
 					code += '<span class="ui-icon ui-icon-pencil edit" title="Modifier"></span>';
 					code += '<span class="ui-icon ui-icon-copy duplicate" title="Dupliquer"></span>';
 					code += '<span class="ui-icon ui-icon-trash delete" title="Supprimer"></span>';
-					code += '</td>';
+					code += '</div></td>';
 					code += '<td class="coords"><small>' + KOCFIA.shared.mapLink( attack.coords ) +'</small></td>';
 					code += '<td class="waves">';
 
@@ -3238,7 +3197,8 @@ jQuery(document).ready(function(){
 						code += '<td class="trip">';
 						code += city.roman + ' ' + city.name;
 						code += '<br />Vers : '+ (this.module == 'wilderness' ? 'TS' : 'FS') + attack.targetLevel
-						code += '<span class="ui-icon ui-icon-cancel" title="Arrêter au retour des troupes"></span></td>';
+						code += '<span class="ui-icon ui-icon-cancel" title="Arrêter au retour des troupes"></span>';
+						code += '<div>Garder '+ attack.rpSlot +' place(s) dans le point de ralliement</div></td>';
 						if( this.module == 'wilderness' ){
 							code += '<td class="coords"><small>' + KOCFIA.shared.mapLink( attack.coords ) +'</small></td>';
 						}
@@ -4024,11 +3984,7 @@ jQuery(document).ready(function(){
 				},
 				storeCoords: function(){
 					if( KOCFIA.debug ) console.info('KOCFIA '+ this.module +' storeCoords function');
-					try{
-						localStorage.setObject('kocfia_'+ this.module +'_coords_' + KOCFIA.storeUniqueId, KOCFIA[ this.module ].coords);
-					} catch(e){
-						alert(e);
-					}
+					localStorage.setObject('kocfia_'+ this.module +'_coords_' + KOCFIA.storeUniqueId, KOCFIA[ this.module ].coords);
 				},
 			};
 
@@ -4126,8 +4082,7 @@ jQuery(document).ready(function(){
 
 						//keep
 						$keep.find('.unit-block').each2(function(i, $b){
-							var k = {},
-								u = $.trim( $b.find('.unit-choice').val() ),
+							var u = $.trim( $b.find('.unit-choice').val() ),
 								q = KOCFIA.shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
 
 							if( u.length == 0 && q != false && q > 0 ){
@@ -4345,7 +4300,7 @@ jQuery(document).ready(function(){
 							cityKey = KOCFIA.citiesKey[i];
 							city = KOCFIA.cities[cityKey];
 
-							checkBoxes += '<th><input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="checkbox" class="city-choice" autocomplete="off" /></th>';
+							checkBoxes += '<td><input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="checkbox" class="city-choice" autocomplete="off" /></td>';
 							form += '<th><label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.roman + ' ' + city.name +'</label></th>';
 
 							inputs += '<td><input class="unit-qty" name="'+ cityKey +'" type="text" autocomplete="off" /></td>';
@@ -4359,13 +4314,16 @@ jQuery(document).ready(function(){
 						form += inputs + '</tr>';
 						form += '<tr class="keeps"><td>Conserver :</td>'
 						form += inputs + '</tr>';
-						form += '</tbody>';
-						form += '<tfoot><tr><td>Coordonnées :</td>';
+						form += '<tr><td>Garder :</td>';
+						form += '<td colspan="99">';
+						form += '<input type="text" class="rallypointSlot"> place(s) dans le point de ralliement</td>';
+						form += '</td></tr>';
+						form += '<tr><td>Coordonnées :</td>';
 						form += '<td colspan="99">';
 						form += '<small>format: x,y x,y x,y ...</small><br />';
 						form += '<textarea name="coords" autocomplete="off"></textarea>';
-						form += '</td></tr></tfoot>';
-						form += '</table>';
+						form += '</td></tr>';
+						form += '</tbody></table>';
 
 						//buttons
 						form += '<button class="launch">Lancer</button>';
@@ -4379,8 +4337,7 @@ jQuery(document).ready(function(){
 						var onGoing = '<h3>Eclairage en cours</h3>';
 						onGoing += '<div class="attack-list ongoing">';
 						onGoing += '<table><thead><tr>';
-						onGoing += '<th class="action">Actions</th>';
-						onGoing += '<th class="">Détails</th>';
+						onGoing += '<th class="trip">Détails</th>';
 						onGoing += '<th class="coords">Coordonnées</th>';
 						onGoing += '<th class="current">Cible</th>';
 						onGoing += '<th class="info">Info</th>';
@@ -4391,8 +4348,7 @@ jQuery(document).ready(function(){
 						var savedPlans = '<h3>Eclairages enregistrées</h3>';
 						savedPlans += '<div class="attack-list saved">';
 						savedPlans += '<table><thead><tr>';
-						savedPlans += '<th class="action">Actions</th>';
-						savedPlans += '<th class="">Détails</th>';
+						savedPlans += '<th class="trip">Détails</th>';
 						savedPlans += '<th class="coords">Coordonnées</th>';
 						savedPlans += '</tr></thead>';
 						savedPlans += '<tbody></tbody></table></div>';
@@ -4414,6 +4370,7 @@ jQuery(document).ready(function(){
 
 							$inputs.filter('[type=checkbox]').prop('checked', false);
 							$inputs.filter('[type=text]').val('');
+							KOCFIA[ module ].$form.find('textarea').val('');
 						})
 						//launch
 						.on('click', '.launch', function(){
@@ -4478,8 +4435,7 @@ jQuery(document).ready(function(){
 						.on('click', '.delete', function(){
 							if( confirm('Etes-vous sûr ?') ){
 								var $this = $(this),
-									$tr = $(this).parent().parent(),
-									isEdit = $this.hasClass('edit'),
+									$tr = $(this).closest('tr'),
 									attackId = $tr.data('attack');
 
 								KOCFIA[ module ].deletePlan( attackId, true );
@@ -4488,24 +4444,30 @@ jQuery(document).ready(function(){
 						})
 						//attack plan edit and duplication
 						.on('click', '.edit, .duplicate', function(){
-							KOCFIA[ module ].resetForm();
+							//reset
+							var $inputs = KOCFIA[ module ].$form.find('input');
+
+							$inputs.filter('[type=checkbox]').prop('checked', false);
+							$inputs.filter('[type=text]').val('');
+							KOCFIA[ module ].$form.find('textarea').val('');
+
 							var $this = $(this),
-								$tr = $this.parent(),
+								$tr = $this.closest('tr'),
 								attackId = $tr.data('attack'),
-								attack = KOCFIA[ module ].attacks[ attackId ];
+								attack = KOCFIA[ module ].attacks[ attackId ],
+								cityKey;
 
 							if( attack ){
 								if( $this.hasClass('edit') ){
 									KOCFIA[ module ].$form.find('.edit-attackId').val( attack.id );
 								}
 
-								var $checkBoxes = KOCFIA[ module ].$form.find('.city').find('input');
+								var $checkBoxes = KOCFIA[ module ].$form.find('.cities').find('input');
 								$checkBoxes.each2(function(i, $cb){
-									if( attack.cities.hasOwnProperty( $cb.val() ) ) $cb.prop('checked', true);
+									if( $.inArray($cb.val(), attack.cities) > -1 ) $cb.prop('checked', true);
 								});
 
-								var $quantities = KOCFIA[ module ].$form.find('.qty').find('input'),
-									cityKey;
+								var $quantities = KOCFIA[ module ].$form.find('.quantities').find('input');
 								$quantities.each2(function(i, $input){
 									cityKey = $input.attr('name');
 									if( attack.units.hasOwnProperty( cityKey ) ){
@@ -4513,16 +4475,16 @@ jQuery(document).ready(function(){
 									}
 								});
 
-								var $keeps = KOCFIA[ module ].$form.find('.keep').find('input'),
-									cityKey;
+								var $keeps = KOCFIA[ module ].$form.find('.keeps').find('input');
 								$keeps.each2(function(i, $input){
 									cityKey = $input.attr('name');
 									if( attack.units.hasOwnProperty( cityKey ) ){
-										$input.val( KOCFIA.shared.format(attack.units[ cityKey ]) );
+										$input.val( KOCFIA.shared.format(attack.keeps[ cityKey ]) );
 									}
 								});
 
 								KOCFIA[ module ].$form.find('textarea').val(attack.coords.join("\n"));
+								KOCFIA[ module ].$form.find('.rallypointSlot').val(attack.rpSlot);
 
 								//open form accordion
 								KOCFIA[ module ].$accordion.accordion('activate', 0);
@@ -4533,7 +4495,7 @@ jQuery(document).ready(function(){
 						//stop on next round
 						.on('click', '.stop', function(){
 							if( confirm('Etes-vous sûr ?') ){
-								var $tr = $(this).parent().parent();
+								var $tr = $(this).closest('tr');
 								$tr.data('stop', 1);
 							}
 						})
@@ -4541,7 +4503,7 @@ jQuery(document).ready(function(){
 						.on('click', '.charge', function(){
 							if( KOCFIA.conf[ module ].active ){
 								if( !KOCFIA.conf[ module ].automatic ){
-									var $tr = $(this).hide().parent().parent();
+									var $tr = $(this).hide().closest('tr');
 									var attack = KOCFIA[ module ].attacks[ $tr.data('attack') ];
 									if( attack ){
 										attack.coordIndex = 0;
@@ -4564,7 +4526,7 @@ jQuery(document).ready(function(){
 						})
 						//remove ongoing attack info line
 						.on('click', '.trash', function(){
-							$(this).parent().remove();
+							$(this).closest('tr').remove();
 						});
 
 					KOCFIA[ this.module ].$accordion = $section.find('.accordion');
@@ -4584,29 +4546,26 @@ jQuery(document).ready(function(){
 					if( KOCFIA.debug ) console.info('KOCFIA '+ this.module +' attackInfo function', attack);
 
 					var code = '<tr data-attack="'+ attack.id +'">';
-					code += '<td class="actions">';
-					code += '<span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
-					code += '<span class="ui-icon ui-icon-pencil edit" title="Modifier"></span>';
-					code += '<span class="ui-icon ui-icon-copy duplicate" title="Dupliquer"></span>';
-					code += '<span class="ui-icon ui-icon-trash delete" title="Supprimer"></span>';
-					code += '</td>';
-					code += '<td class="">';
-					code += '<ul>';
-
-					var cityKey, city;
-					for( cityKey in attack.cities ){
+					code += '<td class="trip">';
+					var cityKey, city, i;
+					for( i = 0; i < attack.cities.length; i += 1 ){
+						cityKey= attack.cities[i];
 						city = KOCFIA.cities[ cityKey ];
 
-						code += '<li>';
+						code += '<div>';
 						code += city.roman + ' ' + city.name + ': ';
 						code += KOCFIA.shared.format( attack.units[ cityKey ] );
 						if( attack.keeps.hasOwnProperty(cityKey) ){
 							code += ' ('+ KOCFIA.shared.format( attack.keeps[ cityKey ] ) +')';
 						}
-						code += '</li>'
+						code += '</div>';
 					}
-					code += '</ul>';
-					code += '</td>';
+					code += '<div>Garder '+ attack.rpSlot +' place(s) dans le point de ralliement</div>';
+					code += '<div><span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
+					code += '<span class="ui-icon ui-icon-pencil edit" title="Modifier"></span>';
+					code += '<span class="ui-icon ui-icon-copy duplicate" title="Dupliquer"></span>';
+					code += '<span class="ui-icon ui-icon-trash delete" title="Supprimer"></span>';
+					code += '</div></td>';
 					code += '<td class="coords">' + KOCFIA.shared.mapLink( attack.coords ) +'</td>';
 					code += '</tr>';
 
@@ -4618,7 +4577,7 @@ jQuery(document).ready(function(){
 					$tbody.empty();
 
 					var code = '', a;
-					if( $.isEmptyObject(KOCFIA[ this.module ].attacks) ){
+					if( !$.isEmptyObject(KOCFIA[ this.module ].attacks) ){
 						for( a in KOCFIA[ this.module ].attacks ){
 							if( KOCFIA[ this.module ].attacks.hasOwnProperty(a) ){
 								code += KOCFIA[ this.module ].attackInfo( KOCFIA[ this.module ].attacks[a] );
@@ -4634,27 +4593,24 @@ jQuery(document).ready(function(){
 					var $tr = KOCFIA[ this.module ].$ongoing.find('tr').filter('[data-attack='+ attack.id +']');
 					if( $tr.length == 0 ){
 						var code = '<tr data-attack="'+ attack.id +'">';
-						code += '<td class="actions">';
-						code += '<span class="ui-icon ui-icon-cancel" title="Arrêter au retour des troupes"></span>';
-						code += '</td>';
-						code += '<td class="">';
-						code += '<ul>';
+						code += '<td class="trip">';
+						code += '<span class="ui-icon ui-icon-cancel stop" title="Arrêter au retour des troupes"></span>';
 
-						var cityKey, city;
-						for( cityKey in attack.cities ){
+						var cityKey, city, i;
+						for( i = 0; i < attack.cities.length; i += 1 ){
+							cityKey = attack.cities[i];
 							city = KOCFIA.cities[ cityKey ];
 
-							code += '<li>';
+							code += '<div>';
 							code += city.roman + ' ' + city.name + ': ';
 							code += KOCFIA.shared.format( attack.units[ cityKey ] );
 							if( attack.keeps.hasOwnProperty(cityKey) ){
 								code += ' ('+ KOCFIA.shared.format( attack.keeps[ cityKey ] ) +')';
 							}
-							code += '</li>'
+							code += '</div>'
 						}
-						code += '</ul>';
-						code += '</td>';
-						code += '<td class="coords">' + KOCFIA.shared.mapLink( attack.coords ) +'</td>';
+						code += '<div>Garder '+ attack.rpSlot +' place(s)</div>';
+						code += '</td><td class="coords">' + KOCFIA.shared.mapLink( attack.coords ) +'</td>';
 						code += '<td class="current"></td>';
 						code += '<td class="info"></td>';
 						code += '</tr>';
@@ -4671,7 +4627,7 @@ jQuery(document).ready(function(){
 						//show the manual launch button
 						KOCFIA[ this.module ].$saved.find('tr').filter('[data-attack='+ attack.id +']').find('.charge').show();
 					} else {
-						$tr.find('.current').html( KOCFIA.shared.mapLink( attack.coords[ attack.coordIndex ] ) + '(' + (attack.coordIndex + 1) + 'e / ' + attack.coords.length + ')' );
+						$tr.find('.current').html( KOCFIA.shared.mapLink( attack.coords[ attack.coordIndex ] ) + '<br>' + (attack.coordIndex + 1) + 'e / ' + attack.coords.length );
 					}
 
 					if( attack.aborts.length ){
@@ -4685,7 +4641,7 @@ jQuery(document).ready(function(){
 					if( KOCFIA.debug ) console.info('KOCFIA '+ this.module +' planAttack function');
 					var errors = [],
 						regexp = /[^0-9, ]/,
-						rule = {};
+						rule;
 
 					//check form
 						var $checkBoxes = KOCFIA[ this.module ].$form.find('.cities').find('input').filter(':checked'),
@@ -4716,7 +4672,7 @@ jQuery(document).ready(function(){
 
 						var $keeps = KOCFIA[ this.module ].$form.find('.keeps').find('input'),
 							keeps = {};
-						$quantities.each(function(i, input){
+						$keeps.each(function(i, input){
 							q = KOCFIA.shared.decodeFormat( $.trim( input.value ) );
 							cityKey = input.name;
 
@@ -4730,31 +4686,26 @@ jQuery(document).ready(function(){
 						});
 
 						//coord
-						var coord = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') );
+						var coords,
+							coord = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') );
 						if( coord.length == 0 ){
 							errors.push('Coordonnée requise.');
 						} else if( regexp.test( coord ) ){
 							errors.push('Pour la coordonnée, veuillez respecter le format x,y.');
-						} else {
-							var c = coord.split(',');
-							if( c[0] < 0 || c[0] > 750 || c[0] < 0 || c[0] > 750 ){
-								errors.push('Coordonnée erronée.');
-							} else {
-								rule.coord = coord;
-							}
 						}
+						coords = coord.split(' ');
 
 						//rally point free slot
 						var rps = parseInt( $.trim(KOCFIA[ this.module ].$form.find('.rallypointSlot').val()), 10 );
 						if( isNaN(rps) || rps < 0 ){
 							errors.push('Le nombre de places à conserver dans le point de ralliement doit être un chiffre positif.');
-						} else attack.rpSlot = rps;
+						}
 
 						if( errors.length ){
 							errors = errors.unique();
 						}
 
-						rule = {cities: cities, units: units, keeps: keeps, category: this.module, type: 'scout'};
+						rule = {cities: cities, units: units, keeps: keeps, category: this.module, type: 'scout', rpSlot: rps, coords: coords};
 
 					return {attack: rule, errors: errors};
 				},
@@ -5340,7 +5291,6 @@ jQuery(document).ready(function(){
 							if( KOCFIA.debug ) console.info('KOCFIA map explore deferred partialExplore function', start, end, length);
 
 							if( !KOCFIA.map.searching ){
-								console.log('here');
 								return dfd.reject();
 							}
 
@@ -6290,19 +6240,11 @@ jQuery(document).ready(function(){
 				},
 				storeRules: function(){
 					if( KOCFIA.debug ) console.info('KOCFIA formation storeRules function');
-					try{
-						localStorage.setObject('kocfia_formation_rules_' + KOCFIA.storeUniqueId, KOCFIA.formation.rules);
-					} catch(e){
-						alert(e);
-					}
+					localStorage.setObject('kocfia_formation_rules_' + KOCFIA.storeUniqueId, KOCFIA.formation.rules);
 				},
 				storeSavedRules: function(){
 					if( KOCFIA.debug ) console.info('KOCFIA formation storeSavedRules function');
-					try{
-						localStorage.setObject('kocfia_formation_savedRules_' + KOCFIA.storeUniqueId, KOCFIA.formation.savedRules);
-					} catch(e){
-						alert(e);
-					}
+					localStorage.setObject('kocfia_formation_savedRules_' + KOCFIA.storeUniqueId, KOCFIA.formation.savedRules);
 				},
 				getTrainingGamble: function( attempts ){
 					if( KOCFIA.debug ) console.info('KOCFIA formation getTrainingGamble function');
@@ -7619,7 +7561,7 @@ jQuery(document).ready(function(){
 			}
 
 			if( $tr.length && $tr.data('stop') ){
-				attack.aborts.push('Attaque stoppée sur demande.');
+				attack.aborts.push((mod == 'scout' ? 'Eclairage stoppé' : 'Attaque stoppée') +' sur demande.');
 				KOCFIA[ mod ].refreshOngoingInfo(attack, true);
 
 				if( mod != 'scout' ){
@@ -7642,7 +7584,7 @@ jQuery(document).ready(function(){
 			if( !attack.hasOwnProperty('aborts') ) attack.aborts = [];
 			if( !attack.hasOwnProperty('coordIndex') ) attack.coordIndex = 0;
 
-			var coordsLength, coords, coordIndex, waveIndex, time, increment = true;
+			var coordsLength, coords, coordIndex, waveIndex, time, increment = true, cityIndex = 0, city;
 
 			//attacks loop only if in automatic mode
 			if( mod == 'wilderness' ){
@@ -7652,7 +7594,7 @@ jQuery(document).ready(function(){
 					if( KOCFIA.conf[ mod ].automatic && KOCFIA[ mod ].attacks[ attack.cityKey ] && KOCFIA[ mod ].attacks[ attack.cityKey ][ attack.id ]){
 						attack.coordIndex = 0;
 					} else {
-						attack.aborts.push('Attaque finie');
+						attack.aborts.push(mod == 'scout' ? 'Eclairage fini' : 'Attaque finie');
 						KOCFIA[ mod ].refreshOngoingInfo(attack, true);
 						return;
 					}
@@ -7707,26 +7649,32 @@ jQuery(document).ready(function(){
 				//setting the attack.cityKey
 				var sequenceByCity = function(dfd){
 					return $.Deferred(function(sdfd){
-						var cityIndex = 0;
 						attack.cityKey = attack.cities[ cityIndex ];
+						city = KOCFIA.cities[ attack.cityKey ];
+						baseParams.cid = attack.cityKey.replace(/city/, '');
+						var status;
 
-						$.when( byCity(sdfd) )
+						$.when( previousMarchingCheck(sdfd) )
 							.done(function(){
+								attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Eclairage lancé sur '+ KOCFIA.shared.mapLink( attack.coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + attack.coords.length +')');
+
+								status = 1;
+							})
+							.fail(function(){
+								status = 0;
+							})
+							.always(function(){
+								KOCFIA[ mod ].refreshOngoingInfo(attack, false);
+
 								cityIndex += 1;
 								if( cityIndex < attack.cities.length ){
 									attack.cityKey = attack.cities[ cityIndex ];
-									return sdfd.pipe( previousMarchingCheck(sdfd) );
+									city = KOCFIA.cities[ attack.cityKey ];
+									baseParams.cid = attack.cityKey.replace(/city/, '');
+
+									return dfd.pipe( sequenceByCity(dfd) );
 								} else {
-									return dfd.resolve();
-								}
-							})
-							.fail(function(){
-								cityIndex += 1;
-								if( cityIndex < attack.cities.length ){
-									cityKey = attack.cities[ cityIndex ];
-									return sdfd.pipe( previousMarchingCheck(sdfd) );
-								} else {
-									return dfd.reject();
+									return status ? dfd.resolve() : dfd.reject();
 								}
 							});
 					}).promise();
@@ -7848,17 +7796,17 @@ jQuery(document).ready(function(){
 						keepFree = attack.hasOwnProperty('rpSlot') ? parseInt(attack.rpSlot, 10) : 0;
 					if( mod == 'wilderness' ){
 						if( slots - keepFree <= 0 || slots - keepFree < attack.waves.length ){
-							attack.aborts.push('Pas assez de place dans le point de ralliement.');
+							attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Pas assez de place dans le point de ralliement.');
 							return dfd.reject();
 						}
 					} else if( mod == 'darkForest' ){
 						if( slots - keepFree <= 0 ){
-							attack.aborts.push('Pas assez de place dans le point de ralliement.');
+							attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Pas assez de place dans le point de ralliement.');
 							return dfd.reject();
 						}
 					} else if( mod == 'scout' ){
 						if( slots - keepFree <= 0 ){
-							attack.aborts.push('Pas assez de place dans le point de ralliement.');
+							attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Pas assez de place dans le point de ralliement.');
 							return dfd.reject();
 						}
 					}
@@ -8015,6 +7963,7 @@ jQuery(document).ready(function(){
 							if( KOCFIA.debug ) console.info('KOCFIA checkAndLaunchAttack deferred checkKnight function');
 							var knights = KOCFIA.shared.getAvailableKnights( attack.cityKey ),
 								k;
+
 							if( mod == 'wilderness' ){
 								if( waveIndex == 0 && knights.length < attack.waves.length ){
 									attack.aborts.push('Pas assez de chevalier disponible pour lancer les '+ attack.waves.length +' vagues.');
@@ -8094,13 +8043,13 @@ jQuery(document).ready(function(){
 
 								available = parseFloat(units[ unit.id ]);
 								if( available < qty ){
-									attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
+									attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +').');
 									return wdfd.reject();
 								} else {
 									for( k = 0; k < kLength; k += 1 ){
 										keep = attack.keep[k];
 										if( unit.id == keep.id && available - qty < parseFloat(keep.qty) ){
-											attack.aborts.push('Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') (conservation).');
+											attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') (conservation).');
 											return wdfd.reject();
 										}
 									}
@@ -8125,14 +8074,9 @@ jQuery(document).ready(function(){
 										d = new Date();
 									ts = parseInt(d.getTime() / 1000, 10);
 									time = timediff; //for the wait before next attack
-									try{
-										window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ts + timediff, p.xcoord, p.ycoord, unitsArr, p.type, p.kid, resources, result.tileId, result.tileType, result.tileLevel, p.cid, true);
-									} catch(e){
-										console.error(e);
-										//to avoid using the same knight on wave 2 as the seed is not yet updated
-										if( p.kid != 0 ){
-											window.seed.knights[ 'city' + p.cid ][ 'knt' + p.kid ].knightStatus = 10;
-										}
+									window.attach_addoutgoingmarch(result.marchId, result.marchUnixTime, ts + timediff, p.xcoord, p.ycoord, unitsArr, p.type, p.kid, resources, result.tileId, result.tileType, result.tileLevel, p.cid, true);
+									if( p.kid != 0 ){
+										window.seed.knights[ 'city' + p.cid ][ 'knt' + p.kid ].knightStatus = 10;
 									}
 
 									if( result.updateSeed ) window.update_seed( result.updateSeed );
@@ -8148,13 +8092,13 @@ jQuery(document).ready(function(){
 
 								} else {
 									if( result.msg ){
-										attack.aborts.push('Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé ('+ result.msg +').');
+										attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé ('+ result.msg +').');
 										return wdfd.reject();
 									} else if( result.user_action == 'marchCaptcha' ){
-										attack.aborts.push('Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (captcha !).');
+										attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (captcha !).');
 										return wdfd.reject();
 									} else {
-										attack.aborts.push('Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (erreur serveur).');
+										attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (erreur serveur).');
 										launchAttempts -= 1;
 										if( launchAttempts > 0 ){
 											return wdfd.pipe( launchWave(wdfd, launchAttempts) );
@@ -8165,7 +8109,7 @@ jQuery(document).ready(function(){
 								}
 							}).fail(function(){
 								//network or server error
-								attack.aborts.push('Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (erreur internet).');
+								attack.aborts.push((mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Plan d\''+ label +' sur '+ KOCFIA.shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (erreur internet).');
 
 								launchAttempts -= 1;
 								if( launchAttempts > 0 ){
@@ -8197,11 +8141,11 @@ jQuery(document).ready(function(){
 						knight = null,
 						wave,
 						kLength;
-					if( mod == 'scout' ){
-						attack.waves = [ {id: 'unt3', qty: attack.units[ attack.cityKey ]} ];
+					if( attack.category == 'scout' ){
+						attack.waves = [{ units: [{id: 'unt3', qty: attack.units[ attack.cityKey ]}] }];
 						attack.keep = [];
 						if( attack.keeps.hasOwnProperty( attack.cityKey ) ){
-							attack.keep = [ {id: 'unt3', qty: attack.keeps[ attack.cityKey ]} ];
+							attack.keep = [{id: 'unt3', qty: attack.keeps[ attack.cityKey ]}];
 						}
 					}
 
@@ -8228,12 +8172,15 @@ jQuery(document).ready(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
 									}, 5000);
 								}
-							} else return dfd.resolve();
+							}
+
+							return dfd.resolve();
 						})
 						.fail(function(){
 							if( attack.marching.length ){
 								KOCFIA.shared.recallWaves( attack );
 							}
+
 							return dfd.reject();
 						});
 				};
@@ -8256,7 +8203,7 @@ jQuery(document).ready(function(){
 				return;
 			}
 
-			baseParams.cid = attack.cityKey.replace(/city/, '');
+			baseParams.cid = (mod != 'scout' ? attack.cityKey.replace(/city/, '') : null);
 			baseParams.type = (mod != 'scout' ? 4 : 3); //MARCH_TYPE_ATTACK 4, MARCH_TYPE_SCOUT 3
 			baseParams.gold = 0;
 			baseParams.r1 = 0;
@@ -8269,7 +8216,9 @@ jQuery(document).ready(function(){
 			//using deferred to sequentialize asynchronous tasks
 			$.when( attackSequence() )
 				.done(function(){
-					attack.aborts.push((mod != 'scout' ? 'Attaque lancée' : 'Eclairage lancé') +' sur '+ KOCFIA.shared.mapLink( attack.coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + attack.coords.length +')');
+					if( mod != 'scout' ){
+						attack.aborts.push('Attaque lancée sur '+ KOCFIA.shared.mapLink( attack.coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + attack.coords.length +')');
+					}
 
 					attack.coordIndex = attack.coordIndex + 1;
 				})
@@ -8289,22 +8238,31 @@ jQuery(document).ready(function(){
 
 					time *= 1000; //timestamp in milliseconds in javascript
 
+					if( mod == 'scout' ){
+						//next round
+						window.setTimeout(function(){
+							KOCFIA.checkAndLaunchAttack( attack, mod );
+						}, 20000);
+					}
+
 					//force march update 10s after impact
 					window.setTimeout(function(){
 						KOCFIA.shared.forceMarchUpdate( attack );
 					}, time + 10000);
 
-					time *= 2; //round-trip
+					if( mod != 'scout' ){
+						time *= 2; //round-trip
 
-					//force refresh
-					window.setTimeout(function(){
-						KOCFIA.shared.updateSeed();
-					}, time + 30000);
+						//force refresh
+						window.setTimeout(function(){
+							KOCFIA.shared.updateSeed();
+						}, time + 30000);
 
-					//next round
-					window.setTimeout(function(){
-						KOCFIA.checkAndLaunchAttack( attack, mod );
-					}, time + 45000);
+						//next round
+						window.setTimeout(function(){
+							KOCFIA.checkAndLaunchAttack( attack, mod );
+						}, time + 45000);
+					}
 				});
 		};
 

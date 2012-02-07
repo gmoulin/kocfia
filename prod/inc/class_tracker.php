@@ -33,6 +33,7 @@ class tracker extends common {
 			'url'			=> FILTER_SANITIZE_STRING,
 			'msg'			=> FILTER_SANITIZE_STRING,
 			'line'			=> FILTER_SANITIZE_NUMBER_INT,
+			'navigator'		=> FILTER_SANITIZE_STRING,
 		);
 
 		foreach( $args as $field => $validation ){
@@ -43,7 +44,13 @@ class tracker extends common {
 
 		$formData = filter_var_array($_POST, $args);
 
-		if( $formData['url'] === false || $formData['msg'] === false || $formData['line'] === false ) die;
+		if(	   $formData['url'] === false
+			|| $formData['msg'] === false
+			|| $formData['line'] === false
+			|| $formData['navigator'] === false
+		) die;
+
+		$formData['navigator'] = json_decode($formData['navigator']);
 
 		foreach( self::$_fields[$this->_table] as $k => $v ){
 			if( isset($formData[$v]) ) $this->_data[$v] = $formData[$v];

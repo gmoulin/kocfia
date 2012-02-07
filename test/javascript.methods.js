@@ -10,12 +10,12 @@ if( !String.prototype.hasOwnProperty('trim') ){
 /* array every */
 if( !Array.prototype.hasOwnProperty('every') ){
 	Array.prototype.every = function(fun, thisp){
-		var i, 
+		var i,
 			length = this.length;
 		for( i = 0; i < length; i += 1 ){
 			if( this.hasOwnProperty(i) && !fun.call(thisp, this[i], i, this) ){
-				return false;				
-			}		
+				return false;
+			}
 		}
 		return true;
 	};
@@ -43,7 +43,7 @@ if( !Array.rpoototype.hasOwnProperty('filter') ){
 /* array foreach */
 if( !Array.prototype.hasOwnProperty('forEach') ){
 	Array.prototype.forEach = function(fun, thisp){
-		var i, 
+		var i,
 			length = this.length;
 		for( i = 0; i < length; i += 1 ){
 			if( this.hasOwnProperty(i) ){
@@ -88,7 +88,7 @@ if( !Array.hasOwnProperty('lastIndexOf') ){
 /* array map */
 if( !Array.prototype.hasOwnProperty('map') ){
 	Array.prototype.map = function(fun, thisp){
-		var i, 
+		var i,
 			length = this.length,
 			result = [];
 		for( i = 0; i < length; i += 1 ){
@@ -103,7 +103,7 @@ if( !Array.prototype.hasOwnProperty('map') ){
 /* array reduce */
 if( !Array.prototype.hasOwnProperty('reduce') ){
 	Array.prototype.reduce = function(fun, initialValue){
-		var i, 
+		var i,
 			length = this.length;
 		for( i = 0; i < length; i += 1 ){
 			if( this.hasOwnProperty(i) ){
@@ -131,7 +131,7 @@ if( !Array.prototype.hasOwnProperty('reduceRight') ){
 /* array some */
 if( !Array.prototype.hasOwnProperty('some') ){
 	Array.prototype.some = function(fun, thisp){
-		var i, 
+		var i,
 			length = this.length;
 		for( i = 0; i < length; i += 1 ){
 			if( this.hasOwnProperty(i) && fun.call(thisp, this[i], i, this) ){
@@ -155,7 +155,7 @@ if( !Date.prototype.hasOwnProperty('toISOString') ){
 		function f(n){
 			return n < 10 ? '0' + n : n;
 		}
-		
+
 		return this.getUTCFullYear()	+ '-' +
 			f(this.getUTCMonth() + 1)	+ '-' +
 			f(this.getUTCDate())		+ 'T' +
@@ -167,7 +167,7 @@ if( !Date.prototype.hasOwnProperty('toISOString') ){
 /* new Date(ISO date string)
  * Date.parse(ISO date string)
  */
- 
+
 /* object keys */
 if( !Object.hasOwnProperty('keys') ){
 	Object.keys = function( object ){
@@ -177,7 +177,7 @@ if( !Object.hasOwnProperty('keys') ){
 			if( Object.prototype.hasOwnProperty.call(object, name) ){
 				result.push(name);
 			}
-		}	
+		}
 		return result;
 	};
 }
@@ -210,9 +210,28 @@ function in_stric_mode(){
 }
 
 function strict_mode_implemented(){
-	return (function(){ 
+	return (function(){
 		'use strict';
 		return !this;
 	}());
+}
+
+/* Fisher–Yates algorithm for array suffle */
+function shuffle(array) {
+  var m = array.length, t, i;
+
+  // While there remain elements to shuffle…
+  while (m) {
+
+    // Pick a remaining element…
+    i = Math.floor(Math.random() * m--);
+
+    // And swap it with the current element.
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+
+  return array;
 }
 

@@ -4,14 +4,15 @@
 // @namespace		KOC
 // @description		améliorations et automatisations diverses pour KOC
 // @require			http://userscripts.org/scripts/source/68059.user.js
-// @require			http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @include			*kingdomsofcamelot.com/*main_src.php*
 // ==/UserScript==
-jQuery.noConflict();
 /*
  * http://userscripts.org/scripts/source/68059.user.js -> used to run the whole script inside the page scope
  * else prototypes are not reachable (grease monkey sandbox limitation)
  */
+
+jQuery.noConflict();
+
 var kocFrame = parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
 kocFrame.style.width = '100%';
@@ -28,25 +29,66 @@ kocFrame.parentNode.appendChild(style);
 var kocCss = document.createElement('style');
 kocCss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 
-var domain = 'http://kocfia.kapok.dev/';
-
-//css
-var jquiCss = document.createElement('link');
-jquiCss.rel = "stylesheet";
-jquiCss.href = domain + "jquery-ui-1.8.17.custom.css";
-jquiCss.type = "text/css";
-
-//scripts
-var jqui = document.createElement('script');
-jqui.src = domain + "jquery-ui-1.8.17.custom.min.js";
-
-var kocfia = document.createElement('script'),
-	d = new Date();
-kocfia.src = domain + "kocfia.js?ts=" + d.getTime();
-
 //injection
-document.head.appendChild( jquiCss );
 document.head.appendChild( kocCss );
-document.body.appendChild( jqui );
 document.body.appendChild( kocReload );
-document.body.appendChild( kocfia );
+
+//preload KOCFIA but do not execute it
+var domain = 'http://kocfia-dev.kapok.fr/',
+	d = new Date(), i,
+	cached = 0,
+	preload = [
+		'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js',
+		domain + "jquery-ui-1.8.17.custom.min.js",
+		domain + "jquery-ui-1.8.17.custom.css",
+		domain + "kocfia.js?ts=" + d.getTime()
+	];
+
+var loadInCache = function(url){
+	var obj = document.createElement('object');
+	obj.data = url;
+	obj.width  = 0;
+	obj.height = 0;
+	/*obj.onload = function(){ cached++; };
+	obj.onerror = function(){ cached++; };*/
+	document.body.appendChild(obj);
+};
+
+var isEmptyObject = function(obj) {
+	return Object.keys(obj).length === 0;
+};
+
+var trys = 60, el, anchor = document.getElementsByTagName('script')[0];
+function load(){
+	if( window.seed && !isEmptyObject(window.seed.cities) && !isEmptyObject(window.seed.citystats) ){
+		for( i = 0; i < preload.length; i += 1 ){
+			if( preload[i].indexOf('.css') === -1 ){
+				el = document.createElement('script');
+				el.src = preload[i];
+			} else {
+				el = document.createElement('link');
+				el.rel = "stylesheet";
+				el.href = preload[i];
+				el.type = "text/css";
+			}
+			el.onload = se.onreadystatechange = initWhenLoaded;
+			anchor.parentNode.insertBefore(el, anchor);
+		}
+	} else {
+		trys -= 1;
+		if( trys <= 0 ) window.location.reload();
+		else window.setTimeout(function(){ load(); }, 1000);
+	}
+};
+
+//if the page is already loaded, call load immediatly, else preload and listen for window load event
+if( "undefined" != typeof(document.readyState) && "complete" === document.readyState ){
+	load();
+} else {
+	for( i = 0; i < preload.length; i += 1 ){
+		loadInCache( preload[i] );
+	}
+
+	window.addEventListener('load', load, false);
+}
+

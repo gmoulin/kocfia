@@ -115,8 +115,8 @@ jQuery(document).ready(function(){
 		confPanelCss += "\n.mapLink { text-decoration: underline; color: blue; cursor: pointer; }";
 		confPanelCss += "\n.navTab .ui-icon { height: 10px; display: inline-block; background-position: -32px -82px; }";
 
-		confPanelCss += "\n#kocfia-conf-panel-wrapper { overflow-x: hidden; overflow-y: auto; }";
-		confPanelCss += "\n#kocfia-conf-panel-content .ui-accordion .ui-accordion-content { padding: 3px; }";
+		confPanelCss += "\n#kocfia-conf-panel-wrapper { overflow: auto; }";
+		confPanelCss += "\n#kocfia-conf-panel-content .ui-accordion .ui-accordion-content { padding: 3px; overflow: visible; }";
 
 		confPanelCss += "\n.kocfia-conf-panel-tab.on { background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%; }";
 		confPanelCss += "\n.kocfia-conf-panel-tab.off { background-image: linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png'); background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%; }";
@@ -224,6 +224,34 @@ jQuery(document).ready(function(){
 
 		confPanelCss += "\n#kocfia-map-canvas { width: 350px; height: 350px; background: #000; }";
 
+		confPanelCss += "\n.cf:before, .cf:after { content: \"\"; display: table; }";
+		confPanelCss += "\n.cf:after { clear: both; }";
+
+		confPanelCss += "\n.darkForest-form .buttons button { float:right; margin: 0 5px; }";
+		confPanelCss += "\n.darkForest-form table { width: 100%; }";
+		confPanelCss += "\n.darkForest-form .city-header { background-color: #CCCCCC; }";
+		confPanelCss += "\n.darkForest-form input[type=checkbox] { position: relative; top: 2px; }";
+		confPanelCss += "\n.darkForest-form .city-header button { float: right; margin: 0 5px 0 10px; }";
+		confPanelCss += "\n.darkForest-form .city-header > label { font-weight: bold; font-size: 13px; }";
+		confPanelCss += "\n.darkForest-form .city-header div { margin: 0 15px; float:right; }";
+		confPanelCss += "\n.darkForest-form .city-header div input { width: 20px; margin-right: 3px; }";
+		confPanelCss += "\n.darkForest-form .rule { text-align: center; vertical-align: top; }";
+		confPanelCss += "\n.darkForest-form .rule .ui-icon { display: inline-block; cursor: pointer; }";
+		confPanelCss += "\n#kocfia-conf-panel .darkForest-form .rule .ui-icon-trash { position: absolute; top: 2px; right: 2px; }";
+		confPanelCss += "\n.darkForest-form .rule .level-active { position: absolute; top: 2px; left: 2px; }";
+		confPanelCss += "\n.darkForest-form .targetLevel { width: 20px; }";
+		confPanelCss += "\n.darkForest-form .rule > div { margin: 4px 0; width: 200px; margin: 0 auto; }";
+		confPanelCss += "\n.darkForest-form .rule div { position: relative; padding: 2px; }";
+		confPanelCss += "\n.darkForest-form .rule div > .ui-icon { position: absolute; top: 0; right: 0; }";
+		confPanelCss += "\n.darkForest-form .rule .wave .ui-icon-minusthick { top: 3px; right: -3px; }";
+		confPanelCss += "\n.darkForest-form .keep { border-color: #666; border-style: solid; border-width: 1px 0; }";
+		confPanelCss += "\n.darkForest-form .wave { margin: 4px 15px; border-top: 1px dotted #666; }";
+		confPanelCss += "\n.darkForest-form .waves { counter-reset: waves; }";
+		confPanelCss += "\n.darkForest-form .wave strong:after { counter-increment: waves; content: ' ' counter(waves); }";
+		confPanelCss += "\n.darkForest-form label { font-weight: bold; }";
+		confPanelCss += "\n.darkForest-form .unit-qty { width: 45px; }";
+		confPanelCss += "\n.darkForest-form .unit-choice { width: 90px; }";
+
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 0; height: 20px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_body { top: 20px; }";
@@ -313,7 +341,7 @@ jQuery(document).ready(function(){
 		merlinBoxClick = false;
 
 	var KOCFIA = {
-		version: '0.4.7',
+		version: '0.4.8',
 		debug: true,
 		debugWhat: {darkForest: 1, checkAndLaunchAttack: 1},
 		server: null,
@@ -685,7 +713,7 @@ jQuery(document).ready(function(){
 			var $tabs = $('#main_engagement_tabs').find('.navTab');
 			var $clone = $tabs.eq(1).clone().removeAttr('onclick').attr('target', '_blank')
 				.attr('href', 'https://apps.facebook.com/kingdomsofcamelot/?page=choosegift');
-			$clone.find('span').html('Cadeaux').append('<b class="ui-icon ui-icon-extlink"></b>');
+			$clone.find('span').html('Cadeaux').append('<b class="ui-icon ui-icon-extlink"></strong>');
 
 			$clone.insertBefore( $tabs.eq(2) );
 	};
@@ -3216,13 +3244,13 @@ jQuery(document).ready(function(){
 				});
 			}
 
-			var units = window.seed.units[ cityKey ],
-				choices = '';
-			for( var u in units ){
-				if( units.hasOwnProperty(u) ){
+			var choices = '';
+			for( var u in window.unitcost ){
+				if( window.unitcost.hasOwnProperty(u) ){
 					var name = window.unitcost[u][0];
 					if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
-					choices += '<option value="'+ u +'">'+ name + ' ('+ Shared.format(units[u]) +')</option>';
+					else if( name == 'Wagon de Ravitaillement' ) name = 'Wagon';
+					choices += '<option value="'+ u +'">'+ name + '</option>';
 				}
 			}
 
@@ -3828,6 +3856,8 @@ jQuery(document).ready(function(){
 			return builds;
 		};
 
+		KOCFIA.autoAttack.listCityAttacks = function( cityKey ){}
+
 		KOCFIA.darkForest.getBuildsConf = function($level, $uChoices, $uQuantity, rel){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getBuildsConf function');
 			switch( rel ){
@@ -4122,8 +4152,8 @@ jQuery(document).ready(function(){
 		};
 
 		KOCFIA.darkForest.getForm = function(){
-			var form = '<h3>Configurer une attaque</h3>';
-			form += '<div class="attack-form">';
+			var form = '<h3>Configurer</h3>';
+			form += '<div class="darkForest-form">';
 
 			//form message area
 			form += '<ul class="message"></ul>';
@@ -4131,11 +4161,10 @@ jQuery(document).ready(function(){
 			//form edit inputs
 			form += '<input type="hidden" class="edit-attackId" name="attackId" value="" autocomplete="off" />';
 
-
 			//buttons
-			form += '<button class="reset">Annuler</button>';
+			form += '<div class="buttons cf"><button class="reset">Annuler</button>';
 			form += '<button class="save">Sauvegarder</button>';
-			form += '<button class="launch">Lancer</button>';
+			form += '<button class="launch">Lancer</button></div>';
 
 			form += '<table>';
 			//city choice
@@ -4143,20 +4172,20 @@ jQuery(document).ready(function(){
 			for( i = 0; i < length; i += 1 ){
 				var cityKey = KOCFIA.citiesKey[i],
 					city = KOCFIA.cities[cityKey];
-				form += '<tbody data-city="'+ cityKey +'" class="city-header"><tr><th colspan="10">'
-				form += '<button class="addLevel">Ajouter un niveau</button>';
-				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="radio" class="city-active" autocomplete="off" />';
-				form += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.roman + ' ' + city.name +'</label>';
+				form += '<tbody data-city="'+ cityKey +'"><tr><td colspan="10" class="city-header">'
+				form += '<button class="add-rule">Ajouter une règle</button>';
 				form += '<div><label for="kocfia-'+ this.module +'-'+ cityKey +'-rps">Laisser&nbsp;:&nbsp;</label>';
 				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'-rps" type="text" class="rallypointSlot" />place(s) dans le point de ralliement</div>';
-				form += '</th></tr><tr></tr></tbody>';
+				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="checkbox" class="city-active" autocomplete="off" />';
+				form += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.roman + ' ' + city.name +'</label>';
+				form += '</td></tr><tr></tr></tbody>';
 			}
 			form += '</table>'
 
-			var levelSkel = '<td>';
-			levelSkel += '<div><label>Niveau&nbsp;:&nbsp;</label>';
-			levelSkel += '<input type="text" class="targetLevel" />';
-			levelSkel += '<input type="radio" class="level-active" autocomplete="off" /></div>';
+			var levelSkel = '<td class="rule"><div><span class="ui-icon ui-icon-trash remove-rule"></span>';
+			levelSkel += '<input type="checkbox" class="level-active" autocomplete="off" />';
+			levelSkel += '<label>Niveau&nbsp;:&nbsp;</label>';
+			levelSkel += '<input type="text" class="targetLevel" /></div>';
 			levelSkel += '<div><label>Priorité chevalier&nbsp;:&nbsp;</label>';
 			levelSkel += '<select class="knight-priority">';
 			levelSkel += '<option value="">aucune</option>';
@@ -4164,37 +4193,31 @@ jQuery(document).ready(function(){
 			levelSkel += '<option value="lowest">combat bas</option>';
 			levelSkel += '</select></div>';
 			levelSkel += '<div class="keep">';
-			levelSkel += 'Conserver';
-			levelSkel += '<button class="add-unit">Ajouter une autre unité</button>';
-			levelSkel += '<div class="unit-block">';
-			levelSkel += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">';
-			levelSkel += '<option value="">Choisir</option></select>';
-			levelSkel += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
-			levelSkel += '</div>';
-			levelSkel += '</div>';
-			levelSkel += '<button class="add-wave">Ajouter une autre vague</button>';
-			levelSkel += '</td>';
+			levelSkel += '<span class="ui-icon ui-icon-plusthick add-unit">+</span><strong>Troupes à conserver</strong>';
+			levelSkel += '</div><div class="waves">';
+			levelSkel += '<span class="ui-icon ui-icon-plusthick add-wave">+</span><strong>Contenu des vagues</strong>';
+			levelSkel += '</div></td>';
 			KOCFIA[ this.module ].$levelSkel = $(levelSkel);
 
-			var unitSkel += '<div class="unit-block">';
-			unitSkel += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
+			var unitSkel = '<div class="unit-block">';
+			unitSkel += '<select class="unit-choice" autocomplete="off">';
 			unitSkel += '<option value="">Choisir</option>';
 			unitSkel += '</select>';
-			unitSkel += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
+			unitSkel += '<input class="unit-qty" type="text" autocomplete="off" />';
 			unitSkel += '</div>';
 			KOCFIA[ this.module ].$unitSkel = $(unitSkel);
 
 			//wave skeleton
 			var waveSkel = '<div class="wave">';
-			waveSkel += 'Vague <span></span>';
-			waveSkel += '<button class="add-unit">Ajouter une autre unité</button>';
+			waveSkel += '<span class="ui-icon ui-icon-plusthick add-unit">+</span>';
+			waveSkel += '<strong>Vague</strong>';
 			waveSkel += '</fieldset>';
-			KOCFIA[ this.module ].$waveSkeleton = $(waveSkel);
+			KOCFIA[ this.module ].$waveSkel = $(waveSkel);
 
 			//buttons
-			form += '<button class="reset">Annuler</button>';
+			form += '<div class="buttons cf"><button class="reset">Annuler</button>';
 			form += '<button class="save">Sauvegarder</button>';
-			form += '<button class="launch">Lancer</button>';
+			form += '<button class="launch">Lancer</button></div>';
 
 			form += '</div>';
 
@@ -4221,7 +4244,6 @@ jQuery(document).ready(function(){
 					var line = '<tbody data-city="'+ cityKey +'"></tbody>';
 
 					onGoing += line;
-					savedPlans += line;
 				}
 				onGoing += '</table></div>';
 
@@ -4236,30 +4258,55 @@ jQuery(document).ready(function(){
 					$('#'+ module +'-automatic').prop('checked', checked).change();
 					if( checked ) KOCFIA[ module ].$accordion.accordion('activate', 1);
 				})
+				//add rule (level) button
+				.on('click', '.add-rule', function(){
+					var $tr = $(this).closest('tbody').find('tr').eq(1),
+						$clone = KOCFIA[ module ].$levelSkel.clone();
+
+					$clone.appendTo( $tr ).find('.add-wave').trigger('click');
+				})
+				//add wave button
+				.on('click', '.add-wave', function(){
+					KOCFIA[ module ].$waveSkel.clone()
+						.appendTo( $(this).closest('.waves') )
+						.find('.add-unit').trigger('click');
+				})
 				//add unit button
 				.on('click', '.add-unit', function(){
 					var $div = $(this).closest('div'),
 						$clone = KOCFIA[ module ].$unitSkel.clone(),
-						$blocks = $div.closest('tr').find('.unit-block');
+						$blocks = $div.closest('table').find('.unit-block');
 
 					if( $blocks.length ){
-						$clone.find('select').html( $blocks.eq(0).find('select').find('option') );
+						$clone.find('select').html( $blocks.eq(0).find('select').find('option').clone() );
 					} else {
+						var choices = '<option value=""></option>';
 						//init select values
+						for( u in window.unitcost ){
+							if( window.unitcost.hasOwnProperty(u) ){
+								var name = window.unitcost[u][0];
+								if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
+								else if( name == 'Wagon de Ravitaillement' ) name = 'Wagon';
+								choices += '<option value="'+ u +'">'+ name +'</option>';
+							}
+						}
+
+						$clone.find('select').html( choices );
 					}
 
-					$clone.appendTo( $div );
+					if( $div.hasClass('waves') && $div.find('.unit-block').length ){
+						$clone.append('<span class="ui-icon ui-icon-minusthick remove"></span>');
+					}
+
+					$clone.appendTo( $div ).find('select').val('');
 				})
 				//remove unit button
 				.on('click', '.remove', function(){
 					$(this).parent().remove();
 				})
-				//add wave button
-				.on('click', '.add-wave', function(){
-					var $tr = $(this).closest('tr'),
-						$clone = KOCFIA[ module ].$waveSkel.clone();
-
-					$clone.appendTo( $tr ).find('.add-unit').trigger('click');
+				//remove unit button
+				.on('click', '.remove-rule', function(){
+					$(this).closest('td').remove();
 				})
 				//reset form
 				.on('click', '.reset', function(){

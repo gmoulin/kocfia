@@ -1,0 +1,135 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>koc test</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery-ui-1.8.17.custom.css" />
+		<style>
+			body {
+				font-size: 11px;
+			}
+			html, body { height: 100%; }
+
+			.selfAnimProgressBar {
+				width: 50px;
+				height: 16px;
+				background-color: #eee;
+				border: 1px solid #666;
+				margin: 5px;
+			}
+
+			.selfAnimProgressBar span {
+				display: block;
+				width: 0%;
+				height: 100%;
+				background-color: #D3FFCF;
+
+				-webkit-transition-property: width background-color;
+				-webkit-transition-timing-function: linear;
+				-webkit-transition-delay: 0s;
+				   -moz-transition-property: width background-color;
+				   -moz-transition-timing-function: linear;
+				   -moz-transition-delay: 0s;
+						transition-property: width background-color;
+						transition-timing-function: linear;
+						transition-delay: 0s;
+				-webkit-transition-duration: 0;
+				   -moz-transition-duration: 0;
+						transition-duration: 0;
+			}
+
+			.selfAnimProgressBar span.anim {
+				width: 100%;
+				background-color: #3BE02D;
+			}
+
+			.selfAnimProgressBar span::after {
+				content: attr(data-label);
+				position: relative;
+				top: 0;
+				left: 2px;
+				color: #333;
+				width: 50px;
+				height: 16px;
+				font-size: 12px;
+				font-weight: bold;
+				line-height: 16px;
+			}
+
+
+			.deferredProgressBar {
+				width: 50px;
+				height: 16px;
+				background-color: #eee;
+				border: 1px solid #666;
+				margin: 5px;
+			}
+
+			.deferredProgressBar::-webkit-progress-bar { background: #eee; /* bar background */ }
+
+			.deferredProgressBar::-moz-progress-bar { background-color: #3BE02D; /* progress zone background */ }
+			.deferredProgressBar::-webkit-progress-value { background-color: #3BE02D; /* progress zone background */ }
+		</style>
+	</head>
+	<body>
+
+		<div class="selfAnimProgressBar">
+			<span data-label="test"></span>
+		</div>
+
+		<progress class="deferredProgressBar" max="7" value="3"></progress>
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script src="http://kocfia.kapok.dev/jquery-ui-1.8.17.custom.min.js"></script>
+
+		<script>
+			$(document).ready(function(){
+				$('.selfAnimProgressBar').find('span').attr('style', '-webkit-transition-duration: 20s; -moz-transition-duration: 20s; transition-duration: 20s').addClass('anim');
+
+				setTimeout(function(){
+					$('.selfAnimProgressBar').find('span').attr('style', '').removeClass('anim');
+					setTimeout(function(){
+						$('.selfAnimProgressBar').find('span').attr('style', '-webkit-transition-duration: 10s; -moz-transition-duration: 10s; transition-duration: 10s').addClass('anim');
+					}, 0);
+				}, 10000);
+
+				$('.deferredProgressBar').attr('max', '10').attr('value', '0');
+
+
+				function A(dfd){
+					console.log('A');
+					setTimeout(function(){ dfd.notify().pipe( B(dfd) ); }, 2000);
+				}
+
+				function B(dfd){
+					console.log('B');
+					setTimeout(function(){ dfd.notify().pipe( C(dfd) ); }, 2000);
+				}
+
+				function C(dfd){
+					console.log('C');
+					setTimeout(function(){ dfd.notify().resolve(); }, 2000);
+				}
+
+				function sequence(){
+					return $.Deferred(function(dfd){
+						return dfd.pipe( A(dfd) );
+					}).progress(function(){
+						$('.deferredProgressBar').attr('value', function(n, v){ return v + 1; });
+					}).promise();
+				}
+
+				$.when( sequence() )
+					.done(function(){
+						console.log('done');
+					})
+					.fail(function(){
+
+					})
+					.always(function(){
+						console.log('always');
+					});
+			});
+		</script>
+	</body>
+</html>

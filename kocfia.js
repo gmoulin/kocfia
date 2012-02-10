@@ -235,18 +235,17 @@ jQuery(document).ready(function(){
 		confPanelCss += "\n.darkForest-form .city-header > label { font-weight: bold; font-size: 13px; }";
 		confPanelCss += "\n.darkForest-form .city-header div { margin: 0 15px; float:right; }";
 		confPanelCss += "\n.darkForest-form .city-header div input { width: 20px; margin-right: 3px; }";
-		confPanelCss += "\n.darkForest-form .rule { text-align: center; vertical-align: top; }";
-		confPanelCss += "\n.darkForest-form .rule .ui-icon { display: inline-block; cursor: pointer; }";
+		confPanelCss += "\n.darkForest-form .rule, .darkForest-form .keep { text-align: center; vertical-align: top; }";
+		confPanelCss += "\n.darkForest-form .rule .ui-icon, .darkForest-form .keep .ui-icon { display: inline-block; cursor: pointer; }";
 		confPanelCss += "\n#kocfia-conf-panel .darkForest-form .rule .ui-icon-trash { position: absolute; top: 2px; right: 2px; }";
 		confPanelCss += "\n.darkForest-form .rule .level-active { position: absolute; top: 2px; left: 2px; }";
 		confPanelCss += "\n.darkForest-form .targetLevel { width: 20px; }";
 		confPanelCss += "\n.darkForest-form .rule > div { margin: 4px 0; width: 200px; margin: 0 auto; }";
 		confPanelCss += "\n.darkForest-form .rule div { position: relative; padding: 2px; }";
 		confPanelCss += "\n.darkForest-form .rule div > .ui-icon { position: absolute; top: 0; right: 0; }";
-		confPanelCss += "\n.darkForest-form .rule .wave .ui-icon-minusthick { top: 3px; right: -3px; }";
-		confPanelCss += "\n.darkForest-form .keep { border-color: #666; border-style: solid; border-width: 1px 0; }";
-		confPanelCss += "\n.darkForest-form .wave { margin: 4px 15px; border-top: 1px dotted #666; }";
 		confPanelCss += "\n.darkForest-form .waves { counter-reset: waves; }";
+		confPanelCss += "\n.darkForest-form .wave { margin: 4px 15px; border-top: 1px dotted #666; }";
+		confPanelCss += "\n.darkForest-form .wave .ui-icon-minusthick { top: 3px; right: -3px; }";
 		confPanelCss += "\n.darkForest-form .wave strong:after { counter-increment: waves; content: ' ' counter(waves); }";
 		confPanelCss += "\n.darkForest-form label { font-weight: bold; }";
 		confPanelCss += "\n.darkForest-form .unit-qty { width: 45px; }";
@@ -3725,6 +3724,10 @@ jQuery(document).ready(function(){
 
 			$section.append( header + '<div class="accordion">' + form + lists + '</div>' + help );
 
+			if( this.module == 'darkForest' ){
+				KOCFIA[ this.module ].loadPlan();
+			}
+
 			KOCFIA[ this.module ].$accordion = $section.find('.accordion');
 			KOCFIA[ this.module ].$form = $section.find('.attack-form');
 			KOCFIA[ this.module ].$saved = $section.find('.attack-list.saved');
@@ -3743,97 +3746,102 @@ jQuery(document).ready(function(){
 
 		KOCFIA.darkForest.planAttack = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' planAttack function');
-			var $waves = KOCFIA[ this.module ].$form.find('.wave'),
-				$keep = KOCFIA[ this.module ].$form.find('.keep'),
-				$cityChoice = KOCFIA[ this.module ].$form.find('.city-choice').filter(':checked'),
-				level = $.trim( KOCFIA[ this.module ].$form.find('.targetLevel').val() ),
-				errors = [],
+			var errors = [], $cb,
+				cityKey, cityActive, city, cityLabel,
+				rps, levelActive, level,
+				keep, check, wave,
+				waves, levels, targets,
 				regexp = /[^0-9, ]/,
-				attack = { type: 'attack', category: this.module, waves: [], coordIndex: 0, keep: [] };
+				plan = { type: 'attack', category: this.module, cities: {}, levels: {}, coordIndex: 0 };
+
+			var checkUnitBlock = function( $block ){
+				var unit = $block.find('.unit-choice').val();
+				if( unit != '' ){
+					var qty = Shared.decodeFormat( $.trim( $block.find('.unit-qty').val() ) );
+					if( qty !== false ) return {id: unit, qty: qty};
+				}
+
+				return false;
+			};
 
 			//check form
-				//city
-				if( !$cityChoice.length ){
-					errors.push('Ville de départ obligatoire.');
-				} else {
-					attack.cityKey = $cityChoice.val();
-				}
+			KOCFIA[ this.module ].$form.find('tbody').each2(function(i, $tbody){
+				cityKey = $tbody.data('city');
+				cityActive = null;
+				city = KOCFIA.cities[ cityKey ];
+				cityLabel = city ? city.roman +' '+ city.name : null;
+				rps = null;
+				level = null;
+				levelActive = null;
+				keep = [];
+				waves = [];
+				levels = {};
+				targets = [];
 
-				//targetLevel
-				if( level == '' ){
-					errors.push('Le niveau des forêts sombres ciblées est requis.');
-				} else if( level == Number.NaN ){
-					errors.push('Le niveau des forêts sombres ciblées est éronné, il doit être un chiffre.');
-				} else if( level < 1 || level > 10 ){
-					errors.push('Le niveau des forêts sombres ciblées est éronné, il doit être compris entre 1 et 10.');
-				} else {
-					attack.targetLevel = level;
-				}
+				$tbody.find('tr').each2(function(j, $tr){
+					if( $tr.hasClass('city-header') ){
+						cityActive = $tr.find('.city-active').is(':checked');
 
-				//waves
-				var unitList = [];
-				$waves.each2(function(i, $wave){
-					var w = {units: []};
+						rps = parseInt( $.trim( $tr.find('.rallypointSlot').val() ), 10 );
+						if( rps === Number.NaN ) rps = 0;
 
-					//knight
-						w.knightPriority = $wave.find('.knight-priority').val();
+						attack.levels[ cityKey ] = {};
+					} else {
+						$tr.find('.keep').find('.unit-block').each2(function(k, $block){
+							check = checkUnitBlock( $block );
+							if( check !== false ) keep.push( check );
+						});
 
-					//troops
-						$wave.find('.unit-block').each2(function(i, $b){
-							var valid = true;
-							var u = $b.find('.unit-choice').val(),
-								q = Shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
 
-							if( u.length == 0 ){
-								valid = false;
+						$tr.find('.rule').each2(function(k, $rule){
+							level = parseInt( $.trim( $rule.find('.targetLevel').val() ), 10 );
+							if( level === Number.NaN || level < 1 || level > 10 ){
+								errors.push('L\'un des niveaux de FS ciblé est invalide dans la ligne pour '+ cityLabel);
+								return;
 							}
 
-							if( q == false || q < 1 ){
-								valid = false;
+							if( $.inArray(level, targets) > -1 ){
+								errors.push('Une seule configuration possible par niveau pour '+ cityLabel);
+								return;
 							}
 
-							if( valid ){
-								unitList.push(u);
-								w.units.push({id: u, qty: q});
+							targets.push(level);
+
+							levelActive = $rule.find('.level-active').is(':checked');
+
+							knightPriority = $rule.find('.knight-priority').val();
+
+							$rule.find('.wave').each2(function(l, $wave){
+								wave = {units: []};
+								$wave.find('.unit-block').each2(function(k, $block){
+									check = checkUnitBlock( $block );
+									if( check !== false ){
+										wave.units.push( check );
+									}
+								});
+								if( wave.units.length ){
+									waves.push(wave);
+								}
+							});
+
+							if( waves.length ){
+								attack.levels[ cityKey ][level] = {active: levelActive, knightPriority: knightPriority, waves: waves });
+							} else {
+								errors.push('Au moins une vague valide doit être spécifiée pour chaque niveau de FS ciblé dans la ligne pour '+ cityLabel);
+								return;
 							}
 						});
 
-					if( w.units.length ){
-						attack.waves.push(w);
+						attack.cities[ cityKey ] = { active: cityActive, rps: rps, keep: keep, targetsLevel: targets };
 					}
 				});
+			});
 
-				if( !attack.waves.length ){
-					errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
-					errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
-				}
+			if( errors.length ){
+				errors = errors.unique();
+			}
 
-				//keep
-				$keep.find('.unit-block').each2(function(i, $b){
-					var k = {},
-						u = $.trim( $b.find('.unit-choice').val() ),
-						q = Shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
-
-					if( u.length == 0 && q != false && q > 0 ){
-						errors.push('L\'unité à conserver doit être spécifiée.');
-					} else if( u.length > 0 && (q == false || q < 1) ){
-						errors.push('L\'unité à conserver doit avoir une quantité.');
-					} else if( u.length > 0 && unitList.length && $.inArray(u, unitList) > -1 ){
-						attack.keep.push({id: u, qty: q});
-					}
-				});
-
-				//rally point free slot
-				var rps = parseInt( $.trim(KOCFIA[ this.module ].$form.find('.rallypointSlot').val()), 10 );
-				if( isNaN(rps) || rps < 0 ){
-					errors.push('Le nombre de places à conserver dans le point de ralliement doit être un chiffre positif.');
-				} else attack.rpSlot = rps;
-
-				if( errors.length ){
-					errors = errors.unique();
-				}
-
-			return {attack: attack, errors: errors};
+			return {plan: plan, errors: errors};
 		};
 
 		KOCFIA.darkForest.getBuildsList = function(){
@@ -4178,7 +4186,10 @@ jQuery(document).ready(function(){
 				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'-rps" type="text" class="rallypointSlot" />place(s) dans le point de ralliement</div>';
 				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="checkbox" class="city-active" autocomplete="off" />';
 				form += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.roman + ' ' + city.name +'</label>';
-				form += '</td></tr><tr></tr></tbody>';
+				form += '</td></tr><tr><td>';
+				form += '<div class="keep">';
+				form += '<span class="ui-icon ui-icon-plusthick add-unit">+</span><strong>Troupes à conserver</strong>';
+				form += '</div></td></tr></tbody>';
 			}
 			form += '</table>'
 
@@ -4191,10 +4202,7 @@ jQuery(document).ready(function(){
 			levelSkel += '<option value="">aucune</option>';
 			levelSkel += '<option value="highest">combat haut</option>';
 			levelSkel += '<option value="lowest">combat bas</option>';
-			levelSkel += '</select></div>';
-			levelSkel += '<div class="keep">';
-			levelSkel += '<span class="ui-icon ui-icon-plusthick add-unit">+</span><strong>Troupes à conserver</strong>';
-			levelSkel += '</div><div class="waves">';
+			levelSkel += '</select></div><div class="waves">';
 			levelSkel += '<span class="ui-icon ui-icon-plusthick add-wave">+</span><strong>Contenu des vagues</strong>';
 			levelSkel += '</div></td>';
 			KOCFIA[ this.module ].$levelSkel = $(levelSkel);
@@ -4249,6 +4257,84 @@ jQuery(document).ready(function(){
 
 			return onGoing;
 		};
+
+		KOCFIA.darkForest.loadPlan = function(){
+			var plan = KOCFIA[ this.module ].attacks;
+			if( plan ){
+				//attack.cities[ cityKey ] = {active: cityActive, rps: rps, keep: [{id: unit, qty: qty}], targetsLevel: targets};
+				//attack.levels[ cityKey ][ level ] = {active: levelActive, knightPriority: knightPriority, waves: [{ units: [{id: unit, qty: qty}] }] });
+
+				var cityKey, $keep, cityInfo, $addUnit, $block, i, levels, level, $rules, $rule;
+				KOCFIA[ this.module ].$form.find('tbody').each2(function(b, $tbody){
+					cityKey = $tbody.data('city');
+
+					if( plan.cities.hasOwnProperty( cityKey ) ){
+						cityInfo = plan.cities[ cityKey ];
+						$tbody.find('.city-active').prop('checked', cityInfo.active);
+						$tbody.find('.rallypointSlot').val( cityInfo.rps );
+
+						$keep = $tbody.find('.keep');
+						$addUnit = $keep.find('.add-unit');
+						for( i = 0; i < cityInfo.keep.length; i += 1 ){
+							$addUnit.trigger('click');
+						}
+
+						$blocks = $keep.find('.unit-block');
+						for( i = 0; i < cityInfo.keep.length; i += 1 ){
+							$block = $blocks.eq(i);
+							$block.find('.unit-choice').val( cityInfo.keep[i].id );
+							$block.find('.unit-qty').val( Shared.format( cityInfo.keep[i].qty ) );
+						}
+
+						if( plan.levels.hasOwnProperty( cityKey ) ){
+							levels = plan.levels[ cityKey ];
+
+							for( i = 0; i < cityInfo.targetsLevel.length; i += 1 ){
+								$tbody.find('.add-rule').trigger('click');
+							}
+
+							$rules = $tbody.find('.rule');
+							for( i = 0; i < cityInfo.targetsLevel.length; i += 1 ){
+								level = levels[ cityInfo.targetsLevel[i] ];
+								$rule = $rules.eq(i);
+
+								$rule.find('.level-active').prop('checked', level.active);
+								$rule.find('.targetLevel').val( cityInfo.targetsLevel[i] );
+								$rule.find('.knight-priority').val( level.knightPriority );
+
+								$addUnit = $rule.find('.add-unit');
+								for( i = 0; i < level.waves.length; i += 1 ){
+									$addUnit.trigger('click');
+								}
+
+								$blocks = $rule.find('.unit-block');
+								for( i = 0; i < level.waves.length; i += 1 ){
+									$block = $blocks.eq(i);
+									$block.find('.unit-choice').val( level.waves[i].id );
+									$block.find('.unit-qty').val( Shared.format( level.waves[i].qty ) );
+								}
+							}
+						} else {
+							//add the default empty rule
+							$tbody.find('.add-rule').trigger('click');
+							//add a unit block in keep div
+							$tbody.find('.rule').find('.add-unit').trigger('click');
+						}
+
+					} else {
+						//add the default empty rule
+						$tbody.find('.add-rule').trigger('click');
+						//add a unit block in keep and rule divs
+						$tbody.find('.add-unit').trigger('click');
+					}
+				});
+			} else {
+				//add the default empty rule
+				KOCFIA[ this.module ].$form.find('.add-rule').trigger('click');
+				//add a unit block in keep and rule divs
+				KOCFIA[ this.module ].$form.find('.add-unit').trigger('click');
+			}
+		}
 
 		KOCFIA.darkForest.addSectionListeners = function(){
 			var module = this.module;
@@ -4311,18 +4397,15 @@ jQuery(document).ready(function(){
 				//reset form
 				.on('click', '.reset', function(){
 					KOCFIA[ module ].$form.find('tbody').each2(function(i, $tbody){
-						$tbody.find('tr').eq(1).find('td').filter(':gt(0)').remove();
+						$tbody.find('tr').eq(1).find('td').filter(':gt(1)').remove();
 					});
-
-					var $keep = KOCFIA[ module ].$form.find('.keep');
-					$keep.find('.unit-block').filter(':gt(0)').remove();
-					$keep.find('.unit-choice').find('option').filter(':gt(0)').remove();
 
 					var $inputs = KOCFIA[ module ].$form.find('input');
 					$inputs.filter('[type="text"], [type="hidden"]').val('');
 					$inputs.filter('[type="radio"], [type="checkbox"]').prop('checked', false);
 
-					KOCFIA[ module ].$form.find('select, textarea').val('');
+					KOCFIA[ module ].$form.find('select').val('');
+
 					KOCFIA[ module ].$form.find('.message').empty();
 				})
 				//save
@@ -4513,9 +4596,9 @@ jQuery(document).ready(function(){
 				}
 
 				//waves
-				var unitList = [];
+				var unitList = [], w;
 				$waves.each2(function(i, $wave){
-					var w = {units: []};
+					w = {units: []};
 
 					//knight
 						w.knight = $wave.find('.knight-choice').val();
@@ -8109,7 +8192,7 @@ jQuery(document).ready(function(){
 			var mod = attack.category,
 				label = (attack.type != 'scout' ? 'attaque' : 'eclairage'),
 				d = new Date(),
-				stopped = false;
+				stopped = false, status;
 			var check = KOCFIA.conf[ mod ] && KOCFIA.conf[ mod ].hasOwnProperty('active') && KOCFIA.conf[ mod ].active;
 			if( !check ){
 				KOCFIA[ mod ].refreshOngoingInfo(attack, true, [d.getTime() / 1000, (mod == 'scout' ? 'Eclairages automatiques stoppés' : 'Attaque automatiques stoppées')]);
@@ -8118,7 +8201,7 @@ jQuery(document).ready(function(){
 
 			KOCFIA[ mod ].refreshOngoingInfo(attack, false, [d.getTime() / 1000, 'Tentative de lancement en cours']);
 
-			if( mod != 'scout' ){
+			if( mod == 'wilderness' ){
 				var $tr = KOCFIA[ mod ].$ongoing.find('tbody').filter('[data-city='+ attack.cityKey +']').find('tr').filter('[data-attack='+ attack.id +']');
 			} else {
 				var $tr = KOCFIA[ mod ].$ongoing.find('tbody').find('tr').filter('[data-attack='+ attack.id +']');
@@ -8158,7 +8241,7 @@ jQuery(document).ready(function(){
 				stop();
 				return false;
 			}
-
+			)
 			//security, defining missing properties
 			if( !attack.hasOwnProperty('marching') ) attack.marching = [];
 			if( !attack.hasOwnProperty('coordIndex') ) attack.coordIndex = 0;
@@ -8178,14 +8261,34 @@ jQuery(document).ready(function(){
 							return dfd.reject();
 						}
 
-						attack.cityKey = attack.cities[ cityIndex ];
-						city = KOCFIA.cities[ attack.cityKey ];
-						baseParams.cid = attack.cityKey.replace(/city/, '');
-						var status;
+						if( mod == 'darkForest' ){
+							if( !attack.cities[ cityIndex ].active ){
+								cityIndex += 1;
+								if( cityIndex < attack.cities.length ){
+									return dfd.pipe( sequenceByCity(dfd) );
+								} else {
+									return status ? dfd.resolve() : dfd.reject();
+								}
+							}
+						}
+
+						//set attack properties for a one city launch
+							attack.cityKey = attack.cities[ cityIndex ];
+							city = KOCFIA.cities[ attack.cityKey ];
+							baseParams.cid = attack.cityKey.replace(/city/, '');
+							if( mod == 'darkForest' ){
+								attack.rpSlot = attack.cities[ cityIndex ].rps;
+
+								//for coordinates level check
+								attack.targets = [];
+								for( var i = 0; i < attack.levels[ cityIndex ].length; i += 1 ){
+									attack.targets.push( attack.levels[ cityIndex ][i].level );
+								}
+							}
 
 						$.when( previousMarchingCheck(sdfd) )
 							.done(function(){
-								KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, (mod == 'scout' ? city.roman + ' ' + city.name + ' ' : '') +'Eclairage lancé sur '+ Shared.mapLink( attack.coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coordsLength +')']);
+								KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, city.roman +' '+ city.name +' '+ (mod == 'scout' ? 'Eclairage lancé' : 'Attaque lancée') +' sur '+ Shared.mapLink( attack.coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coordsLength +')']);
 
 								status = 1;
 							})
@@ -8195,10 +8298,6 @@ jQuery(document).ready(function(){
 							.always(function(){
 								cityIndex += 1;
 								if( cityIndex < attack.cities.length ){
-									attack.cityKey = attack.cities[ cityIndex ];
-									city = KOCFIA.cities[ attack.cityKey ];
-									baseParams.cid = attack.cityKey.replace(/city/, '');
-
 									return dfd.pipe( sequenceByCity(dfd) );
 								} else {
 									return status ? dfd.resolve() : dfd.reject();
@@ -8424,12 +8523,19 @@ jQuery(document).ready(function(){
 										attack.coordIndex = attack.coordIndex + 1;
 										return dfd.pipe( checkCoord(dfd, 3) );
 
-									} else if( info.tileLevel != attack.level ){
-										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas du bon niveau ('+ info.tileLevel +').']);
-										attack.coordIndex = attack.coordIndex + 1;
-										return dfd.pipe( checkCoord(dfd, 3) );
-
 									} else {
+										//set the waves corresponding to the target level
+										if( attacks.levels.hasOwnProperty( info.tileLevel ) ){
+											var level = attacks.levels[ info.tileLevel ];
+											attack.waves = level.waves;
+											attack.knightPriority = level.knightPriority;
+											attack.currentLevel = info.tileLevel;
+										} else {
+											KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas du bon niveau ('+ info.tileLevel +').']);
+											attack.coordIndex = attack.coordIndex + 1;
+											return dfd.pipe( checkCoord(dfd, 3) );
+										}
+
 										baseParams.xcoord = gps[0];
 										baseParams.ycoord = gps[1];
 										return dfd.pipe( checkAndLaunchWaves(dfd) );
@@ -8514,11 +8620,9 @@ jQuery(document).ready(function(){
 							var knights = Shared.getAvailableKnights( attack.cityKey ),
 								k;
 
-							if( mod == 'wilderness' ){
-								if( waveIndex == 0 && knights.length < attack.waves.length ){
-									KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de chevalier disponible pour lancer les '+ attack.waves.length +' vagues.']);
-									return wdfd.reject();
-								}
+							if( waveIndex == 0 && knights.length < attack.waves.length ){
+								KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de chevalier disponible pour lancer les '+ attack.waves.length +' vagues.']);
+								return wdfd.reject();
 							}
 
 							if( !knights.length ){
@@ -8737,6 +8841,11 @@ jQuery(document).ready(function(){
 								}
 							}
 
+							if( mod == 'darkForest' ){
+								//places in PR ?
+								//all rules dones ?
+							}
+
 							return dfd.resolve();
 						})
 						.fail(function(){
@@ -8752,7 +8861,7 @@ jQuery(document).ready(function(){
 					return $.Deferred(function( dfd ){
 						//calling sequencialy previousMarchingCheck(), resetTracks(), checkRallyPoint(), checkCoords(), checkAndLaunchWaves()
 						//using deferred.pipe() to iterate
-						if( mod == 'scout' ){
+						if( mod != 'wilderness' ){
 							return dfd.pipe( sequenceByCity(dfd) );
 						} else {
 							return dfd.pipe( previousMarchingCheck(dfd) );

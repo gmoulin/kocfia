@@ -242,6 +242,10 @@ jQuery(document).ready(function(){
 		confPanelCss += "\n#kocfia-darkForest .ongoing .trip div div:not(:last-child) { border-right: 1px solid #ccc; margin-right: 10px; }";
 		confPanelCss += "\n#kocfia-darkForest .ongoing .trip div .ui-icon { position: absolute; top: 0; left: 0; }";
 
+		confPanelCss += '\n#kocfia-conf-panel .ui-buttonset { display: inline-block; }';
+		confPanelCss += '\n#kocfia-conf-panel .ui-buttonset .ui-button-text { padding: 0.2em o.5em; min-width: 30px; }';
+		confPanelCss += '\n#kocfia-conf-panel #kocfia-transport .coord { width: 50px; }';
+
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 0; height: 20px; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_body { top: 20px; }";
@@ -332,10 +336,10 @@ jQuery(document).ready(function(){
 
 	var KOCFIA = {
 		version: '0.4.9',
-		debug: false,
+		debug: true,
 		debugWhat: {transport: 1},
 		server: null,
-		modules: ['chat', 'fbWallPopup', 'overview', 'wilderness', 'darkForest', 'scout', 'notepad', 'map', 'formation'],
+		modules: ['chat', 'fbWallPopup', 'overview', 'wilderness', 'darkForest', 'scout', 'notepad', 'map', 'formation', 'transport'],
 		modulesLabel: {
 			overview: 'Vue globale',
 			map: 'Carte',
@@ -1441,7 +1445,7 @@ jQuery(document).ready(function(){
 			return code;
 		};
 
-		Shared.marchTimeCalculator = function(cityKey, troops, from_x, from_y, is_round_trip, items_applied){
+		Shared.marchTimeCalculator = function(cityKey, troops, from_x, from_y, is_round_trip, items_applied, isFriendly){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('kocfia shared marchTimeCalculator function', cityKey, troops, from_x, from_y, is_round_trip, items_applied);
 			var speed = 99999,
 				total_troops = 0,
@@ -1450,17 +1454,22 @@ jQuery(document).ready(function(){
 				d = new Date(),
 				ts = parseInt(d.getTime() / 1000, 10);
 
-			var techElevenModifier = parseInt(window.seed.tech.tch11),
-				techTwelveModifier = parseInt(window.seed.tech.tch12),
-				i, length = troops.length;
+			var techElevenModifier = parseInt(window.seed.tech.tch11, 10),
+				techTwelveModifier = parseInt(window.seed.tech.tch12, 10),
+				i, length = troops.length,
+				j, troop_speed;
 			for( i = 0; i < length; i += 1 ){
-				var j = i + 1;
-				if( troops.length <= 0 || window.unitstats["unt" + j] == null ) continue;
+				j = i + 1;
+
+				if( troops[i] <= 0 || !window.unitstats.hasOwnProperty("unt" + j) ) continue;
+
 				total_troops += troops[i];
-				var troop_speed = parseInt(window.unitstats["unt" + j][3]) * (1 + 0.1 * techElevenModifier);
+				troop_speed = parseInt(window.unitstats["unt" + j][3]) * (1 + 0.1 * techElevenModifier, 10);
+
 				if( j > 6 ){
-					troop_speed = troop_speed * (1 + 0.05 * techTwelveModifier)
+					troop_speed = troop_speed * (1 + 0.05 * techTwelveModifier);
 				}
+
 				if( troop_speed < speed ){
 					speed = troop_speed;
 				}
@@ -1468,28 +1477,54 @@ jQuery(document).ready(function(){
 
 			if( 0 == speed ) return "";
 
-			var x = Math.abs(parseInt(city.coords.x, 10) - parseInt(from_x, 10));
-			if (x > 375) x = 750 - x;
-			var y = Math.abs(parseInt(city.coords.y, 10) - parseInt(from_y, 10));
-			if (y > 375) y = 750 - y;
-
-			time = parseInt(Math.sqrt((x * x) + (y * y)) * 6000 / speed);
-			if( items_applied["57"] && window.seed.items.i57 > 0 ){
-				time = parseInt(time * 0.5);
-			} else if( items_applied["55"] && window.seed.items.i55 > 0 ){
-				time = parseInt(time * 0.75);
+			var i, guardianBonus = 0;
+			for( i = 0; i < window.seed.guardians.length; i += 1 ){
+				guardian = window.seed.guardians[i];
+				if( guardian.city == cityKey && guardian.type == 'food' && guardian.level > 0 ){
+					guardianBonus = guardian.level;
+					break;
+				}
 			}
+
+			var multiplier = 1 + (guardianBonus * 0.01),
+				time = 0,
+				minimum_time = 173,
+				barbarian_raid = false,
+				attack_selected = !isFriendly,
+				x = Math.abs(parseInt(coordXFrom, 10) - parseInt(coordXTo, 10)),
+				y = Math.abs(parseInt(coordYFrom, 10) - parseInt(coordYTo, 10));
+			if( x > 375 ) x = 750 - x;
+			if( y > 375 ) y = 750 - y;
+
+			var distance = Math.sqrt((x * x) + (y * y));
+
+			 var building = getCityBuilding (cityID, 18);
+			 if (building) {
+				 fSpeed = Speed * (1 + parseInt(building.maxLevel)/2);
+				 gSpeed = fSpeed/6000;
+				 estSec = (dist/gSpeed).toFixed(0);
+				 ret.friendETA = parseInt((estSec*e+''))+30;
+				 ret.friendEtaStr = timestr ((ret.friendETA+''),1);
+
+			 }
+
+			time = Math.ceil(distance * 6000 / speed);
+
+			if( items_applied["57"] && window.seed.items.i57 > 0 ) time = parseInt(time * 0.5, 10);
+			else if( items_applied["55"] && window.seed.items.i55 > 0 ) time = parseInt(time * 0.75, 10);
+
 			time += 30;
 
-			if( window.seed.playerEffects.returnExpire > ts ){
-				time = parseInt(time * 0.75);
+			if( seed.playerEffects.returnExpire > timestamp ) time = parseInt(time * 0.75, 10);
+
+			if( isFriendly ){
+				var level = Shared.getCityBuilding(cityKey, 18);
+				if( level > 0 ) speed = speed * (1 + level / 2);
 			}
+
 			if( is_round_trip ) time *= 2;
 
-			var guardianBonus = cm.guardianModalModel.getMarchBonus();
-			var multiplier = 100 / (100 + guardianBonus);
-
-			time = parseInt(time * multiplier, 10);
+			if( time < minimum_time && barbarian_raid && attack_selected ) time = minimum_time;
 
 			return time;
 		};
@@ -7642,11 +7677,11 @@ jQuery(document).ready(function(){
 			var $info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ cityKey +']').find('.info');
 
 			params.requestType = "CANCEL_TRAINING";
-			params.cityId      = info[1];
-			params.typetrn     = info[2];
+			params.cityId	   = info[1];
+			params.typetrn	   = info[2];
 			params.numtrptrn   = info[3];
-			params.trnETA      = info[4];
-			params.trnTmp      = info[5];
+			params.trnETA	   = info[4];
+			params.trnTmp	   = info[5];
 			params.trnNeeded   = info[6];
 
 			var d = new Date();
@@ -7725,13 +7760,13 @@ jQuery(document).ready(function(){
 			var $info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city='+ cityKey +']').find('.info');
 
 			params.requestType = "CANCEL_FORTIFICATIONS";
-			params.cityId      = info[1];
-			params.typefrt     = info[2];
+			params.cityId	   = info[1];
+			params.typefrt	   = info[2];
 			params.numtrpfrt   = info[3];
-			params.frtETA      = info[4];
-			params.frtTmp      = info[5];
+			params.frtETA	   = info[4];
+			params.frtTmp	   = info[5];
 			params.frtNeeded   = info[6];
-			params.frtid       = info[0];
+			params.frtid	   = info[0];
 
 			$.ajax({
 					url: window.g_ajaxpath + 'ajax/cancelFortifications.php' + window.g_ajaxsuffix,
@@ -8220,6 +8255,20 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-transport').html('');
 
+			var manualForm = KOCFIA.transport.getManualForm();
+
+			$section.append( '<div class="accordion">' + manualForm + '</div>' );
+
+			KOCFIA.transport.$accordion = $section.find('.accordion');
+			KOCFIA.transport.$manualForm = $section.find('.manual-form');
+			KOCFIA.transport.$form = $section.find('.attack-form');
+			KOCFIA.transport.$saved = $section.find('.attack-list.saved');
+			KOCFIA.transport.$ongoing = $section.find('.attack-list.ongoing');
+
+			KOCFIA.transport.$accordion.accordion({collapsible: true, autoHeight: false, animated: false}).accordion('activate', false);
+
+			KOCFIA.transport.addManualFormListeners();
+
 			//envoie manuel
 				//ville expéditrice
 				//ville destinataire
@@ -8277,7 +8326,7 @@ jQuery(document).ready(function(){
 			Shared.storeConf();
 		};
 
-		KOCFIA.transport.storeAutomaticRules = function(){'
+		KOCFIA.transport.storeAutomaticRules = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport storeAutomaticRules function');
 			localStorage.setObject('kocfia_transport_rules_' + KOCFIA.storeUniqueId, KOCFIA.transport.rules);
 		};
@@ -8287,18 +8336,19 @@ jQuery(document).ready(function(){
 			var cityKeyFrom = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked').val(),
 				units = window.seed.units[ cityKeyFrom ],
 				cityKeyTo = KOCFIA.transport.$manualForm.find('.to').find('input').filter(':checked').val(),
+				coord = KOCFIA.transport.$manualForm.find('.coord'),
 				code = '', n, i, u, label;
 
 			if( units.hasOwnProperty('unt1') ){
 				n = parseInt(units['unt1'], 10);
 				if( n > 0 ){
 					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt1' );
-						code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt1" value="unt1">';
-						code += '<label for="kocfia-transport-manual-unt1" title="'+ Shared.readable(n) +'">';
-						code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg">';
-						code += '&nbsp;Ravitalleur ('+ Shared.format(n) +')';
-						code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
-						code += '</label>';
+					code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt1" value="unt1">';
+					code += '<label for="kocfia-transport-manual-unt1" title="'+ Shared.readable(n) +'">';
+					code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg">';
+					code += '&nbsp;Ravitalleur ('+ Shared.format(n) +')';
+					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
+					code += '</label>';
 				}
 			}
 
@@ -8326,7 +8376,7 @@ jQuery(document).ready(function(){
 					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
 					code += '</label>';
 				}
-
+			}
 
 			code += '<select name="troop-list">';
 			for( u in units ){
@@ -8340,7 +8390,7 @@ jQuery(document).ready(function(){
 							}
 						}
 
-						d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt7' );
+						d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
 
 						code += '<option value="'+ u +'" title="'+ Shared.readable(n) +'">'+ label +' ('+ Shared.format(n) +')';
 						code += (d != '' ? '- '+ Shared.readableDuration( d ) : '') +'</option>';
@@ -8359,7 +8409,7 @@ jQuery(document).ready(function(){
 				gold = window.seed.citystats[ cityKey ];
 
 			for( i = 0; i < KOCFIA.resources.length; i += 1 ){
-				type = KOCFIA.resources[j];
+				type = KOCFIA.resources[i];
 				inSeed = KOCFIA.inSeed.resources[ type.name ];
 
 				if( inSeed ){
@@ -8372,21 +8422,43 @@ jQuery(document).ready(function(){
 					if( n > 0 ){
 						if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-						code += '<button rel="'+ r +'" data-label="'+ type.label +'" title="'+ Shared.readable(n) +'">'+ type.label +'('+ Shared.format(n) +')</button>';
+						code += '<button rel="'+ type.name +'" data-label="'+ type.label +'" title="'+ Shared.readable(n) +'">'+ type.label +' ('+ Shared.format(n) +')</button>';
 					}
 				}
 			}
 			return code;
 		};
 
-		KOCFIA.transport.getDuration = function( cityKeyFrom, cityKeyTo, unit ){
+		KOCFIA.transport.getDuration = function( cityKeyFrom, cityKeyTo, coord, unit ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getDuration function');
+			var coordXTo, coordYTo, city, distance;
 
-			if( cityKeyFrom && cityKeyTo ){
-				return 1;
-			} else {
-				return '';
+			if( cityKeyTo ){
+				city = KOCFIA.cities[ cityKeyTo ];
+				coordXTo = city.coords.x;
+				coordYTo = city.coords.y;
+			} else if( coord != '' ){
+				coord = coord.split(',');
+				if( coord.length != 2 ) return '';
+				coord[0] = parseInt(coord[0], 10);
+				coord[1] = parseInt(coord[1], 10);
+				if( isNaN(coord[0]) || coord[0] < 0 || coord[0] > 750 ) return '';
+				if( isNaN(coord[1]) || coord[1] < 0 || coord[1] > 750 ) return '';
+
+				coordXTo = coord[0];
+				coordYTo = coord[1];
 			}
+
+			var is_round_trip = false,
+				items_applied = {},
+				isFriendly = true,
+				troops = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+				u = parseInt(unit.replace(/unt/, ''), 10);
+
+			troops[u] = 1;
+
+			return Shared.marchTimeCalculator(cityKeyFrom, troops, coordXTo, coordYTo, is_round_trip, items_applied, isFriendly);
+
 		};
 
 		KOCFIA.transport.getManualForm = function(){
@@ -8405,21 +8477,21 @@ jQuery(document).ready(function(){
 			}
 			form += '</div>';
 
-			form += '<br><label>Vers&nbsp;:&nbsp;</label><input type="text" name="coord" class="coord">';
-			form += '<div class="to">';
+			form += '<br><br><label>Vers&nbsp;:&nbsp;</label><input type="text" name="coord" class="coord">';
+			form += '&nbsp;ou&nbsp;<div class="to">';
 			for( c in KOCFIA.cities ){
 				if( KOCFIA.cities.hasOwnProperty(c) ){
 					city = KOCFIA.cities[ c ];
-					form += '<input type="radio" name="from" value="'+ c +'" id="kocfia-transport-manual-from-'+ c +'"><label for="kocfia-transport-manual-from-'+ c +'">'+ city.roman +'</label>';
+					form += '<input type="radio" name="to" value="'+ c +'" id="kocfia-transport-manual-to-'+ c +'"><label for="kocfia-transport-manual-to-'+ c +'">'+ city.roman +'</label>';
 				}
 			}
 			form += '</div>';
 
-			form += '<br><label>Troupes&nbsp;:&nbsp;</label>';
+			form += '<br><br><label>Troupes&nbsp;:&nbsp;</label>';
 			form += '<div class="troop">';
 			form += '</div>'
 
-			form += '<br><label>Ressources</label>';
+			form += '<br><br><label>Ressources&nbsp;:&nbsp;</label>';
 			form += '<div class="resources">';
 			form += '<div class="available"></div>';
 			form += '<div class="chosen"></div>';
@@ -8446,23 +8518,28 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getHelp function');
 		};
 
-		KOCFIA.transport.addListeners = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport addListeners function');
+		KOCFIA.transport.addManualFormListeners = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport addManualFormListeners function');
 
 			KOCFIA.transport.$manualForm.find('.from, .to').buttonset();
 			KOCFIA.transport.$manualForm
 				//city from and to
 				.on('change', '.from input', function(){
-					var code = KOCFIA.transport.getResources( this.value );
-					var $res = KOCFIA.transport.$manualForm.find('.resources');
+					var code = KOCFIA.transport.getResources( this.value ),
+						$res = KOCFIA.transport.$manualForm.find('.resources');
 					$res.find('.available').empty().append( code ).buttonset();
 					$res.find('.chosen').empty();
 				})
 				.on('change', '.from input, .to input[type=radio]', function(){
+					var $this = $(this);
+					if( $this.closest('.to').length ){
+						KOCFIA.find('.to').find('.coord').val('');
+					}
 					var code = KOCFIA.transport.getUnits();
 					KOCFIA.transport.$manualForm.find('.troop').empty().append( code );
 				})
 				.on('keyup', '.to input[type=text]', function(){
+					$(this).siblings('.ui-buttonset').find('input').prop('checked', false).button('refresh');
 
 					var code = KOCFIA.transport.getUnits();
 					KOCFIA.transport.$manualForm.find('.troop').empty().append( code );

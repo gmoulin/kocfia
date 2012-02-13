@@ -331,7 +331,7 @@ jQuery(document).ready(function(){
 		merlinBoxClick = false;
 
 	var KOCFIA = {
-		version: '0.4.8',
+		version: '0.4.9',
 		debug: false,
 		debugWhat: {transport: 1},
 		server: null,
@@ -2510,44 +2510,54 @@ jQuery(document).ready(function(){
 				$resAutonomyTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
 				$troopsTrs = KOCFIA.overview.$tbodyTrs.filter('.troops').filter(':not(:first)'),
 				$troopsBarbarianTrs = KOCFIA.overview.$tbodyTrs.filter('.troops_barbarian').filter(':not(:first)'),
-				$defensesTrs = KOCFIA.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)');
-
-			var i, j, k, length = KOCFIA.citiesKey.length, subLength;
+				$defensesTrs = KOCFIA.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)'),
+				i, j, k, m, b, r, n, s,
+				length = KOCFIA.citiesKey.length,
+				subLength, population, hapiness,
+				cityKey, stats, seed, rowsLength,
+				barbariansRes, barbariansTroops,
+				marches, marche, populationModifier,
+				time, factor, bonusG, bonusW, fort,
+				line, type, $tds, $td, stock, stockInSeed,
+				take, substract, bonusK, brLength,
+				base, total, nbLine, d, timestamp,
+				keys = ['gold', 'food', 'wood', 'stone', 'ore'],
+				guardianBase = {gold: 0, food: 0, wood: 0, stone: 0, ore: 0};
 			for( i = 0; i < length; i += 1 ){
-				var cityKey = KOCFIA.citiesKey[i],
-					stats = window.seed.citystats[ cityKey ],
-					seed = {
-						pop: stats.pop,
-						gold: stats.gold,
-						res: window.seed.resources[ cityKey ],
-						units: window.seed.units[ cityKey ],
-						guardian: window.seed.guardian[ cityKey ],
-						knights: window.seed.knights[ cityKey ],
-						wilds: window.seed.wilderness[ cityKey ],
-						fortifications: window.seed.fortifications[ cityKey ]
-					};
+				cityKey = KOCFIA.citiesKey[i];
+				stats = window.seed.citystats[ cityKey ];
+				seed = {
+					pop: stats.pop,
+					gold: stats.gold,
+					res: window.seed.resources[ cityKey ],
+					units: window.seed.units[ cityKey ],
+					guardian: window.seed.guardian[ cityKey ],
+					knights: window.seed.knights[ cityKey ],
+					wilds: window.seed.wilderness[ cityKey ],
+					fortifications: window.seed.fortifications[ cityKey ]
+				};
 
 				//barbarian camps
-					var barbariansRes = [],
-						barbariansTroops = [],
-						marches = window.seed.queue_atkp[ cityKey ];
+					barbariansRes = [];
+					barbariansTroops = [];
+					marches = window.seed.queue_atkp[ cityKey ];
 					if( marches ){
-						for( var m in marches ){
+						for( m in marches ){
 							if( marches.hasOwnProperty(m) ){
-								var marche = marches[m];
+								marche = marches[m];
 								//cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN: 9
 								//cm.BOT_STATUS.BOT_MARCH_MARCHING: 1,
 								//cm.BOT_STATUS.BOT_MARCH_RETURNING: 2,
 								//cm.BOT_STATUS.BOT_MARCH_RESTING: 7,
 								if( marche.marchType == 9 ){
 									//get attack duration (go, fight, return, unload, repeat)
-									var time = parseFloat(marche.returnUnixTime) - parseFloat(marche.marchUnixTime) + (parseFloat(marche.restPeriod) / 60);
+									time = parseFloat(marche.returnUnixTime) - parseFloat(marche.marchUnixTime) + (parseFloat(marche.restPeriod) / 60);
 
 									//how many attacks in one hour
-									var factor = 3600 / time;
+									factor = 3600 / time;
 
 									//get resources in one hour
-									var barbarianRes = [ factor * parseFloat(marche.gold), factor * parseFloat(marche.resource1), factor * parseFloat(marche.resource2), factor * parseFloat(marche.resource3), factor * parseFloat(marche.resource4) ];
+									barbarianRes = [ factor * parseFloat(marche.gold), factor * parseFloat(marche.resource1), factor * parseFloat(marche.resource2), factor * parseFloat(marche.resource3), factor * parseFloat(marche.resource4) ];
 
 									barbariansRes.push( barbarianRes );
 
@@ -2562,22 +2572,22 @@ jQuery(document).ready(function(){
 					}
 
 				//population
-					var line = 0;
+					line = 0;
 					subLength = KOCFIA.population.length;
 					for( j = 0; j < subLength; j += 1 ){
 						var type = KOCFIA.population[j];
 						if( type.rows ){
 							var rowsLength = type.rows;
 							for( k = 0; k < rowsLength; k += 1 ){
-								var inSeed = KOCFIA.inSeed.population[ type.name[k] ],
-									$tds = $popTrs.eq(line).find('td'),
-									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-									n = null;
+								inSeed = KOCFIA.inSeed.population[ type.name[k] ];
+								$tds = $popTrs.eq(line).find('td');
+								$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+								n = null;
 								if( inSeed ){
 									n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 								} else if( type.name[k] == 'availablePopulation' ){
-									var take = KOCFIA.inSeed.population[ type.name[0] ],
-										substract = KOCFIA.inSeed.population[ type.name[2] ];
+									take = KOCFIA.inSeed.population[ type.name[0] ];
+									substract = KOCFIA.inSeed.population[ type.name[2] ];
 
 									n = parseFloat( seed[ take.var ][ take.index ] ) - parseFloat( seed[ substract.var ][ substract.index ] );
 								}
@@ -2596,11 +2606,11 @@ jQuery(document).ready(function(){
 							}
 
 						} else {
-							var inSeed = KOCFIA.inSeed.population[ type.name ],
-								$tds = $popTrs.eq(line).find('td'),
-								$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+							inSeed = KOCFIA.inSeed.population[ type.name ];
+							$tds = $popTrs.eq(line).find('td');
+							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 							if( inSeed ){
-								var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
+								n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 
 								$td.html( Shared.format( n ) )
 									.attr('title', Shared.readable( n ))
@@ -2619,15 +2629,15 @@ jQuery(document).ready(function(){
 				//resources
 					subLength = KOCFIA.resources.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var type = KOCFIA.resources[j],
-							inSeed = KOCFIA.inSeed.resources[ type.name ],
-							$tds = $resTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						type = KOCFIA.resources[j];
+						inSeed = KOCFIA.inSeed.resources[ type.name ];
+						$tds = $resTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 						if( inSeed ){
 							if( inSeed.hasOwnProperty('type') ){
-								var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
+								n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
 							} else {
-								var n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
+								n = parseFloat( seed[ inSeed.var ][ inSeed.index ] );
 							}
 
 							if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
@@ -2645,12 +2655,12 @@ jQuery(document).ready(function(){
 				//resources cap
 					subLength = KOCFIA.resources_cap.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var type = KOCFIA.resources_cap[j],
-							inSeed = KOCFIA.inSeed.resources_cap[ type.name ],
-							$tds = $resCapTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						type = KOCFIA.resources_cap[j];
+						inSeed = KOCFIA.inSeed.resources_cap[ type.name ];
+						$tds = $resCapTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 						if( inSeed ){
-							var n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
+							n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
 							if( n > 0 ) n = n / 3600;
 
 							$td.html( Shared.format( n ) )
@@ -2664,25 +2674,23 @@ jQuery(document).ready(function(){
 					}
 
 				//resources production detail
-					var base = [],
-						total = [0, 0, 0, 0, 0],
-						line = 0,
-						nbLine = KOCFIA.resources_production_detail.length / 4,
-						d = new Date(),
-						timestamp = parseFloat(d.getTime() / 1000);
+					base = [];
+					total = [0, 0, 0, 0, 0];
+					line = 0;
+					nbLine = KOCFIA.resources_production_detail.length / 4;
+					d = new Date();
+					timestamp = parseFloat(d.getTime() / 1000);
 
 					//guardian bonus
-						var keys = ['gold', 'food', 'wood', 'stone', 'ore'],
-							guardianBase = { gold: 0, food: 0, wood: 0, stone: 0, ore: 0 },
-							guardianBonus = ( seed.guardian ? seed.guardian[0] : {} );
+						guardianBonus = ( seed.guardian ? seed.guardian[0] : {} );
 						if( guardianBonus.hasOwnProperty('type') && guardianBonus.type == -1 ) guardian.type = 'wood';
 
-						var bonusG = $.extend({}, guardianBase, guardianBonus);
+						bonusG = $.extend({}, guardianBase, guardianBonus);
 
 					//knight bonus
-						var bonusK = 0;
+						bonusK = 0;
 						if( seed.knights ){
-							var k = seed.knights[ "knt" + window.seed.leaders[cityKey].resourcefulnessKnightId ];
+							k = seed.knights[ "knt" + window.seed.leaders[cityKey].resourcefulnessKnightId ];
 							if( k ){
 								bonusK = parseFloat(k.resourcefulness);
 								if( k.resourcefulnessBoostExpireUnixtime > timestamp ){
@@ -2692,33 +2700,33 @@ jQuery(document).ready(function(){
 						}
 
 					//wild bonus
-						var bonusW = [0, 0, 0, 0, 0];
+						bonusW = [0, 0, 0, 0, 0];
 						if( seed.wilds ){
 							subLength = seed.wilds.length;
 							for( j = 0; j < subLength; j += 1 ){
-								var b = seed.wilds[ j ].tileType[0];
+								b = seed.wilds[ j ].tileType[0];
 								bonusW[ b ] += parseInt( seed.wilds[ j ].tileLevel, 10);
 							}
 						}
 
 					//population modifier
-						var populationModifier = 1,
-							population = parseFloat(seed.pop[0]),
-							hapiness = parseFloat(seed.pop[3]);
+						populationModifier = 1;
+						population = parseFloat(seed.pop[0]);
+						hapiness = parseFloat(seed.pop[3]);
 						if( hapiness > population ){
 							populationModifier = population / hapiness;
 						}
 
 					subLength = KOCFIA.resources_production_detail.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var type = KOCFIA.resources_production_detail[j],
-							r = j + 1; //no gold
+						type = KOCFIA.resources_production_detail[j];
+						r = j + 1; //no gold
 						if( type.rows ){
-							var rowsLength = type.rows;
+							rowsLength = type.rows;
 							for( k = 0; k < rowsLength; k += 1 ){
-								var $tds = $resProdDetailTrs.eq(line).find('td'),
-									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-									n = null;
+								$tds = $resProdDetailTrs.eq(line).find('td');
+								$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+								n = null;
 								//'base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'
 								switch( type.label[k] ){
 									case 'base':
@@ -2768,11 +2776,11 @@ jQuery(document).ready(function(){
 				//resources from barbarian camps
 					subLength = KOCFIA.resources_production_barbarian.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var $tds = $resProdBarbarianTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-							n = 0;
+						$tds = $resProdBarbarianTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						n = 0;
 						if( barbariansRes.length ){
-							var brLength = barbariansRes.length
+							brLength = barbariansRes.length;
 							for( k = 0; k < brLength; k += 1 ){
 								n += barbariansRes[k][j];
 							}
@@ -2789,20 +2797,20 @@ jQuery(document).ready(function(){
 					}
 
 				//resources consumption
-					var line = 0;
+					line = 0;
 					subLength = KOCFIA.resources_consumption.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var type = KOCFIA.resources_consumption[j];
+						type = KOCFIA.resources_consumption[j];
 						if( type.rows ){
-							var rowsLength = type.rows;
+							rowsLength = type.rows;
 							for( k = 0; k < rowsLength; k += 1 ){
-								var $tds = $resConsoTrs.eq(line).find('td'),
-									$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-									n = null;
+								$tds = $resConsoTrs.eq(line).find('td');
+								$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+								n = null;
 								//'dépense', 'formation'
 								switch( type.label[k] ){
 									case 'dépense':
-										var inSeed = KOCFIA.inSeed.resources_consumption[ type.name ];
+										inSeed = KOCFIA.inSeed.resources_consumption[ type.name ];
 										if( inSeed ){
 											if( inSeed.hasOwnProperty('type') ){
 												n = parseFloat( seed[ inSeed.var ][ inSeed.type ][ inSeed.index ] );
@@ -2836,8 +2844,8 @@ jQuery(document).ready(function(){
 				//resources production total
 					subLength = KOCFIA.resources_production_total.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var $tds = $resProdTotalTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						$tds = $resProdTotalTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 
 						if( total[j] ){
 							total[j] += 100;
@@ -2852,11 +2860,11 @@ jQuery(document).ready(function(){
 				//resources autonomy
 					subLength = KOCFIA.resources_autonomy.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var stock = KOCFIA.resources[j],
-							stockInSeed = KOCFIA.inSeed.resources[ stock.name ],
-							$tds = $resAutonomyTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-							s = 0;
+						stock = KOCFIA.resources[j];
+						stockInSeed = KOCFIA.inSeed.resources[ stock.name ];
+						$tds = $resAutonomyTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						s = 0;
 						if( stockInSeed ){
 							if( stockInSeed.hasOwnProperty('type') ){
 								s = parseFloat( seed[ stockInSeed.var ][ stockInSeed.type ][ stockInSeed.index ] );
@@ -2881,12 +2889,12 @@ jQuery(document).ready(function(){
 				//troops
 					subLength = KOCFIA.troops.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var type = KOCFIA.troops[j],
-							$tds = $troopsTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-							n = null;
+						type = KOCFIA.troops[j];
+						$tds = $troopsTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						n = null;
 
-						if( seed.units[ type.name ] ){
+						if( seed.units.hasOwnProperty(type.name) ){
 							n = parseFloat( seed.units[ type.name ] );
 						}
 
@@ -2904,10 +2912,10 @@ jQuery(document).ready(function(){
 				//troops barbarian
 					subLength = KOCFIA.troops_barbarian.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var type = KOCFIA.troops_barbarian[j],
-							$tds = $troopsBarbarianTrs.eq(j).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-							n = null;
+						type = KOCFIA.troops_barbarian[j];
+						$tds = $troopsBarbarianTrs.eq(j).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						n = null;
 
 						if( barbariansTroops.length && barbariansTroops[j] ){
 							n = parseFloat( barbariansTroops[j] );
@@ -2927,10 +2935,10 @@ jQuery(document).ready(function(){
 				//defenses
 					subLength = KOCFIA.defenses.length;
 					for( j = 0; j < subLength; j += 1 ){
-						var fort = KOCFIA.defenses[j];
-						var $tds = $defensesTrs.eq( j ).find('td'),
-							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i ),
-							n = null;
+						fort = KOCFIA.defenses[j];
+						$tds = $defensesTrs.eq( j ).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						n = null;
 
 						if( seed.fortifications.hasOwnProperty( fort.name ) ){
 							n = parseFloat( seed.fortifications[ fort.name ] );
@@ -8269,13 +8277,157 @@ jQuery(document).ready(function(){
 			Shared.storeConf();
 		};
 
-		KOCFIA.transport.storeAutomaticRules = function(){
+		KOCFIA.transport.storeAutomaticRules = function(){'
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport storeAutomaticRules function');
 			localStorage.setObject('kocfia_transport_rules_' + KOCFIA.storeUniqueId, KOCFIA.transport.rules);
 		};
 
+		KOCFIA.transport.getUnits = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getUnits function');
+			var cityKeyFrom = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked').val(),
+				units = window.seed.units[ cityKeyFrom ],
+				cityKeyTo = KOCFIA.transport.$manualForm.find('.to').find('input').filter(':checked').val(),
+				code = '', n, i, u, label;
+
+			if( units.hasOwnProperty('unt1') ){
+				n = parseInt(units['unt1'], 10);
+				if( n > 0 ){
+					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt1' );
+						code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt1" value="unt1">';
+						code += '<label for="kocfia-transport-manual-unt1" title="'+ Shared.readable(n) +'">';
+						code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg">';
+						code += '&nbsp;Ravitalleur ('+ Shared.format(n) +')';
+						code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
+						code += '</label>';
+				}
+			}
+
+			if( units.hasOwnProperty('unt7') ){
+				n = parseInt(units['unt7'], 10);
+				if( n > 0 ){
+					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt7' );
+					code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt7" value="unt7">';
+					code += '<label for="kocfia-transport-manual-unt7" title="'+ Shared.readable(n) +'">';
+					code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg">';
+					code += '&nbsp;Cavalerie ('+ Shared.format(n) +')';
+					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
+					code += '</label>';
+				}
+			}
+
+			if( units.hasOwnProperty('unt9') ){
+				n = parseInt(units['unt9'], 10);
+				if( n > 0 ){
+					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt9' );
+					code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt9" value="unt9">';
+					code += '<label for="kocfia-transport-manual-unt9" title="'+ Shared.readable(n) +'">';
+					code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg">';
+					code += '&nbsp;Wagon ('+ Shared.format(n) +')';
+					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
+					code += '</label>';
+				}
+
+
+			code += '<select name="troop-list">';
+			for( u in units ){
+				if( units.hasOwnProperty(u) && u != 'unt1' && u != 'unt7' && u != 'unt9' ){
+					n = parseInt(units[ u ], 10);
+					if( n > 0 ){
+						for( i = 0; i < KOCFIA.troops.length; i += 1 ){
+							if( KOCFIA.troops[i].name == u ){
+								label = KOCFIA.troops[i].label;
+								break;
+							}
+						}
+
+						d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt7' );
+
+						code += '<option value="'+ u +'" title="'+ Shared.readable(n) +'">'+ label +' ('+ Shared.format(n) +')';
+						code += (d != '' ? '- '+ Shared.readableDuration( d ) : '') +'</option>';
+					}
+				}
+			}
+			code += '</select>';
+
+			return code;
+		};
+
+		KOCFIA.transport.getResources = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getResources function');
+			var code = '', i, type, inSeed, n,
+				res = window.seed.resources[ cityKey ],
+				gold = window.seed.citystats[ cityKey ];
+
+			for( i = 0; i < KOCFIA.resources.length; i += 1 ){
+				type = KOCFIA.resources[j];
+				inSeed = KOCFIA.inSeed.resources[ type.name ];
+
+				if( inSeed ){
+					if( inSeed.var == 'gold' ){
+						n = parseFloat( gold[ inSeed.index ] );
+					} else {
+						n = parseFloat( res[ inSeed.type ][ inSeed.index ] );
+					}
+
+					if( n > 0 ){
+						if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
+
+						code += '<button rel="'+ r +'" data-label="'+ type.label +'" title="'+ Shared.readable(n) +'">'+ type.label +'('+ Shared.format(n) +')</button>';
+					}
+				}
+			}
+			return code;
+		};
+
+		KOCFIA.transport.getDuration = function( cityKeyFrom, cityKeyTo, unit ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getDuration function');
+
+			if( cityKeyFrom && cityKeyTo ){
+				return 1;
+			} else {
+				return '';
+			}
+		};
+
 		KOCFIA.transport.getManualForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getManualForm function');
+			var c, city;
+
+			var form = '<h3>Transport Manuel</h3>';
+			form += '<div class="manual-form">';
+
+			form += '<label>Depuis&nbsp;:&nbsp;</label><div class="from">';
+			for( c in KOCFIA.cities ){
+				if( KOCFIA.cities.hasOwnProperty(c) ){
+					city = KOCFIA.cities[ c ];
+					form += '<input type="radio" name="from" value="'+ c +'" id="kocfia-transport-manual-from-'+ c +'"><label for="kocfia-transport-manual-from-'+ c +'">'+ city.roman +'</label>';
+				}
+			}
+			form += '</div>';
+
+			form += '<br><label>Vers&nbsp;:&nbsp;</label><input type="text" name="coord" class="coord">';
+			form += '<div class="to">';
+			for( c in KOCFIA.cities ){
+				if( KOCFIA.cities.hasOwnProperty(c) ){
+					city = KOCFIA.cities[ c ];
+					form += '<input type="radio" name="from" value="'+ c +'" id="kocfia-transport-manual-from-'+ c +'"><label for="kocfia-transport-manual-from-'+ c +'">'+ city.roman +'</label>';
+				}
+			}
+			form += '</div>';
+
+			form += '<br><label>Troupes&nbsp;:&nbsp;</label>';
+			form += '<div class="troop">';
+			form += '</div>'
+
+			form += '<br><label>Ressources</label>';
+			form += '<div class="resources">';
+			form += '<div class="available"></div>';
+			form += '<div class="chosen"></div>';
+			form += '</div>';
+
+			form += '</div>';
+
+			return form;
 		};
 
 		KOCFIA.transport.getSupplyForm = function(){
@@ -8296,6 +8448,72 @@ jQuery(document).ready(function(){
 
 		KOCFIA.transport.addListeners = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport addListeners function');
+
+			KOCFIA.transport.$manualForm.find('.from, .to').buttonset();
+			KOCFIA.transport.$manualForm
+				//city from and to
+				.on('change', '.from input', function(){
+					var code = KOCFIA.transport.getResources( this.value );
+					var $res = KOCFIA.transport.$manualForm.find('.resources');
+					$res.find('.available').empty().append( code ).buttonset();
+					$res.find('.chosen').empty();
+				})
+				.on('change', '.from input, .to input[type=radio]', function(){
+					var code = KOCFIA.transport.getUnits();
+					KOCFIA.transport.$manualForm.find('.troop').empty().append( code );
+				})
+				.on('keyup', '.to input[type=text]', function(){
+
+					var code = KOCFIA.transport.getUnits();
+					KOCFIA.transport.$manualForm.find('.troop').empty().append( code );
+				})
+				//revert radios or select for troops change
+				.on('change', '.troop input, .troop select', function(){
+					if( $(this).is('input') ){
+						KOCFIA.transport.$manualForm.find('.troop').find('select').val('');
+					} else {
+						KOCFIA.transport.$manualForm.find('.troop').find('input').prop('checked', false);
+					}
+				})
+				//resources
+				.on('click', '.resources .available button', function(){
+					var $this = $(this),
+						label = $this.data('label'),
+						res = $this.attr('rel'),
+						$chosen = KOCFIA.transport.$manualForm.find('.resources').find('.chosen'),
+						$chosenRes = $chosen.find('input'),
+						chosenRes = $chosenRes.map(function(){ return this.rel; }).get();
+
+					if( $.inArray(res, chosenRes) ){
+						$chosen.filter('[rel='+ res +']').focus();
+					} else {
+						var code = '', i, r;
+						/*{name: 'gold', label: 'Or', key: 'rec0', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
+						  {name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
+						  {name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
+						  {name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
+						  {name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+						  {name: 'resource7', label: 'Pierre d\'Ether', key: '7', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},*/
+
+						for( i = 0; i < KOCFIA.resources.length; i += 1 ){
+							r = KOCFIA.resources[i];
+							if( r.name == res ){
+								code += '<div class="res">';
+								code += '<label><img src="'+ r.icon +'">&nbsp;'+ label +'</label>';
+								code += '<input type="text" class="qty" name="'+ res +'" value="">';
+								code += '<span class="ui-icon ui-icon-trash remove"></span>';
+								code += '</div>';
+								break;
+							}
+						}
+
+						$chosen.append( code );
+					}
+				})
+				.on('click', '.resources .remove', function(){
+					$(this).closest('div').remove();
+				})
+			;
 		};
 
 	/* MAP VISUALISATION WITH CANVAS */

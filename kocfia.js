@@ -8488,13 +8488,6 @@ jQuery(document).ready(function(){
 						$chosen.filter('[rel='+ res +']').focus();
 					} else {
 						var code = '', i, r;
-						/*{name: 'gold', label: 'Or', key: 'rec0', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-						  {name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-						  {name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-						  {name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-						  {name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-						  {name: 'resource7', label: 'Pierre d\'Ether', key: '7', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},*/
-
 						for( i = 0; i < KOCFIA.resources.length; i += 1 ){
 							r = KOCFIA.resources[i];
 							if( r.name == res ){

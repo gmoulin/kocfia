@@ -19,6 +19,3097 @@
 			var domainName = 'caval314';
 			var roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
 			var resourceinfo = {"0":"Gold","1":"Food","2":"Wood","3":"Stone","4":"Ore","5":"Population","6":"Time","7":"Aetherstone","rec0":"Or","rec1":"Nourriture","rec2":"Bois","rec3":"Pierre","rec4":"Minerai","rec5":"Population","rec6":"Heure"};
+			var stimgUrl = 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/';
+			var itemlist = {
+				i1: {
+					name: "Sablier d'Ecuyer",
+					description: "R\u00e9duis le temps de construction ou de recherche \u00e0 une minute",
+					price: 1,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i2: {
+					name: "Sablier de Chevalier",
+					description: "R\u00e9duis le temps de construction ou de recherche \u00e0 15 minutes",
+					price: 5,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i3: {
+					name: "Le Sablier de Gueni\u00e8vre",
+					description: "R\u00e9duis le temps de construction ou de recherche d'une heure",
+					price: 10,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i4: {
+					name: "Le Sablier de Morgane",
+					description: "R\u00e9duis le temps de construction ou de recherche de 2 heures et demi",
+					price: 20,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i5: {
+					name: "Le Sablier d'Arthur",
+					description: "R\u00e9duis le temps de construction ou de recherche de 8 heures",
+					price: 50,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i6: {
+					name: "Le Sablier de Merlin",
+					description: "R\u00e9duis le temps de construction ou de recherche de 15 heures",
+					price: 80,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i7: {
+					name: "Sablier Divin",
+					description: "R\u00e9duis le temps de construction ou de recherche de 24 heures",
+					price: 120,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i8: {
+					name: "Sablier Epique",
+					description: "R\u00e9duis le temps de construction ou de recherche de 2 jours et demi",
+					price: 275,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i9: {
+					name: "Dragon Frappeur",
+					description: "D\u00e9molir un de tes b\u00e2timents tout de suite",
+					price: 12,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i10: {
+					name: "Sablier l\u00e9gendaire",
+					description: "R\u00e9duis le temps de construction ou de recherche de 4 jours",
+					price: 430,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i26: {
+					name: "Outils d'assaut",
+					description: "R\u00e9duis le temps de construction des unit\u00e9s D\u00e9fensives restantes de 30%",
+					price: 35,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i36: {
+					name: "Tutelle de Lancelot",
+					description: "R\u00e9duis le temps restant d'entra\u00eenement des unit\u00e9s de 30%",
+					price: 30,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i37: {
+					name: "Tutelle d'Arthur",
+					description: "R\u00e9duis le temps restant d'entra\u00eenement des unit\u00e9s de 50%",
+					price: 100,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i38: {
+					name: "Tutelle de Merlin",
+					description: "R\u00e9duis le temps restant d'entra\u00eenement des unit\u00e9s de 70%",
+					price: 150,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i49: {
+					name: "Portail Caravane",
+					description: "Termine imm\u00e9diatement le transport vers le/ du march\u00e9",
+					price: 8,
+					tradable: null,
+					category: 2,
+					subCategory: 0
+				},
+				i55: {
+					name: "Ailes Vertes de Griffon",
+					description: "Diminue le temps d'une marche de 25%",
+					price: 8,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i57: {
+					name: "Ailes de Dragon Rouge",
+					description: "Diminue le temps d'une marche de 50%",
+					price: 20,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i69: {
+					name: "Exploration instantan\u00e9e",
+					description: "Pour une petite ballade, rien ne vaut les Portails de Refuge et les Colombes de Paix. Contient : x2 Portail de Refuge, x2 Colombes de Paix",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i101: {
+					name: "Jour de Prosp\u00e9rit\u00e9",
+					description: "Augmente le revenu de l'imp\u00f4t de 100% pour 24 heures",
+					price: 45,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i102: {
+					name: "Semaine de Prosp\u00e9rit\u00e9",
+					description: "Augmente le revenu de l'imp\u00f4t de 100% pour 7 jours.",
+					price: 280,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i111: {
+					name: "Pri\u00e8re pour les R\u00e9coltes",
+					description: "Augmente la production d'Aliments de 25% pour 24 heures",
+					price: 9,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i112: {
+					name: "Sacrifice pour les R\u00e9coltes",
+					description: "Augmente la production d'Aliments de 25% pour 7 jours.",
+					price: 50,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i121: {
+					name: "B\u00e9n\u00e9diction Druidique",
+					description: "Augmente la production de Bois de 25% pour 24 heures",
+					price: 9,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i122: {
+					name: "C\u00e9r\u00e9monie Druidique",
+					description: "Augmente la production de Bois de 25% pour 7 jours.",
+					price: 50,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i131: {
+					name: "Nain Tailleur de Pierre",
+					description: "Augmente la production de Pierres de 25% pour 24 heures",
+					price: 9,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i132: {
+					name: "Equipe de Nains Carriers",
+					description: "Augmente la production de Pierres  de 25% pour 7 jours.",
+					price: 50,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i141: {
+					name: "Outils de Mine des Nains",
+					description: "Augmente la production de Minerai de 25% pour 24 heures",
+					price: 9,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i142: {
+					name: "Aide des Nains",
+					description: "Augmente la production de Minerai de 25% pour 7 jours.",
+					price: 50,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i211: {
+					name: "Rose de Charisme",
+					description: "La r\u00e9compense augmente le sens Politique du Chevalier de 25% . Dure 7 jours.",
+					price: 40,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i221: {
+					name: "Le Gant du Courage",
+					description: "La r\u00e9compense augmente la Combativit\u00e9 du Chevalier de 25%. Dure 7 jours.",
+					price: 40,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i231: {
+					name: "Miroir de la Connaissance",
+					description: "La r\u00e9compense augmente l'Intelligence du Chevalier de 25% . Dure 7 jours.",
+					price: 40,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i241: {
+					name: "Gants du Rassemblement",
+					description: "La r\u00e9compense augmente l'Ing\u00e9niosit\u00e9 du Chevalier de 25% . Dure 7 jours.",
+					price: 40,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i261: {
+					name: "Soif de Sang",
+					description: "Augmente l'Attaque des unit\u00e9s de 20% pour 24 heures.",
+					price: 10,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i262: {
+					name: "Fr\u00e9n\u00e9sie de sang",
+					description: "Augmente l&#39;Attaque des unit\u00e9s de 20% pour 7 jours.",
+					price: 60,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i271: {
+					name: "Peau d'Ecorce",
+					description: "Augmente la D\u00e9fense des unit\u00e9s de 20% pour 24 heures.",
+					price: 10,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i272: {
+					name: "Peau de Gargouille",
+					description: "Augmente la D\u00e9fense des unit\u00e9s de 20% pour 7 jours.",
+					price: 60,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i273: {
+					name: "Corne d'Abondance",
+					description: "R\u00e9duis les besoins en Nourriture des troupes de 50% pendant 8 heures.",
+					price: 40,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i274: {
+					name: "Corne de G\u00e9n\u00e9rosit\u00e9",
+					description: "R\u00e9duis les besoins en Nourriture des troupes de 50% pendant 24 heures.",
+					price: 110,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i275: {
+					name: "Corne de Majest\u00e9",
+					description: "R\u00e9duit le besoin en Nourriture de tes Troupes de 50% pendant 3 jours.",
+					price: 320,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i276: {
+					name: "Sac renforc\u00e9",
+					description: "Augmente la capacit\u00e9 de charge des troupes de 25% pour toutes les marches se finissant dans l'heure qui suit.",
+					price: 15,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i277: {
+					name: "Sac solidement renforc\u00e9",
+					description: "Augmente la capacit\u00e9 de charge des troupes de 25% pour toutes les marches se finissant dans 2 heures.",
+					price: 22,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i278: {
+					name: "Sac fortement renforc\u00e9",
+					description: "Augmente la capacit\u00e9 de charge des troupes de 25% pour toutes les marches se finissant dans 4 heures.",
+					price: 40,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i279: {
+					name: "Ailes d'Aigle bleu",
+					description: "Diminue le temps de retour de marches de 50% pour 1 heure. Seulement applicable aux marches commenc\u00e9es dans l'heure.",
+					price: 15,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i280: {
+					name: "Fureur sanguinaire",
+					description: "Augmente l'attaque des troupes de 50% pendant 4 heures.",
+					price: 90,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i281: {
+					name: "Peau de fer",
+					description: "Augmente la d\u00e9fense des troupes de 50% pendant 4 heures.",
+					price: 90,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i282: {
+					name: "Banni\u00e8re de Loyaut\u00e9",
+					description: "Augmente la sant\u00e9 des troupes de 10% pendant 24h",
+					price: 12,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i283: {
+					name: "Banni\u00e8re de Vigor",
+					description: "Augmente la sant\u00e9 des troupes de 10% pendant 7j",
+					price: 70,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i284: {
+					name: "Corne de Samhain",
+					description: "R\u00e9duis le besoins alimentaires dees troupes de 50% pendant 7j",
+					price: 735,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i285: {
+					name: "Auras of Authority",
+					description: "Increases the maximum number of troops per march by 15% for 1 hour.",
+					price: 80,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i286: {
+					name: "Auras of Dominion",
+					description: "Increases the maximum number of troops per march by 30% for 1 hour.",
+					price: 160,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i351: {
+					name: "Vents Fertiles",
+					description: "Augmente  ta limite de Population de 20% ou de 100 habitants. Cela ne marche pas si la Population actuelle atteint la limite de Population.",
+					price: 40,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i355: {
+					name: "Hypnose de Masse",
+					description: "Augmente imm\u00e9diatement le Bonheur \u00e0 100.",
+					price: 100,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i361: {
+					name: "Entra\u00eene-toi avec Kay",
+					description: "Am\u00e9liore l'XP du Chevalier de 1000 points OU son Niveau actuel de +8%",
+					price: 8,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i362: {
+					name: "Entra\u00eene-toi avec Galahad",
+					description: "Am\u00e9liore l'XP du Chevalier de 10.000 points OU son Niveau actuel de +30%",
+					price: 30,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i363: {
+					name: "Entra\u00eene-toi avec Arthur",
+					description: "Am\u00e9liore l'XP du Chevalier de 100.000 points OU son Niveau actuel de +100%",
+					price: 100,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i401: {
+					name: "Inspiration Divine",
+					description: "Te permet de moderniser un b\u00e2timent et de passer du niveau 9 \u00e0 10.",
+					price: 45,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i402: {
+					name: "Providence Divine",
+					description: "T'autorise \u00e0 \u00e9lever le 1 de ton ch\u00e2teau au niveau 2",
+					price: 200,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i403: {
+					name: "Dragon Frappeur",
+					description: "Un moine et un noble marchant",
+					price: 55,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i404: {
+					name: "B\u00e9n\u00e9diction Druidique",
+					description: "Une reine par\u00e9e de ses atours",
+					price: 220,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i501: {
+					name: "Coffre d'Ecuyer",
+					description: "Re\u00e7ois-en 1 \u00e0 3 de chacune : Armoiries de Sire Bor, Armoiries de Sire Ector et Armoiries de Sire Kay",
+					price: 90,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i502: {
+					name: "Coffre de Chevalier",
+					description: "Re\u00e7ois-en 1 \u00e0 3 de chacune : Armoiries de Sire Bedivere, Armoiries de Sire Gawain et Armoiries de Sire Perceval",
+					price: 150,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i503: {
+					name: "Coffre du Seigneur",
+					description: "Re\u00e7ois-en 1 \u00e0 3 de chacune : Armoiries de Sire Galaad, Armoiries de Sire Lancelot et Armoiries du Roi Arthur",
+					price: 250,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i504: {
+					name: "Coffre de Fey",
+					description: "Contient entre 1 et 3 Sceaux de Morgane, 1 et 3 sceaux de Mordred, 1 et 3 sceaux du Roi Cerf.",
+					price: 350,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i505: {
+					name: "Coffre d'Avalon",
+					description: "Contient 1 \u00e0 3 Sceaux de Pendragon, 1 \u00e0 3 Sceaux de la Dame du Lac, 1 \u00e0 3 Sceaux de Merlin.",
+					price: 400,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i511: {
+					name: "Chevalier Rouge",
+					description: "Te donne un Chevalier am\u00e9lior\u00e9 de niveau 10 \u00e0 15, \u00e0 comp\u00e9tences al\u00e9atoires",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i512: {
+					name: "Chevalier Bleu",
+					description: "Te donne un Chevalier am\u00e9lior\u00e9 au niveau 16 \u00e0 25, \u00e0 comp\u00e9tences al\u00e9atoires",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i513: {
+					name: "Le Chevalier Noir",
+					description: "Te donne un Chevalier am\u00e9lior\u00e9 au niveau 26 \u00e0 35, \u00e0 comp\u00e9tences al\u00e9atoires",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i514: {
+					name: "Chevalier Vert",
+					description: "Te donne un Chevalier am\u00e9lior\u00e9 au niveau 36 \u00e0 50, \u00e0 comp\u00e9tences al\u00e9atoires",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i521: {
+					name: "Jeunes Volontaires",
+					description: "Convoque 100-250 Hommes de Troupe de Ravitaillement 100-250 Miliciens.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i522: {
+					name: "Volontaires exp\u00e9riment\u00e9s",
+					description: "convoque 200-250 Eclaireurs, 200-300 Piquiers, 150-250 Paladins et 100-200 Archers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i523: {
+					name: "V\u00e9t\u00e9rans Volontaires",
+					description: "convoque 100-300 Cavalerie, 100-200 Cavalerie Lourde, et 200-450 Wagons de Ravitaillement.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i524: {
+					name: "Troupes volontaires pour le si\u00e8ge",
+					description: "Convoque 100-200 Balistes, 100-200 B\u00e9liers, et 150-350 Catapultes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i531: {
+					name: "R\u00e9compense myst\u00e9rieuse",
+					description: "Offre 2 ballots de 10.000 d'Or, de Nourriture, de Bois, de Pierres ou de Minerai pour ton Royaume.",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i598: {
+					name: "Jouer \u00e0 la roue de la chance",
+					description: "Used to track direct play for the wheel game in KoC, don't display on the frontend",
+					price: 25,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i599: {
+					name: "Jetons Magiques de Merlin",
+					description: "Te permet de jouer aux Bo\u00eetes Magiques de Merlin pour gagner un objet au hasard.",
+					price: 5,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i601: {
+					name: "Commandes Cachet\u00e9es",
+					description: "Te permet de d\u00e9signer un b\u00e2timent \u00e0 construire ou \u00e0 moderniser apr\u00e8s ta construction en cours.",
+					price: null,
+					tradable: null,
+					category: 7,
+					subCategory: 0
+				},
+				i610: {
+					name: "Pierres changeante",
+					description: "R\u00e9arrange tes b\u00e2timents",
+					price: null,
+					tradable: null,
+					category: 7,
+					subCategory: 0
+				},
+				i711: {
+					name: "Bouffon de la Cour",
+					description: "Augmente ton stock de Nourriture lorsque les joueurs visitent ta Cour",
+					price: 100,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i721: {
+					name: "Chiens de Chasse",
+					description: "Augmente le stock de Bois lorsque les joueurs visitent ta Cour",
+					price: 100,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i731: {
+					name: "Sculpteur Professionnel",
+					description: "Augmente le stock de Pierres lorsque les joueurs visitent ta Cour",
+					price: 100,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i741: {
+					name: "M\u00e9tallurgiste",
+					description: "Augmente le Minerai lorsque les joueurs visitent ta Cour",
+					price: 100,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i801: {
+					name: "Fen\u00eatre \u00e0 Vitrail 1",
+					description: "Un c\u0153ur bleu et rouge",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 800
+				},
+				i802: {
+					name: "Fen\u00eatre \u00e0 Vitrail 2",
+					description: "Une croix en Or",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 800
+				},
+				i803: {
+					name: "Fen\u00eatre \u00e0 Vitrail 3",
+					description: "Un griffon vert",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 800
+				},
+				i804: {
+					name: "Fen\u00eatre \u00e0 Vitrail 4",
+					description: "Un pommier",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 800
+				},
+				i805: {
+					name: "Fen\u00eatre \u00e0 Vitrail 5",
+					description: "Un dragon crachant du feu",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 800
+				},
+				i811: {
+					name: "Banni\u00e8re de Guerre 1",
+					description: "Un blason aux armes crois\u00e9es",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 810
+				},
+				i812: {
+					name: "Banni\u00e8re de Guerre 2",
+					description: "Un lion se cabrant",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 810
+				},
+				i813: {
+					name: "Banni\u00e8re de Guerre 3",
+					description: "Une fleur-de-lis",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 810
+				},
+				i814: {
+					name: "Banni\u00e8re de Guerre 4",
+					description: "Un aigle \u00e0 deux t\u00eates avec des lauriers",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 810
+				},
+				i815: {
+					name: "Banni\u00e8re de Guerre 5",
+					description: "TYPE_ARTICLE_COUR_DECOR_BANNIERES",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i821: {
+					name: "Tableau 1",
+					description: "Une reine par\u00e9e de ses atours",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 820
+				},
+				i822: {
+					name: "Tableau 2",
+					description: "Un bateau sur l'oc\u00e9an",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 820
+				},
+				i823: {
+					name: "Tableau 3",
+					description: "Un dragon rugissant",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 820
+				},
+				i824: {
+					name: "Tableau 4",
+					description: "Un moine et un noble marchant",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 820
+				},
+				i825: {
+					name: "Tableau 5",
+					description: "Un chevalier sur son destrier",
+					price: 50,
+					tradable: null,
+					category: 6,
+					subCategory: 820
+				},
+				i831: {
+					name: "Rideaux Rouges",
+					description: "Rideaux Rouges pour d\u00e9corer ta Cour. Cela changera les banni\u00e8res sur certains b\u00e2timents de ta Ville",
+					price: 25,
+					tradable: null,
+					category: 6,
+					subCategory: 830
+				},
+				i832: {
+					name: "Rideaux Bleus",
+					description: "Des Rideaux Bleus pour d\u00e9corer ta Cour. Pour changer les banni\u00e8res de quelques uns de tes b\u00e2timents en Ville.",
+					price: 25,
+					tradable: null,
+					category: 6,
+					subCategory: 830
+				},
+				i833: {
+					name: "Rideaux Pourpre",
+					description: "Des Rideaux Pourpre pour d\u00e9corer ta Cour. Cela changera les banni\u00e8res de certains b\u00e2timents de ta Ville",
+					price: 25,
+					tradable: null,
+					category: 6,
+					subCategory: 830
+				},
+				i834: {
+					name: "Rideaux Verts",
+					description: "Des Rideaux Verts pour d\u00e9corer ta cour. Pour changer les banni\u00e8res de quelques un de tes b\u00e2timents en Ville.",
+					price: 25,
+					tradable: null,
+					category: 6,
+					subCategory: 830
+				},
+				i835: {
+					name: "Rideaux Jaunes",
+					description: "Les Rideaux Jaunes pour d\u00e9corer ta Cour. Cela changera les banni\u00e8res sur certains b\u00e2timents de ta ville",
+					price: 25,
+					tradable: null,
+					category: 6,
+					subCategory: 830
+				},
+				i841: {
+					name: "Tr\u00f4ne 1",
+					description: "Petit tr\u00f4ne de bois",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 840
+				},
+				i842: {
+					name: "Tr\u00f4ne 2",
+					description: "Tr\u00f4ne moyen en bois",
+					price: 40,
+					tradable: null,
+					category: 6,
+					subCategory: 840
+				},
+				i843: {
+					name: "Tr\u00f4ne 3",
+					description: "Grand tr\u00f4ne de bois",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 840
+				},
+				i844: {
+					name: "Tr\u00f4ne 4",
+					description: "Tr\u00f4ne d'Argent",
+					price: 80,
+					tradable: null,
+					category: 6,
+					subCategory: 840
+				},
+				i845: {
+					name: "Tr\u00f4ne 5",
+					description: "Tr\u00f4ne en Or",
+					price: 100,
+					tradable: null,
+					category: 6,
+					subCategory: 840
+				},
+				i851: {
+					name: "R\u00e2telier d'Armes 1",
+					description: "Une petite quantit\u00e9 d'armes",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 850
+				},
+				i852: {
+					name: "R\u00e2telier d'Armes 2",
+					description: "Une petite quantit\u00e9 d'armes, incluant des \u00e9p\u00e9es",
+					price: 40,
+					tradable: null,
+					category: 6,
+					subCategory: 850
+				},
+				i853: {
+					name: "R\u00e2telier d'Armes 3",
+					description: "Quelques armes",
+					price: 60,
+					tradable: null,
+					category: 6,
+					subCategory: 850
+				},
+				i854: {
+					name: "R\u00e2telier d'Armes 4",
+					description: "Une cache d'armes",
+					price: 80,
+					tradable: null,
+					category: 6,
+					subCategory: 850
+				},
+				i855: {
+					name: "R\u00e2telier d'Armes 5",
+					description: "R\u00e2telier d'armes rempli.",
+					price: 100,
+					tradable: null,
+					category: 6,
+					subCategory: 850
+				},
+				i860: {
+					name: "Drapeau am\u00e9ricain",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i861: {
+					name: "Drapeau britannique",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i862: {
+					name: "Drapeau canadien",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i863: {
+					name: "Drapeau australien",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i864: {
+					name: "Drapeau su\u00e9dois",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i865: {
+					name: "Drapeau danois",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i866: {
+					name: "Drapeau norv\u00e9gien",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i867: {
+					name: "Drapeau italien",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i868: {
+					name: "Drapeau allemand",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i869: {
+					name: "Drapeau Fran\u00e7ais",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i870: {
+					name: "Drapeau autrichien",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i871: {
+					name: "Drapeau grec",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i872: {
+					name: "Drapeau irlandais",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i873: {
+					name: "Drapeau br\u00e9silien",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i874: {
+					name: "Drapeau suisse",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i875: {
+					name: "Drapeau finlandais",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i876: {
+					name: "Drapeau hollandais",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i877: {
+					name: "Drapeau chinois",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i878: {
+					name: "Drapeau russe",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i879: {
+					name: "Drapeau sud-cor\u00e9en",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat comme t\u00e9moin de ta fiert\u00e9",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i880: {
+					name: "Drapeau de pirate",
+					description: "Yarrr ! Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 de pirate !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i881: {
+					name: "Drapeau de la R\u00e9publique de Chine (Ta\u00efwan)",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i882: {
+					name: "Drapeau du Japon",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i883: {
+					name: "Drapeau de l'Espagne",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i884: {
+					name: "Drapeau de la Turquie",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i885: {
+					name: "Drapeau de l'Angleterre",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i886: {
+					name: "Drapeau de l'Ecosse",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i887: {
+					name: "Drapeau du Pays de Galles",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i888: {
+					name: "Drapeau des Philippines",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i889: {
+					name: "Drapeau du Mexique",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i890: {
+					name: "Banni\u00e8re d'obscurit\u00e9",
+					description: "Ce drapeau appara\u00eetra dans ta cour et dans le chat pour montrer ta fiert\u00e9 !",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i891: {
+					name: "Rideau Halloween",
+					description: "Rideau Halloween pour d\u00e9corer ta Cour. Cela changera les banni\u00e8res de ton ch\u00e2teau.",
+					price: 25,
+					tradable: null,
+					category: 6,
+					subCategory: 830
+				},
+				i892: {
+					name: "Drapeau de Don",
+					description: "Ce drapeau appara\u00eetra dans ta Cour et dans le Chat pour afficher ta fiert\u00e9!",
+					price: null,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i893: {
+					name: "Drapeau de Fey",
+					description: "Les Fey sont en route pour Camelot. Amis ou Ennemis?",
+					price: 20,
+					tradable: null,
+					category: 6,
+					subCategory: 860
+				},
+				i901: {
+					name: "Colombe de la Paix",
+					description: "Donne \u00e0 ta ville 12 heures de temps de paix. En temps de paix, tu ne peux ni attaquer ni \u00eatre attaqu\u00e9. Et tu ne peux pas utiliser la paix si tu es en cours d'attaque ou que tes unit\u00e9s avancent.",
+					price: 30,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i902: {
+					name: "Mode Vacances 3 Jours",
+					description: "Pour un temps limit\u00e9 seulement ! Besoin de faire un break? Mets-toi en Mode Vacances pour 3 jours. Offre \u00e0 ta ville 3 jours de paix, 50% de r\u00e9duction en besoin des troupes, et d\u00e9ploie la Brume d'Avalon. Le Mode Vacances prendra fin d\u00e8s que tu enverras les troupes au combat.",
+					price: 445,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i903: {
+					name: "Mode Vacances 7 Jours",
+					description: "Pour un temps limit\u00e9 seulement ! Mets-toi en Mode Vacances pour 7 jours.Ceci garantit \u00e0 toutes tes villes 7 jours de paix, 50% de r\u00e9duction en besoin des troupes, et d\u00e9ploie la Brume d'Avalon. Le Mode Vacances prendra fin d\u00e8s que tu enverras des troupes au combat.",
+					price: 970,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i911: {
+					name: "Portail du Refuge",
+					description: "T\u00e9l\u00e9porte ta ville vers un autre lieu al\u00e9atoire sur la Carte et place tes Villes sous la Brume d'Avalon pendant 7 jours.",
+					price: 30,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i912: {
+					name: "Portail de l'Ordre",
+					description: "T\u00e9l\u00e9porte ta ville vers un endroit sp\u00e9cifique de la Carte et place tes Villes sous les Brumes d'Avalon pendant 7 jours.",
+					price: 90,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i913: {
+					name: "reserve for rome",
+					description: "reserv for rome",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i914: {
+					name: "no scout",
+					description: "reserved by Rome",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i922: {
+					name: "La Cape de Merlin",
+					description: "Change ton nom de Seigneur ou de Dame.",
+					price: 90,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i923: {
+					name: "C\u00e9l\u00e9bration de Bapt\u00eame",
+					description: "Change le nom d'une de tes Villes.",
+					price: 10,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i924: {
+					name: "L'\u00e9chapp\u00e9e de Merlin",
+					description: "T\u00e9l\u00e9porte ta ville vers un endroit sp\u00e9cifique et change ton nom de Seigneur ou de Dame.",
+					price: 150,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i925: {
+					name: "diety changer",
+					description: "RESERVED BY GOR",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i926: {
+					name: "diety changer 2",
+					description: "RESERVED BY GOR",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i931: {
+					name: "Aura de Commandement",
+					description: "Augmente tes troupes au maximum afin d'augmenter la marche de 25%",
+					price: 20,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i932: {
+					name: "Aura de Conqu\u00eate",
+					description: "Augmente le maximum des troupes de 50 % pour une marche.",
+					price: 40,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i941: {
+					name: "Fontaine de Jouvence",
+					description: "Permet de r\u00e9assigner les points d'adresse gagn\u00e9s par ton Chevalier depuis le niveau 1. Une Fontaine de Jouvence est n\u00e9cessaire tous les 10 niveaux.",
+					price: 20,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i942: {
+					name: "Fontaine de Jouvence x5",
+					description: "Permet de r\u00e9assigner les points d'adresse gagn\u00e9s par ton Chevalier depuis le niveau 1. Une Fontaine de Jouvence est n\u00e9cessaire tous les 10 niveaux.",
+					price: 90,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i943: {
+					name: "Recharge d&#39;\u00e9nergie",
+					description: "RESERVED BY GOR",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i1001: {
+					name: "1.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 1.000 pi\u00e8ces  d'Or dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1002: {
+					name: "5.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 5.000 pi\u00e8ces  d'Or dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1003: {
+					name: "10.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 10.000 pi\u00e8ces  d'Or dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1004: {
+					name: "20.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 20.000 pi\u00e8ces  d'Or dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1005: {
+					name: "40.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 40.000 pi\u00e8ces  d'Or dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1006: {
+					name: "60.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 60.000 pi\u00e8ces d'Or dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1007: {
+					name: "80.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 80.000 pi\u00e8ces d'Or dans ta Ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1008: {
+					name: "100.000 pi\u00e8ces d'Or",
+					description: "D\u00e9p\u00f4t de 100.000 pi\u00e8ces d'Or dans ta Ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1011: {
+					name: "1.000 Unit\u00e9s de Nourriture",
+					description: "D\u00e9p\u00f4t de 1.000 Unit\u00e9s de Nourriture.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1012: {
+					name: "5.000 Unit\u00e9s de Nourriture",
+					description: "D\u00e9p\u00f4t de 5.000 Unit\u00e9s de Nourriture.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1013: {
+					name: "10.000 Unit\u00e9s de Nourriture",
+					description: "D\u00e9p\u00f4t de 10.000 Unit\u00e9s de Nourriture.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1014: {
+					name: "20.000 Unit. de Nourriture",
+					description: "D\u00e9p\u00f4t de 20.000 Unit\u00e9s de Nourriture.",
+					price: 6,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1015: {
+					name: "40.000 Unit. de Nourriture",
+					description: "D\u00e9p\u00f4t de 40.000 Unit\u00e9s de Nourriture.",
+					price: 10,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1016: {
+					name: "60.000 Unit\u00e9s de Nourriture",
+					description: "D\u00e9p\u00f4t de 60.000 Unit\u00e9s de Nourriture.",
+					price: 14,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1017: {
+					name: "80.000 unit\u00e9s de Nourriture",
+					description: "D\u00e9p\u00f4t de 80.000 unit\u00e9s de Nourriture dans ta Ville.",
+					price: 18,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1018: {
+					name: "100.000 unit\u00e9s de Nourriture",
+					description: "D\u00e9p\u00f4t de 100.000 unit\u00e9s de Nourriture dans ta Ville.",
+					price: 20,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1021: {
+					name: "1.000 Unit\u00e9s de de Bois",
+					description: "D\u00e9p\u00f4t de 1.000 Unit\u00e9s de Bois dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1022: {
+					name: "5.000 Unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 1.000 Unit\u00e9s de Bois dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1023: {
+					name: "10.000 Unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 10.000 Unit\u00e9s de Bois dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1024: {
+					name: "20.000 Unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 20.000 Unit\u00e9s de Bois dans ta ville.",
+					price: 6,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1025: {
+					name: "40.000 Unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 40.000 Unit\u00e9s de Bois dans ta ville.",
+					price: 10,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1026: {
+					name: "60.000 Unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 60.000 Unit\u00e9s de Bois dans la ville",
+					price: 14,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1027: {
+					name: "80.000 unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 80.000 unit\u00e9s de Bois dans ta Ville.",
+					price: 18,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1028: {
+					name: "100.000 unit\u00e9s de Bois",
+					description: "D\u00e9p\u00f4t de 100.000 unit\u00e9s de Bois dans ta Ville.",
+					price: 20,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1031: {
+					name: "1.000 Unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 1.000 Unit\u00e9s de Pierre dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1032: {
+					name: "5.000 Unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 5.000 Unit\u00e9s de Pierre dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1033: {
+					name: "10.000 Unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 10.000 Unit\u00e9s de Pierre dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1034: {
+					name: "20.000 Unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 20.000 Unit\u00e9s de Pierre dans ta ville.",
+					price: 6,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1035: {
+					name: "40.000 Unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 40.000 Unit\u00e9s de Pierre dans ta ville.",
+					price: 10,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1036: {
+					name: "60.000 Unit\u00e9s de Pierres",
+					description: "D\u00e9p\u00f4t de 60.000 Unit\u00e9s de Pierre dans la ville",
+					price: 14,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1037: {
+					name: "80.000 unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 80.000 unit\u00e9s de Pierres dans ta Ville.",
+					price: 18,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1038: {
+					name: "100.000 unit\u00e9s de Pierre",
+					description: "D\u00e9p\u00f4t de 100.000 unit\u00e9s de Pierres dans ta Ville.",
+					price: 20,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1041: {
+					name: "1.000 en Minerai",
+					description: "D\u00e9p\u00f4t de 1.000 Unit\u00e9s de Minerai dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1042: {
+					name: "5.000 Unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 5.000 Unit\u00e9s de Minerai dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1043: {
+					name: "10.000 Unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 10.000 Unit\u00e9s de Minerai dans ta ville.",
+					price: null,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1044: {
+					name: "20.000 Unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 20.000 Unit\u00e9s de Minerai dans ta ville.",
+					price: 6,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1045: {
+					name: "40.000 Unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 40.000 Unit\u00e9s de Minerai dans ta ville.",
+					price: 10,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1046: {
+					name: "60.000 Unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 60.000 Unit\u00e9s de Minerai dans ta ville.",
+					price: 14,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1047: {
+					name: "80.000 unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 80.000 unit\u00e9s de Minerai dans ta Ville.",
+					price: 18,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1048: {
+					name: "100.000 unit\u00e9s de Minerai",
+					description: "D\u00e9p\u00f4t de 100.000 unit\u00e9s de Minerai dans ta Ville.",
+					price: 20,
+					tradable: null,
+					category: 4,
+					subCategory: 0
+				},
+				i1061: {
+					name: "Non disponible",
+					description: "TYPE_ARTICLE_PIERRE_PRECIEUSE_INSTANTANEE",
+					price: null,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i1062: {
+					name: "100 Emeraudes",
+					description: "100 Emeraudes",
+					price: 100,
+					tradable: null,
+					category: 0,
+					subCategory: 0
+				},
+				i1101: {
+					name: "Armoiries de Sire Bor",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 5 points",
+					price: 25,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1102: {
+					name: "Armoiries de Sire Ector",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 10 points",
+					price: 50,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1103: {
+					name: "Armoiries de Sire Kay",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 15 points",
+					price: 75,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1104: {
+					name: "Armoiries de Sire Bedivere",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 20 points",
+					price: 70,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1105: {
+					name: "Armoiries de Sire Gawain",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 25 points",
+					price: 200,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1106: {
+					name: "Armoiries de Sire Perceval",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 30 points",
+					price: 75,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1107: {
+					name: "Armoiries de Sire Galaad",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevalier de 40 points",
+					price: 100,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1108: {
+					name: "Armoiries de Sire Lancelot",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevaliers de 50 points",
+					price: 150,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1109: {
+					name: "Les Armoiries du Roi Arthur",
+					description: "Am\u00e9liore la loyaut\u00e9 de ton Chevaliers de 60 points",
+					price: 85,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1110: {
+					name: "Sceau de Morgane",
+					description: "Sceau de Morgane",
+					price: 115,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1111: {
+					name: "Sceau de Mordred",
+					description: "Sceau de Mordred",
+					price: 170,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1112: {
+					name: "Sceau du Roi Stag",
+					description: "Sceau du Roi Stag",
+					price: 90,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1113: {
+					name: "Sceau de Pendragon",
+					description: "Sceau de Pendragon",
+					price: 120,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1114: {
+					name: "Sceau de la Dame du Lac",
+					description: "Sceau de la Dame du Lac",
+					price: 180,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1115: {
+					name: "Sceau de Merlin",
+					description: "Sceau de Merlin",
+					price: null,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1120: {
+					name: "Aetherseal",
+					description: "Aetherseal",
+					price: null,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1121: {
+					name: "Ysbadden Seal",
+					description: "Ysbadden Seal",
+					price: null,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1122: {
+					name: "Sidhe Seal",
+					description: "Sidhe Seal",
+					price: null,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1199: {
+					name: "Parchemin de v\u00e9lin",
+					description: "A Vellum Scroll is marked with the secrets of raising a druid Stone Circle. The Stone Circle allows you to expend Aetherstones and train Kerns",
+					price: 10,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i1202: {
+					name: "Certificat de 2\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Seconde ville.",
+					price: 150,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1203: {
+					name: "Certificat de 3\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Troisi\u00e8me ville.",
+					price: 250,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1204: {
+					name: "Certificat de 4\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Quatri\u00e8me ville.",
+					price: 500,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1205: {
+					name: "Certificat de 5\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Cinqui\u00e8me ville.",
+					price: 750,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1206: {
+					name: "Certificat de 6\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Sixi\u00e8me ville.",
+					price: 850,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1207: {
+					name: "Certificat de 7\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Septi\u00e8me ville.",
+					price: 900,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1208: {
+					name: "Certificat de 8\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Huiti\u00e8me ville.",
+					price: 950,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1209: {
+					name: "Certificat de 9\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Neuvi\u00e8me ville. Cet article n'a pas de date limite.",
+					price: null,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1210: {
+					name: "Certificat de 10\u00e8me Ville",
+					description: "Autorisation de b\u00e2tir une Dixi\u00e8me ville. Cet article n'a pas de date limite.",
+					price: null,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1211: {
+					name: "Fey Deed",
+					description: "Required to build a Fey City.",
+					price: 950,
+					tradable: null,
+					category: 6,
+					subCategory: 0
+				},
+				i1300: {
+					name: "200 Unit\u00e9s de Ravitaillement",
+					description: "Appelle 200 Unit\u00e9s de Ravitaillement.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1301: {
+					name: "1.000 Unit\u00e9s de Ravitaillement",
+					description: "Appelle 1.000 Unit\u00e9s de Ravitaillement.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1310: {
+					name: "200 Miliciens",
+					description: "Appelle 200 Miliciens.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1311: {
+					name: "1.000 Miliciens",
+					description: "Appelle 1.000 Miliciens.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1320: {
+					name: "200 Eclaireurs",
+					description: "Appelle 200 Eclaireurs.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1321: {
+					name: "1.000 Eclaireurs",
+					description: "Appelle 1.000 Eclaireurs.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1330: {
+					name: "200 Piquiers",
+					description: "Appelle 200 Piquiers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1331: {
+					name: "1.000 Piquiers",
+					description: "Appelle 1.000 Piquiers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1340: {
+					name: "150 Paladins",
+					description: "Appelle 150 Paladins.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1341: {
+					name: "750 Paladins",
+					description: "Appelle 750 Paladins.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1350: {
+					name: "150 Archers",
+					description: "Appelle 150 Archers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1351: {
+					name: "750 Archers",
+					description: "Appelle 750 Archers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1360: {
+					name: "150 Cavaleries",
+					description: "Appelle 150 Cavaleries.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1361: {
+					name: "750 Cavaleries",
+					description: "Appelle 750 Cavaleries.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1370: {
+					name: "100 Cavaleries Lourdes",
+					description: "Appelle 100 Cavaleries Lourdes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1371: {
+					name: "500 Cavaleries Lourdes",
+					description: "Appelle 500 Cavaleries Lourdes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1380: {
+					name: "100 Wagons de Ravitaillement",
+					description: "Appelle 100 Wagons de Ravitaillement.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1381: {
+					name: "500 Wagons de Ravitaillement",
+					description: "Appelle 500 Wagons de Ravitaillement.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1390: {
+					name: "100 Balistes",
+					description: "Appelle 100 Balistes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1391: {
+					name: "500 Balistes",
+					description: "Appelle 500 Balistes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1400: {
+					name: "50 B\u00e9liers",
+					description: "Appelle 50 B\u00e9liers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1401: {
+					name: "200 B\u00e9liers",
+					description: "Appelle 200 B\u00e9liers.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1410: {
+					name: "50 Catapultes",
+					description: "Appelle 50 Catapultes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1411: {
+					name: "200 Catapultes",
+					description: "Appelle 200 Catapultes.",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1412: {
+					name: "10 Supply Troops",
+					description: "Summons 10 Supply Troops",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1413: {
+					name: "25 Supply Troops",
+					description: "Summons 25 Supply Troops",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1414: {
+					name: "50 Supply Troops",
+					description: "Summons 50 Supply Troops",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1415: {
+					name: "75 Supply Troops",
+					description: "Summons 75 Supply Troops",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1416: {
+					name: "100 Supply Troops",
+					description: "Summons 100 Supply Troops",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1417: {
+					name: "150 Supply Troops",
+					description: "Summons 150 Supply Troops",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1418: {
+					name: "10 Militiamen",
+					description: "Summons 10 Militiamen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1419: {
+					name: "25 Militiamen",
+					description: "Summons 25 Militiamen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1420: {
+					name: "50 Militiamen",
+					description: "Summons 50 Militiamen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1421: {
+					name: "75 Militiamen",
+					description: "Summons 75 Militiamen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1422: {
+					name: "100 Militiamen",
+					description: "Summons 100 Militiamen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1423: {
+					name: "150 Militiamen",
+					description: "Summons 150 Militiamen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1424: {
+					name: "10 Scouts",
+					description: "Summons 10 Scouts",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1425: {
+					name: "25 Scouts",
+					description: "Summons 25 Scouts",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1426: {
+					name: "50 Scouts",
+					description: "Summons 50 Scouts",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1427: {
+					name: "75 Scouts",
+					description: "Summons 75 Scouts",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1428: {
+					name: "100 Scouts",
+					description: "Summons 100 Scouts",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1429: {
+					name: "150 Scouts",
+					description: "Summons 150 Scouts",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1430: {
+					name: "10 Pikemen",
+					description: "Summons 10 Pikemen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1431: {
+					name: "25 Pikemen",
+					description: "Summons 25 Pikemen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1432: {
+					name: "50 Pikemen",
+					description: "Summons 50 Pikemen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1433: {
+					name: "75 Pikemen",
+					description: "Summons 75 Pikemen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1434: {
+					name: "100 Pikemen",
+					description: "Summons 100 Pikemen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1435: {
+					name: "150 Pikemen",
+					description: "Summons 150 Pikemen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1436: {
+					name: "10 Swordsmen",
+					description: "Summons 10 Swordsmen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1437: {
+					name: "25 Swordsmen",
+					description: "Summons 25 Swordsmen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1438: {
+					name: "50 Swordsmen",
+					description: "Summons 50 Swordsmen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1439: {
+					name: "75 Swordsmen",
+					description: "Summons 75 Swordsmen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1440: {
+					name: "100 Swordsmen",
+					description: "Summons 100 Swordsmen",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1441: {
+					name: "10 Archers",
+					description: "Summons 10 Archers",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1442: {
+					name: "25 Archers",
+					description: "Summons 25 Archers",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1443: {
+					name: "50 Archers",
+					description: "Summons 50 Archers",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1444: {
+					name: "75 Archers",
+					description: "Summons 75 Archers",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1445: {
+					name: "100 Archers",
+					description: "Summons 100 Archers",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1446: {
+					name: "10 Cavalry",
+					description: "Summons 10 Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1447: {
+					name: "25 Cavalry",
+					description: "Summons 25 Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1448: {
+					name: "50 Cavalry",
+					description: "Summons 50 Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1449: {
+					name: "75 Cavalry",
+					description: "Summons 75 Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1450: {
+					name: "100 Cavalry",
+					description: "Summons 100 Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1451: {
+					name: "10 Heavy Cavalry",
+					description: "Summons 10 Heavy Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1452: {
+					name: "25 Heavy Cavalry",
+					description: "Summons 25 Heavy Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1453: {
+					name: "50 Heavy Cavalry",
+					description: "Summons 50 Heavy Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1454: {
+					name: "75 Heavy Cavalry",
+					description: "Summons 75 Heavy Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1455: {
+					name: "150 Heavy Cavalry",
+					description: "Summons 150 Heavy Cavalry",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1456: {
+					name: "10 Supply Wagons",
+					description: "Summons 10 Supply Wagons",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1457: {
+					name: "25 Supply Wagons",
+					description: "Summons 25 Supply Wagons",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1458: {
+					name: "50 Supply Wagons",
+					description: "Summons 50 Supply Wagons",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1459: {
+					name: "75 Supply Wagons",
+					description: "Summons 75 Supply Wagons",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1460: {
+					name: "150 Supply Wagons",
+					description: "Summons 150 Supply Wagons",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1461: {
+					name: "10 Ballistae",
+					description: "Summons 10 Ballistae",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1462: {
+					name: "25 Ballistae",
+					description: "Summons 25 Ballistae",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1463: {
+					name: "50 Ballistae",
+					description: "Summons 50 Ballistae",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1464: {
+					name: "75 Ballistae",
+					description: "Summons 75 Ballistae",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1465: {
+					name: "150 Ballistae",
+					description: "Summons 150 Ballistae",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1466: {
+					name: "10 Battering Rams",
+					description: "Summons 10 Battering Rams",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1467: {
+					name: "25 Battering Rams",
+					description: "Summons 25 Battering Rams",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1468: {
+					name: "75 Battering Rams",
+					description: "Summons 75 Battering Rams",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1469: {
+					name: "100 Battering Rams",
+					description: "Summons 100 Battering Rams",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1470: {
+					name: "150 Battering Rams",
+					description: "Summons 150 Battering Rams",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1471: {
+					name: "10 Catapults",
+					description: "Summons 10 Catapults",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1472: {
+					name: "25 Catapults",
+					description: "Summons 25 Catapults",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1473: {
+					name: "75 Catapults",
+					description: "Summons 75 Catapults",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1474: {
+					name: "100 Catapults",
+					description: "Summons 100 Catapults",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i1475: {
+					name: "150 Catapults",
+					description: "Summons 150 Catapults",
+					price: null,
+					tradable: null,
+					category: 3,
+					subCategory: 0
+				},
+				i2000: {
+					name: "Rituel de bapt\u00eame",
+					description: "Change le nom de ton Guardien.",
+					price: 10,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i2001: {
+					name: "Renaissance \u00e9l\u00e9mentaire",
+					description: "Changer l&#39;actuel Gardien, mais maintenir le niveau actuel",
+					price: 10,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i2002: {
+					name: "Obsidian Rune",
+					description: "This rune allows you to summon the Iron Indrik to your city.  The Iron Indrik boosts your Ore production, capacity and increases the Attack attribute of your marching troops.",
+					price: 50,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i2003: {
+					name: "Deluge Rune",
+					description: "This rune allows you to summon the Viand Asherah to your city.  The Viand Asherah boosts your Food production and capacity.",
+					price: 50,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i2004: {
+					name: "Boulder Rune",
+					description: "This rune allows you to summon the Terrene Golem to your city.  The Terrene Golem boosts your Stone production and capacity.",
+					price: 50,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3000: {
+					name: "Pierrre d'Ohr",
+					description: "Une roche blanche, friable, avec plein de facettes.",
+					price: 2,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3001: {
+					name: "Aile de Lin",
+					description: "Spun flax in the shape of a great bird's wing.",
+					price: 1,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3002: {
+					name: "Cachette animale",
+					description: "Peau d'animal, pr\u00eate \u00e0 \u00eatre tann\u00e9e.",
+					price: 1,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3003: {
+					name: "Pierre de Keter",
+					description: "Roche dor\u00e9e et lisse qui est incroyablement dure.",
+					price: 2,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3004: {
+					name: "Parchemin de B\u00e9n\u00e9diction",
+					description: "Un parchemin d'\u00e9critures saintes, d\u00e9crivant la mani\u00e8re de b\u00e9nir l'eau.",
+					price: 16,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3005: {
+					name: "Eau B\u00e9nite",
+					description: "Flacon d'eau b\u00e9nite.",
+					price: 27,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3006: {
+					name: "Sacrement Divin",
+					description: "Encens, eau b\u00e9nite, vin, pain - toute le n\u00e9cessaire \u00e0 accomplir un rituel sacr\u00e9.",
+					price: 40,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3007: {
+					name: "H\u00e9liotrope",
+					description: "Une roche \u00e9carlate qui palpite au contact de la chaleur.",
+					price: 1,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3008: {
+					name: "Pierre magn\u00e9tique",
+					description: "Une roche grise et bleue qui est plus lourde qu'elle ne parait.",
+					price: 1,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3009: {
+					name: "Oeil de Tigre",
+					description: "Une roche brune et mal\u00e9able.",
+					price: 1,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3010: {
+					name: "Parchemin de v\u00e9lin",
+					description: "Parchemin en peau d'animal.",
+					price: 8,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i3011: {
+					name: "Faveur de Gueni\u00e8vre",
+					description: "Mouchoir de Dame, en soie.",
+					price: 3,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i10000: {
+					name: "Pack D\u00e9butant",
+					description: "Ce pack contient tous les objets n\u00e9cessaires pour ta Ville",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10001: {
+					name: "Pack Page",
+					description: "Ce pack contient des articles d'une valeur de presque 230 Emeraudes pour ta Ville !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10002: {
+					name: "Pack d'Ecuyer.",
+					description: "Ce pack contient des articles d'une valeur de presque 350 Emeraudes pour ta Ville !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10003: {
+					name: "Pack de Chevalier.",
+					description: "Ce pack contient des articles d'une valeur de presque 750 Emeraudes pour ta Ville !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10004: {
+					name: "Cadeau pour les R\u00e9coltes",
+					description: "Arthur a r\u00e9compens\u00e9 ta contribution d&#39;un de ses cadeaux pour t&#39;aider \u00e0 R\u00e9colter cette Saison",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10005: {
+					name: "Prix des R\u00e9coltes",
+					description: "Arthur a r\u00e9compens\u00e9 ta contribution d'un cadeau de prix pour t'aider \u00e0 R\u00e9colter cette Saison",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10006: {
+					name: "Prime pour les R\u00e9coltes",
+					description: "Arthur a r\u00e9compens\u00e9 ta contribution d'un pack pour t'assurer une bonne R\u00e9colte cette Saison",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10007: {
+					name: "Sors moi de l\u00e0 !",
+					description: "Pour une petite balade, rien ne vaut les Portails de Refuge et les Colombes de Paix. Contient : Portail de Refuge x2, Colombes de Paix x2",
+					price: 100,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10008: {
+					name: "Le r\u00e9compense de Ga\u00efa",
+					description: "Une collection d'articles conf\u00e9rant la b\u00e9n\u00e9diction de Gaia \u00e0 tes ressources. Contient : Pri\u00e8re pour la R\u00e9colte x5, B\u00e9n\u00e9diction de Druide x5, Coupe Pierre de Gnomon x5, Outils Miniers de Nain x5",
+					price: 120,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10009: {
+					name: "Ascension Divine",
+					description: "Que la Lumi\u00e8re Divine brille sur la Ville puissante. Contient: Inspiration Divine x5",
+					price: 180,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10010: {
+					name: "Saison abondante",
+					description: "Augmente tes Ressources pour deux grandes semaines ! Contient : Sacrifice de R\u00e9colte x2, C\u00e9r\u00e9monie Druidique x2, Equipe de Nains Carriers x2, Assistance de Nain x2",
+					price: 340,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10011: {
+					name: "Restauration Magique",
+					description: "Parfois, il faut d\u00e9truire avant de construire. Des Dragons Frappeurs et de nombreux Sabliers sont disponibles. Contient : Dragon Frappeur x5, Sablier d'Ecuyer x10, Sablier de Chevalier x5, Sablier de Gueni\u00e8vre x5, Sablier Morgane x5, Sablier d'Arthur x5, Sablier de Merlin x2",
+					price: 450,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10012: {
+					name: "Coffre de Bataille \u00e0 Gr\u00ealons",
+					description: "Ce pack contient certains des objets favoris d'Arthur pour la Saison des Guerres Hivernales !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10013: {
+					name: "Coffre Bataille Gel\u00e9e",
+					description: "Ce pack contient des articles utiles pour la Saison des Guerres Hivernales",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10014: {
+					name: "Coffre Bataille Blizzard",
+					description: "Ce pack contient certains des objets chers \u00e0 Arthur pour la Saison des Guerres Hivernales !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10015: {
+					name: "Pack Page",
+					description: "Ce pack contient des articles d'une valeur de presque 230 Emeraudes pour ta Ville !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10016: {
+					name: "Pack d'Ecuyer",
+					description: "Ce pack contient des articles d'une valeur de presque 350 Emeraudes pour ta Ville !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10017: {
+					name: "Pack de Chevalier",
+					description: "Ce pack contient des articles d'une valeur de presque 750 Emeraudes pour ta Ville !",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10018: {
+					name: "Pack d'Aide Ha\u00eftien",
+					description: "100% des sommes  seront revers\u00e9es au Fond d'aide et de d\u00e9veloppement pour Haiti de la Croix Rouge Am\u00e9ricaine. Comprend un Jeune Volontaire, 2 Jetons Magiques de Merlin et 5.000 de chaque Ressource.",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10019: {
+					name: "Offre d'Affection",
+					description: "Un jeton d'amour \u00e0 donner \u00e0 un autre joueur. Contient : Rose de Charisme x1, Colombe de Paix x1, Jour de Prosp\u00e9rit\u00e9 x1, Fontaine de Jouvence x1, Rideaux Rouges x1",
+					price: null,
+					tradable: 1,
+					category: 5,
+					subCategory: 0
+				},
+				i10020: {
+					name: "Nouveau Coffre de Ville",
+					description: "Un cadeau de Merlin pour b\u00e2tir une Ville puissante",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10021: {
+					name: "Potion de Brume",
+					description: "D\u00e9ploie les brumes d'Avalon sur toutes tes villes pendant une semaine. Les brumes d'Avalon dispara\u00eetront si tu attaques la ville d'un autre joueur ou une Etendue sauvage occup\u00e9e",
+					price: 10,
+					tradable: null,
+					category: 1,
+					subCategory: 0
+				},
+				i10022: {
+					name: "Coffre de ressources inactives",
+					description: "contient 1 000 unit\u00e9s de chaque ressource",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10023: {
+					name: "Pack de 5\u00e8me Ville",
+					description: "Construis ta 5\u00e8me Ville plus rapidement! Contiens 5 Sabliers Divins, 2 Sabliers de Chevaliers, 1 Jeton Magique de Merlin",
+					price: 1250,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10024: {
+					name: "Coffre de Guerre",
+					description: "Construis ton arm\u00e9e pour vaincre tes ennemis. Contient 3 Colombes de la Paix, 3 Instructions de Lancelot, 1 Corne de Majest\u00e9, 1 Inspiration Divine",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10026: {
+					name: "Coffre de Charit\u00e9",
+					description: "Aide \u00e0 nourrir les n\u00e9cessiteux. 100% des recettes seront allou\u00e9es \u00e0 une association locale. contient 1 Drapeau de Don, 1 Jeton Magique de Merlin, 40.000 points de Nourriture, 1 Jeune Volontaire",
+					price: 30,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10027: {
+					name: "Pack de 6\u00e8me Ville",
+					description: "Pour une dur\u00e9e limit\u00e9e uniquement! Sois le premier \u00e0 recevoir une sixi\u00e8me Ville et 2 NOUVEAUX articles EXCLUSIFS! Contient x1 Acte de 6eme Ville, x1 Ailes d'aigle bleu, x1 Sacs renforc\u00e9s, x1 Drapeau de Fey, x1 Potion de Brume, x1 Sablier Divin, x1 Portail de l'Ordre",
+					price: 1080,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10028: {
+					name: "Aux armes",
+					description: "Pour un temps imparti. Appelle jusqu'\u00e0 2.000 Troupes pour t'aider au combat, incluant  catapultes et un assortiment al\u00e9atoire d'autres Unit\u00e9s.",
+					price: 350,
+					tradable: null,
+					category: 3,
+					subCategory: 100
+				},
+				i10029: {
+					name: "Coffre Myst\u00e9rieux",
+					description: "Tente ta chance pour obtenir un puissant objet. Tu peux gagner une Inspiration Divine, une Corne de G\u00e9n\u00e9rosit\u00e9, un Sablier Divin ou tout autre superbe objet.",
+					price: 35,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10030: {
+					name: "Pack de 7\u00e8me Ville",
+					description: "Pour un temps limit\u00e9 uniquement! Sois le premier \u00e0 obtenir l'Acte de 7\u00e8me ville et 2 NOUVEAUX articles EXCLUSIFS! Contient x1 Acte de 7\u00e8me Ville, x1 Fureur sanguinaire, x1 Peau de Fer, x1 Potion de Brume, 1x Portail de l'Ordre",
+					price: 1080,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10031: {
+					name: "Coffre de l'Ordre",
+					description: "Etablis l'ordre dans ton Royaume: x3 Portail de l'Ordre",
+					price: 240,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10032: {
+					name: "Divine Evocation",
+					description: "Light up the Kingdom by building your cities to their maximum potential! Contains x1 Divine Providence, x2 Divine Inspirations, and x3 Divine Hourglasses.",
+					price: 600,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10033: {
+					name: "Prince's Package",
+					description: "This Package contains items to grow your City!",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10034: {
+					name: "King's Package",
+					description: "This Package contains items to grow your City!",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10035: {
+					name: "Herald's Package",
+					description: "This Package contains items to grow your City!",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10036: {
+					name: "Fey City Premier Package",
+					description: "LIMITED TIME ONLY! Be the first to get a Fey City and Summon the Viand Kraken! Contains x1 Fey City Deed, x1 Deluge Rune, x1 Portal of Order, x1 Sacred Providence, x2 Sacred Inspiration, x1 Divine Hourglass, x1 Potion of Mist.",
+					price: 1750,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10037: {
+					name: "Fey City Package",
+					description: "Build up your Fey City and continue your conquest! Contains x1 Fey City Deed, x1 Portal of Order, x1 Sacred Providence, x1 Potion of Mist",
+					price: 1150,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10038: {
+					name: "Dark Forest Chest",
+					description: "Contains between 1 and 3 Aetherseals, 1 and 3 Ysbadden Seals, and 1 and 3 Sidhe Seals.",
+					price: 450,
+					tradable: null,
+					category: 5,
+					subCategory: 0
+				},
+				i10043: {
+					name: "Super Mystery Box",
+					description: "Take a chance to win one of the most powerful items in Camelot!",
+					price: 50,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10044: {
+					name: "New City Mystery Box",
+					description: "Limited time! Take a chance to win the new city deed or other exclusive items!",
+					price: 55,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10045: {
+					name: "Combat Mystery Box",
+					description: "Do you feel lucky? Dominate your opponents with one of many great combat items!",
+					price: 35,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10046: {
+					name: "Builder Mystery Box",
+					description: "Take a chance to win a powerful building item like Divine/Sacred Items, hourglasses, or others that will help you build the greatest Kingdom in Camelot!",
+					price: 45,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10047: {
+					name: "City Mystery Chest",
+					description: "Take a chance to win a crest or seal for your next city!",
+					price: 35,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10048: {
+					name: "Mini Mystery Box",
+					description: "Need a useful item like a Red Dragon Wings or one of the Horns? Here's your chance to win for a great price!",
+					price: 15,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10049: {
+					name: "Morgana's Mystery Box",
+					description: "Take a chance to win one of the most powerful items in Camelot!  Check today's message for more details!",
+					price: 35,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10050: {
+					name: "Arthur's Mystery Box",
+					description: "Take a chance to win one of the most powerful items in Camelot!  Check today's message for more details!",
+					price: 35,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10051: {
+					name: "Morien's Mystery Box",
+					description: "Take a chance to win a great item!  Check today's message for more details!",
+					price: 25,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				},
+				i10052: {
+					name: "Kabam Card Mystery Box",
+					description: "",
+					price: null,
+					tradable: null,
+					category: 5,
+					subCategory: 100
+				}
+			};
 			var seed = {
 					"playerEffects": {
 						"r4BstExp": 1320437706

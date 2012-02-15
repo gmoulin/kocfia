@@ -255,6 +255,8 @@ jQuery(document).ready(function(){
 		confPanelCss += '\n#kocfia-transport .manual-form .quantity input { width: 50px; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .res input { width: 50px; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .troop select { margin-top: 5px; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .minTroop, #kocfia-transport .manual-form .maxLoad { margin-left: 5px; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .items img { width: 20px; }';
 
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 0; height: 20px; }";
@@ -382,107 +384,128 @@ jQuery(document).ready(function(){
 			cities: {},//cityXXXX:{'id','name',coords: {x,y}}, ...]
 			citiesKey: [],
 			resources: [
-				{name: 'gold', label: 'Or', key: 'rec0', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
-				{name: 'resource7', label: 'Pierre d\'Ether', key: '7', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/aetherstone_30.png'},
+				{name: 'gold', label: 'Or', key: 'rec0', icon: window.stimgUrl + 'img/gold_30.png' },
+				{name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: window.stimgUrl + 'img/food_30.png' },
+				{name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: window.stimgUrl + 'img/wood_30.png' },
+				{name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: window.stimgUrl + 'img/stone_30.png' },
+				{name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: window.stimgUrl + 'img/iron_30.png' },
+				{name: 'resource5', label: 'Pierre d\'Ether', key: 'rec5', icon: window.stimgUrl + 'img/aetherstone_30.png'},
 			],
+			resourceInfo : {
+				rec0: {name: 'gold', label: 'Or', key: 'rec0', icon: window.stimgUrl + 'img/gold_30.png' },
+				rec1: {name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: window.stimgUrl + 'img/food_30.png' },
+				rec2: {name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: window.stimgUrl + 'img/wood_30.png' },
+				rec3: {name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: window.stimgUrl + 'img/stone_30.png' },
+				rec4: {name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: window.stimgUrl + 'img/iron_30.png' },
+				rec5: {name: 'resource5', label: 'Pierre d\'Ether', key: 'rec5', icon: window.stimgUrl + 'img/aetherstone_30.png'},
+				gold: {name: 'gold', label: 'Or', key: 'rec0', icon: window.stimgUrl + 'img/gold_30.png' },
+				resource1x3600: {name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: window.stimgUrl + 'img/food_30.png' },
+				resource2x3600: {name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: window.stimgUrl + 'img/wood_30.png' },
+				resource3x3600: {name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: window.stimgUrl + 'img/stone_30.png' },
+				resource4x3600: {name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: window.stimgUrl + 'img/iron_30.png' },
+				     resource5: {name: 'resource5', label: 'Pierre d\'Ether', key: 'rec5', icon: window.stimgUrl + 'img/iron_30.png' },
+			},
 			resources_cap: [
-				{name: 'resource1Capx3600', label: 'plafond', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{name: 'resource2Capx3600', label: 'plafond', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{name: 'resource3Capx3600', label: 'plafond', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{name: 'resource4Capx3600', label: 'plafond', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{name: 'resource1Capx3600', label: 'plafond', icon: window.stimgUrl + 'img/food_30.png' },
+				{name: 'resource2Capx3600', label: 'plafond', icon: window.stimgUrl + 'img/wood_30.png' },
+				{name: 'resource3Capx3600', label: 'plafond', icon: window.stimgUrl + 'img/stone_30.png' },
+				{name: 'resource4Capx3600', label: 'plafond', icon: window.stimgUrl + 'img/iron_30.png' },
 			],
 			resources_production_detail: [
-				{rows: 6, name: 'resource1', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{rows: 6, name: 'resource2', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{rows: 6, name: 'resource3', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{rows: 6, name: 'resource4', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{rows: 6, name: 'resource1', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: window.stimgUrl + 'img/food_30.png' },
+				{rows: 6, name: 'resource2', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: window.stimgUrl + 'img/wood_30.png' },
+				{rows: 6, name: 'resource3', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: window.stimgUrl + 'img/stone_30.png' },
+				{rows: 6, name: 'resource4', label: ['base', 'gardien', 'chevalier', 'technologie', 'TS', 'sort'], icon: window.stimgUrl + 'img/iron_30.png' },
 			],
 			resources_production_barbarian: [
-				{name: 'gold', label: 'camps barbare', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{name: 'resource1', label: 'camps barbare', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{name: 'resource2', label: 'camps barbare', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{name: 'resource3', label: 'camps barbare', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{name: 'resource4', label: 'camps barbare', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{name: 'gold', label: 'camps barbare', icon: window.stimgUrl + 'img/gold_30.png' },
+				{name: 'resource1', label: 'camps barbare', icon: window.stimgUrl + 'img/food_30.png' },
+				{name: 'resource2', label: 'camps barbare', icon: window.stimgUrl + 'img/wood_30.png' },
+				{name: 'resource3', label: 'camps barbare', icon: window.stimgUrl + 'img/stone_30.png' },
+				{name: 'resource4', label: 'camps barbare', icon: window.stimgUrl + 'img/iron_30.png' },
 			],
 			resources_consumption: [
-				{rows: 2, name: 'gold', label: ['dépense', 'formation'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{rows: 2, name: 'resource1', label: ['dépense', 'formation'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{rows: 2, name: 'resource2', label: ['dépense', 'formation'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{rows: 2, name: 'resource3', label: ['dépense', 'formation'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{rows: 2, name: 'resource4', label: ['dépense', 'formation'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{rows: 2, name: 'gold', label: ['dépense', 'formation'], icon: window.stimgUrl + 'img/gold_30.png' },
+				{rows: 2, name: 'resource1', label: ['dépense', 'formation'], icon: window.stimgUrl + 'img/food_30.png' },
+				{rows: 2, name: 'resource2', label: ['dépense', 'formation'], icon: window.stimgUrl + 'img/wood_30.png' },
+				{rows: 2, name: 'resource3', label: ['dépense', 'formation'], icon: window.stimgUrl + 'img/stone_30.png' },
+				{rows: 2, name: 'resource4', label: ['dépense', 'formation'], icon: window.stimgUrl + 'img/iron_30.png' },
 			],
 			resources_production_total: [
-				{name: 'gold', label: 'total', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{name: 'resource1', label: 'total', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{name: 'resource2', label: 'total', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{name: 'resource3', label: 'total', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{name: 'resource4', label: 'total', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{name: 'gold', label: 'total', icon: window.stimgUrl + 'img/gold_30.png' },
+				{name: 'resource1', label: 'total', icon: window.stimgUrl + 'img/food_30.png' },
+				{name: 'resource2', label: 'total', icon: window.stimgUrl + 'img/wood_30.png' },
+				{name: 'resource3', label: 'total', icon: window.stimgUrl + 'img/stone_30.png' },
+				{name: 'resource4', label: 'total', icon: window.stimgUrl + 'img/iron_30.png' },
 			],
 			resources_autonomy: [
-				{name: 'gold', label: 'autonomie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/gold_30.png' },
-				{name: 'resource1x3600', label: 'autonomie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/food_30.png' },
-				{name: 'resource2x3600', label: 'autonomie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/wood_30.png' },
-				{name: 'resource3x3600', label: 'autonomie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/stone_30.png' },
-				{name: 'resource4x3600', label: 'autonomie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/iron_30.png' },
+				{name: 'gold', label: 'autonomie', icon: window.stimgUrl + 'img/gold_30.png' },
+				{name: 'resource1x3600', label: 'autonomie', icon: window.stimgUrl + 'img/food_30.png' },
+				{name: 'resource2x3600', label: 'autonomie', icon: window.stimgUrl + 'img/wood_30.png' },
+				{name: 'resource3x3600', label: 'autonomie', icon: window.stimgUrl + 'img/stone_30.png' },
+				{name: 'resource4x3600', label: 'autonomie', icon: window.stimgUrl + 'img/iron_30.png' },
 			],
 			population: [
-				{rows: 4, name: ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], label: ['population', 'plafond', 'péon', 'glandeur'], icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/population_40.png'},
-				{name: 'taxRate', label: 'taxation', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/taxes.png'},
-				{name: 'hapiness', label: 'bonheur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/happiness.png'},
+				{rows: 4, name: ['population', 'populationCap', 'laborPopulation', 'availablePopulation'], label: ['population', 'plafond', 'péon', 'glandeur'], icon: window.stimgUrl + 'img/population_40.png'},
+				{name: 'taxRate', label: 'taxation', icon: window.stimgUrl + 'img/taxes.png'},
+				{name: 'hapiness', label: 'bonheur', icon: window.stimgUrl + 'img/happiness.png'},
 			],
 			unitInfo: {
-				unt1: {label: 'Ravitailleur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
-				unt2: {label: 'Milicien', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
-				unt3: {label: 'Eclaireur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
-				unt4: {label: 'Piquier', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
-				unt5: {label: 'Paladin', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
-				unt6: {label: 'Archer', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
-				unt7: {label: 'Cavalerie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
-				unt8: {label: 'Cavalerie Lourde', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
-				unt9: {label: 'Wagon', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
-				unt10: {label: 'Baliste', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				unt11: {label: 'Bélier', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
-				unt12: {label: 'Catapulte', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
+				unt1: {label: 'Ravitailleur', icon: window.stimgUrl + 'img/units/unit_1_30_s34.jpg'},
+				unt2: {label: 'Milicien', icon: window.stimgUrl + 'img/units/unit_2_30_s34.jpg'},
+				unt3: {label: 'Eclaireur', icon: window.stimgUrl + 'img/units/unit_3_30_s34.jpg'},
+				unt4: {label: 'Piquier', icon: window.stimgUrl + 'img/units/unit_4_30_s34.jpg'},
+				unt5: {label: 'Paladin', icon: window.stimgUrl + 'img/units/unit_5_30_s34.jpg'},
+				unt6: {label: 'Archer', icon: window.stimgUrl + 'img/units/unit_6_30_s34.jpg'},
+				unt7: {label: 'Cavalerie', icon: window.stimgUrl + 'img/units/unit_7_30_s34.jpg'},
+				unt8: {label: 'Cavalerie Lourde', icon: window.stimgUrl + 'img/units/unit_8_30_s34.jpg'},
+				unt9: {label: 'Wagon', icon: window.stimgUrl + 'img/units/unit_9_30_s34.jpg'},
+				unt10: {label: 'Baliste', icon: window.stimgUrl + 'img/units/unit_10_30_s34.jpg'},
+				unt11: {label: 'Bélier', icon: window.stimgUrl + 'img/units/unit_11_30_s34.jpg'},
+				unt12: {label: 'Catapulte', icon: window.stimgUrl + 'img/units/unit_12_30_s34.jpg'},
 			},
 			troops: [
-				{name: 'unt1', label: 'Ravitailleur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
-				{name: 'unt2', label: 'Milicien', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
-				{name: 'unt3', label: 'Eclaireur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
-				{name: 'unt4', label: 'Piquier', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
-				{name: 'unt5', label: 'Paladin', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
-				{name: 'unt6', label: 'Archer', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
-				{name: 'unt7', label: 'Cavalerie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
-				{name: 'unt8', label: 'Cavalerie Lourde', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
-				{name: 'unt9', label: 'Wagon', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
-				{name: 'unt10', label: 'Baliste', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{name: 'unt11', label: 'Bélier', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
-				{name: 'unt12', label: 'Catapulte', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
+				{name: 'unt1', label: 'Ravitailleur', icon: window.stimgUrl + 'img/units/unit_1_30_s34.jpg'},
+				{name: 'unt2', label: 'Milicien', icon: window.stimgUrl + 'img/units/unit_2_30_s34.jpg'},
+				{name: 'unt3', label: 'Eclaireur', icon: window.stimgUrl + 'img/units/unit_3_30_s34.jpg'},
+				{name: 'unt4', label: 'Piquier', icon: window.stimgUrl + 'img/units/unit_4_30_s34.jpg'},
+				{name: 'unt5', label: 'Paladin', icon: window.stimgUrl + 'img/units/unit_5_30_s34.jpg'},
+				{name: 'unt6', label: 'Archer', icon: window.stimgUrl + 'img/units/unit_6_30_s34.jpg'},
+				{name: 'unt7', label: 'Cavalerie', icon: window.stimgUrl + 'img/units/unit_7_30_s34.jpg'},
+				{name: 'unt8', label: 'Cavalerie Lourde', icon: window.stimgUrl + 'img/units/unit_8_30_s34.jpg'},
+				{name: 'unt9', label: 'Wagon', icon: window.stimgUrl + 'img/units/unit_9_30_s34.jpg'},
+				{name: 'unt10', label: 'Baliste', icon: window.stimgUrl + 'img/units/unit_10_30_s34.jpg'},
+				{name: 'unt11', label: 'Bélier', icon: window.stimgUrl + 'img/units/unit_11_30_s34.jpg'},
+				{name: 'unt12', label: 'Catapulte', icon: window.stimgUrl + 'img/units/unit_12_30_s34.jpg'},
 			],
 			troops_barbarian: [
-				{name: 'unt1', label: 'Ravitailleur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg'},
-				{name: 'unt2', label: 'Milicien', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_2_30_s34.jpg'},
-				{name: 'unt3', label: 'Eclaireur', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_3_30_s34.jpg'},
-				{name: 'unt4', label: 'Piquier', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_4_30_s34.jpg'},
-				{name: 'unt5', label: 'Paladin', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_5_30_s34.jpg'},
-				{name: 'unt6', label: 'Archer', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_6_30_s34.jpg'},
-				{name: 'unt7', label: 'Cavalerie', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg'},
-				{name: 'unt8', label: 'Cavalerie Lourde', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_8_30_s34.jpg'},
-				{name: 'unt9', label: 'Wagon', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg'},
-				{name: 'unt10', label: 'Baliste', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_10_30_s34.jpg'},
-				{name: 'unt11', label: 'Bélier', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_11_30_s34.jpg'},
-				{name: 'unt12', label: 'Catapulte', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_12_30_s34.jpg'},
+				{name: 'unt1', label: 'Ravitailleur', icon: window.stimgUrl + 'img/units/unit_1_30_s34.jpg'},
+				{name: 'unt2', label: 'Milicien', icon: window.stimgUrl + 'img/units/unit_2_30_s34.jpg'},
+				{name: 'unt3', label: 'Eclaireur', icon: window.stimgUrl + 'img/units/unit_3_30_s34.jpg'},
+				{name: 'unt4', label: 'Piquier', icon: window.stimgUrl + 'img/units/unit_4_30_s34.jpg'},
+				{name: 'unt5', label: 'Paladin', icon: window.stimgUrl + 'img/units/unit_5_30_s34.jpg'},
+				{name: 'unt6', label: 'Archer', icon: window.stimgUrl + 'img/units/unit_6_30_s34.jpg'},
+				{name: 'unt7', label: 'Cavalerie', icon: window.stimgUrl + 'img/units/unit_7_30_s34.jpg'},
+				{name: 'unt8', label: 'Cavalerie Lourde', icon: window.stimgUrl + 'img/units/unit_8_30_s34.jpg'},
+				{name: 'unt9', label: 'Wagon', icon: window.stimgUrl + 'img/units/unit_9_30_s34.jpg'},
+				{name: 'unt10', label: 'Baliste', icon: window.stimgUrl + 'img/units/unit_10_30_s34.jpg'},
+				{name: 'unt11', label: 'Bélier', icon: window.stimgUrl + 'img/units/unit_11_30_s34.jpg'},
+				{name: 'unt12', label: 'Catapulte', icon: window.stimgUrl + 'img/units/unit_12_30_s34.jpg'},
 			],
 			defenses: [
-				{name: 'fort53', label: 'Arbalètes', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_53_30.jpg'},
-				{name: 'fort55', label: 'Trébuchets', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_55_30.jpg'},
-				{name: 'fort60', label: 'Pièges', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_60_30.jpg'},
-				{name: 'fort61', label: 'Chausse-trapes', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_61_30.jpg'},
-				{name: 'fort62', label: 'Palissades', icon: 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_62_30.jpg'},
+				{fort: 'fort53', frt: 'frt53', label: 'Arbalètes', icon: window.stimgUrl + 'img/units/unit_53_30.jpg'},
+				{fort: 'fort55', frt: 'frt55', label: 'Trébuchets', icon: window.stimgUrl + 'img/units/unit_55_30.jpg'},
+				{fort: 'fort60', frt: 'frt60', label: 'Pièges', icon: window.stimgUrl + 'img/units/unit_60_30.jpg'},
+				{fort: 'fort61', frt: 'frt61', label: 'Chausse-trapes', icon: window.stimgUrl + 'img/units/unit_61_30.jpg'},
+				{fort: 'fort62', frt: 'frt62', label: 'Palissades', icon: window.stimgUrl + 'img/units/unit_62_30.jpg'},
 			],
+			fortInfo: {
+				frt53: {fort: 'fort53', label: 'Arbalètes', icon: window.stimgUrl + 'img/units/unit_53_30.jpg'},
+				frt55: {fort: 'fort55', label: 'Trébuchets', icon: window.stimgUrl + 'img/units/unit_55_30.jpg'},
+				frt60: {fort: 'fort60', label: 'Pièges', icon: window.stimgUrl + 'img/units/unit_60_30.jpg'},
+				frt61: {fort: 'fort61', label: 'Chausse-trapes', icon: window.stimgUrl + 'img/units/unit_61_30.jpg'},
+				frt62: {fort: 'fort62', label: 'Palissades', icon: window.stimgUrl + 'img/units/unit_62_30.jpg'},
+			},
 			inSeed: {
 				population: {
 					population: {index: 0, var: 'pop'},
@@ -497,7 +520,7 @@ jQuery(document).ready(function(){
 					resource2x3600: {index: 0, type: 'rec2', var: 'res'},
 					resource3x3600: {index: 0, type: 'rec3', var: 'res'},
 					resource4x3600: {index: 0, type: 'rec4', var: 'res'},
-					resource7: {index: 0, type: 'rec5', var: 'res'},
+					resource5: {index: 0, type: 'rec5', var: 'res'},
 				},
 				resources_cap: {
 					resource1Capx3600: {index: 1, type: 'rec1', var: 'res'},
@@ -2989,8 +3012,8 @@ jQuery(document).ready(function(){
 						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
 						n = null;
 
-						if( seed.fortifications.hasOwnProperty( fort.name ) ){
-							n = parseFloat( seed.fortifications[ fort.name ] );
+						if( seed.fortifications.hasOwnProperty( fort.fort ) ){
+							n = parseFloat( seed.fortifications[ fort.fort ] );
 						}
 
 						if( n != null ){
@@ -3389,7 +3412,7 @@ jQuery(document).ready(function(){
 					if( unitsCode.length ) unitsCode += ', ';
 
 					unitsCode += Shared.format( unit.qty );
-					unitsCode +=  '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_';
+					unitsCode +=  '<img src="'+ window.stimgUrl +'img/units/unit_';
 					unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
 				}
 				code += unitsCode + '</div></div>';
@@ -3401,7 +3424,7 @@ jQuery(document).ready(function(){
 				if( unitsCode.length ) unitsCode += '<br />';
 
 				unitsCode += Shared.format( unit.qty );
-				unitsCode += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_';
+				unitsCode += '<img src="'+ window.stimgUrl +'img/units/unit_';
 				unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
 			}
 			code += unitsCode + '</div></td></tr>';
@@ -7075,7 +7098,7 @@ jQuery(document).ready(function(){
 				form += '<label>Garder&nbsp;:&nbsp;</label>';
 				for( j = 0; j < rLength; j += 1 ){
 					res = KOCFIA.resources[j];
-					if( res.name != 'resource7' ){
+					if( res.name != 'resource5' ){
 						form += '<label for="kocfia-formation-auto-'+ cityKey +'-keep-'+ res.name +'">';
 						form += '<img src="'+ res.icon +'" title="'+ res.label +'">';
 						form += '</label>';
@@ -7341,7 +7364,7 @@ jQuery(document).ready(function(){
 			formations += '<ol class="formations">';
 			for( i = 0; i < queue.length; i += 1 ){
 				formation = queue[i];
-				unit = KOCFIA.unitInfo[ (formation[0].indexOf('unt') == -1 ? 'unt' : '') + formation[0] ];
+				unit = KOCFIA.unitInfo[ 'unt' + formation[0] ];
 
 				formations += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
 				formations += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
@@ -7356,12 +7379,7 @@ jQuery(document).ready(function(){
 			queue = window.seed.queue_fort[cityKey];
 			for( i = 0; i < queue.length; i += 1 ){
 				formation = queue[i];
-				for( j = 0; j < KOCFIA.defenses.length; j += 1 ){
-					if( KOCFIA.defenses[j].name == 'fort' + formation[0] ){
-						unit = KOCFIA.defenses[j];
-						break;
-					}
-				}
+				unit = KOCFIA.fortInfo[ 'frt' + formation[0] ]
 
 				fortifications += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
 				fortifications += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
@@ -7965,7 +7983,7 @@ jQuery(document).ready(function(){
 							window.seed.citystats[rule.cityKey].gold[0] = parseInt(window.seed.citystats[rule.cityKey].gold[0], 10) - parseInt(window.unitcost[rule.troop][5], 10) * qty;
 							window.seed.citystats[rule.cityKey].pop[0] = parseInt(window.seed.citystats[rule.cityKey].pop[0], 10) - parseInt(window.unitcost[rule.troop][6], 10) * qty;
 
-							window.seed.queue_unt[rule.cityKey].push([rule.troop, qty, result.initTS, parseInt(result.initTS) + result.timeNeeded, 0, result.timeNeeded, null]);
+							window.seed.queue_unt[rule.cityKey].push([rule.troop.replace(/unt/, ''), qty, result.initTS, parseInt(result.initTS) + result.timeNeeded, 0, result.timeNeeded, null]);
 
 							/*
 							seed.items["i" + iid] = Number(seed.items["i" + iid]) - 1;
@@ -8090,8 +8108,9 @@ jQuery(document).ready(function(){
 			//step 3 of 3 for buildFortificationSequence
 			var build = function(fdfd){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation addToQueue deferred build function');
-				var wParams = $.extend({}, baseParams);
-				wParams.type = rule.defense.replace(/frt/, '');
+				var wParams = $.extend({}, baseParams),
+					def = rule.defense.replace(/frt/, '');
+				wParams.type = def;
 				wParams.quant = qty;
 				wParams.items = '';
 
@@ -8105,7 +8124,7 @@ jQuery(document).ready(function(){
 					.done(function( result ){
 						if( result.ok ){
 							var r, unit,
-								fortcost = window.fortcost["frt" + rule.defense],
+								fortcost = window.fortcost[ rule.defense ],
 								time = KOCFIA.formation.defenseTrainDuration(rule.cityKey, rule.defense, qty);
 
 							/*
@@ -8121,14 +8140,9 @@ jQuery(document).ready(function(){
 							window.seed.citystats[rule.cityKey].gold[0] = parseInt(window.seed.citystats[rule.cityKey].gold[0], 10) - parseInt(fortcost[5], 10) * qty;
 							window.seed.citystats[rule.cityKey].pop[0] = parseInt(window.seed.citystats[rule.cityKey].pop[0], 10) - parseInt(fortcost[6], 10) * qty;
 
-							window.seed.queue_fort[rule.cityKey].push([rule.defense, qty, result.initTS, parseInt(result.initTS) + time, 0, time, result.fortifyId]);
+							window.seed.queue_fort[rule.cityKey].push([def, qty, result.initTS, parseInt(result.initTS) + time, 0, time, result.fortifyId]);
 
-							for( j = 0; j < KOCFIA.defenses.length; j += 1 ){
-								if( KOCFIA.defenses[j].name == rule.defense ){
-									unit = KOCFIA.defenses[j];
-									break;
-								}
-							}
+							unit = KOCFIA.fortInfo[ rule.defense ];
 							msg.push([d.getTime() / 1000, 'Lancement de '+ Shared.format( qty ) +' <img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />.']);
 
 							return fdfd.resolve();
@@ -8358,7 +8372,7 @@ jQuery(document).ready(function(){
 					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt1' );
 					code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt1" value="unt1">';
 					code += '<label for="kocfia-transport-manual-unt1" title="'+ Shared.readable(n) +'">';
-					code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_1_30_s34.jpg">';
+					code += '<img src="'+ window.stimgUrl +'img/units/unit_1_30_s34.jpg">';
 					code += '&nbsp;Ravitalleur ('+ Shared.format(n) +')';
 					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
 					code += '</label><br>';
@@ -8371,7 +8385,7 @@ jQuery(document).ready(function(){
 					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt7' );
 					code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt7" value="unt7">';
 					code += '<label for="kocfia-transport-manual-unt7" title="'+ Shared.readable(n) +'">';
-					code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_7_30_s34.jpg">';
+					code += '<img src="'+ window.stimgUrl +'img/units/unit_7_30_s34.jpg">';
 					code += '&nbsp;Cavalerie ('+ Shared.format(n) +')';
 					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
 					code += '</label><br>';
@@ -8384,7 +8398,7 @@ jQuery(document).ready(function(){
 					d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, 'unt9' );
 					code += '<input type="radio" name="troop" id="kocfia-transport-manual-unt9" value="unt9">';
 					code += '<label for="kocfia-transport-manual-unt9" title="'+ Shared.readable(n) +'">';
-					code += '<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/units/unit_9_30_s34.jpg">';
+					code += '<img src="'+ window.stimgUrl +'img/units/unit_9_30_s34.jpg">';
 					code += '&nbsp;Wagon ('+ Shared.format(n) +')';
 					code += (d != '' ? '<span class="duration"> - '+ Shared.readableDuration( d ) +'</span>' : '');
 					code += '</label><br>';
@@ -8416,7 +8430,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getResources function');
 			var code = '', i, type, inSeed, n,
 				res = window.seed.resources[ cityKey ],
-				gold = window.seed.citystats[ cityKey ];
+				gold = window.seed.citystats[ cityKey ]['gold'];
 
 			for( i = 0; i < KOCFIA.resources.length; i += 1 ){
 				type = KOCFIA.resources[i];
@@ -8432,7 +8446,7 @@ jQuery(document).ready(function(){
 					if( n > 0 ){
 						if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-						code += '<button rel="'+ type.name +'" data-label="'+ type.label +'" title="'+ Shared.readable(n) +'">'+ type.label +' <small>('+ Shared.format(n) +')</small></button>';
+						code += '<button rel="'+ type.key +'" data-label="'+ type.label +'" title="'+ Shared.readable(n) +'">'+ type.label +' <small>('+ Shared.format(n) +')</small></button>';
 					}
 				}
 			}
@@ -8474,6 +8488,22 @@ jQuery(document).ready(function(){
 			return Shared.marchTimeCalculator(cityKeyFrom, troops, coordXTo, coordYTo, is_round_trip, items_applied, isFriendly);
 		};
 
+		KOCFIA.transport.getLoadCapacity = function( unit, quantity ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getLoadCapacity function');
+
+			if( window.unitstats.hasOwnProperty(unit) ){
+				return quantity * parseInt(window.unitstats[unit][5], 10);
+			} else return false;
+		};
+
+		KOCFIA.transport.getTroopQuantityForLoad = function( unit, quantity ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getTroopQuantityForLoad function');
+
+			if( window.unitstats.hasOwnProperty(unit) ){
+				return Math.ceil(parseInt(window.unitstats[unit][5], 10) / quantity);
+			} else return false;
+		};
+
 		KOCFIA.transport.getManualForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getManualForm function');
 			var c, city;
@@ -8503,12 +8533,28 @@ jQuery(document).ready(function(){
 			form += '<br><label>Troupes&nbsp;:&nbsp;</label>';
 			form += '<div class="troop">';
 			form += '</div>';
-			form += '<div class="quantity"><label for="kocfia-transport-manual-quantity">Quantité&nbsp:&nbsp;</label><input type="text" name="qty"></div>';
+			form += '<div class="quantity"><label for="kocfia-transport-manual-quantity">Quantité&nbsp:&nbsp;</label>';
+			form += '<input type="text" name="qty"><button class="minTroop">Minimise</button></div>';
 
 			form += '<label>Ressources&nbsp;:&nbsp;</label>';
 			form += '<div class="resources">';
 			form += '<div class="available"></div>';
 			form += '<div class="chosen"></div>';
+			form += '</div>';
+
+			var items = [55, 57, 221, 261, 262, 271, 272, 931, 932, 280, 281],
+				info, key, i;
+			form += '<div class="items">';
+			for( i = 0; i < items.length; i += 1 ){
+				key = 'i' + items[i];
+				if( parseInt(window.seed.items[ key ], 10) > 1 ){
+					info = window.itemlist[ key ];
+					form += '<input type="checkbox" value="'+ items[i] +'" id="kocfia-transport-item-'+ items[i] +'">';
+					form += '<label for="kocfia-transport-item-'+ items[i] +'" title="'+ info.name + ' - '+ info.description +'">';
+					form += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg">';
+					form += '</label>';
+				}
+			}
 			form += '</div>';
 
 			form += '<div class="buttons">';
@@ -8541,16 +8587,172 @@ jQuery(document).ready(function(){
 
 		KOCFIA.transport.planManualTransport = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport planManualTransport function');
+			var plan = {},
+				errors = [],
+				city, nb, res, label;
+
+			//from
+			var $from = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked');
+			if( $from.length ){
+				plan.from = $from.val();
+			} else {
+				errors.push('Vous devez spécifier une cité d\'expédition');
+			}
+
+			//to
+			var $to = KOCFIA.transport.$manualForm.find('.to').find('input').filter(':checked'),
+				coord = $trim( KOCFIA.transport.$manualForm.find('.coord').val() );
+			if( $to.length ){
+				plan.to = {};
+				city = KOCFIA.cities[ $from.val() ];
+				plan.to.x = city.coords.x;
+				plan.to.y = city.coords.y;
+			} else if( coord != '' ){
+				var regexp = /[^0-9, ]/;
+				if( regexp.test( coords ) ){
+					errors.push('Pour les coordonnées, veuillez respecter le format x,y');
+				} else {
+					var coord = coords[i].split(',');
+					if( coord[0] < 0 || coord[0] > 750 || coord[1] < 0 || coord[1] > 750 ){
+						errors.push('Mauvais format de coordonnée pour la destination (x,y)');
+					} else {
+						plan.to.x = coord[0];
+						plan.to.y = coord[1];
+					}
+				}
+			} else {
+				errors.push('Vous devez spécifier une cité ou coordonnée de destination');
+			}
+
+			//troop
+			var $unit = KOCFIA.transport.$manualForm('.quantity'),
+				unit = $unit.attr('name'),
+				quantity = $trim( $unit.val() );
+			if( quantity == '' ){
+				errors.push('Vous devez spécifier la quantité de troupe pour le transport');
+			} else {
+				quantity = Shared.decodeFormat( quantity );
+				if( quantity === false ) errors.push('Quantité incorrecte de troupe pour le transport');
+				else if( quantity == 0 ) errors.push('Vous devez spécifier la quantité de troupe pour le transport');
+				else plan.unit = { id: unit, qty: quantity };
+			}
+
+			//resources
+			var $chosen = KOCFIA.transport.$manualForm.find('.chosen').find('input');
+			if( $chosen.length ){
+				plan.res = [];
+				$chosen.each(function(){
+					nb = $.trim( this.value );
+					res = this.name;
+					label = KOCFIA.resourceInfo[ res ].label;
+					if( res == 'gold' ) label = 'd\'' + label;
+					else label = 'de '+ label;
+
+					if( nb == '' ){
+						errors.push('Vous devez spécifier la quantité '+ label +' pour le transport');
+					} else {
+						nb = Shared.decodeFormat( nb );
+						if( nb === false ) errors.push('Quantité incorrecte '+ label +' pour le transport');
+						else if( nb == 0 ) errors.push('Vous devez spécifier la quantité '+ label +' pour le transport');
+						else plan.res.push({ id: res, qty: nb });
+					}
+				});
+			} else {
+				errors.push('Vous devez spécifier au moins une ressource pour le transport');
+			}
+
+			//items
+			//var itemlist = [55, 57, 221, 261, 262, 271, 272, 931, 932, 280, 281];
+			var $items = KOCFIA.transport.$manualFOrm.find('.items').find('input').filter(':checked');
+			plan.items = [];
+			if( $items.length ){
+				$items.each(function(){ plan.items.push( this.value ); });
+			}
+
+			return {plan: plan, errors: errors};
 		};
 
 		KOCFIA.transport.launchManualTransport = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport launchManualTransport function');
+
+			var tParams = $.extends({}, window.g_ajaxparams),
+				unitsarr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+				totalTroops = plan.unit.qty,
+				resources = [],
+				totalResources = 0,
+				unitId = null,
+				i, attempts = 3;
+
+			tParams.cid = plan.from;
+			tParams.type = 1;//cm.MARCH_TYPES.MARCH_TYPE_TRANSPORT: 1
+			tParams.kid = 0;
+			tParams.xcoord = plan.to.x;
+			tParams.ycoord = plan.to.y;
+			tParams[ plan.unit.id ] = plan.unit.qty;
+			unitsarr[ plan.unit.id.replace(/unt/, '')] = plan.unit.qty;
+
+			for( i = 0; i < plan.res.length; i += 1 ){
+				tParams[ plan.res[i].id ] = plan.res[i].qty;
+				resources.push(plan.res[i].qty);
+				totalResources += plan.res[i].qty;
+			}
+
+			tParams.items = plan.items.join(",");
+
+			var launch = function(){
+				$.ajax({
+					url: g_ajaxpath + "ajax/march.php" + g_ajaxsuffix,
+					type: 'post',
+					data: tParams,
+					dataType: 'json',
+					timeout: 10000,
+				})
+				.done(function(data){
+					if( data.ok ){
+	                    var timediff = parseInt(data.eta, 10) - parseInt(data.initTS, 10),
+							d = new Date(),
+							ts = d.getTime() / 1000;
+
+						window.attach_addoutgoingmarch(data.marchId, data.marchUnixTime, ts + timediff, tParams.xcoord, tParams.ycoord, unitsarr, tParams.type, tParams.kid, resources, data.tileId, data.tileType, data.tileLevel, tParams.cid, true);
+
+						window.updateBoosts(data);
+						if( data.liftFog ){
+							window.update_boosts();
+							window.seed.playerEffects.fogExpire = 0;
+							window.g_mapObject.getMoreSlots();
+						}
+
+						for( var i = 0; i < plan.items.length; i += 1 ){
+							window.seed.items[ 'i' + plan.items[i] ] = parseInt(window.seed.items[ 'i' + plan.items[i] ]) - 1;
+							window.ksoItems[ plan.items[i] ].subtract();
+						}
+					} else if( data.user_action ){
+						if( data.user_action == 'marchWarning' ){
+							tParams.marchWarning = 1;
+							launch();
+						} else if( data.user_action == 'marchCaptcha' ){
+							KOCFIA.transport.$manualForm.find('.result').empty().append('Transport échoué (captcha)');
+						} else {
+							KOCFIA.transport.$manualForm.find('.result').empty().append('Transport échoué (action)');
+						}
+					} else if( data.msg ){
+						KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé ('+ data.msg +')');
+					} else {
+						KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé (serveur)');
+					}
+				})
+				.fail(function(){
+					attemps -= 1;
+					if( attempts > 0 ) launch();
+					else KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé (erreur internet)');
+				});
+			};
 		};
 
 		KOCFIA.transport.addManualFormListeners = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport addManualFormListeners function');
 
-			KOCFIA.transport.$manualForm.find('.from, .to').buttonset();
+			KOCFIA.transport.$manualForm.find('.from, .to, .items').buttonset();
 			KOCFIA.transport.$manualForm
 				//city from and to
 				.on('change', '.from input', function(){
@@ -8613,18 +8815,14 @@ jQuery(document).ready(function(){
 					if( $.inArray(res, chosenRes) > -1 ){
 						$chosen.filter('[rel='+ res +']').focus();
 					} else {
-						var code = '', i, r;
-						for( i = 0; i < KOCFIA.resources.length; i += 1 ){
-							r = KOCFIA.resources[i];
-							if( r.name == res ){
-								code += '<div class="res">';
-								code += '<label><img src="'+ r.icon +'">&nbsp;'+ label +'</label>&nbsp;';
-								code += '<input type="text" name="'+ res +'" value="">';
-								code += '<span class="ui-icon ui-icon-trash remove"></span>';
-								code += '</div>';
-								break;
-							}
-						}
+						var code = '', info;
+						info = KOCFIA.resourceInfo[ res ];
+						code += '<div class="res">';
+						code += '<label><img src="'+ info.icon +'">&nbsp;'+ label +'</label>&nbsp;';
+						code += '<input type="text" name="'+ res +'" value="">';
+						code += '<span class="ui-icon ui-icon-trash remove"></span>';
+						code += '<button class="maxLoad">Capacité Maximum</buton>';
+						code += '</div>';
 
 						$chosen.append( code );
 					}
@@ -8632,6 +8830,98 @@ jQuery(document).ready(function(){
 				.on('click', '.resources .remove', function(){
 					$(this).closest('div').remove();
 				})
+				//unit change, force max at available
+				.on('keyup', '.quantity input', function(){
+					var $unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
+						unt = $unit.attr('name'),
+						quantity = $.trim( $unit.val() );
+
+					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
+					if( quantity === false ) return;
+
+					var cityKey = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked').val(),
+						available = 0;
+					if( cityKey ){
+						available = parseInt(window.seed.units[ cityKey ][ unt ], 10);
+						if( isNaN(available) ) available = false;
+					}
+
+					if( available && available < quantity ){
+						$unit.val( Shared.readable(available) )
+							.animate({backgroundColor: 'red'}, 500, function(){ $(this).css('background-color', ''); });
+					}
+				})
+				//resource change, force max at available
+				.on('keyup', '.chosen .res input', function(){
+					var quantity = $.trim( this.value ),
+						res = this.name;
+
+					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
+					if( quantity === false ) return;
+
+					var cityKey = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked').val(),
+						available = 0;
+					if( cityKey ){
+						if( res == 'gold' ){
+							available = parseInt(window.seed.citystats[ cityKey ]['gold'][0], 10);
+						} else {
+							available = parseInt(window.seed.resources[ cityKey ][ res ], 10);
+							var info = KOCFIA.resourceInfo[ res ];
+							if( isNaN(available) ) available = false;
+							else if( info.name.indexOf('x3600') > -1 ) available /= 3600;
+						}
+					}
+
+					if( available && available < quantity ){
+						$(this).val( Shared.readable(available) )
+							.animate({backgroundColor: 'red'}, 500, function(){ $(this).css('background-color', ''); });
+					}
+				})
+				//minimise unit quantity
+				.on('click', '.minTroop', function(){
+					var $chosen = KOCFIA.transport.$manualForm.find('.chosen').find('input'),
+						resources = 0,
+						$unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
+						unt = $unit.attr('name'),
+						quantity = $.trim( $unit.val() );
+
+					$chosen.each(function(){
+						var nb = $.trim( this.value );
+						nb = Shared.decodeFormat(nb);
+						if( nb !== false ) resources += nb;
+					});
+
+					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
+					if( quantity === false ) return;
+
+					if( resources == 0 ) return;
+
+					var needed = KOCFIA.transport.getTroopQuantityForLoad( unt, resources );
+					if( needed !== false ) $unit.val( Shared.format(needed) );
+				})
+				//maximise load
+				.on('click', '.maxLoad', function(){
+					var $chosen = KOCFIA.transport.$manualForm.find('.chosen').find('input'),
+						resources = 0,
+						$unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
+						unt = $unit.attr('name'),
+						quantity = $.trim( $unit.val() );
+
+					$chosen.each(function(){
+						var nb = $.trim( this.value );
+						nb = Shared.decodeFormat(nb);
+						if( nb !== false ) resources += nb;
+					});
+
+					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
+					if( quantity === false ) return;
+
+					if( resources == 0 ) return;
+
+					var maxLoad = KOCFIA.transport.getLoadCapacity( unt, quantity );
+					if( maxLoad !== false && maxLoad < resources ) this.value = Shared.readable( maxLoad - resource );
+				})
+				//form reset
 				.on('click', '.reset', function(){
 					KOCFIA.transport.$manualForm.find('.troop, .resources, .result').empty();
 					KOCFIA.transport.$manualForm.find('.quantity').hide().find('input').val('');
@@ -8641,10 +8931,11 @@ jQuery(document).ready(function(){
 
 					KOCFIA.transport.$manualForm.find('.from, .to').find('input').filter('[type=radio]').prop('checked', false).button('refresh');
 				})
+				//form submit
 				.on('click', '.launch', function(){
 					var result = KOCFIA.transport.planManualTransport();
 					if( result.errors.length ){
-						KOCFIA.transport.$manualForm.find('.result').append( result.errors.join('<br>') );
+						KOCFIA.transport.$manualForm.find('.result').append( result.errors.unique().join('<br>') );
 					} else {
 						KOCFIA.transport.launchManualTransport( result.plan );
 					}
@@ -8848,16 +9139,12 @@ jQuery(document).ready(function(){
 			 *		resetTracks
 			 *		checkRallyPoint (for all cities, at least a slot free, counting keep free slot parameter)
 			 *		checkCoords (recursive on coords list)
-			 *			checkCoordByBunch ( do 10 coords at a time )
-			 *				byBunch check
-			 *				if a dark forest of a targeted level is found
-			 *				for each city with a matching level rule
-			 *					check the rally point (not via checkRallyPoint)
-			 *						checkAndLaunchWaves
-			 *							findLostKnights
-			 *							checkKnight
-			 *							checkUnits
-			 *							launchWave
+			 *			checkCoordByGroup ( do 10 coords at a time )
+			 *				groupedCheck
+			 *					if a dark forest is found
+			 *					for each active cities, is there a matching active rule
+			 *						check rallypoint, knight, troops
+			 *						launch
 			 */
 
 			/* deferred attack functions */
@@ -9094,234 +9381,8 @@ jQuery(document).ready(function(){
 					if( mod != 'darkForest' ){
 						return dfd.pipe(checkCoord(dfd, 3));
 					} else {
-						return dfd.pipe(checkCoordsByBunch(dfd, 3));
+						return dfd.pipe(checkCoordsByGroup(dfd, 3));
 					}
-				};
-
-
-				var byBunch = function(dfd, data){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred byBunch function');
-					var bunchIndex = 0;
-
-					var bunchSequence = function(dfd){
-						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkBunch function');
-						return $.Deferred(function(bdfd){
-							return bdfd.pipe( check(bdfd, data) );
-						}).promise();
-					};
-
-
-					var check = function(bdfd){
-						if( bunchIndex >= bunch.length ){
-							return bdfd.resolve();
-						}
-
-						var info, type;
-
-						info = data['l_'+ bunch[ bunchIndex ][0] +'_t_'+ bunch[ bunchIndex ][1]];
-						if( info ){
-							type = parseInt(info.tileType, 10);
-							if( type != 54 && type != 0 ){
-								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas une forêt sombre ou un marais']);
-								//will force the update of coords on next checkAndLaunchAttack call
-								KOCFIA[ mod ].coords.status = 'outdated';
-								bunchIndex += 1;
-								return bdfd.pipe( check(bdfd) );
-							} else if( type == 0 ){
-								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') est un marais']);
-								bunchIndex += 1;
-								return bdfd.pipe( check(bdfd) );
-							} else if( $.inArray(coords[ attack.coordIndex + bunchIndex ], attack.marchingCoords) > -1 ){
-								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') déjà attaquée']);
-								bunchIndex += 1;
-								return bdfd.pipe( check(bdfd) );
-							} else {
-								//check if the coord level correspond to an "active" city with an "active" rule
-								var found = false, level, i, j, k, wave, enoughUnits,
-									units, unit, unitKey, unitNum, qty, available,
-									keep, slots, keepFree, knights, highest, lowest;
-								for( i = 0; i < attack.cities.length; i += 1 ){
-									attack.cityKey = attack.cities[i];
-									if( attack.info[ attack.cityKey ].active ){
-										city = KOCFIA.cities[ attack.cityKey ];
-										//checking range and looping if over max range
-										if( Shared.getDistance(city.coords.x, city.coords.y, gps[0], gps[1]) > 100 ){
-											continue;
-										}
-
-										if( attack.levels[ attack.cityKey ].hasOwnProperty( info.tileLevel ) && attack.levels[ attack.cityKey ][ info.tileLevel ].active ){
-											//set the attack for on wave launch
-												attack.rpSlot = attack.info[ attack.cityKey ].rps;
-
-												level = attack.levels[ attack.cityKey ][ info.tileLevel ];
-												attack.waves = level.waves;
-												attack.keep = attack.info[ attack.cityKey ].keep;
-
-											//check rally point slot
-												slots = Shared.getRallyPointSlots( attack.cityKey );
-												keepFree = parseInt(attack.rpSlot, 10) || 0;
-												if( slots - keepFree <= 0 || slots - keepFree < attack.levels[ attack.cityKey ][ info.tileLevel ].waves.length ){
-													//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de place dans le point de ralliement de '+ city.label]);
-													continue;
-												}
-
-											//check knight
-												Shared.freeKnights( attack.cityKey );
-												knights = Shared.getAvailableKnights( attack.cityKey );
-												if( knights.length < level.waves.length ){
-													//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de chevalier'+ (level.waves.length > 1 ? 's' : '') +' disponible'+ (level.waves.length > 1 ? 's' : '') +' pour lancer '+ (level.waves.length > 1 ? 'les '+ level.waves.length +' vagues' : 'la vague') +' depuis '+ city.label]);
-													continue;
-												}
-
-												if( level.knightPriority == '' ){
-													knight = knights[0].knightId;
-												} else if( level.knightPriority == 'highest' ){
-													highest = 0;
-													for( k in knights ){
-														if( knights.hasOwnProperty(k) ){
-															if( parseFloat(knights[k].knight.combat) > highest ){
-																knight = knights[k].knightId;
-															}
-														}
-													}
-													if( knight == null ){
-														//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Chevalier indisponible dans '+ city.label]);
-														continue;
-													}
-												} else if( level.knightPriority == 'lowest' ){
-													lowest = 0;
-													for( k in knights ){
-														if( knights.hasOwnProperty(k) ){
-															if( parseFloat(knights[k].knight.combat) < lowest ){
-																knight = knights[k].knightId;
-															}
-														}
-													}
-													if( knight == null ){
-														//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Chevalier indisponible dans '+ city.label]);
-														continue;
-													}
-												}
-												baseParams.kid = knight;
-
-											//check units
-												units = window.seed.units[ attack.cityKey ]
-												enoughUnits = true;
-												for( w = 0; w < level.waves.length; w += 1 ){
-													if( !enoughUnits ) continue;
-													wave = level.waves[w];
-													for( j = 0; j < wave.units.length; j += 1 ){
-														unit = wave.units[j];
-														unitKey = unit.id.replace(/nt/, '');
-														unitNum = parseInt(unit.id.replace(/unt/, ''), 10); //for unitsArr, 0 based
-														qty = parseFloat(unit.qty);
-
-														available = parseFloat(units[ unit.id ]);
-														if( available < qty ){
-															//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') dans '+ city.label]);
-															enoughUnits = false;
-														} else {
-															for( k = 0; k < attack.keep.length; k += 1 ){
-																keep = attack.keep[k];
-																if( unit.id == keep.id && available - qty < parseFloat(keep.qty) ){
-																	//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') (conservation) dans '+ city.label]);
-																	enoughUnits = false;
-																}
-															}
-														}
-													}
-												}
-												if( !enoughUnits ) continue;
-
-											baseParams.cid = attack.cityKey.replace(/city/, '');
-
-											//for the city all checks are ok
-											found = true;
-											break;
-										}
-									}
-								}
-
-								if( !found ){
-									//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas du bon niveau ('+ info.tileLevel +').']);
-									bunchIndex += 1;
-									return bdfd.pipe( check(bdfd) );
-								}
-
-								baseParams.xcoord = gps[0];
-								baseParams.ycoord = gps[1];
-								bunchIndex += 1;
-								return bdfd.pipe( checkAndLaunchWaves(bdfd) );
-							}
-						}
-					};
-
-					$.when( bunchSequence() )
-						.always(function(){
-							attack.coordIndex += bunchIndex;
-							dfd.pipe( checkCoordByBunch(dfd, 3) );
-						});
-				};
-
-				var checkCoordByBunch = function(dfd, 3){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkCoordByBunch function');
-					if( $tr.data('stop') ){
-						stop();
-						return dfd.reject();
-					}
-					KOCFIA[ mod ].refreshOngoingInfo(attack, false);
-
-					if( attack.coordIndex >= coordsLength ){
-						KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Aucune coordonnée validée pour l\''+ label +'.']);
-						return dfd.reject();
-					}
-
-					var cParams = jQuery.extend(true, {}, window.g_ajaxparams),
-						i, gps, blocks = [];
-
-					for( i = 0; i < 10; i += 1 ){
-						gps = coords[ attack.coordIndex + i ].split(',');
-						bunch.push( gps );
-
-						blocks.push("bl_" + gps[0] + "_bt_" + gps[1]);
-
-						if( attack.coordIndex + i >= coordsLength ){
-							break;
-						}
-					}
-
-					cParams.blocks = blocks.join(',');
-
-					$.ajax({
-						url: window.g_ajaxpath + "ajax/fetchMapTiles.php" + window.g_ajaxsuffix,
-						type: 'post',
-						data: cParams,
-						dataType: 'json',
-						timeout: 10000,
-					})
-					.done(function(result){
-						if( result.data ){
-							return dfd.pipe( byBunch(dfd, result.data) );
-						} else {
-							attempts -= 1;
-							if( attempts > 0 ){
-								return dfd.pipe( checkCoordByBunch(dfd, attempts) );
-							} else {
-								attack.coordIndex += 1;
-								return dfd.pipe( checkCoordByBunch(dfd, 3) );
-							}
-						}
-					})
-					.fail(function(){
-						attempts -= 1;
-						if( attempts > 0 ){
-							return dfd.pipe( checkCoordByBunch(dfd, attempts) );
-						} else {
-							attack.coordIndex += 1;
-
-							return dfd.pipe( checkCoordByBunch(dfd, 3) );
-						}
-					});
 				};
 
 				//check one coord and return the result using the deferred object in parameter
@@ -9431,6 +9492,232 @@ jQuery(document).ready(function(){
 							return dfd.pipe( checkCoord(dfd, 3) );
 						}
 					});
+				};
+
+				//check severals coords at a time
+				var checkCoordByGroup = function(dfd, attempts){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkCoordByBunch function');
+					if( $tr.data('stop') ){
+						stop();
+						return dfd.reject();
+					}
+					KOCFIA[ mod ].refreshOngoingInfo(attack, false);
+
+					if( attack.coordIndex >= coordsLength ){
+						KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Aucune coordonnée validée pour l\''+ label +'.']);
+						return dfd.reject();
+					}
+
+					var cParams = jQuery.extend(true, {}, window.g_ajaxparams),
+						i, gps, blocks = [];
+
+					for( i = 0; i < 10; i += 1 ){
+						gps = coords[ attack.coordIndex + i ].split(',');
+						bunch.push( gps );
+
+						blocks.push("bl_" + gps[0] + "_bt_" + gps[1]);
+
+						if( attack.coordIndex + i >= coordsLength ){
+							break;
+						}
+					}
+
+					cParams.blocks = blocks.join(',');
+
+					$.ajax({
+						url: window.g_ajaxpath + "ajax/fetchMapTiles.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: cParams,
+						dataType: 'json',
+						timeout: 10000,
+					})
+					.done(function(result){
+						if( result.data ){
+							return dfd.pipe( groupedCheck(dfd, result.data) );
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								return dfd.pipe( checkCoordByGroup(dfd, attempts) );
+							} else {
+								attack.coordIndex += 1;
+								return dfd.pipe( checkCoordByGroup(dfd, 3) );
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							return dfd.pipe( checkCoordByGroup(dfd, attempts) );
+						} else {
+							attack.coordIndex += 1;
+
+							return dfd.pipe( checkCoordByGroup(dfd, 3) );
+						}
+					});
+				};
+
+				var groupedCheck = function(dfd, data){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred byBunch function');
+					var bunchIndex = 0;
+
+					var bunchSequence = function(dfd){
+						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkBunch function');
+						return $.Deferred(function(bdfd){
+							return bdfd.pipe( check(bdfd, data) );
+						}).promise();
+					};
+
+
+					var check = function(bdfd){
+						if( bunchIndex >= bunch.length ){
+							return bdfd.resolve();
+						}
+
+						var info = data['l_'+ bunch[ bunchIndex ][0] +'_t_'+ bunch[ bunchIndex ][1]],
+							gps = bunch[ bunchIndex ];
+						if( info ){
+							var type = parseInt(info.tileType, 10);
+							if( type != 54 && type != 0 ){
+								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas une forêt sombre ou un marais']);
+								//will force the update of coords on next checkAndLaunchAttack call
+								KOCFIA[ mod ].coords.status = 'outdated';
+								bunchIndex += 1;
+								return bdfd.pipe( check(bdfd) );
+							} else if( type == 0 ){
+								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') est un marais']);
+								bunchIndex += 1;
+								return bdfd.pipe( check(bdfd) );
+							} else if( $.inArray(coords[ attack.coordIndex + bunchIndex ], attack.marchingCoords) > -1 ){
+								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') déjà attaquée']);
+								bunchIndex += 1;
+								return bdfd.pipe( check(bdfd) );
+							} else {
+								//check if the coord level correspond to an "active" city with an "active" rule
+								var found = false, level, i, j, k, wave, enoughUnits,
+									units, unit, unitKey, unitNum, qty, available,
+									keep, slots, keepFree, knights, highest, lowest;
+								for( i = 0; i < attack.cities.length; i += 1 ){
+									attack.cityKey = attack.cities[i];
+									if( attack.info[ attack.cityKey ].active ){
+										city = KOCFIA.cities[ attack.cityKey ];
+										//checking range and looping if over max range
+										if( Shared.getDistance(city.coords.x, city.coords.y, gps[0], gps[1]) > 100 ){
+											continue;
+										}
+
+										//has the city a corresponding active rule
+										if( attack.levels[ attack.cityKey ].hasOwnProperty( info.tileLevel ) && attack.levels[ attack.cityKey ][ info.tileLevel ].active ){
+											//set the attack for on wave launch
+												attack.rpSlot = attack.info[ attack.cityKey ].rps;
+												level = attack.levels[ attack.cityKey ][ info.tileLevel ];
+
+											//check rally point slot
+												slots = Shared.getRallyPointSlots( attack.cityKey );
+												keepFree = parseInt(attack.rpSlot, 10) || 0;
+												if( slots - keepFree <= 0 || slots - keepFree < level.waves.length ){
+													//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de place dans le point de ralliement de '+ city.label]);
+													continue;
+												}
+
+											//check knight
+												Shared.freeKnights( attack.cityKey );
+												knights = Shared.getAvailableKnights( attack.cityKey );
+												if( knights.length < level.waves.length ){
+													//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de chevalier'+ (level.waves.length > 1 ? 's' : '') +' disponible'+ (level.waves.length > 1 ? 's' : '') +' pour lancer '+ (level.waves.length > 1 ? 'les '+ level.waves.length +' vagues' : 'la vague') +' depuis '+ city.label]);
+													continue;
+												}
+
+												if( level.knightPriority == '' ){
+													knight = knights[0].knightId;
+												} else if( level.knightPriority == 'highest' ){
+													highest = 0;
+													for( k in knights ){
+														if( knights.hasOwnProperty(k) ){
+															if( parseFloat(knights[k].knight.combat) > highest ){
+																knight = knights[k].knightId;
+															}
+														}
+													}
+													if( knight == null ){
+														//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Chevalier indisponible dans '+ city.label]);
+														continue;
+													}
+												} else if( level.knightPriority == 'lowest' ){
+													lowest = 0;
+													for( k in knights ){
+														if( knights.hasOwnProperty(k) ){
+															if( parseFloat(knights[k].knight.combat) < lowest ){
+																knight = knights[k].knightId;
+															}
+														}
+													}
+													if( knight == null ){
+														//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Chevalier indisponible dans '+ city.label]);
+														continue;
+													}
+												}
+												baseParams.kid = knight;
+
+												attack.waves = level.waves;
+												attack.keep = attack.info[ attack.cityKey ].keep;
+
+											//check units
+												units = window.seed.units[ attack.cityKey ]
+												enoughUnits = true;
+												for( w = 0; w < attack.waves.length; w += 1 ){
+													if( !enoughUnits ) continue;
+													wave = attack.waves[w];
+													for( j = 0; j < wave.units.length; j += 1 ){
+														unit = wave.units[j];
+														unitKey = unit.id.replace(/nt/, '');
+														unitNum = parseInt(unit.id.replace(/unt/, ''), 10); //for unitsArr, 0 based
+														qty = parseFloat(unit.qty);
+
+														available = parseFloat(units[ unit.id ]);
+														if( available < qty ){
+															//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') dans '+ city.label]);
+															enoughUnits = false;
+														} else {
+															for( k = 0; k < attack.keep.length; k += 1 ){
+																keep = attack.keep[k];
+																if( unit.id == keep.id && available - qty < parseFloat(keep.qty) ){
+																	//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Pas assez de troupe ('+ window.unitcost[ unit.id ][0] +') (conservation) dans '+ city.label]);
+																	enoughUnits = false;
+																}
+															}
+														}
+													}
+												}
+												if( !enoughUnits ) continue;
+
+											baseParams.cid = attack.cityKey.replace(/city/, '');
+
+											//for the city all checks are ok
+											found = true;
+											break;
+										}
+									}
+								}
+
+								if( !found ){
+									//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas du bon niveau ('+ info.tileLevel +').']);
+									bunchIndex += 1;
+									return bdfd.pipe( check(bdfd) );
+								}
+
+								baseParams.xcoord = gps[0];
+								baseParams.ycoord = gps[1];
+								bunchIndex += 1;
+								return bdfd.pipe( checkAndLaunchWaves(bdfd) );
+							}
+						}
+					};
+
+					$.when( bunchSequence() )
+						.always(function(){
+							attack.coordIndex += bunchIndex;
+							dfd.pipe( checkCoordByGroup(dfd, 3) );
+						});
 				};
 
 				//loop function for checking and launching each wave, use deferred.pipe() to iterate
@@ -9593,6 +9880,14 @@ jQuery(document).ready(function(){
 									} else if( result.user_action == 'marchCaptcha' ){
 										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, (mod == 'scout' ? city.label + ' ' : '') +'Plan d\''+ label +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (captcha !).']);
 										return wdfd.reject();
+									} else if( result.user_action == 'marchWarning' ){
+										wParams.marchWarning = 1;
+										launchAttempts -= 1;
+										if( launchAttempts > 0 ){
+											return wdfd.pipe( launchWave(wdfd, launchAttempts) );
+										} else {
+											return wdfd.reject();
+										}
 									} else {
 										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, (mod == 'scout' ? city.label + ' ' : '') +'Plan d\''+ label +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' refusé (erreur serveur).']);
 										launchAttempts -= 1;
@@ -9623,6 +9918,7 @@ jQuery(document).ready(function(){
 								if( mod == 'wilderness' ){
 									return wdfd.pipe( findLostKnights(wdfd) );
 								} else if( mod == 'darkForest' ){
+									//will recheck units and filling some need variables
 									return wdfd.pipe( checkUnits(wdfd, 3) );
 								} else { //scout
 									//no knight for scouting, so we pipe directly to checking unit

@@ -250,13 +250,17 @@ jQuery(document).ready(function(){
 
 		confPanelCss += '\n#kocfia-transport .troop img { width: 20px; }';
 		confPanelCss += '\n#kocfia-transport .res img { width: 20px; }';
-		confPanelCss += '\n#kocfia-transport .manual-form .buttons { display: none; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .resources { margin: 12px 0; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .resources .ui-buttonset img { top: 2px; }';
+		confPanelCss += '\n#kocfia-transport .manual-form input[type=text] { text-align: center; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .buttons { margin-top: 12px; display: none; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .quantity { display: none; }';
-		confPanelCss += '\n#kocfia-transport .manual-form .quantity input { width: 50px; }';
-		confPanelCss += '\n#kocfia-transport .manual-form .res input { width: 50px; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .quantity input { width: 80px; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .res input { width: 80px; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .troop select { margin-top: 5px; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .minTroop, #kocfia-transport .manual-form .maxLoad { margin-left: 5px; }';
-		confPanelCss += '\n#kocfia-transport .manual-form .items img { width: 20px; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .ui-buttonset img { width: 20px; top: 0; margin: 0; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .items { position: relative; top: 4px; }';
 
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 0; height: 20px; }";
@@ -652,7 +656,7 @@ jQuery(document).ready(function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.time('kocfia '+ KOCFIA.modules[i] +' on');
 					KOCFIA[ KOCFIA.modules[i] ].on();
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.timeEnd('kocfia '+ KOCFIA.modules[i] +' on');
-				}, i * 1000 + 1000);
+				}, i * 1000 + 500);
 			};
 
 			for( i = 0; i < modulesLength; i += 1 ){
@@ -660,6 +664,13 @@ jQuery(document).ready(function(){
 					initModule(i);
 				}
 			}
+
+			window.setTimeout(function(){
+				if( KOCFIA.conf.confPanel.visible ){
+					KOCFIA.$confPanel.show();
+					KOCFIA.$confPanelWrapper.css('height', KOCFIA.calcConfPanelInnerHeight());
+				}
+			}, i * 1000 + 1000);
 
 		//refresh button
 			KOCFIA.$buttons.append(
@@ -956,7 +967,7 @@ jQuery(document).ready(function(){
 			XMLHttpRequest.prototype.open = newOpen;
 		};
 
-		/* CONFIGURATION PANEL */
+	/* CONFIGURATION PANEL */
 		KOCFIA.confPanel = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('confPanel') ) console.info('KOCFIA confPanel function');
 			$head.append( $('<style>').html(confPanelCss) );
@@ -1167,11 +1178,6 @@ jQuery(document).ready(function(){
 
 			//help dialogs
 			KOCFIA.$confPanel.find('.help').dialog({ autoOpen: false, height: 300, width: 400, zIndex: 100002 });
-
-			if( KOCFIA.conf.confPanel.visible ){
-				KOCFIA.$confPanel.show();
-				KOCFIA.$confPanelWrapper.css('height', KOCFIA.calcConfPanelInnerHeight());
-			}
 		};
 
 		KOCFIA.calcConfPanelInnerHeight = function(){
@@ -1392,7 +1398,7 @@ jQuery(document).ready(function(){
 		};
 
 		Shared.decodeFormat = function( num ){
-			num = num.toString();
+				num = num.toString().replace(/'/, ''); //reset readable() format
 			var regexp = new RegExp('^[0-9]+(\.[0-9]{1,2})?([KMG]){0,1}$', 'gi'),
 				match = regexp.exec(num);
 			if( !match ){
@@ -8446,7 +8452,8 @@ jQuery(document).ready(function(){
 					if( n > 0 ){
 						if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-						code += '<button rel="'+ type.key +'" data-label="'+ type.label +'" title="'+ Shared.readable(n) +'">'+ type.label +' <small>('+ Shared.format(n) +')</small></button>';
+						code += '<button rel="'+ type.key +'" data-label="'+ type.label +'" title="'+ type.label +' - '+ Shared.readable(n) +'">';
+						code += '<img src="'+ type.icon +'" alt="'+ type.label +'"><small>('+ Shared.format(n) +')</small></button>';
 					}
 				}
 			}
@@ -8500,7 +8507,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getTroopQuantityForLoad function');
 
 			if( window.unitstats.hasOwnProperty(unit) ){
-				return Math.ceil(parseInt(window.unitstats[unit][5], 10) / quantity);
+				return Math.ceil(quantity / parseInt(window.unitstats[unit][5], 10));
 			} else return false;
 		};
 
@@ -8536,14 +8543,15 @@ jQuery(document).ready(function(){
 			form += '<div class="quantity"><label for="kocfia-transport-manual-quantity">Quantité&nbsp:&nbsp;</label>';
 			form += '<input type="text" name="qty"><button class="minTroop">Minimise</button></div>';
 
-			form += '<label>Ressources&nbsp;:&nbsp;</label>';
 			form += '<div class="resources">';
+			form += '<label>Ressources&nbsp;:&nbsp;</label>';
 			form += '<div class="available"></div>';
 			form += '<div class="chosen"></div>';
 			form += '</div>';
 
-			var items = [55, 57, 221, 261, 262, 271, 272, 931, 932, 280, 281],
+			var items = [55, 57, 931], //speed and march capacity boosts
 				info, key, i;
+			form += '<label>Boosts&nbsp;:&nbsp;</label>';
 			form += '<div class="items">';
 			for( i = 0; i < items.length; i += 1 ){
 				key = 'i' + items[i];
@@ -8589,26 +8597,32 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport planManualTransport function');
 			var plan = {},
 				errors = [],
-				city, nb, res, label;
+				city, nb, res, label,
+				gpsFrom = null,
+				gpsTo = null;
 
 			//from
 			var $from = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked');
 			if( $from.length ){
 				plan.from = $from.val();
+				city = KOCFIA.cities[ plan.from ];
+				gpsFrom = city.coords.x +','+ city.coords.y;
 			} else {
 				errors.push('Vous devez spécifier une cité d\'expédition');
 			}
 
 			//to
 			var $to = KOCFIA.transport.$manualForm.find('.to').find('input').filter(':checked'),
-				coord = $trim( KOCFIA.transport.$manualForm.find('.coord').val() );
+				coord = $.trim( KOCFIA.transport.$manualForm.find('.coord').val() );
 			if( $to.length ){
 				plan.to = {};
-				city = KOCFIA.cities[ $from.val() ];
+				city = KOCFIA.cities[ $to.val() ];
 				plan.to.x = city.coords.x;
 				plan.to.y = city.coords.y;
+
+				gpsTo = plan.to.x +','+ plan.to.y;
 			} else if( coord != '' ){
-				var regexp = /[^0-9, ]/;
+				var regexp = /[^0-9,]/;
 				if( regexp.test( coords ) ){
 					errors.push('Pour les coordonnées, veuillez respecter le format x,y');
 				} else {
@@ -8618,16 +8632,26 @@ jQuery(document).ready(function(){
 					} else {
 						plan.to.x = coord[0];
 						plan.to.y = coord[1];
+						gpsTo = plan.to.x +','+ plan.to.y;
 					}
 				}
 			} else {
 				errors.push('Vous devez spécifier une cité ou coordonnée de destination');
 			}
 
+			if( gpsFrom != null && gpsTo != null && gpsFrom == gpsTo ){
+				errors.push('Les coordonnées d\'expédition et de destination doivent être différentes');
+			}
+
 			//troop
-			var $unit = KOCFIA.transport.$manualForm('.quantity'),
-				unit = $unit.attr('name'),
-				quantity = $trim( $unit.val() );
+			var $unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
+				quantity = $.trim( $unit.val() ),
+				$troop = KOCFIA.transport.$manualForm.find('.troop'),
+				unit = $troop.find('input').filter(':checked').val(),
+				selected = $troop.find('select').val();
+
+			if( selected != '' ) unit = selected;
+
 			if( quantity == '' ){
 				errors.push('Vous devez spécifier la quantité de troupe pour le transport');
 			} else {
@@ -8663,7 +8687,7 @@ jQuery(document).ready(function(){
 
 			//items
 			//var itemlist = [55, 57, 221, 261, 262, 271, 272, 931, 932, 280, 281];
-			var $items = KOCFIA.transport.$manualFOrm.find('.items').find('input').filter(':checked');
+			var $items = KOCFIA.transport.$manualForm.find('.items').find('input').filter(':checked');
 			plan.items = [];
 			if( $items.length ){
 				$items.each(function(){ plan.items.push( this.value ); });
@@ -8672,14 +8696,12 @@ jQuery(document).ready(function(){
 			return {plan: plan, errors: errors};
 		};
 
-		KOCFIA.transport.launchManualTransport = function(){
+		KOCFIA.transport.launchManualTransport = function( plan ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport launchManualTransport function');
 
-			var tParams = $.extends({}, window.g_ajaxparams),
+			var tParams = $.extend({}, window.g_ajaxparams),
 				unitsarr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				totalTroops = plan.unit.qty,
 				resources = [],
-				totalResources = 0,
 				unitId = null,
 				i, attempts = 3;
 
@@ -8694,7 +8716,6 @@ jQuery(document).ready(function(){
 			for( i = 0; i < plan.res.length; i += 1 ){
 				tParams[ plan.res[i].id ] = plan.res[i].qty;
 				resources.push(plan.res[i].qty);
-				totalResources += plan.res[i].qty;
 			}
 
 			tParams.items = plan.items.join(",");
@@ -8747,6 +8768,8 @@ jQuery(document).ready(function(){
 					else KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé (erreur internet)');
 				});
 			};
+
+			launch();
 		};
 
 		KOCFIA.transport.addManualFormListeners = function(){
@@ -8799,7 +8822,7 @@ jQuery(document).ready(function(){
 					} else {
 						KOCFIA.transport.$manualForm.find('.troop').find('input').prop('checked', false);
 					}
-					KOCFIA.transport.$manualForm.find('.quantity').show();
+					KOCFIA.transport.$manualForm.find('.quantity, .buttons').show();
 				})
 				//resources
 				.on('click', '.resources .available button', function(){
@@ -8810,7 +8833,7 @@ jQuery(document).ready(function(){
 						res = $this.attr('rel'),
 						$chosen = KOCFIA.transport.$manualForm.find('.resources').find('.chosen'),
 						$chosenRes = $chosen.find('input'),
-						chosenRes = $chosenRes.map(function(){ return this.rel; }).get();
+						chosenRes = $chosenRes.map(function(){ return this.name; }).get();
 
 					if( $.inArray(res, chosenRes) > -1 ){
 						$chosen.filter('[rel='+ res +']').focus();
@@ -8821,7 +8844,9 @@ jQuery(document).ready(function(){
 						code += '<label><img src="'+ info.icon +'">&nbsp;'+ label +'</label>&nbsp;';
 						code += '<input type="text" name="'+ res +'" value="">';
 						code += '<span class="ui-icon ui-icon-trash remove"></span>';
-						code += '<button class="maxLoad">Capacité Maximum</buton>';
+						if( $chosen.find('.maxLoad').length == 0 ){
+							code += '<button class="maxLoad">Capacité Maximum</buton>';
+						}
 						code += '</div>';
 
 						$chosen.append( code );
@@ -8833,8 +8858,12 @@ jQuery(document).ready(function(){
 				//unit change, force max at available
 				.on('keyup', '.quantity input', function(){
 					var $unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
-						unt = $unit.attr('name'),
-						quantity = $.trim( $unit.val() );
+						quantity = $.trim( $unit.val() ),
+						$troop = KOCFIA.transport.$manualForm.find('.troop'),
+						unit = $troop.find('input').filter(':checked').val(),
+						selected = $troop.find('select').val();
+
+					if( selected != '' ) unit = selected;
 
 					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
 					if( quantity === false ) return;
@@ -8842,13 +8871,12 @@ jQuery(document).ready(function(){
 					var cityKey = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked').val(),
 						available = 0;
 					if( cityKey ){
-						available = parseInt(window.seed.units[ cityKey ][ unt ], 10);
+						available = parseInt(window.seed.units[ cityKey ][ unit ], 10);
 						if( isNaN(available) ) available = false;
 					}
 
 					if( available && available < quantity ){
-						$unit.val( Shared.readable(available) )
-							.animate({backgroundColor: 'red'}, 500, function(){ $(this).css('background-color', ''); });
+						$unit.val( Shared.readable(available) );
 					}
 				})
 				//resource change, force max at available
@@ -8873,8 +8901,7 @@ jQuery(document).ready(function(){
 					}
 
 					if( available && available < quantity ){
-						$(this).val( Shared.readable(available) )
-							.animate({backgroundColor: 'red'}, 500, function(){ $(this).css('background-color', ''); });
+						$(this).val( Shared.readable(available) );
 					}
 				})
 				//minimise unit quantity
@@ -8882,8 +8909,12 @@ jQuery(document).ready(function(){
 					var $chosen = KOCFIA.transport.$manualForm.find('.chosen').find('input'),
 						resources = 0,
 						$unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
-						unt = $unit.attr('name'),
-						quantity = $.trim( $unit.val() );
+						quantity = $.trim( $unit.val() ),
+						$troop = KOCFIA.transport.$manualForm.find('.troop'),
+						unit = $troop.find('input').filter(':checked').val(),
+						selected = $troop.find('select').val();
+
+					if( selected != '' ) unit = selected;
 
 					$chosen.each(function(){
 						var nb = $.trim( this.value );
@@ -8896,16 +8927,20 @@ jQuery(document).ready(function(){
 
 					if( resources == 0 ) return;
 
-					var needed = KOCFIA.transport.getTroopQuantityForLoad( unt, resources );
-					if( needed !== false ) $unit.val( Shared.format(needed) );
+					var needed = KOCFIA.transport.getTroopQuantityForLoad( unit, resources );
+					if( needed !== false ) $unit.val( Shared.readable(needed) ).trigger('change');
 				})
 				//maximise load
 				.on('click', '.maxLoad', function(){
 					var $chosen = KOCFIA.transport.$manualForm.find('.chosen').find('input'),
 						resources = 0,
 						$unit = KOCFIA.transport.$manualForm.find('.quantity').find('input'),
-						unt = $unit.attr('name'),
-						quantity = $.trim( $unit.val() );
+						quantity = $.trim( $unit.val() ),
+						$troop = KOCFIA.transport.$manualForm.find('.troop'),
+						unit = $troop.find('input').filter(':checked').val(),
+						selected = $troop.find('select').val();
+
+					if( selected != '' ) unit = selected;
 
 					$chosen.each(function(){
 						var nb = $.trim( this.value );
@@ -8913,13 +8948,19 @@ jQuery(document).ready(function(){
 						if( nb !== false ) resources += nb;
 					});
 
+					var current = $.trim( $chosen.filter(':last').val() );
+					current = Shared.decodeFormat( current );
+					if( current === false ) current = 0;
+					current = resources - current;
+
 					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
 					if( quantity === false ) return;
 
-					if( resources == 0 ) return;
-
-					var maxLoad = KOCFIA.transport.getLoadCapacity( unt, quantity );
-					if( maxLoad !== false && maxLoad < resources ) this.value = Shared.readable( maxLoad - resource );
+					var maxLoad = KOCFIA.transport.getLoadCapacity( unit, quantity );
+					if( maxLoad !== false ){
+						if( $chosen.length == 1 ) $chosen.val( Shared.readable( maxLoad ) ).trigger('change');
+						else $chosen.filter(':last').val( Shared.readable( maxLoad - current ) ).trigger('change');
+					}
 				})
 				//form reset
 				.on('click', '.reset', function(){
@@ -8933,9 +8974,10 @@ jQuery(document).ready(function(){
 				})
 				//form submit
 				.on('click', '.launch', function(){
-					var result = KOCFIA.transport.planManualTransport();
+					var $msg = KOCFIA.transport.$manualForm.find('.result').empty(),
+						result = KOCFIA.transport.planManualTransport();
 					if( result.errors.length ){
-						KOCFIA.transport.$manualForm.find('.result').append( result.errors.unique().join('<br>') );
+						$msg.append( result.errors.unique().join('<br>') );
 					} else {
 						KOCFIA.transport.launchManualTransport( result.plan );
 					}

@@ -407,7 +407,7 @@ jQuery(document).ready(function(){
 				resource2x3600: {name: 'resource2x3600', label: 'Bois', key: 'rec2', icon: window.stimgUrl + 'img/wood_30.png' },
 				resource3x3600: {name: 'resource3x3600', label: 'Pierre', key: 'rec3', icon: window.stimgUrl + 'img/stone_30.png' },
 				resource4x3600: {name: 'resource4x3600', label: 'Minerai', key: 'rec4', icon: window.stimgUrl + 'img/iron_30.png' },
-				     resource5: {name: 'resource5', label: 'Pierre d\'Ether', key: 'rec5', icon: window.stimgUrl + 'img/iron_30.png' },
+					 resource5: {name: 'resource5', label: 'Pierre d\'Ether', key: 'rec5', icon: window.stimgUrl + 'img/iron_30.png' },
 			},
 			resources_cap: [
 				{name: 'resource1Capx3600', label: 'plafond', icon: window.stimgUrl + 'img/food_30.png' },
@@ -1398,7 +1398,7 @@ jQuery(document).ready(function(){
 		};
 
 		Shared.decodeFormat = function( num ){
-				num = num.toString().replace(/'/, ''); //reset readable() format
+			num = num.toString().replace(/'/, ''); //reset readable() format
 			var regexp = new RegExp('^[0-9]+(\.[0-9]{1,2})?([KMG]){0,1}$', 'gi'),
 				match = regexp.exec(num);
 			if( !match ){
@@ -8495,19 +8495,39 @@ jQuery(document).ready(function(){
 			return Shared.marchTimeCalculator(cityKeyFrom, troops, coordXTo, coordYTo, is_round_trip, items_applied, isFriendly);
 		};
 
-		KOCFIA.transport.getLoadCapacity = function( unit, quantity ){
+		KOCFIA.transport.getLoadCapacity = function( unit, quantity, loadBoost ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getLoadCapacity function');
 
 			if( window.unitstats.hasOwnProperty(unit) ){
-				return quantity * parseInt(window.unitstats[unit][5], 10);
+				var load = quantity * parseInt(window.unitstats[unit][5], 10),
+					d = new Date(),
+					ts = d.getTime() / 1000;
+
+				load = parseInt(load + (load * parseInt(window.seed.tech.tch10, 10) * 0.1));
+
+				if( window.seed.playerEffects.loadExpire > ts || loadBoost ){
+					load *= 1.25;
+				}
+
+				return load;
 			} else return false;
 		};
 
-		KOCFIA.transport.getTroopQuantityForLoad = function( unit, quantity ){
+		KOCFIA.transport.getTroopQuantityForLoad = function( unit, quantity, loadBoost ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getTroopQuantityForLoad function');
 
 			if( window.unitstats.hasOwnProperty(unit) ){
-				return Math.ceil(quantity / parseInt(window.unitstats[unit][5], 10));
+				var load = parseInt(window.unitstats[unit][5], 10),
+					d = new Date(),
+					ts = d.getTime() / 1000;
+
+				load = parseInt(load + (load * parseInt(window.seed.tech.tch10, 10) * 0.1));
+
+				if( window.seed.playerEffects.loadExpire > ts || loadBoost ){
+					load *= 1.25;
+				}
+
+				return Math.ceil( quantity / load );
 			} else return false;
 		};
 
@@ -8549,7 +8569,7 @@ jQuery(document).ready(function(){
 			form += '<div class="chosen"></div>';
 			form += '</div>';
 
-			var items = [55, 57, 931], //speed and march capacity boosts
+			var items = [55, 57, 931, 276], //speed and march capacity boosts
 				info, key, i;
 			form += '<label>Boosts&nbsp;:&nbsp;</label>';
 			form += '<div class="items">';
@@ -8583,6 +8603,17 @@ jQuery(document).ready(function(){
 
 		KOCFIA.transport.getPileUpForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getPileUpForm function');
+
+			var form = '';
+
+			/**
+			 * by resource
+			 * one line for per town
+			 * from / activate / quantity
+			 * to cities
+			 */
+
+			return form;
 		};
 
 		KOCFIA.transport.getListsTemplate = function(){
@@ -8669,7 +8700,7 @@ jQuery(document).ready(function(){
 					nb = $.trim( this.value );
 					res = this.name;
 					label = KOCFIA.resourceInfo[ res ].label;
-					if( res == 'gold' ) label = 'd\'' + label;
+					if( res == 'rec0' ) label = 'd\'' + label;
 					else label = 'de '+ label;
 
 					if( nb == '' ){
@@ -8701,21 +8732,30 @@ jQuery(document).ready(function(){
 
 			var tParams = $.extend({}, window.g_ajaxparams),
 				unitsarr = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				resources = [],
+				resources = [0, 0, 0, 0, 0, 0],
 				unitId = null,
-				i, attempts = 3;
+				i, key, attempts = 3;
 
-			tParams.cid = plan.from;
+			tParams.cid = plan.from.replace(/city/, '');
 			tParams.type = 1;//cm.MARCH_TYPES.MARCH_TYPE_TRANSPORT: 1
 			tParams.kid = 0;
 			tParams.xcoord = plan.to.x;
 			tParams.ycoord = plan.to.y;
-			tParams[ plan.unit.id ] = plan.unit.qty;
+			tParams[ plan.unit.id.replace(/nt/, '') ] = plan.unit.qty;
 			unitsarr[ plan.unit.id.replace(/unt/, '')] = plan.unit.qty;
 
+			tParams.gold = 0;
+			tParams.r1 = 0;
+			tParams.r2 = 0;
+			tParams.r3 = 0;
+			tParams.r4 = 0;
+			tParams.r5 = 0;
+
 			for( i = 0; i < plan.res.length; i += 1 ){
-				tParams[ plan.res[i].id ] = plan.res[i].qty;
-				resources.push(plan.res[i].qty);
+				if( plan.res[i].id == 'rec0' ) key = 'gold';
+				else key = plan.res[i].id.replace(/ec/, '');
+				tParams[ key ] = plan.res[i].qty;
+				resources[ key.replace(/r/, '') ] = plan.res[i].qty;
 			}
 
 			tParams.items = plan.items.join(",");
@@ -8730,7 +8770,7 @@ jQuery(document).ready(function(){
 				})
 				.done(function(data){
 					if( data.ok ){
-	                    var timediff = parseInt(data.eta, 10) - parseInt(data.initTS, 10),
+						var timediff = parseInt(data.eta, 10) - parseInt(data.initTS, 10),
 							d = new Date(),
 							ts = d.getTime() / 1000;
 
@@ -8844,9 +8884,7 @@ jQuery(document).ready(function(){
 						code += '<label><img src="'+ info.icon +'">&nbsp;'+ label +'</label>&nbsp;';
 						code += '<input type="text" name="'+ res +'" value="">';
 						code += '<span class="ui-icon ui-icon-trash remove"></span>';
-						if( $chosen.find('.maxLoad').length == 0 ){
-							code += '<button class="maxLoad">Capacité Maximum</buton>';
-						}
+						code += '<button class="maxLoad">Capacité Maximum</buton>';
 						code += '</div>';
 
 						$chosen.append( code );
@@ -8854,6 +8892,7 @@ jQuery(document).ready(function(){
 				})
 				.on('click', '.resources .remove', function(){
 					$(this).closest('div').remove();
+					var $chosen = KOCFIA.transport.$manualForm.find('.resources').find('.chosen');
 				})
 				//unit change, force max at available
 				.on('keyup', '.quantity input', function(){
@@ -8912,14 +8951,18 @@ jQuery(document).ready(function(){
 						quantity = $.trim( $unit.val() ),
 						$troop = KOCFIA.transport.$manualForm.find('.troop'),
 						unit = $troop.find('input').filter(':checked').val(),
-						selected = $troop.find('select').val();
+						selected = $troop.find('select').val(),
+						loadBoost = $('#kocfia-transport-item-270').prop('checked') || false;
 
 					if( selected != '' ) unit = selected;
 
 					$chosen.each(function(){
 						var nb = $.trim( this.value );
 						nb = Shared.decodeFormat(nb);
-						if( nb !== false ) resources += nb;
+						if( nb !== false ){
+							if( this.name == 'rec5' ) nb *= 5; //ether stone
+							resources += nb;
+						}
 					});
 
 					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
@@ -8927,8 +8970,8 @@ jQuery(document).ready(function(){
 
 					if( resources == 0 ) return;
 
-					var needed = KOCFIA.transport.getTroopQuantityForLoad( unit, resources );
-					if( needed !== false ) $unit.val( Shared.readable(needed) ).trigger('change');
+					var needed = KOCFIA.transport.getTroopQuantityForLoad( unit, resources, loadBoost );
+					if( needed !== false ) $unit.val( Shared.readable(needed) ).trigger('keyup');
 				})
 				//maximise load
 				.on('click', '.maxLoad', function(){
@@ -8938,28 +8981,36 @@ jQuery(document).ready(function(){
 						quantity = $.trim( $unit.val() ),
 						$troop = KOCFIA.transport.$manualForm.find('.troop'),
 						unit = $troop.find('input').filter(':checked').val(),
-						selected = $troop.find('select').val();
+						selected = $troop.find('select').val(),
+						loadBoost = $('#kocfia-transport-item-270').prop('checked') || false;
 
 					if( selected != '' ) unit = selected;
 
 					$chosen.each(function(){
 						var nb = $.trim( this.value );
 						nb = Shared.decodeFormat(nb);
-						if( nb !== false ) resources += nb;
+						if( nb !== false ){
+							if( this.name == 'rec5' ) nb *= 5; //ether stone
+
+							resources += nb;
+						}
 					});
 
-					var current = $.trim( $chosen.filter(':last').val() );
+					var $input = $(this).siblings('input');
+
+					var current = $.trim( $input.val() );
 					current = Shared.decodeFormat( current );
 					if( current === false ) current = 0;
-					current = resources - current;
+					resources = resources - current;
 
 					if( quantity != '' ) quantity = Shared.decodeFormat( quantity );
 					if( quantity === false ) return;
 
-					var maxLoad = KOCFIA.transport.getLoadCapacity( unit, quantity );
+					var maxLoad = KOCFIA.transport.getLoadCapacity( unit, quantity, loadBoost );
 					if( maxLoad !== false ){
-						if( $chosen.length == 1 ) $chosen.val( Shared.readable( maxLoad ) ).trigger('change');
-						else $chosen.filter(':last').val( Shared.readable( maxLoad - current ) ).trigger('change');
+						maxLoad -= resources;
+						if( $input.attr('name') == 'rec5' ) maxLoad /= 5;
+						$input.val( Shared.readable( Math.ceil(maxLoad) ) ).trigger('keyup');
 					}
 				})
 				//form reset

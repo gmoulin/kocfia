@@ -263,6 +263,7 @@ jQuery(document).ready(function(){
 		confPanelCss += '\n#kocfia-transport .manual-form .buttons { margin-top: 6px; display: none; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .minTroop, #kocfia-transport .manual-form .maxLoad { margin-left: 5px; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .ui-buttonset img { width: 20px; position: relative; top: 2px; margin: 0 3px 0 0; }';
+		confPanelCss += '\n#kocfia-transport .manual-form .items.ui-buttonset img { top: 0; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .ui-buttonset small { position: relative; top: -4px; }';
 		confPanelCss += '\n#kocfia-transport .manual-form .items, #kocfia-transport .manual-form .available { position: relative; top: 4px; }';
 
@@ -321,7 +322,7 @@ jQuery(document).ready(function(){
 		overviewCss += "\n#kocfia-overview tr.highlight.toggle th, #kocfia-overview .toggle th.highlight, #kocfia-overview .toggle th { background-color: #CCC; }";
 		overviewCss += "\n#kocfia-overview tr td.sum { background-color: #D9F4F1; }";
 		overviewCss += "\n#kocfia-overview img { width:20px; }";
-		overviewCss += "\n#kocfia-overview tr td.sum, #kocfia-overview tr td.sum ~ td { text-align: right; }";
+		overviewCss += "\n#kocfia-overview tr td.sum, #kocfia-overview tr td.sum ~ td { text-align: right; padding-right: 5px; }";
 		overviewCss += "\n#kocfia-overview .toggle th { width: auto; cursor: pointer; }";
 		overviewCss += "\n#kocfia-overview .details-toggle { margin-left: 10px; font-size: 10px; font-weight: normal; }";
 		overviewCss += "\n#kocfia-overview .details-toggle label { cursor: pointer; }";
@@ -363,14 +364,15 @@ jQuery(document).ready(function(){
 
 
 	var KOCFIA = {
-		version: '0.4.9',
+		version: '0.4.10',
 		debug: true,
-		debugWhat: {transport: 1},
+		debugWhat: {transport: 1, darkForest: 1, checkAndLaunchAttack: 1},
 		server: null,
-		modules: ['chat', 'overview', 'wilderness', 'darkForest', 'scout', 'formation', 'transport', 'fbWallPopup', 'notepad', 'map'],
+		modules: ['chat', 'overview', 'barbarian', 'wilderness', 'darkForest', 'scout', 'formation', 'transport', 'fbWallPopup', 'notepad', 'map'],
 		modulesLabel: {
 			overview: 'Vue globale',
 			map: 'Carte',
+			barbarian: 'CB',
 			wilderness: 'TS',
 			darkForest: 'FO',
 			scout: 'Eclairage',
@@ -577,6 +579,7 @@ jQuery(document).ready(function(){
 
 		//prepare the module with shared parts
 		KOCFIA.wilderness = $.extend({}, KOCFIA.autoAttack, KOCFIA.wilderness);
+		KOCFIA.barbarian = $.extend({}, KOCFIA.autoAttack, KOCFIA.barbarian);
 		KOCFIA.darkForest = $.extend({}, KOCFIA.autoAttack, KOCFIA.darkForest);
 		KOCFIA.scout = $.extend({}, KOCFIA.autoAttack, KOCFIA.scout);
 
@@ -3310,7 +3313,7 @@ jQuery(document).ready(function(){
 				}, i * 20000);
 			};
 
-			if( this.module == 'wilderness' ){
+			if( this.module == 'wilderness' || this.module == 'barbarian' ){
 				//launching stored attacks
 				for( var c in KOCFIA[ module ].attacks ){
 					if( KOCFIA[ module ].attacks.hasOwnProperty(c) ){
@@ -3330,7 +3333,7 @@ jQuery(document).ready(function(){
 						i += 1;
 					}
 				}
-			} else {
+			} else if( this.module == 'darkForest' ){
 				delayedLaunch(KOCFIA[ module ].attacks, i);
 			}
 		};
@@ -3373,6 +3376,211 @@ jQuery(document).ready(function(){
 			KOCFIA[ this.module ].$saved.find('tbody').empty();
 		};
 
+		KOCFIA.autoAttack.getForm = function(){
+			var form = '<h3>Configurer une attaque</h3>';
+			form += '<div class="attack-form">';
+
+			//form message area
+			form += '<ul class="message"></ul>';
+
+			//form edit inputs
+			form += '<input type="hidden" class="edit-attackId" name="attackId" value="" autocomplete="off" />';
+			form += '<input type="hidden" class="edit-cityKey" name="cityKey" value="" autocomplete="off" />';
+
+			//city choice
+			var i, length = KOCFIA.citiesKey.length;
+			form += '<fieldset>';
+			form += '<legend>Ville</legend><div class="buttonset">';
+			for( i = 0; i < length; i += 1 ){
+				var cityKey = KOCFIA.citiesKey[i],
+					city = KOCFIA.cities[cityKey];
+				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="radio" class="city-choice" autocomplete="off" />';
+				form += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.label +'</label>';
+			}
+			form += '</div></fieldset>';
+
+			form += '<fieldset>';
+			form += '<legend>Coordonnées</legend>';
+			//pre configured attack builds
+			if( this.module == 'wilderness' ){
+				form += KOCFIA[ this.module ].getBuildsList();
+			}
+			form += '<small>format: x,y x,y x,y ...</small>';
+			form += '<textarea name="coords" autocomplete="off"></textarea>';
+			form += '</fieldset>';
+
+			form += '<fieldset>';
+			form += '<legend>Détail</legend>';
+			form += '<label>Niveau&nbsp;:&nbsp;</label>';
+			form += '<input type="text" class="targetLevel" />';
+			form += '<div><label>Laisser&nbsp;:&nbsp;</label>';
+			form += '<input type="text" class="rallypointSlot" /> place(s) dans le point de ralliement</div>';
+			form += '</fieldset>';
+
+			//wave skeleton
+			var skel = '<fieldset class="wave">';
+			skel += '<legend>Vague</legend>';
+			skel += '<label>Chevalier&nbsp;:&nbsp;</label>';
+			skel += '<select class="knight-choice" name="knight" autocomplete="off">';
+			skel += '<option value="">N\'importe lequel</option>';
+			skel += '</select>';
+			skel += '<div class="unit-block">';
+			skel += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
+			skel += '<option value="">Choisir</option>';
+			skel += '</select>';
+			skel += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
+			skel += '</div>';
+			skel += '<button class="add-unit">Ajouter une autre unité</button>';
+			skel += '</fieldset>';
+			KOCFIA[ this.module ].$waveSkeleton = $(skel);
+
+			//unit keep
+			form += '<fieldset class="keep">';
+			form += '<legend>Conserver</legend>';
+			form += '<div class="unit-block">';
+			form += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">';
+			form += '<option value="">Choisir</option>';
+			form += '</select>';
+			form += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
+			form += '</div>';
+			form += '<button class="add-unit">Ajouter une autre unité</button>';
+			form += '</fieldset>';
+
+			//buttons
+			form += '<button class="add-wave">Ajouter une vague</button>';
+			form += '<button class="launch">Lancer</button>';
+			form += '<button class="save">Sauvegarder</button>';
+			form += '<button class="saveAndLaunch">Sauvegarder et Lancer</button>';
+			form += '<button class="reset">Annuler</button>';
+
+			form += '</div>';
+
+			return form;
+		};
+
+		KOCFIA.autoAttack.planAttack = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' planAttack function');
+			var $waves = KOCFIA[ this.module ].$form.find('.wave'),
+				$keep = KOCFIA[ this.module ].$form.find('.keep'),
+				$cityChoice = KOCFIA[ this.module ].$form.find('.city-choice').filter(':checked'),
+				level = $.trim( KOCFIA[ this.module ].$form.find('.targetLevel').val() ),
+				coords = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') ),
+				errors = [],
+				regexp = /[^0-9, ]/,
+				attack = { type: 'attack', category: this.module, waves: [], coordIndex: 0, keep: [] },
+				label = (this.module == 'wilderness' ? 'terres sauvages' : 'camps barbares');
+
+			//check form
+				//city
+				if( !$cityChoice.length ){
+					errors.push('Ville de départ obligatoire.');
+				} else {
+					attack.cityKey = $cityChoice.val();
+				}
+
+				//targetLevel
+				if( level == '' ){
+					errors.push('Le niveau des '+ label +' ciblées est requis.');
+				} else if( level == Number.NaN ){
+					errors.push('Le niveau des '+ label +' ciblées est éronné, il doit être un chiffre.');
+				} else if( level < 1 || level > 10 ){
+					errors.push('Le niveau des '+ label +' ciblées est éronné, il doit être compris entre 1 et 10.');
+				} else {
+					attack.targetLevel = level;
+				}
+
+				//coords
+				if( coords.length == 0 ){
+					errors.push('Au moins une coordonnée est requise.');
+				} else if( regexp.test( coords ) ){
+					errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnées.');
+				} else {
+					coords = coords.split(' ');
+					var wrongGPS = false, i, length = coords.length;
+					for( i = 0; i < length; i += 1 ){
+						var coord = coords[i].split(',');
+						if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
+							wrongGPS = true;
+						}
+					}
+					if( wrongGPS ){
+						errors.push('Une des coordonnées est erronée.');
+					} else {
+						attack.coords = coords;
+					}
+				}
+
+				//waves
+				var unitList = [], w;
+				$waves.each(function(){
+					var $wave = $(this);
+					w = {units: []};
+
+					//knight
+						w.knight = $wave.find('.knight-choice').val();
+
+					//troops
+						$wave.find('.unit-block').each(function(){
+							var $b = $(this),
+								valid = true;
+								u = $b.find('.unit-choice').val(),
+								q = Shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+
+							if( u.length == 0 ){
+								valid = false;
+							}
+
+							if( q == false || q < 1 ){
+								valid = false;
+							}
+
+							if( valid ){
+								unitList.push(u);
+								w.units.push({id: u, qty: q});
+							}
+						});
+
+					if( w.units.length ){
+						attack.waves.push(w);
+					}
+				});
+
+				if( !attack.waves.length ){
+					errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
+					errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
+				}
+
+				//keep
+				$keep.find('.unit-block').each(function(){
+					var $b = $(this),
+						u = $.trim( $b.find('.unit-choice').val() ),
+						q = Shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
+
+					if( u.length == 0 && q != false && q > 0 ){
+						errors.push('L\'unité à conserver doit être spécifiée.');
+					} else if( u.length > 0 && (q == false || q < 1) ){
+						errors.push('L\'unité à conserver doit avoir une quantité.');
+					} else if( u.length > 0 && unitList.length && $.inArray(u, unitList) > -1 ){
+						attack.keep.push({id: u, qty: q});
+					}
+				});
+
+				//rally point free slot
+				var rps = $.trim(KOCFIA[ this.module ].$form.find('.rallypointSlot').val());
+				if( rps == '' ) rps = 0;
+
+				rps = parseInt( rps, 10 );
+				if( isNaN(rps) || rps < 0 ){
+					errors.push('Le nombre de places à conserver dans le point de ralliement doit être un chiffre positif.');
+				} else attack.rpSlot = rps;
+
+				if( errors.length ){
+					errors = errors.unique();
+				}
+
+			return {attack: attack, errors: errors};
+		};
+
 		KOCFIA.autoAttack.addWaves = function( num, cityKey ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' addWaves function', num, cityKey);
 			//fill the keep <select> options too
@@ -3383,7 +3591,7 @@ jQuery(document).ready(function(){
 				$clone.clone().insertBefore( KOCFIA[ this.module ].$form.find('.keep') );
 			}
 
-			if( this.module == 'wilderness' ){
+			if( this.module == 'wilderness' || this.module == 'barbarian' ){
 				var knights = Shared.getAvailableKnights( cityKey ),
 					choices = '', i, length = knights.length;
 				for( i = 0; i < length; i += 1 ){
@@ -3417,7 +3625,7 @@ jQuery(document).ready(function(){
 
 			var code = '<tr data-city="'+ attack.cityKey +'" data-attack="'+ attack.id +'">';
 			code += '<td class="trip">'+ city.label;
-			code += '<br />Vers : TS' + attack.targetLevel;
+			code += '<br />Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
 			code += '<br />'+ attack.coords.length +' coordonnée(s)';
 			code += '<br />Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '');
 			code += '<div><span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
@@ -3496,7 +3704,7 @@ jQuery(document).ready(function(){
 				code += '<td class="trip">';
 				code += '<span class="ui-icon ui-icon-cancel stop" title="Arrêter l\'attaque"></span>';
 				code += city.label;
-				code += '<br />Vers : TS' + attack.targetLevel;
+				code += '<br />Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
 				code += '<br />Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '') +'</td>';
 				code += '<td class="coords"><small>' + Shared.mapLink( attack.coords ) +'</small></td>';
 				code += '<td class="current"></td>';
@@ -3566,9 +3774,7 @@ jQuery(document).ready(function(){
 				onGoing += '<div class="attack-list ongoing">';
 				onGoing += '<table><thead><tr>';
 				onGoing += '<th class="trip">Itinéraire</th>';
-				if( this.module == 'wilderness' ){
-					onGoing += '<th class="coords">Coordonnées</th>';
-				}
+				onGoing += '<th class="coords">Coordonnées</th>';
 				onGoing += '<th class="current">Cible</th>';
 				onGoing += '<th class="info">Info</th>';
 				onGoing += '</tr></thead>';
@@ -3578,9 +3784,7 @@ jQuery(document).ready(function(){
 				savedPlans += '<div class="attack-list saved">';
 				savedPlans += '<table><thead><tr>';
 				savedPlans += '<th class="trip">Itinéraire</th>';
-				if( this.module == 'wilderness' ){
-					savedPlans += '<th class="coords">Coordonnées</th>';
-				}
+				savedPlans += '<th class="coords">Coordonnées</th>';
 				savedPlans += '<th class="waves">Vagues</th>';
 				savedPlans += '<th class="keep">Converser</th>';
 				savedPlans += '</tr></thead>';
@@ -3900,6 +4104,36 @@ jQuery(document).ready(function(){
 			}
 
 			KOCFIA[ this.module ].$accordion.accordion({collapsible: true, autoHeight: false, animated: false}).accordion('activate', false);
+		};
+
+		KOCFIA.autoAttack.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getHelp function');
+			var help = '<div id="kocfia-'+ this.module +'-help" class="help" title="Aide '+ KOCFIA.modulesLabel[ this.module ] +'">';
+			help += '<h4>Règles, limitations et informations :</h4><ul>';
+			if( this.module == 'wilderness' ){
+				help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
+			}
+			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques</li>';
+			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
+			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
+			help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant > 1min)</li>';
+			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardée</li>';
+			help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
+			help += '<li>Dix secondes après impact sur la cible, une mise à jour des données de la marche est effectuée (survivants, status)</li>';
+			help += '<li>Les campeurs sont automatiquement rappelés</li>';
+			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
+			help += '</ul><h4>Méthode :</h4><ol>';
+			help += '<li>Sélectionner une ville</li>';
+			help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
+			help += '<li>Spécifier le niveau pour les '+ (this.module == 'wilderness' ? 'TS attaquées' : 'CB attaqués') +'</li>';
+			help += '<li>Spécifier combien de places conserver dans le point de ralliement (optionnel)</li>';
+			help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
+			help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
+			help += '<li>Les quantités de troupes peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
+			help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
+			help += '</ol></div>';
+
+			return help;
 		};
 
 	/* DARK FOREST */
@@ -4742,208 +4976,6 @@ jQuery(document).ready(function(){
 			module: 'wilderness'
 		};
 
-		KOCFIA.wilderness.getForm = function(){
-			var form = '<h3>Configurer une attaque</h3>';
-			form += '<div class="attack-form">';
-
-			//form message area
-			form += '<ul class="message"></ul>';
-
-			//form edit inputs
-			form += '<input type="hidden" class="edit-attackId" name="attackId" value="" autocomplete="off" />';
-			form += '<input type="hidden" class="edit-cityKey" name="cityKey" value="" autocomplete="off" />';
-
-			//city choice
-			var i, length = KOCFIA.citiesKey.length;
-			form += '<fieldset>';
-			form += '<legend>Ville</legend><div class="buttonset">';
-			for( i = 0; i < length; i += 1 ){
-				var cityKey = KOCFIA.citiesKey[i],
-					city = KOCFIA.cities[cityKey];
-				form += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="radio" class="city-choice" autocomplete="off" />';
-				form += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.label +'</label>';
-			}
-			form += '</div></fieldset>';
-
-			form += '<fieldset>';
-			form += '<legend>Coordonnées</legend>';
-			//pre configured attack builds
-			form += KOCFIA[ this.module ].getBuildsList();
-			form += '<small>format: x,y x,y x,y ...</small>';
-			form += '<textarea name="coords" autocomplete="off"></textarea>';
-			form += '</fieldset>';
-
-			form += '<fieldset>';
-			form += '<legend>Détail</legend>';
-			form += '<label>Niveau&nbsp;:&nbsp;</label>';
-			form += '<input type="text" class="targetLevel" />';
-			form += '<div><label>Laisser&nbsp;:&nbsp;</label>';
-			form += '<input type="text" class="rallypointSlot" /> place(s) dans le point de ralliement</div>';
-			form += '</fieldset>';
-
-			//wave skeleton
-			var skel = '<fieldset class="wave">';
-			skel += '<legend>Vague</legend>';
-			skel += '<label>Chevalier&nbsp;:&nbsp;</label>';
-			skel += '<select class="knight-choice" name="knight" autocomplete="off">';
-			skel += '<option value="">N\'importe lequel</option>';
-			skel += '</select>';
-			skel += '<div class="unit-block">';
-			skel += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice" autocomplete="off">';
-			skel += '<option value="">Choisir</option>';
-			skel += '</select>';
-			skel += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="text" autocomplete="off" />';
-			skel += '</div>';
-			skel += '<button class="add-unit">Ajouter une autre unité</button>';
-			skel += '</fieldset>';
-			KOCFIA[ this.module ].$waveSkeleton = $(skel);
-
-			//unit keep
-			form += '<fieldset class="keep">';
-			form += '<legend>Conserver</legend>';
-			form += '<div class="unit-block">';
-			form += '<label>Unité&nbsp;:&nbsp;</label><select class="unit-choice">';
-			form += '<option value="">Choisir</option>';
-			form += '</select>';
-			form += '<label>Quantité&nbsp;:&nbsp;</label><input class="unit-qty" type="" autocomplete="off" />';
-			form += '</div>';
-			form += '<button class="add-unit">Ajouter une autre unité</button>';
-			form += '</fieldset>';
-
-			//buttons
-			form += '<button class="add-wave">Ajouter une vague</button>';
-			form += '<button class="launch">Lancer</button>';
-			form += '<button class="save">Sauvegarder</button>';
-			form += '<button class="saveAndLaunch">Sauvegarder et Lancer</button>';
-			form += '<button class="reset">Annuler</button>';
-
-			form += '</div>';
-
-			return form;
-		};
-
-		KOCFIA.wilderness.planAttack = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' planAttack function');
-			var $waves = KOCFIA[ this.module ].$form.find('.wave'),
-				$keep = KOCFIA[ this.module ].$form.find('.keep'),
-				$cityChoice = KOCFIA[ this.module ].$form.find('.city-choice').filter(':checked'),
-				level = $.trim( KOCFIA[ this.module ].$form.find('.targetLevel').val() ),
-				coords = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') ),
-				errors = [],
-				regexp = /[^0-9, ]/,
-				attack = { type: 'attack', category: this.module, waves: [], coordIndex: 0, keep: [] };
-
-			//check form
-				//city
-				if( !$cityChoice.length ){
-					errors.push('Ville de départ obligatoire.');
-				} else {
-					attack.cityKey = $cityChoice.val();
-				}
-
-				//targetLevel
-				if( level == '' ){
-					errors.push('Le niveau des terres sauvages ciblées est requis.');
-				} else if( level == Number.NaN ){
-					errors.push('Le niveau des terres sauvages ciblées est éronné, il doit être un chiffre.');
-				} else if( level < 1 || level > 10 ){
-					errors.push('Le niveau des terres sauvages ciblées est éronné, il doit être compris entre 1 et 10.');
-				} else {
-					attack.targetLevel = level;
-				}
-
-				//coords
-				if( coords.length == 0 ){
-					errors.push('Au moins une coordonnée est requise.');
-				} else if( regexp.test( coords ) ){
-					errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne entre deux coordonnées.');
-				} else {
-					coords = coords.split(' ');
-					var wrongGPS = false, i, length = coords.length;
-					for( i = 0; i < length; i += 1 ){
-						var coord = coords[i].split(',');
-						if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
-							wrongGPS = true;
-						}
-					}
-					if( wrongGPS ){
-						errors.push('Une des coordonnées est erronée.');
-					} else {
-						attack.coords = coords;
-					}
-				}
-
-				//waves
-				var unitList = [], w;
-				$waves.each(function(){
-					var $wave = $(this);
-					w = {units: []};
-
-					//knight
-						w.knight = $wave.find('.knight-choice').val();
-
-					//troops
-						$wave.find('.unit-block').each(function(){
-							var $b = $(this),
-								valid = true;
-								u = $b.find('.unit-choice').val(),
-								q = Shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
-
-							if( u.length == 0 ){
-								valid = false;
-							}
-
-							if( q == false || q < 1 ){
-								valid = false;
-							}
-
-							if( valid ){
-								unitList.push(u);
-								w.units.push({id: u, qty: q});
-							}
-						});
-
-					if( w.units.length ){
-						attack.waves.push(w);
-					}
-				});
-
-				if( !attack.waves.length ){
-					errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
-					errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
-				}
-
-				//keep
-				$keep.find('.unit-block').each(function(){
-					var $b = $(this),
-						u = $.trim( $b.find('.unit-choice').val() ),
-						q = Shared.decodeFormat( $.trim( $b.find('.unit-qty').val() ) );
-
-					if( u.length == 0 && q != false && q > 0 ){
-						errors.push('L\'unité à conserver doit être spécifiée.');
-					} else if( u.length > 0 && (q == false || q < 1) ){
-						errors.push('L\'unité à conserver doit avoir une quantité.');
-					} else if( u.length > 0 && unitList.length && $.inArray(u, unitList) > -1 ){
-						attack.keep.push({id: u, qty: q});
-					}
-				});
-
-				//rally point free slot
-				var rps = $.trim(KOCFIA[ this.module ].$form.find('.rallypointSlot').val());
-				if( rps == '' ) rps = 0;
-
-				rps = parseInt( rps, 10 );
-				if( isNaN(rps) || rps < 0 ){
-					errors.push('Le nombre de places à conserver dans le point de ralliement doit être un chiffre positif.');
-				} else attack.rpSlot = rps;
-
-				if( errors.length ){
-					errors = errors.unique();
-				}
-
-			return {attack: attack, errors: errors};
-		};
-
 		KOCFIA.wilderness.getBuildsList = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getBuilds function');
 			var builds = '<fieldset class="builds">';
@@ -5055,32 +5087,9 @@ jQuery(document).ready(function(){
 			}
 		};
 
-		KOCFIA.wilderness.getHelp = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getHelp function');
-			var help = '<div id="kocfia-'+ this.module +'-help" class="help" title="Aide '+ KOCFIA.modulesLabel[ this.module ] +'">';
-			help += '<h4>Règles, limitations et informations :</h4><ul>';
-			help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
-			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques</li>';
-			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
-			help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant > 1min)</li>';
-			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardée</li>';
-			help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
-			help += '<li>Dix secondes après impact sur la cible, une mise à jour des données de la marche est effectuée (survivants, status)</li>';
-			help += '<li>Les campeurs sont automatiquement rappelés</li>';
-			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-			help += '</ul><h4>Méthode :</h4><ol>';
-			help += '<li>Sélectionner une ville</li>';
-			help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
-			help += '<li>Spécifier le niveau pour les TS attaquées</li>';
-			help += '<li>Spécifier combien de places conserver dans le point de ralliement (optionnel)</li>';
-			help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
-			help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
-			help += '<li>Les quantités de troupes peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2M pour deux millions, 3G pour trois milliards)</li>';
-			help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
-			help += '</ol></div>';
-
-			return help;
+	/* BARBARIAN */
+		KOCFIA.barbarian = {
+			module: 'barbarian'
 		};
 
 	/* SCOUT */
@@ -6378,8 +6387,7 @@ jQuery(document).ready(function(){
 			}
 			code += '</tbody></table>';
 
-			var coordsList = '<textarea id="coordsList">'+ coords.join("\n") +'</textarea>';
-
+			KOCFIA.map.$coordsList.html( coords.join("\n") ).show();
 			KOCFIA.map.$results.html( code );
 			KOCFIA.map.filterResults();
 		};
@@ -8524,7 +8532,7 @@ jQuery(document).ready(function(){
 				}
 			}
 			load = parseInt(load, 10);
-			if( isNan(load) ) load = false;
+			if( isNaN(load) ) load = false;
 
 			return load;
 		};
@@ -8551,7 +8559,7 @@ jQuery(document).ready(function(){
 				}
 			}
 			load = parseInt(load, 10);
-			if( isNan(load) ) return false;
+			if( isNaN(load) ) return false;
 			if( load == 0 ) return false;
 
 			return Math.floor( quantity / load );
@@ -8827,6 +8835,8 @@ jQuery(document).ready(function(){
 							window.seed.items[ 'i' + plan.items[i] ] = parseInt(window.seed.items[ 'i' + plan.items[i] ]) - 1;
 							window.ksoItems[ plan.items[i] ].subtract();
 						}
+
+						KOCFIA.transport.$manualForm.find('.result').empty().append('Transport lancé');
 					} else if( data.user_action ){
 						if( data.user_action == 'marchWarning' ){
 							tParams.marchWarning = 1;
@@ -9192,7 +9202,7 @@ jQuery(document).ready(function(){
 			KOCFIA[ mod ].refreshOngoingInfo(attack, false, [d.getTime() / 1000, 'Tentative de lancement en cours']);
 
 			var $tr = null;
-			if( mod == 'wilderness' ){
+			if( mod == 'wilderness' || mod == 'barbarian' ){
 				$tr = KOCFIA[ mod ].$ongoing.find('tbody').filter('[data-city="'+ attack.cityKey +'"]').find('tr').filter('[data-attack="'+ attack.id +'"]');
 			} else if( mod == 'darkForest' ){
 				var $tr = KOCFIA[ mod ].$ongoing.find('tbody').find('tr');
@@ -9241,7 +9251,7 @@ jQuery(document).ready(function(){
 			var coordsLength, coords, waveIndex, time, city, bunch = [];
 
 			/** sequences
-			 * wilderness
+			 * wilderness & barbarian
 			 *		previousMarchingCheck
 			 *		resetTracks
 			 *		checkRallyPoint
@@ -9296,7 +9306,7 @@ jQuery(document).ready(function(){
 					var checkMarch = function(dfd, i){
 						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkMarch function');
 
-						if( mod == 'wilderness' ){
+						if( mod == 'wilderness' || mod == 'barbarian' ){
 							march = window.seed.queue_atkp[ attack.cityKey ][ 'm' + attack.marching[i] ];
 						} else {
 							march = null;
@@ -9323,7 +9333,7 @@ jQuery(document).ready(function(){
 
 						if( march ){
 							marches.push( attack.marching[i] );
-							if( mod != 'wilderness' ) marchesCoord.push( march.toXCoord +','+ march.toYCoord );
+							if( mod != 'wilderness' && mod != 'barbarian' ) marchesCoord.push( march.toXCoord +','+ march.toYCoord );
 						}
 
 						if( march && !march.hasOwnProperty('kocfiaUpdated') ){
@@ -9364,7 +9374,7 @@ jQuery(document).ready(function(){
 									attempts = 3;
 									if( i >= mLength ){
 										attack.marching = marches;
-										if( mod != 'wilderness' ) attack.marchingCoords = marchesCoord;
+										if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
 										return dfd.pipe( resetTracks(dfd) );
 									} else {
 										return dfd.pipe( checkMarch(dfd, i) );
@@ -9377,7 +9387,7 @@ jQuery(document).ready(function(){
 										i += 1;
 										if( i >= mLength ){
 											attack.marching = marches;
-											if( mod != 'wilderness' ) attack.marchingCoords = marchesCoord;
+											if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
 											return dfd.pipe( resetTracks(dfd) );
 										} else {
 											return dfd.pipe( checkMarch(dfd, i) );
@@ -9394,7 +9404,7 @@ jQuery(document).ready(function(){
 									i += 1;
 									if( i >= mLength ){
 										attack.marching = marches;
-										if( mod != 'wilderness' ) attack.marchingCoords = marchesCoord;
+										if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
 										return dfd.pipe( resetTracks(dfd) );
 									} else {
 										return dfd.pipe( checkMarch(dfd, i) );
@@ -9405,7 +9415,7 @@ jQuery(document).ready(function(){
 							i += 1;
 							if( i >= mLength ){
 								attack.marching = marches;
-								if( mod != 'wilderness' ) attack.marchingCoords = marchesCoord;
+								if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
 								return dfd.pipe( resetTracks(dfd) );
 							} else {
 								return dfd.pipe( checkMarch(dfd, i) );
@@ -9413,7 +9423,7 @@ jQuery(document).ready(function(){
 						}
 					};
 
-					if( mod == 'wilderness' ){
+					if( mod == 'wilderness' || mod == 'barbarian' ){
 						if( window.seed.queue_atkp[ attack.cityKey ] ){
 							var mParams = window.g_ajaxparams,
 								i = 0, j, march,
@@ -9513,7 +9523,7 @@ jQuery(document).ready(function(){
 					if( mod != 'darkForest' ){
 						return dfd.pipe(checkCoord(dfd, 3));
 					} else {
-						return dfd.pipe(checkCoordsByGroup(dfd, 3));
+						return dfd.pipe(checkCoordByGroup(dfd, 3));
 					}
 				};
 
@@ -9559,6 +9569,18 @@ jQuery(document).ready(function(){
 									} else if( info.tileUserId != null || info.tileCityId != null ){ //"0" -> under mists, "xxx" -> no mists
 										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e) occupées']);
 										attack.coordIndex += 1;
+										return dfd.pipe( checkCoord(dfd, 3) );
+
+									} else {
+										baseParams.xcoord = gps[0];
+										baseParams.ycoord = gps[1];
+										return dfd.pipe( checkAndLaunchWaves(dfd) );
+									}
+								} else if( mod == 'barbarian' ){
+									if( type != 51 || info.tileCityId != null ){
+										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e) n\'est pas un camp barbare']);
+										attack.coordIndex += 1;
+
 										return dfd.pipe( checkCoord(dfd, 3) );
 
 									} else {
@@ -9628,7 +9650,7 @@ jQuery(document).ready(function(){
 
 				//check severals coords at a time
 				var checkCoordByGroup = function(dfd, attempts){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkCoordByBunch function');
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkCoordByGroup function');
 					if( $tr.data('stop') ){
 						stop();
 						return dfd.reject();
@@ -9636,22 +9658,22 @@ jQuery(document).ready(function(){
 					KOCFIA[ mod ].refreshOngoingInfo(attack, false);
 
 					if( attack.coordIndex >= coordsLength ){
-						KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Aucune coordonnée validée pour l\''+ label +'.']);
+						KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Parcours des coordonnées fini.']);
 						return dfd.reject();
 					}
 
 					var cParams = jQuery.extend(true, {}, window.g_ajaxparams),
 						i, gps, blocks = [];
 
-					for( i = 0; i < 10; i += 1 ){
+					bunch = [];
+					for( i = 0; i < 50; i += 1 ){
+						if( attack.coordIndex + i >= coordsLength ){
+							break;
+						}
 						gps = coords[ attack.coordIndex + i ].split(',');
 						bunch.push( gps );
 
 						blocks.push("bl_" + gps[0] + "_bt_" + gps[1]);
-
-						if( attack.coordIndex + i >= coordsLength ){
-							break;
-						}
 					}
 
 					cParams.blocks = blocks.join(',');
@@ -9689,18 +9711,18 @@ jQuery(document).ready(function(){
 				};
 
 				var groupedCheck = function(dfd, data){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred byBunch function');
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred groupedCheck function');
 					var bunchIndex = 0;
 
-					var bunchSequence = function(dfd){
-						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkBunch function');
+					var bunchSequence = function(){
+						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred bunchSequence function');
 						return $.Deferred(function(bdfd){
-							return bdfd.pipe( check(bdfd, data) );
+							return bdfd.pipe( bunchCheck(bdfd, data) );
 						}).promise();
 					};
 
-
-					var check = function(bdfd){
+					var bunchCheck = function(bdfd){
+						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred bunchCheck function');
 						if( bunchIndex >= bunch.length ){
 							return bdfd.resolve();
 						}
@@ -9710,19 +9732,19 @@ jQuery(document).ready(function(){
 						if( info ){
 							var type = parseInt(info.tileType, 10);
 							if( type != 54 && type != 0 ){
-								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas une forêt sombre ou un marais']);
+								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + bunchIndex + 1) +'e / '+ coordsLength +') n\'est pas une forêt sombre ou un marais']);
 								//will force the update of coords on next checkAndLaunchAttack call
 								KOCFIA[ mod ].coords.status = 'outdated';
 								bunchIndex += 1;
-								return bdfd.pipe( check(bdfd) );
+								return bdfd.pipe( bunchCheck(bdfd) );
 							} else if( type == 0 ){
-								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') est un marais']);
+								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + bunchIndex + 1) +'e / '+ coordsLength +') est un marais']);
 								bunchIndex += 1;
-								return bdfd.pipe( check(bdfd) );
+								return bdfd.pipe( bunchCheck(bdfd) );
 							} else if( $.inArray(coords[ attack.coordIndex + bunchIndex ], attack.marchingCoords) > -1 ){
-								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') déjà attaquée']);
+								//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + bunchIndex + 1) +'e / '+ coordsLength +') déjà attaquée']);
 								bunchIndex += 1;
-								return bdfd.pipe( check(bdfd) );
+								return bdfd.pipe( bunchCheck(bdfd) );
 							} else {
 								//check if the coord level correspond to an "active" city with an "active" rule
 								var found = false, level, i, j, k, wave, enoughUnits,
@@ -9833,7 +9855,7 @@ jQuery(document).ready(function(){
 								if( !found ){
 									//KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e / '+ coordsLength +') n\'est pas du bon niveau ('+ info.tileLevel +').']);
 									bunchIndex += 1;
-									return bdfd.pipe( check(bdfd) );
+									return bdfd.pipe( bunchCheck(bdfd) );
 								}
 
 								baseParams.xcoord = gps[0];
@@ -9979,6 +10001,7 @@ jQuery(document).ready(function(){
 									attack.marching.push( result.marchId );
 									if( mod == 'darkForest' ){
 										attack.marchingCoords.push( p.xcoord +','+ p.ycoord );
+										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [d.getTime() / 1000, (mod == 'scout' ? 'Eclairage lancé' : 'Attaque lancée') +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +')' +(mod != 'wilderness' && mod != 'barbarian' ? ' depuis '+ city.label : '')]);
 									}
 
 									var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10);
@@ -10003,7 +10026,7 @@ jQuery(document).ready(function(){
 									return wdfd.resolve();
 								} else {
 									if( result.msg ){
-										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, (mod == 'scout' ? city.label + ' ' : '') +'Plan d\''+ label +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' refusé ('+ result.msg + (result.msg.indexOf('marais') ? '(le serveur a retourné un type de coordonnées pas à jour)' : '') +').']);
+										KOCFIA[ mod ].refreshOngoingInfo(attack, false, [ d.getTime() / 1000, (mod == 'scout' ? city.label + ' ' : '') +'Plan d\''+ label +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' refusé ('+ result.msg + (result.msg.indexOf('marais') > -1 ? ' (le serveur a retourné un type de coordonnées pas à jour)' : '') +').']);
 										//sometimes the checkCoord find a dark forest that is in fact a swamp with an incorrect tileType
 										if( mod == 'darkForest' && result.msg.indexOf('marais') > -1 ) attack.coordIndex += 1;
 										return wdfd.reject();
@@ -10045,7 +10068,7 @@ jQuery(document).ready(function(){
 							return $.Deferred(function( wdfd ){
 								//calling sequencialy findLostKnights(), checkKnight(), checkUnits(), launchWave()
 								//using deferred.pipe() to iterate
-								if( mod == 'wilderness' ){
+								if( mod == 'wilderness' || mod == 'barbarian' ){
 									return wdfd.pipe( findLostKnights(wdfd) );
 								} else if( mod == 'darkForest' ){
 									//will recheck units and filling some need variables
@@ -10086,7 +10109,7 @@ jQuery(document).ready(function(){
 						.done(function(){
 							waveIndex += 1;
 							if( waveIndex < attack.waves.length ){
-								if( mod == 'wilderness' ){
+								if( mod == 'wilderness' || mod == 'barbarian' ){
 									//launch next wave in 10s
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
@@ -10128,7 +10151,7 @@ jQuery(document).ready(function(){
 				return;
 			}
 
-			baseParams.cid = (mod == 'wilderness' ? attack.cityKey.replace(/city/, '') : null);
+			baseParams.cid = (mod == 'wilderness' || mod == 'barbarian' ? attack.cityKey.replace(/city/, '') : null);
 			baseParams.type = (mod != 'scout' ? 4 : 3); //MARCH_TYPE_ATTACK 4, MARCH_TYPE_SCOUT 3
 			baseParams.gold = 0;
 			baseParams.r1 = 0;
@@ -10141,7 +10164,7 @@ jQuery(document).ready(function(){
 			//using deferred to sequentialize asynchronous tasks
 			$.when( attackSequence() )
 				.done(function(){
-					KOCFIA[ mod ].refreshOngoingInfo(attack, false, [d.getTime() / 1000, (mod == 'scout' ? 'Eclairage lancé' : 'Attaque lancée') +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +')' +(mod != 'wilderness' ? ' depuis '+ city.label : '')]);
+					KOCFIA[ mod ].refreshOngoingInfo(attack, false, [d.getTime() / 1000, (mod == 'scout' ? 'Eclairage lancé' : 'Attaque lancée') +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +')' +(mod != 'wilderness' && mod != 'barbarian' ? ' depuis '+ city.label : '')]);
 
 					attack.coordIndex += 1;
 				})
@@ -10232,7 +10255,7 @@ jQuery(document).ready(function(){
 							}, 5 * 60000);
 						}
 
-					} else if( mod == 'wilderness' ){
+					} else if( mod == 'wilderness' || mod == 'barbarian' ){
 						time *= 2; //round-trip
 
 						//force refresh
@@ -10258,7 +10281,7 @@ jQuery(document).ready(function(){
 				});
 		};
 
-		KOCFIA.init();
+	KOCFIA.init();
 })(window, document, jQuery);
 
 });

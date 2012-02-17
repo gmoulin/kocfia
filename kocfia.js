@@ -8569,7 +8569,7 @@ jQuery(document).ready(function(){
 			form += '<div class="chosen"></div>';
 			form += '</div>';
 
-			var items = [55, 57, 931, 276], //speed and march capacity boosts
+			var items = [55, 57, 931, 932, 276], //speed and march capacity boosts
 				info, key, i;
 			form += '<label>Boosts&nbsp;:&nbsp;</label>';
 			form += '<div class="items">';

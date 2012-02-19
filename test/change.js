@@ -1,5 +1,5 @@
 //marchTimeCalculator
-        var throne67 = cm.ThroneController.effectBonus(67);
+        /*var throne67 = cm.ThroneController.effectBonus(67);
         var throne68, throne69, throne70, throne71, throne72;
         throne68 = throne69 = throne70 = throne71 = throne72 = 0;
         if (attack_selected) {
@@ -24,7 +24,7 @@
         var throneBoost = throne67 + throne68 + throne69 + throne70 + throne71 + throne72;
         if (!barbarian_raid) {
             speed = speed * (1 + (throneBoost * 0.01))
-        }
+        }*/
 
 //max units per march
         var rallyLevel = getBuildingLevel(12),

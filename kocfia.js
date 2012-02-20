@@ -8798,13 +8798,13 @@ jQuery(document).ready(function(){
 			return Shared.marchTimeCalculator(cityKeyFrom, troops, coordXTo, coordYTo, is_round_trip, items_applied, 'transport');
 		};
 
-		KOCFIA.transport.getLoadCapacity = function( units, loadBoost ){
+		KOCFIA.transport.getLoadCapacity = function( units, itemBoost ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getLoadCapacity function');
 
 			var load = 0, i, l, u,
 				loadBoost,
 				techLoadBoost = parseInt(window.seed.tech.tch10, 10) * 0.1,
-				loadEffectBoost = 0,
+				loadEffectBoost = itemBoost ? 0 : 0.25,
 				d = new Date(),
 				ts = d.getTime() / 1000;
 
@@ -8832,13 +8832,13 @@ jQuery(document).ready(function(){
 			return load;
 		};
 
-		KOCFIA.transport.getTroopQuantityForLoad = function( units, quantity, loadBoost ){
+		KOCFIA.transport.getTroopQuantityForLoad = function( units, quantity, itemBoost ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getTroopQuantityForLoad function');
 
 			var load = 0, i, l, u,
 				loadBoost,
 				techLoadBoost = parseInt(window.seed.tech.tch10, 10) * 0.1,
-				loadEffectBoost = 0,
+				loadEffectBoost = itemBoost ? 0 : 0.25,
 				d = new Date(),
 				ts = d.getTime() / 1000;
 
@@ -8905,7 +8905,7 @@ jQuery(document).ready(function(){
 			form += '<div class="chosen"></div>';
 			form += '</div>';
 
-			var items = [55, 57, 931, 932, 276], //speed and march capacity boosts
+			var items = [55, 57, 931, 932, 276, 277, 278], //speed and march capacity boosts
 				info, key, i;
 			form += '<label>Boosts&nbsp;:&nbsp;</label>';
 			form += '<div class="items">';
@@ -9058,9 +9058,13 @@ jQuery(document).ready(function(){
 						resources = 0, troops = 0, nb,
 						$unitChosen = KOCFIA.transport.$manualForm.find('.resources').find('.chosen').find('input'),
 						units = [],
-						loadBoost = $('#kocfia-transport-item-276').prop('checked') || false,
+						itemBoost = $('#kocfia-transport-item-276').prop('checked') || false,
 						$input = $(this).siblings('input'),
-						current = $.trim( Shared.decodeFormat( $input.val() ) );
+						current = $.trim( Shared.decodeFormat( $input.val() ) ),
+						d = new Date(),
+						timestamp = d.getTime() / 1000;
+
+					if( window.seed.playerEffects.loadExpire > timestamp ) itemBoost = true;
 
 					$unitChosen.each(function(){
 						nb = $.trim( this.value );
@@ -9083,7 +9087,7 @@ jQuery(document).ready(function(){
 					if( current === false ) current = 0;
 					resources = resources - current;
 
-					var needed = KOCFIA.transport.getTroopQuantityForLoad( units, resources, loadBoost );
+					var needed = KOCFIA.transport.getTroopQuantityForLoad( units, resources, itemBoost );
 					if( needed !== false ){
 						needed -= resources;
 						$input.val( Shared.readable( needed ) ).trigger('keyup');
@@ -9095,9 +9099,13 @@ jQuery(document).ready(function(){
 						resources = 0, troops = 0, nb,
 						$unitChosen = KOCFIA.transport.$manualForm.find('.resources').find('.chosen').find('input'),
 						units = [],
-						loadBoost = $('#kocfia-transport-item-276').prop('checked') || false,
+						itemBoost = $('#kocfia-transport-item-276').prop('checked') || false,
 						$input = $(this).siblings('input'),
-						current = $.trim( Shared.decodeFormat( $input.val() ) );
+						current = $.trim( Shared.decodeFormat( $input.val() ) ),
+						d = new Date(),
+						timestamp = d.getTime() / 1000;
+
+					if( window.seed.playerEffects.loadExpire > timestamp ) itemBoost = true;
 
 					$unitChosen.each(function(){
 						nb = $.trim( this.value );
@@ -9120,7 +9128,7 @@ jQuery(document).ready(function(){
 					if( current === false ) current = 0;
 					resources = resources - current;
 
-					var maxLoad = KOCFIA.transport.getLoadCapacity( units, loadBoost );
+					var maxLoad = KOCFIA.transport.getLoadCapacity( units, itemBoost );
 					if( maxLoad !== false ){
 						maxLoad -= resources;
 						if( $input.attr('name') == 'rec5' ) maxLoad /= 5;
@@ -9599,97 +9607,204 @@ jQuery(document).ready(function(){
 
 			return {plan: finalPlan, errors: errors};
 		};
-/*
+
 		KOCFIA.transport.launchAutomatic = function(type){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic function');
 
 			if( !$.isEmptyObject( KOCFIA.transport[ type ] ) ){
-				var i, j, cityKey, city, rule,
-					cityIndex = 0;
+				var i, j, d, u, cityKey, city, rules, destinations,
+					currentDestination, destinationsKey, params, units,
+					rule, key, maxLoad, minTroop, currentUnit, timestamp,
+					maxUnitPerSlot, unitsArr, resources, unitLeft,
+					unitQuantity, resourceQuantity,
+					availableUnit,
+					unitIndex = 0,
+					cityIndex = 0,
+					destinationIndex = 0;
 
 				var sequence = function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred sequence function');
 					return $.Deferred(function(dfd){
-						return dfd.pipe( byCity(dfd) );
+						return dfd.pipe( fromCity(dfd) );
 					}).promise();
 				};
 
-				var byCity = function(dfd){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred byCity function');
-					cityKey = KOCFIA.citiesKey[ cityIndex ];
-					city = KOCFIA.cities[ cityKey ];
-					return dfd.pipe( checkCityRules(dfd) );
-				};
+				var fromCity = function(dfd){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred fromCity function');
 
-				var checkCityRules = function(dfd){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred checkCityRules function');
-
-					//no need to parse the rules for a city with no free slots
-					if( Shared.getRallyPointSlots( cityKey ) == 0 ){
-						cityIndex += 1;
-						return dfd.pipe( byCity(dfd) );
+					if( cityIndex >= KOCFIA.citiesKey.length ){
+						return dfd.resolve();
 					}
 
-					var params = $.extend({}, window.g_ajaxparams),
-						unitsArr = {},
-						resources = [0, 0, 0, 0, 0, 0],
-						unitId = null,
-						i, key, u;
+					cityKey = KOCFIA.citiesKey[ cityIndex ];
+					city = KOCFIA.cities[ cityKey ];
+					destinations = KOCFIA.transport[ type ][ cityKey ];
+					destinationsKey = Object.keys(destinations);
 
-				//detect troops
-				//x troops -> x request
-
+					params = $.extend({}, window.g_ajaxparams);
 					params.cid = cityKey.replace(/city/, '');
 					params.type = 1;//cm.MARCH_TYPES.MARCH_TYPE_TRANSPORT: 1
 					params.kid = 0;
+
+					units = [];
+					destinations = [];
+
+					return dfd.pipe( toCity(dfd) );
+				};
+
+				var toCity = function(dfd){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred toCity function');
+					//no need to parse the rules for a city with no free slots
+					if( Shared.getRallyPointSlots( cityKey ) == 0 ){
+						cityIndex += 1;
+						return dfd.pipe( fromCity(dfd) );
+					}
+					if( destinationIndex > destinations.length ){
+						cityIndex += 1;
+						return dfd.pipe( fromCity(dfd) );
+					}
+
+					desKey = destinationsKeys[ destinationIndex ];
+					if( destKey.indexOf('city') > -1 ){
+						d = KOCFIA.cities[ destKey ];
+						currentDestination = d.label;
+						params.xcoord = d.coords.x;
+						params.ycoord = d.coords.y;
+					} else {
+						currentDestination = destKey; //xxx,yyy
+						d = destKey.split(',');
+						params.xcoord = d[0];
+						params.ycoord = d[1];
+					}
+
+					rules = destinations[ destKey ];
+
+					return dfd.pipe( getUnits(dfd) );
+				};
+
+				//how many request have to be done for the destination,
+				//get all the different units of the active resources
+				var getUnits = function(dfd){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred getUnits function');
+
+					if( units.length == 0 ){
+						for( j = 0; j < KOCFIA.resources.length; j += 1 ){
+							res = KOCFIA.resources[ j ];
+							resKey = res.key;
+
+							if( rules.hasOwnProperty( resKey ) ){
+								rule = rules[ resKey ];
+
+								if( !rule.active ) continue;
+
+								units[ rule.unit ] = 1;
+							}
+						}
+
+						units = Object.keys(units);
+					}
+
+					if( unitIndex > units.length ){
+						destinationIndex += 1;
+						return dfd.pipe( toCity(dfd) );
+					}
+
+					for( j = 0; j < units.length; j += 1 ){
+						params[ units[j].replace(/nt/, '') ] = 0;
+					}
+
+					currentUnit = units[unitIndex];
+
+					if( params.hasOwnProperty('marchWarning') ) delete params.marchWarning;
+
+					return dfd.pipe( checkRules(dfd) );
+				};
+
+				var checkRules = function(dfd){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred checkRules function');
+
+					unitsArr = {};
+					resources = [0, 0, 0, 0, 0, 0];
+
+					var d = new Date(),
+						timestamp = d.getTime() / 1000,
+						itemBoost;
+
+					params.gold = 0;
+					params.r1 = 0;
+					params.r2 = 0;
+					params.r3 = 0;
+					params.r4 = 0;
+					params.r5 = 0;
+
+					unitsArr[ currentUnit ] = 0;
+
+					availableUnit = parseInt(window.seed.units[ cityKey ][ currentUnit ], 10);
+					if( isNaN(availableUnit) || availableUnit == 0 ){
+						unitIndex += 1;
+						return dfd.pipe( getUnits(dfd) );
+					}
+
+					//max troop per RP slot
+					maxUnitPerSlot = 90000;
+
+					if( window.seed.playerEffects.loadExpire > timestamp ) itemBoost = true;
+
+					u = currentUnit.replace(/nt/, '');
 
 					for( j = 0; j < KOCFIA.resources.length; j += 1 ){
 						res = KOCFIA.resources[ j ];
 						resKey = res.key;
 
-						if( KOCFIA.transport.pileUp.hasOwnProperty( resKey )
-							&& KOCFIA.transport[ type ][ resKey ].hasOwnProperty( cityKey )
-						){
-							rule = KOCFIA.transport[ type ][ resKey ][ cityKey ];
+						if( rules.hasOwnProperty( resKey ) ){
+							rule = rules[ resKey ];
 
-							if( !rule.active ) continue;
+							if( !rule.active && rule.unit != currentUnit ) continue;
 
-			tParams.xcoord = plan.to.x;
-			tParams.ycoord = plan.to.y;
+							if( rule.res == 'rec0' ) key = 'gold';
+							else key = rule.res.replace(/ec/, '').;
 
-			for( u in window.unitstats ){
-				if( window.unitstats.hasOwnProperty(u) ){
-					unitsArr[ u.replace(/unt/, '') ] = 0;
-				}
-			}
+							if( key == 'gold' ){
+								availableResource = parseInt(window.seed.citystats[ cityKey ]['gold'][0], 10);
+							} else {
+								availableResource = parseInt(window.seed.resources[ cityKey ][ rule.res ], 10);
+								var info = KOCFIA.resourceInfo[ res ];
+								if( isNaN(availableResource) ) continue;
+								else if( info.name.indexOf('x3600') > -1 ) availableResource /= 3600;
+							}
 
-			for( i = 0; i < plan.units.length; i += 1 ){
-				key = plan.units[i].id.replace(/nt/, '');
-				tParams[ key ] = plan.units[i].qty;
-				unitsArr[ key.replace(/u/, '') ] = plan.units[i].qty;
-			}
+							surplus = availableResource - rule.quantity;
+							if( surplus <= 0 ) continue;
 
-			tParams.gold = 0;
-			tParams.r1 = 0;
-			tParams.r2 = 0;
-			tParams.r3 = 0;
-			tParams.r4 = 0;
-			tParams.r5 = 0;
+							unitLeft = availableUnit - unitsArr[ unit ];
+							if( unitLeft > maxUnitPerSlot ) unitLeft = maxUnitPerSlot;
 
-			for( i = 0; i < plan.res.length; i += 1 ){
-				if( plan.res[i].id == 'rec0' ) key = 'gold';
-				else key = plan.res[i].id.replace(/ec/, '');
-				tParams[ key ] = plan.res[i].qty;
-				resources[ key.replace(/r/, '') ] = plan.res[i].qty;
-			}
+							minTroop = KOCFIA.transport.getTroopQuantityForLoad( [{id: unit, qty: unitLeft}], surplus, itemBoost );
+							if( minTroop > unitLeft ){
+								resourcesQuantity = KOCFIA.transport.getLoadCapacity( [{id: currentUnit, qty: availableUnit - unitsArr[ currentUnit ]}], itemBoost );
+								unitQuantity = unitLeft;
+							} else {
+								unitQuantity = minTroop;
+								resourcesQuantity = surplus;
+							}
 
-			tParams.items = plan.items.join(",");
+							params[ key ] = (params.hasOwnProperty(key) ? params[key] : 0) + resourcesQuantity;
+							resources[ key.replace(/r/, '') ] += resourcesQuantity;
 
+							params[ u ] = (params.hasOwnProperty(u) ? params[ u ] : 0) + unitQuantity;
+							unitsArr[ u.replace(/u/, '') ] += unitQuantity;
 						}
+					}
+
+					if( unitsArr[ currentUnit ] > 0 ){
+						return dfd.pipe( launch(dfd, params, 3) );
+					} else {
+						unitIndex += 1;
+						return dfd.pipe( getUnits(dfd) );
 					}
 				};
 
-				var launch = function( dfd, params, attempts ){
+				var launch = function( dfd, tParams, attempts ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomatic deferred launch function');
 					$.ajax({
 						url: g_ajaxpath + "ajax/march.php" + g_ajaxsuffix,
@@ -9701,55 +9816,67 @@ jQuery(document).ready(function(){
 					.done(function(data){
 						if( data.ok ){
 							var timediff = parseInt(data.eta, 10) - parseInt(data.initTS, 10),
-						d = new Date(),
-						ts = d.getTime() / 1000;
+								d = new Date(),
+								ts = d.getTime() / 1000;
 
-					window.attach_addoutgoingmarch(data.marchId, data.marchUnixTime, ts + timediff, tParams.xcoord, tParams.ycoord, unitsArr, tParams.type, tParams.kid, resources, data.tileId, data.tileType, data.tileLevel, tParams.cid, true);
+							window.attach_addoutgoingmarch(data.marchId, data.marchUnixTime, ts + timediff, tParams.xcoord, tParams.ycoord, unitsArr, tParams.type, tParams.kid, resources, data.tileId, data.tileType, data.tileLevel, tParams.cid, true);
 
-					window.updateBoosts(data);
-					if( data.liftFog ){
-						window.update_boosts();
-						window.seed.playerEffects.fogExpire = 0;
-						window.g_mapObject.getMoreSlots();
-					}
+							window.updateBoosts(data);
+							if( data.liftFog ){
+								window.update_boosts();
+								window.seed.playerEffects.fogExpire = 0;
+								window.g_mapObject.getMoreSlots();
+							}
 
-					for( var i = 0; i < plan.items.length; i += 1 ){
-						window.seed.items[ 'i' + plan.items[i] ] = parseInt(window.seed.items[ 'i' + plan.items[i] ]) - 1;
-						window.ksoItems[ plan.items[i] ].subtract();
-					}
-
-					if( dfd ){
-						dfd.pipe( KOCFIA.transport.AutomaticByCity(dfd) );
-					} else {
-						KOCFIA.transport.$manualForm.find('.result').empty().append('Transport lancé');
-					}
+							unitIndex += 1;
+							return dfd.pipe( getUnits(dfd) );
 						} else if( data.user_action ){
 							if( data.user_action == 'marchWarning' ){
 								tParams.marchWarning = 1;
-								launch();
+								return dfd.pipe( launch(dfd, tParams, 3) );
 							} else if( data.user_action == 'marchCaptcha' ){
-								KOCFIA.transport.$manualForm.find('.result').empty().append('Transport échoué (captcha)');
+								dfd.reject();
 							} else {
-								KOCFIA.transport.$manualForm.find('.result').empty().append('Transport échoué (action)');
+								attempts -= 1;
+								if( attempts > 0 ) dfd.pipe( launch(dfd, tParams, attempts) );
+								else {
+									unitIndex += 1;
+									return dfd.pipe( getUnits(dfd) );
+								}
 							}
 						} else if( data.msg ){
-							KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé ('+ data.msg +')');
-									} else {
-										KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé (serveur)');
-									}
-									})
-						.fail(function(){
-							attempts -= 1;
-							if( attempts > 0 ) launch();
-							else KOCFIA.transport.$manualForm.find('.result').empty().append('Transport refusé (erreur internet)');
-						});
+							//detect message to pipe to the correct function (not enough units, not enough resource, PR full, ...)
+							unitIndex += 1;
+							return dfd.pipe( getUnits(dfd) );
+						} else {
+							unitIndex += 1;
+							return dfd.pipe( getUnits(dfd) );
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ) dfd.pipe( launch(dfd, tParams, attempts) );
+						else {
+							unitIndex += 1;
+							return dfd.pipe( getUnits(dfd) );
+						}
+					});
 				};
 
+				$.when( sequence() )
+					.done(function(){
 
-				KOCFIA.transport.refreshOnGoing( '', 'pileUp' );
+					})
+					.fail(function(){
+
+					})
+					.always(function(){
+
+					});
+
+				//KOCFIA.transport.refreshOnGoing( '', 'pileUp' );
 			}
 		};
-*/
 
 	/* MAP VISUALISATION WITH CANVAS */
 		KOCFIA.canvas = {

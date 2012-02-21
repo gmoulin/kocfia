@@ -369,32 +369,79 @@
 
 
 #kocfia-conf-panel #kocfia-transport .coord { width: 50px; }
+
 #kocfia-transport .manual-form .chosen { margin-top: 2px; }
+
 #kocfia-transport .manual-form .chosen img { width: 20px; }
+
 #kocfia-transport .manual-form .chosen input { width: 80px; }
-#kocfia-transport .manual-form .resources, #kocfia-transport .manual-form .troop { margin: 12px 0; }
+
+#kocfia-transport .manual-form .resources,
+#kocfia-transport .manual-form .troop { margin: 12px 0; }
+
 #kocfia-transport .manual-form input[type=text] { text-align: center; }
+
 #kocfia-transport .manual-form .items { margin-bottom: 6px; }
+
 #kocfia-transport .manual-form .buttons { margin-top: 6px; display: none; }
-#kocfia-transport .manual-form .minTroop, #kocfia-transport .manual-form .maxLoad { margin-left: 5px; }
-#kocfia-transport .manual-form .available img { margin: 0 3px 0 0; }
+
+#kocfia-transport .manual-form .minTroop,
+#kocfia-transport .manual-form .maxLoad { margin-left: 5px; }
+
+#kocfia-transport .manual-form .available button { padding: 0; }
+
+#kocfia-transport .manual-form .available img {
+	margin: 0 3px 0 0;
+	top: 1px;
+	padding: 0;
+}
+
 #kocfia-transport .manual-form .available small { position: relative; top: 1px; line-height: 11px; display: inline-block; }
+
 #kocfia-transport .manual-form .from, #kocfia-transport .manual-form .to, #kocfia-transport .manual-form .items { display: inline-block; }
+
 #kocfia-transport .manual-form .items img, #kocfia-transport .manual-form .troop img, #kocfia-transport .manual-form .resources img { width: 20px; }
 
 
 
 #kocfia-transport .pileUp-form .buttons { text-align: right; }
+
 #kocfia-transport .pileUp-form .buttons button { margin-left: 10px; }
+
 #kocfia-transport .pileUp-form table { width: 100%; }
+
 #kocfia-transport .pileUp-form .res { text-align: center; }
+
 #kocfia-transport .pileUp-form .res img { margin-bottom: 10px; }
-#kocfia-transport .pileUp-form td { padding: 5px; vertical-align: top; }
-#kocfia-transport .pileUp-form td .rule:not(:last-child) { padding-bottom: 5px; border-bottom: 1px solid #ccc; margin-bottom: 5px; }
-#kocfia-transport .pileUp-form .quantity { width: 50px; text-align: center; }
-#kocfia-transport .pileUp-form .active { position: relative; top: 2px; }
+
+#kocfia-transport .pileUp-form td {
+	padding: 5px;
+	vertical-align: top;
+}
+
+#kocfia-transport .pileUp-form td .rule:not(:last-child) {
+	padding-bottom: 5px;
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 5px;
+}
+
+#kocfia-transport .pileUp-form .quantity {
+	width: 50px;
+	text-align: center;
+}
+
+#kocfia-transport .pileUp-form .active {
+	position: relative;
+	top: 2px;
+}
+
 #kocfia-transport .pileUp-form .rule select { width: 70px; }
-#kocfia-transport .pileUp-form .rule .remove { margin-left: 10px; position: relative; top: 2px; }
+
+#kocfia-transport .pileUp-form .rule .remove {
+	margin-left: 10px;
+	position: relative;
+	top: 2px;
+}
 
 #kocfia-transport .pileUp-form .duplicate {
 	display: inline-block;

@@ -40,6 +40,8 @@ var domain = 'http://kocfia.kapok.dev/',
 		'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js',
 		domain + "jquery-ui-1.8.17.custom.min.js",
 		domain + "jquery-ui-1.8.17.custom.css",
+		domain + "jquery.miniColors.css",
+		domain + "jquery.miniColors.min.js",
 		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
 		domain + "kocfia.js?ts=" + d.getTime()
 	];

@@ -109,12 +109,12 @@ jQuery(document).ready(function(){
 	var chatHelpCss = ".kocmain .mod_comm .comm_global .chatlist .noalliance { display: none; }";
 		chatHelpCss += "\n.kocmain .mod_comm.ui-draggable { display: block; }";
 
-	var chatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: #EAFC83; }";
-		chatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: #C7E3F7; }";
-		chatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: #D5D2F7; }";
+	var chatHighlightLeadersCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.chancellor:not(.direct) { background-color: %chancellorColor%; }";
+		chatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.vice_chancellor:not(.direct) { background-color: %viceChancellorColor%; }";
+		chatHighlightLeadersCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.officer:not(.direct) { background-color: %officerColor%; }";
 
-	var chatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: #FAE4E4; }";
-	var chatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: #FFCAA2; }";
+	var chatHighlightFriendsCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.friend:not(.direct) { background-color: %friendColor%; }";
+	var chatHighlightFoesCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.foe:not(.direct) { background-color: %foeColor%; }";
 
 	var overviewCss = "#kocfia-overview { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;  z-index: 100000; display: none; }";
 		overviewCss += "\n#kocfia-overview .ui-icon-close { position: absolute; right: -3px; top: -3px; cursor: pointer; z-index: 99999; }";
@@ -1860,7 +1860,12 @@ jQuery(document).ready(function(){
 				onRightPosition: {top: '-562px', left: '761px'},
 				highlightLeaders: 0,
 				highlightFriends: 0,
-				highlightFoes: 0
+				highlightFoes: 0,
+				chancellorColor: '#EAFC83',
+				viceChancellorColor: '#C7E3F7',
+				officerColor: '#D5D2F7',
+				friendColor: '#FAE4E4',
+				foeColor: '#FFCAA2',
 			},
 			stored: ['friends_list', 'foes_list'],
 			friendsList: [],
@@ -1891,6 +1896,15 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-chat').html('');
 
+			var colors = '<div class="kocfia-chat-colors">';
+			colors += '<label for="kocfia-chat-chancellorColor">Chancelier</label><input type="text" id="kocfia-chat-chancellorColor" name="chancellorColor">';
+			colors += '<br><label for="kocfia-chat-viceChancellorColor">Vice chancelier</label><input type="text" id="kocfia-chat-viceChancellorColor" name="viceChancellorColor">';
+			colors += '<br><label for="kocfia-chat-officerColor">Officier</label><input type="text" id="kocfia-chat-officerColor" name="officerColor">';
+			colors += '<br><label for="kocfia-chat-friendColor">Amis</label><input type="text" id="kocfia-chat-friendColor" name="friendColor">';
+			colors += '<br><label for="kocfia-chat-foeColor">Ennemis</label><input type="text" id="kocfia-chat-foeColor" name="foeColor">';
+			colors += '<button class="apply">Appliquer</button>';
+			colors += '</div>';
+
 			var friends = '',
 				i, length = KOCFIA.chat.friendsList.length;
 			for( i = 0; i < length; i += 1 ){
@@ -1907,14 +1921,14 @@ jQuery(document).ready(function(){
 				code += '<p><label for="kocfia-friend">Joueur : </label>';
 				code += '<input type="text" name="kocfia-friend" id="kocfia-friend" />';
 				code += '<button rel="friends">Ajouter</button></p>';
-				code += '<ul class="kocfia-chat-list" rel="friends"></ul>';
+				code += '<ul class="kocfia-chat-list" rel="friends">'+ friends +'</ul>';
 				code += '<h3>Liste d\'ennemis</h3>';
 				code += '<p><label for="kocfia-foe">Joueur : </label>';
 				code += '<input type="text" name="kocfia-foe" id="kocfia-foe" />';
 				code += '<button rel="foes">Ajouter</button></p>';
-				code += '<ul class="kocfia-chat-list" rel="foes"></ul>';
+				code += '<ul class="kocfia-chat-list" rel="foes">'+ foes +'</ul>';
 
-			$section.append( code )
+			$section.append( colors + code )
 				.on('click', 'button', function(e){
 					e.preventDefault();
 
@@ -1957,7 +1971,38 @@ jQuery(document).ready(function(){
 					e.preventDefault();
 					//use game native function
 					Chat.whisper( $(this).text() );
+				})
+				.on('click', '.apply', function(){
+					$('#kocfia-chat').find('.kocfia-chat-colors').find('input').each(function(){
+						KOCFIA.conf.chat[ this.name ] = $(this).miniColors('value');
+					});
+					Shared.storeConf();
+
+					if( KOCFIA.conf.chat.highlightLeaders ){
+						$('#kocfia-chat-highlight-leaders').remove();
+
+						var css = chatHighlightLeadersCss;
+						css = css.replace(/%chancellorColor%/, KOCFIA.conf.chat.chancellorColor);
+						css = css.replace(/%viceChancellorColor%/, KOCFIA.conf.chat.viceChancellorColor);
+						css = css.replace(/%officerColor%/, KOCFIA.conf.chat.officerColor);
+
+						$head.append( $('<style id="kocfia-chat-highlight-leaders">').html(css) );
+					}
+
+					if( KOCFIA.conf.chat.highlightFriends ){
+						$('#kocfia-chat-highlight-friends').remove();
+						$head.append( $('<style id="kocfia-chat-highlight-friends">').html( chatHighlightFriendsCss.replace(/%friendColor%/, KOCFIA.conf.chat.friendColor) ) );
+					}
+
+					if( KOCFIA.conf.chat.highlightFoes ){
+						$('#kocfia-chat-highlight-foes').remove();
+						$head.append( $('<style id="kocfia-chat-highlight-foes">').html( chatHighlightFoesCss.replace(/%foeColor%/, KOCFIA.conf.chat.foeColor) ) );
+					}
 				});
+
+			$section.find('.kocfia-chat-colors').find('input').miniColors().each(function(){
+				$(this).miniColors('value', KOCFIA.conf.chat[ this.name ]);
+			});
 
 			KOCFIA.chat.$lists = $('#kocfia-chat').find('.kocfia-chat-list');
 		};
@@ -2216,7 +2261,12 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat highlightLeadersOn function');
 			KOCFIA.chat.getLeadersList();
 
-			$head.append( $('<style id="kocfia-chat-highlight-leaders">').html(chatHighlightLeadersCss) );
+			var css = chatHighlightLeadersCss;
+			css = css.replace(/%chancellorColor%/, KOCFIA.conf.chat.chancellorColor);
+			css = css.replace(/%viceChancellorColor%/, KOCFIA.conf.chat.viceChancellorColor);
+			css = css.replace(/%officerColor%/, KOCFIA.conf.chat.officerColor);
+
+			$head.append( $('<style id="kocfia-chat-highlight-leaders">').html(css) );
 		};
 
 		KOCFIA.chat.highlightLeadersOff = function(){
@@ -2228,7 +2278,7 @@ jQuery(document).ready(function(){
 		/* highlight friends */
 		KOCFIA.chat.highlightFriendsOn = function( highlight ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat highlightFriendsOn function');
-			$head.append( $('<style id="kocfia-chat-highlight-friends">').html(chatHighlightFriendsCss) );
+			$head.append( $('<style id="kocfia-chat-highlight-friends">').html( chatHighlightFriendsCss.replace(/%friendColor%/, KOCFIA.conf.chat.friendColor) ) );
 			KOCFIA.chat.highlightFriendsAndFoes(0);
 		};
 
@@ -2252,7 +2302,7 @@ jQuery(document).ready(function(){
 		/* highlight foes */
 		KOCFIA.chat.highlightFoesOn = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat highlightFoesOn function');
-			$head.append( $('<style id="kocfia-chat-highlight-foes">').html(chatHighlightFoesCss) );
+			$head.append( $('<style id="kocfia-chat-highlight-foes">').html(chatHighlightFoesCss.replace(/%foeColor%/, KOCFIA.conf.chat.foeColor)) );
 			KOCFIA.chat.highlightFriendsAndFoes(0);
 		};
 
@@ -3381,7 +3431,7 @@ jQuery(document).ready(function(){
 
 			//city choice
 			var i, length = KOCFIA.citiesKey.length;
-			form += '<fieldset>';
+			form += '<fieldset class="buttonset">';
 			form += '<legend>Ville</legend><div>';
 			for( i = 0; i < length; i += 1 ){
 				var cityKey = KOCFIA.citiesKey[i],
@@ -8579,33 +8629,35 @@ jQuery(document).ready(function(){
 			var priorize = ['unt7', 'unt9', 'unt1'],
 				oPriorize = {'unt7': 1, 'unt9': 1, 'unt1': 1};
 
-			for( i = 0; i <  priorize.length; i += 1 ){
-				u = priorize[i];
-				if( units.hasOwnProperty(u) ){
-					n = parseInt(units[u], 10);
-					if( n > 0 ){
-						info = KOCFIA.unitInfo[u];
-						d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
-						code += '<button rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +'">';
-						code += '<img src="'+ info.icon +'">';
-						code += '<small>'+ Shared.format(n);
-						code += (d !== '' ? '<br>'+ Shared.readableDuration( d ) : '');
-						code += '</small></button>';
+			if( units ){
+				for( i = 0; i <  priorize.length; i += 1 ){
+					u = priorize[i];
+					if( units.hasOwnProperty(u) ){
+						n = parseInt(units[u], 10);
+						if( n > 0 ){
+							info = KOCFIA.unitInfo[u];
+							d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
+							code += '<button rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +'">';
+							code += '<img src="'+ info.icon +'">';
+							code += '<small>'+ Shared.format(n);
+							code += (d !== '' ? '<br>'+ Shared.readableDuration( d ) : '');
+							code += '</small></button>';
+						}
 					}
 				}
-			}
 
-			for( u in units ){
-				if( units.hasOwnProperty(u) && !oPriorize.hasOwnProperty(u) ){
-					n = parseInt(units[ u ], 10);
-					if( n > 0 ){
-						info = KOCFIA.unitInfo[u];
-						d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
-						code += '<button rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +'">';
-						code += '<img src="'+ info.icon +'">';
-						code += '<small>'+ Shared.format(n);
-						code += (d !== '' ? '<br>'+ Shared.readableDuration( d ) : '');
-						code += '</small></button>';
+				for( u in units ){
+					if( units.hasOwnProperty(u) && !oPriorize.hasOwnProperty(u) ){
+						n = parseInt(units[ u ], 10);
+						if( n > 0 ){
+							info = KOCFIA.unitInfo[u];
+							d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
+							code += '<button rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +'">';
+							code += '<img src="'+ info.icon +'">';
+							code += '<small>'+ Shared.format(n);
+							code += (d !== '' ? '<br>'+ Shared.readableDuration( d ) : '');
+							code += '</small></button>';
+						}
 					}
 				}
 			}
@@ -8756,21 +8808,22 @@ jQuery(document).ready(function(){
 			var form = '<h3>Transport Manuel</h3>';
 			form += '<div class="manual-form">';
 
-			form += '<label>Depuis&nbsp;:&nbsp;</label><div class="from">';
+			form += '<label>Depuis&nbsp;:&nbsp;</label><div class="from buttonset">';
 			for( c in KOCFIA.cities ){
 				if( KOCFIA.cities.hasOwnProperty(c) ){
 					city = KOCFIA.cities[ c ];
-					form += '<input type="radio" name="from" value="'+ c +'" id="kocfia-transport-manual-from-'+ c +'"><label for="kocfia-transport-manual-from-'+ c +'">'+ city.roman +'</label>';
+					form += '<input type="radio" name="from" value="'+ c +'" id="kocfia-transport-manual-from-'+ c +'">';
+					form += '<label for="kocfia-transport-manual-from-'+ c +'">'+ city.label +'</label>';
 				}
 			}
 			form += '</div>';
 
 			form += '<br><br><label>Vers&nbsp;:&nbsp;</label><input type="text" name="coord" class="coord">';
-			form += '&nbsp;ou&nbsp;<div class="to">';
+			form += '&nbsp;ou&nbsp;<div class="to buttonset">';
 			for( c in KOCFIA.cities ){
 				if( KOCFIA.cities.hasOwnProperty(c) ){
 					city = KOCFIA.cities[ c ];
-					form += '<input type="radio" name="to" value="'+ c +'" id="kocfia-transport-manual-to-'+ c +'"><label for="kocfia-transport-manual-to-'+ c +'">'+ city.roman +'</label>';
+					form += '<input type="radio" name="to" value="'+ c +'" id="kocfia-transport-manual-to-'+ c +'"><label for="kocfia-transport-manual-to-'+ c +'">'+ city.label +'</label>';
 				}
 			}
 			form += '</div>';
@@ -8787,21 +8840,8 @@ jQuery(document).ready(function(){
 			form += '<div class="chosen"></div>';
 			form += '</div>';
 
-			var items = [55, 57, 931, 932, 276, 277, 278, 285, 286], //speed, load, unit number limit boosts
-				info, key, i;
 			form += '<label>Boosts&nbsp;:&nbsp;</label>';
-			form += '<div class="items">';
-			for( i = 0; i < items.length; i += 1 ){
-				key = 'i' + items[i];
-				if( parseInt(window.seed.items[ key ], 10) > 1 ){
-					info = window.itemlist[ key ];
-					form += '<input type="checkbox" value="'+ items[i] +'" id="kocfia-transport-item-'+ items[i] +'">';
-					form += '<label for="kocfia-transport-item-'+ items[i] +'" title="'+ info.name + ' - '+ info.description +'">';
-					form += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg">';
-					form += '</label>';
-				}
-			}
-			form += '</div>';
+			form += '<div class="items buttonset"></div>';
 
 			form += '<div class="buttons">';
 			form += '<button class="launch">Envoyer</button>';
@@ -8828,6 +8868,7 @@ jQuery(document).ready(function(){
 				//city from and to
 				.on('change', '.from input', function(){
 					KOCFIA.transport.$manualForm.trigger('getAndSetResources');
+					KOCFIA.transport.$manualForm.trigger('getItems');
 					KOCFIA.transport.$manualForm.trigger('updateLimit');
 				})
 				.bind('getAndSetTroops', function(){
@@ -8848,6 +8889,22 @@ jQuery(document).ready(function(){
 
 						unitLimit = Shared.getUnitLimit( from, hasAuraBoost, hasAura2Boost );
 					}
+				})
+				.bind('getItems', function(){
+					var items = [55, 57, 931, 932, 276, 277, 278, 285, 286], //speed, load, unit number limit boosts
+						info, key, i, code = '';
+					for( i = 0; i < items.length; i += 1 ){
+						key = 'i' + items[i];
+						if( parseInt(window.seed.items[ key ], 10) > 1 ){
+							info = window.itemlist[ key ];
+							code += '<input type="checkbox" value="'+ items[i] +'" id="kocfia-transport-item-'+ items[i] +'">';
+							code += '<label for="kocfia-transport-item-'+ items[i] +'" title="'+ info.name + ' - '+ info.description +'">';
+							code += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg">';
+							code += '</label>';
+						}
+					}
+
+					KOCFIA.transport.$manualForm.find('.items').html( code );
 				})
 				.on('change', '.to input', function(){
 					KOCFIA.transport.$manualForm.find('.coord').val('');

@@ -197,6 +197,25 @@
 /* chat tab */
 	#kocfia-chat ul { padding-left: 0; }
 
+	#kocfia-chat .kocfia-chat-colors label {
+		display: inline-block;
+		min-width: 120px;
+		padding: 3px 6px 3px 0;
+		text-align: right;
+	}
+
+	#kocfia-chat .kocfia-chat-colors input {
+		width: 65px;
+		margin: 2px 0;
+	}
+
+	#kocfia-chat .kocfia-chat-colors .miniColors-trigger {
+		position: relative;
+		top: -2px;
+	}
+
+	#kocfia-chat .kocfia-chat-colors .apply { margin-left: 126px; }
+
 /* map search tab */
 	#kocfia-map .save,
 	#kocfia-map .filter { display: none; }
@@ -681,7 +700,12 @@
 		#kocfia-transport .manual-form .troop img,
 		#kocfia-transport .manual-form .resources img { width: 20px; }
 
-		#kocfia-transport .manual-form .buttonset label img { top: 2px; }
+		#kocfia-transport .manual-form .buttonset label img { top: 0; }
+
+		#kocfia-transport .manual-form .items.buttonset label {
+			position: relative;
+			top: 4px;
+		}
 
 	/* pileUp form */
 		#kocfia-transport .pileUp-form .buttons { text-align: right; }
@@ -715,7 +739,7 @@
 			top: 2px;
 		}
 
-		#kocfia-transport .pileUp-form .rule select { width: 70px; }
+		#kocfia-transport .pileUp-form .rule select { max-width: 100px; }
 
 		#kocfia-transport .pileUp-form .rule .remove {
 			margin-right: 10px;

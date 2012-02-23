@@ -5,7 +5,7 @@
 		z-index: 100001;
 	}
 
-	#kocfia-conf-panel .ui-icon-close {
+	#kocfia-conf-panel .ui-icon.ui-icon-close {
 		position: absolute;
 		right: -3px;
 		top: -3px;
@@ -15,7 +15,15 @@
 
 	#kocfia-conf-panel label + select { margin-left: 5px; }
 
-	#kocfia-conf-panel .ui-icon-trash {
+	#kocfia-conf-panel .ui-icon.ui-icon-trash,
+	#kocfia-conf-panel .ui-icon.ui-icon-cancel,
+	#kocfia-conf-panel .ui-icon.ui-icon-stop,
+	#kocfia-conf-panel .ui-icon.ui-icon-flag,
+	#kocfia-conf-panel .ui-icon.ui-icon-info,
+	#kocfia-conf-panel .ui-icon.ui-icon-pencil,
+	#kocfia-conf-panel .ui-icon.ui-icon-copy,
+	#kocfia-conf-panel .ui-icon.ui-icon-plusthick,
+	#kocfia-conf-panel .ui-icon.ui-icon-minusthick {
 		cursor: pointer;
 		display: inline-block;
 		position: relative;
@@ -36,7 +44,7 @@
 	#kocfia-conf-panel ul:not(.ui-accordion-content) { margin: 5px; }
 
 	#kocfia-conf-panel .coord {
-		width: 50px;
+		width: 60px;
 		text-align: center;
 	}
 
@@ -98,9 +106,8 @@
 			cursor: pointer;
 		}
 
-		.ui-tabs-panel h3 .ui-icon-info,
-		.ui-tabs-panel .infos .ui-icon-info {
-			position: relative;
+		#kocfia-conf-panel .ui-tabs-panel h3 .ui-icon.ui-icon-info,
+		#kocfia-conf-panel .ui-tabs-panel .infos .ui-icon.ui-icon-info {
 			top: 5px;
 		}
 
@@ -108,13 +115,18 @@
 
 		.ui-tabs-panel .help { display:none; }
 
-		.ui-tabs-panel .ui-icon-info {
-			cursor: pointer;
-		}
-
 		.ui-tabs-panel .accordion { clear: both; margin-top: 5px; }
 
-		.ui-accordion .ui-accordion-header { text-indent: 30px; }
+		.ui-accordion .ui-accordion-header {
+			text-indent: 15px;
+			line-height: 20px;
+			height: 20px;
+		}
+
+		.ui-accordion .ui-accordion-header .ui-icon {
+			left: 0;
+			margin-left: 0;
+		}
 
 	/* clearfix */
 		.cf:before, .cf:after { content: ""; display: table; }
@@ -214,7 +226,7 @@
 		top: -2px;
 	}
 
-	#kocfia-chat .kocfia-chat-colors .apply { margin-left: 126px; }
+	#kocfia-chat .kocfia-chat-colors .apply { margin-left: 141px; }
 
 /* map search tab */
 	#kocfia-map .save,
@@ -222,6 +234,11 @@
 
 	#kocfia-map .search-status {
 		padding: 3px;
+		text-align: center;
+	}
+
+	#kocfia-map .range {
+		width: 40px;
 		text-align: center;
 	}
 
@@ -262,6 +279,8 @@
 		width: 25px;
 		text-align: center;
 	}
+
+	.attack-form > button { margin-right: 5px; }
 
 	.attack-form { counter-reset: waves; }
 
@@ -316,6 +335,10 @@
 
 		#kocfia-scout .attack-form tr td {
 			text-align: center;
+			vertical-align: middle;
+		}
+
+		#kocfia-scout .attack-form tr:last-child td {
 			vertical-align: top;
 		}
 
@@ -332,15 +355,22 @@
 			height: 100px;
 		}
 
-		#kocfia-scout .attack-form tr td input[type=text] {
+		#kocfia-scout .attack-form tr td input[type=text],
+		#kocfia-scout .attack-form tr td input[type=number] {
 			width: 95%;
 			max-width: 40px;
 		}
 
+		#kocfia-scout .attack-form button { margin-right: 5px; }
+
 	/* dark forest specific form */
+		.darkForest-form table + .buttons {
+			border-top: 1px solid #CCC;
+			padding-top: 5px;
+		}
+
 		.darkForest-form .buttons button {
-			float:right;
-			margin: 0 5px;
+			margin: 0 5px 0 0;
 		}
 
 		.darkForest-form table { width: 100%; }
@@ -350,8 +380,7 @@
 		.darkForest-form .city-header td { background-color: #CCCCCC; }
 
 		.darkForest-form .city-header button {
-			float: right;
-			margin: 0 5px 0 10px;
+			margin: 0 5px 0 0;
 		}
 
 		.darkForest-form .city-header td > label {
@@ -365,29 +394,18 @@
 			width: auto;
 		}
 
-		.darkForest-form .city-header input[type=text] {
+		.darkForest-form .city-header div input {
 			width: 20px;
 			margin-right: 3px;
 		}
 
+		.darkForest-form input[type=number],
 		.darkForest-form input[type=text] { text-align: center; }
 
 		.darkForest-form .rule,
 		.darkForest-form .keep {
 			text-align: center;
 			vertical-align: top;
-		}
-
-		.darkForest-form .rule .ui-icon,
-		.darkForest-form .keep .ui-icon {
-			display: inline-block;
-			cursor: pointer;
-		}
-
-		#kocfia-conf-panel .darkForest-form .rule .ui-icon-trash {
-			position: absolute;
-			top: 2px;
-			right: 2px;
 		}
 
 		#kocfia-conf-panel .darkForest-form .rule .level-active {
@@ -423,16 +441,30 @@
 			border-top: 1px dotted #666;
 		}
 
-		.darkForest-form .ui-icon.ui-icon-plusthick { top: 2px; }
-
-		.darkForest-form .ui-icon.ui-icon-trash { top: 4px; }
-
-		.darkForest-form .ui-icon.ui-icon-minusthick {
-			top: 3px;
-			right: 12px;
+		#kocfia-conf-panel .darkForest-form .rule .ui-icon-trash {
+			position: absolute;
+			top: 4px;
+			right: 2px;
 		}
 
-		.darkForest-form .wave .ui-icon.ui-icon-minusthick { right: -3px; }
+		#kocfia-conf-panel .darkForest-form .ui-icon.ui-icon-plusthick {
+			position: absolute;
+			left: 13px;
+			top: 1px;
+		}
+
+		#kocfia-conf-panel .darkForest-form .ui-icon.ui-icon-minusthick {
+			position: absolute;
+			top: 1px;
+			right: 13px;
+		}
+
+		#kocfia-conf-panel .darkForest-form .unit-block .ui-icon.ui-icon-minusthick {
+			right: -3px;
+			top: 6px;
+		}
+
+		#kocfia-conf-panel .darkForest-form .keep .unit-block .ui-icon.ui-icon-minusthick { right: 15px; }
 
 		.darkForest-form .wave strong:after {
 			counter-increment: waves;
@@ -611,14 +643,29 @@
 		top: 4px;
 	}
 
-	#kocfia-formation .forms fieldset input + label,
-	#kocfia-formation .forms fieldset select + label,
-	#kocfia-formation .forms fieldset label + label,
-	#kocfia-formation .forms fieldset button + label { margin: 0 3px 0 10px; }
+	#kocfia-formation .dynamic { margin-bottom: 5px; }
+
+	#kocfia-formation .manual-train-form fieldset {
+		border: none;
+		padding: 0;
+	}
+
+	#kocfia-formation .manual-train-form fieldset > button {
+		margin: 0 5px 0 0;
+	}
+
+	#kocfia-formation .forms fieldset p input + label,
+	#kocfia-formation .forms fieldset p select + label,
+	#kocfia-formation .forms fieldset p label + label,
+	#kocfia-formation .forms fieldset p button + label { margin: 0 3px 0 10px; }
 
 	#kocfia-formation .forms .save { float: right; }
 
 	#kocfia-formation .forms fieldset { clear: both; }
+
+	#kocfia-formation .forms fieldset + fieldset { margin-top: 5px; }
+
+	#kocfia-formation fieldset .unit { margin-top: 2px; }
 
 	#kocfia-formation .manual-train-form .launch,
 	#kocfia-formation .manual-train-form .reset { display: none; }
@@ -627,6 +674,8 @@
 		cursor: pointer;
 		display: inline-block;
 		margin-right: 5px;
+		position:relative;
+		top: 2px;
 	}
 
 	#kocfia-formation fieldset p:first-child { margin-top: 0; }
@@ -659,8 +708,6 @@
 	#kocfia-map-canvas { width: 350px; height: 350px; background: #000; }
 
 /* transport tab */
-	#kocfia-conf-panel #kocfia-transport .coord { width: 50px; }
-
 	#kocfia-transport .accordion + div { margin-top: 15px; }
 
 	/* manual form */
@@ -673,6 +720,7 @@
 		#kocfia-transport .manual-form .resources,
 		#kocfia-transport .manual-form .troop { margin: 12px 0; }
 
+		#kocfia-transport .manual-form input[type=number],
 		#kocfia-transport .manual-form input[type=text] { text-align: center; }
 
 		#kocfia-transport .manual-form .items { margin-bottom: 6px; }
@@ -708,55 +756,46 @@
 		}
 
 	/* pileUp form */
-		#kocfia-transport .pileUp-form .buttons { text-align: right; }
+		#kocfia-transport .transport-form .buttons { text-align: right; }
 
-		#kocfia-transport .pileUp-form .buttons button { margin-left: 10px; }
+		#kocfia-transport .transport-form .buttons button { margin-left: 10px; }
 
-		#kocfia-transport .pileUp-form table { width: 100%; }
+		#kocfia-transport .transport-form table { width: 100%; }
 
-		#kocfia-transport .pileUp-form .res { text-align: center; }
+		#kocfia-transport .transport-form .res { text-align: center; }
 
-		#kocfia-transport .pileUp-form .res img { margin-bottom: 10px; }
+		#kocfia-transport .transport-form .res img { margin-bottom: 10px; }
 
-		#kocfia-transport .pileUp-form td {
+		#kocfia-transport .transport-form .res .ui-icon {
+			margin: 0 5px;
+		}
+
+		#kocfia-transport .transport-form td {
 			padding: 5px;
 			vertical-align: top;
 		}
 
-		#kocfia-transport .pileUp-form td .rule:not(:last-child) {
+		#kocfia-transport .transport-form .rule .ui-icon.ui-icon-trash { top: 1px; }
+
+		#kocfia-transport .transport-form td .rule:not(:last-child) {
 			padding-bottom: 5px;
 			border-bottom: 1px solid #ccc;
 			margin-bottom: 5px;
 		}
 
-		#kocfia-transport .pileUp-form .quantity {
+		#kocfia-transport .transport-form .quantity {
 			width: 50px;
 			text-align: center;
 		}
 
-		#kocfia-transport .pileUp-form .active {
-			position: relative;
-			top: 2px;
-		}
+		#kocfia-transport .transport-form .rule select { max-width: 100px; }
 
-		#kocfia-transport .pileUp-form .rule select { max-width: 100px; }
+		#kocfia-transport .transport-form .rule .remove { margin-right: 10px; }
 
-		#kocfia-transport .pileUp-form .rule .remove {
-			margin-right: 10px;
-			position: relative;
-			top: 2px;
-		}
+		#kocfia-transport .transport-form .duplicate { margin-right: 10px; }
 
-		#kocfia-transport .pileUp-form .duplicate {
-			display: inline-block;
-			position: relative;
-			top: 2px;
-			margin-right: 10px;
-			cursor: pointer;
-		}
-
-		#kocfia-transport .pileUp-form .from,
-		#kocfia-transport .pileUp-form .coord { margin-right: 15px; }
+		#kocfia-transport .transport-form .from,
+		#kocfia-transport .transport-form .coord { margin-right: 15px; }
 
 /* input radio and checkbox normalize */
 	#kocfia-conf-panel input[type="checkbox"],
@@ -767,8 +806,16 @@
 		*height: 13px;
 	}
 
+/* form validation */
+	input:invalid,
+	textarea:invalid,
+	select:invalid {
+		box-shadow: 0 0 1.5px 1px #FFC300;
+	}
 
 /* buttonset for radio and inputs */
+	legend.buttonset label { margin: 0 5px; }
+
 	.buttonset input[type=checkbox],
 	.buttonset input[type=radio] {
 		display: none;
@@ -784,6 +831,11 @@
 		background-color: #E6E6E6;
 		display: inline-block;
 		margin: 0 4px;
+	}
+
+	.buttonset input[type=checkbox]:required:invalid + label,
+	.buttonset input[type=radio]:required:invalid + label {
+		box-shadow: 0 0 1.5px 1px #FFC300;
 	}
 
 	.buttonset input[type=checkbox]:checked + label,

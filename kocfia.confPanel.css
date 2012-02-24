@@ -65,24 +65,27 @@
 	}
 
 	.kocfia-conf-panel-tab.on {
-		background-image: -webkit-linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-image: -moz-linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%;
+		background-image: -webkit-linear-gradient(-45deg, green 15%, transparent 15%, transparent);
+		background-image: -moz-linear-gradient(-45deg, green 15%, transparent 15%, transparent);
+		background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent);
+		background-repeat: no-repeat;
+		background-position: 0 0;
 	}
 
 	.kocfia-conf-panel-tab.off {
-		background-image: -webkit-linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-image: -moz-linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-image: linear-gradient(-45deg, red 15%, transparent 15%, transparent), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-repeat: no-repeat, repeat-x; background-position: 0 0, 50% 50%;
+		background-image: -webkit-linear-gradient(-45deg, red 15%, transparent 15%, transparent);
+		background-image: -moz-linear-gradient(-45deg, red 15%, transparent 15%, transparent);
+		background-image: linear-gradient(-45deg, red 15%, transparent 15%, transparent);
+		background-repeat: no-repeat;
+		background-position: 0 0;
 	}
 
 	.kocfia-conf-panel-tab.on.auto {
-		background-image: -webkit-linear-gradient(-45deg, green 15%, transparent 15%, transparent), -webkit-linear-gradient(-45deg, transparent 90%, blue 90%, blue), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-image: -moz-linear-gradient(-45deg, green 15%, transparent 15%, transparent), -moz-linear-gradient(-45deg, transparent 90%, blue 90%, blue), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent), linear-gradient(-45deg, transparent 90%, blue 90%, blue), url('images/ui-bg_glass_100_f6f6f6_1x400.png');
-		background-repeat: no-repeat, no-repeat, repeat-x; background-position: 0 0, right bottom, 50% 50%;
+		background-image: -webkit-linear-gradient(-45deg, green 15%, transparent 15%, transparent), -webkit-linear-gradient(-45deg, transparent 90%, blue 90%, blue);
+		background-image: -moz-linear-gradient(-45deg, green 15%, transparent 15%, transparent), -moz-linear-gradient(-45deg, transparent 90%, blue 90%, blue);
+		background-image: linear-gradient(-45deg, green 15%, transparent 15%, transparent), linear-gradient(-45deg, transparent 90%, blue 90%, blue));
+		background-repeat: no-repeat, no-repeat;
+		background-position: 0 0, right bottom;
 	}
 
 	/* jquery ui tabs and panel */
@@ -451,11 +454,19 @@
 			right: 2px;
 		}
 
+		#kocfia-conf-panel .darkForest-form .rule .ui-icon-copy {
+			position: absolute;
+			top: 4px;
+			right: 23px;
+		}
+
 		#kocfia-conf-panel .darkForest-form .ui-icon.ui-icon-plusthick {
 			position: absolute;
 			left: 13px;
 			top: 1px;
 		}
+
+		#kocfia-conf-panel .darkForest-form .keep .ui-icon.ui-icon-plusthick { top: 0; }
 
 		#kocfia-conf-panel .darkForest-form .ui-icon.ui-icon-minusthick {
 			position: absolute;
@@ -469,6 +480,12 @@
 		}
 
 		#kocfia-conf-panel .darkForest-form .keep .unit-block .ui-icon.ui-icon-minusthick { right: 15px; }
+
+		#kocfia-conf-panel .darkForest-form .keep .ui-icon.ui-icon-copy {
+			position: absolute;
+			top: 0;
+			right: 13px;
+		}
 
 		.darkForest-form .wave strong:after {
 			counter-increment: waves;

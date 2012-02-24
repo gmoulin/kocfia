@@ -42,6 +42,7 @@ var domain = 'http://kocfia.kapok.dev/',
 		domain + "jquery-ui-1.8.17.custom.css",
 		domain + "jquery.miniColors.css",
 		domain + "jquery.miniColors.min.js",
+		domain + "jquery.tablesorter.min.js",
 		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
 		domain + "kocfia.js?ts=" + d.getTime()
 	];

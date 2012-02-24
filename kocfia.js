@@ -1761,11 +1761,13 @@ jQuery(document).ready(function(){
 			};
 
 		/* players */
-			Shared.getPlayerInfo = function( userId, $el ){
+			Shared.getPlayerInfo = function( $el ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getPlayerInfo function');
 
 				var params = $.extend({}, window.g_ajaxparams),
-					lastLogin = null, online = null;
+					lastLogin = null,
+					online = null,
+					userId = parseInt($el.attr('rel'), 10);
 				params.pid = userId;
 
 				var getInfo = function( dfd, attempts ){
@@ -1835,6 +1837,8 @@ jQuery(document).ready(function(){
 
 			Shared.getDiplomacy = function( allianceId ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getDiplomacy function');
+
+				if( allianceId === null || allianceId === '' ) return '';
 
 				if( window.seed.allianceDiplomacies === null || $.isEmptyObject(window.seed.allianceDiplomacies) ){
 					return 'neutral';
@@ -1959,7 +1963,7 @@ jQuery(document).ready(function(){
 				code += '<ul class="kocfia-chat-list" rel="foes">'+ foes +'</ul>';
 
 			$section.append( colors + code )
-				.on('click', 'button', function(e){
+				.on('click', 'button:not(.apply)', function(e){
 					e.preventDefault();
 
 					var $this = $(this),
@@ -5924,7 +5928,9 @@ jQuery(document).ready(function(){
 			stored: ['search'],
 			search: {},/*{by city, tiles}*/
 			currentSearch: {},
-			loadTypeLabels: { C: 'cités', CB: 'Camps Barbares', TS: 'Terres Sauvages', FS: 'Forêts Sombres' }
+			loadTypeLabels: { C: 'cités', CB: 'Camps Barbares', TS: 'Terres Sauvages', FS: 'Forêts Sombres' },
+			sortList: [],
+			displayed: 0
 		};
 
 		KOCFIA.map.confPanel = function( $section ){
@@ -5988,15 +5994,16 @@ jQuery(document).ready(function(){
 			code += '</select><button>Sauvegarder</button></fieldset>';
 			code += '<fieldset class="filter"><legend>Filter les résultats</legend>';
 			code += '<textarea id="kocfia-map-coordsList"></textarea>';
-			code += '<div class="category"><label for="kocfia-map-category">Catégorie&nbsp;:&nbsp;</label>';
-			code += '<select id="kocfia-map-category" required>';
-			code += '<option value="">Choisir</option>';
-			code += '<option value="C">Cités</option>';
-			code += '<option value="CB">Camps Barbares</option>';
-			code += '<option value="TS">Terres Sauvages</option>';
-			code += '<option value="FS">Forêts Sombres</option>';
-			code += '</select></div>';
-			code += '<div class="level"><label for="kocfia-map-level-min">Niveau entre&nbsp;:&nbsp;</label>';
+			code += '<div class="category buttonset"><label>Catégorie&nbsp;:&nbsp;</label>';
+			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-C" value="C" required>';
+			code += '<label for="kocfia-map-category-C">Cités</label>';
+			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-CB" value="CB" required>';
+			code += '<label for="kocfia-map-category-CB">Camps Barbares</label>';
+			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-TS" value="TS" required>';
+			code += '<label for="kocfia-map-category-TS">Terres Sauvages</label>';
+			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-FO" value="FO" required>';
+			code += '<label for="kocfia-map-category-FO">Forêts Sombres</label>';
+			code += '</div><div class="level"><label for="kocfia-map-level-min">Niveau entre&nbsp;:&nbsp;</label>';
 			code += '<input type="number" id="kocfia-map-level-min" class="coord" min="1" max="10" />';
 			code += '<label for="kocfia-map-level-max">&nbsp;et&nbsp;:&nbsp;</label>';
 			code += '<input type="number" id="kocfia-map-level-max" class="coord" min="1" max="10" />';
@@ -6014,15 +6021,14 @@ jQuery(document).ready(function(){
 			code += '<input type="checkbox" id="kocfia-map-type-plain" value="50" />';
 			code += '<label for="kocfia-map-type-plain">Plaine</label>';
 			code += '</div><div class="status buttonset">';
-			code += '<label for="kocfia-map-status">Libre</label>';
 			code += '<input type="checkbox" id="kocfia-map-status" />';
+			code += '<label for="kocfia-map-status">Libre</label>';
 			code += '</div><div class="mist buttonset">';
-			code += '<label for="kocfia-map-mist">Sous brumes</label>';
 			code += '<input type="checkbox" id="kocfia-map-mist" />';
+			code += '<label for="kocfia-map-mist">Sous brumes</label>';
 			code += '</div></fieldset><div class="search-status"></div><div class="search-result"></div>';
 
-			$section
-				.append( code )
+			$section.append( code )
 				.on('change', '#kocfia-map-city-coord', function(){
 					var v = $(this).val();
 					if( v !== '' ){
@@ -6047,9 +6053,9 @@ jQuery(document).ready(function(){
 					} else if( regexp.test( coord ) ){
 						errors.push('Pour les coordonnées, veuillez respecter le format x,y.');
 					} else {
-						coord = coord.split(' ');
-						coordX = parseInt(coordX, 10);
-						coordY = parseInt(coordY, 10);
+						coord = coord.split(',');
+						coordX = parseInt(coord[0], 10);
+						coordY = parseInt(coord[1], 10);
 						if( coordX < 0 || coordX > 750 || coordY < 0 || coordY > 750 ){
 							errors.push('Coordonnée invalide.');
 						}
@@ -6080,7 +6086,8 @@ jQuery(document).ready(function(){
 					event.stopPropagation();
 					if( KOCFIA.map.xhr ) KOCFIA.map.xhr.abort(); //kill the ajax request
 					KOCFIA.map.searching = false;
-					KOCFIA.map.$search.find('input, select').val('');
+					KOCFIA.map.$search.find('input[type="text"], select').val('');
+					KOCFIA.map.$search.find('input[type="checkbox"]').prop('checked', false);
 					$('#kocfia-map-range-min').val('1');
 					$('#kocfia-map-range-max').val('20');
 					KOCFIA.map.$search.find('.go').removeAttr('disabled').html('Rechercher');
@@ -6120,8 +6127,10 @@ jQuery(document).ready(function(){
 						KOCFIA.map.currentSearch = KOCFIA.map.search[ cityKey ];
 					}
 				})
-				.on('change', '#kocfia-map-category', function(event){
-					event.stopPropagation();
+				.on('click', '.map-category', function(){
+					var category = $(this).val();
+					KOCFIA.map.displayed = 0;
+
 					var $inputs = KOCFIA.map.$filter.find('input');
 
 					$inputs.filter('[type="checkbox"]').prop('checked', false);
@@ -6130,7 +6139,6 @@ jQuery(document).ready(function(){
 					KOCFIA.map.$filter.find('.level, .type, .status, .mist').hide();
 					KOCFIA.map.$coordsList.hide();
 
-					var category = $(this).val();
 					if( category !== '' ){
 						if( category != 'C' ) KOCFIA.map.$filter.find('.level').show();
 
@@ -6145,22 +6153,21 @@ jQuery(document).ready(function(){
 						KOCFIA.map.$results.empty();
 					}
 				})
-				.on('change', '.filter input[type=checkbox]', function(event){
-					event.stopPropagation();
+				.on('change', '.filter input[type="checkbox"]', function(){
 					KOCFIA.map.filterResults();
 				})
-				.on('keyup', '.filter input[type=text]', function(event){
+				.on('keyup', '.filter input[type="text"]', function(event){
 					event.stopPropagation();
 					KOCFIA.map.filterResults();
 				})
 				.on('click', '.search-result .playerInfo', function(){
-					var info = Shared.getPlayerInfo( this.rel, $(this) );
+					Shared.getPlayerInfo( $(this) );
 				});
 
 			KOCFIA.map.$search = $('#kocfia-map').find('.search');
 			KOCFIA.map.$save = $('#kocfia-map').find('.save');
 			KOCFIA.map.$filter = $('#kocfia-map').find('.filter');
-			KOCFIA.map.$category = $('#kocfia-map-category');
+			KOCFIA.map.$category = KOCFIA.map.$filter.find('.map-category');
 			KOCFIA.map.$coordsList = $('#kocfia-map-coordsList');
 			KOCFIA.map.$results = $('#kocfia-map').find('.search-result');
 			KOCFIA.map.$status = $('#kocfia-map').find('.search-status');
@@ -6214,7 +6221,7 @@ jQuery(document).ready(function(){
 						coords = KOCFIA.map.currentSearch.coords;
 					}
 
-					var id, tile, range, user, alliance, name, label, might, userId;
+					var id, tile, range, user, alliance, name, label, might, userId, a;
 					for( id in result.data ){
 						if( result.data.hasOwnProperty(id) ){
 							tile = result.data[id];
@@ -6235,7 +6242,7 @@ jQuery(document).ready(function(){
 												coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 											}
 										} else if( tile.tileType == 53 ){
-											tiles.city.push({ s: 'C', r: range, x: tile.xCoord, y: tile.yCoord, m: '?', p: '?', c: '?', b: 1 });
+											tiles.city.push({ s: 'C', r: range, x: tile.xCoord, y: tile.yCoord, m: '?', u: null, p: '?', g: '?', a: null, c: '?', b: 1 });
 											coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 									//dark forest
 										} else if( tile.tileType == 54 ){
@@ -6254,6 +6261,7 @@ jQuery(document).ready(function(){
 
 											user = null;
 											userId = null;
+											a = null;
 											might = '';
 											name = '';
 											alliance = '';
@@ -6269,10 +6277,11 @@ jQuery(document).ready(function(){
 													might = Shared.format(user.m);
 													alliance = (result.allianceNames.hasOwnProperty('a' + user.a) ? result.allianceNames['a' + user.a] : '');
 													userId = tile.tileUserId;
+													a = user.a;
 												}
 											}
 
-											tiles.wilderness.push({ s: 'TS', r: range, t: tile.tileType, e: label, x: tile.xCoord, y: tile.yCoord, m: might, u: userId, p: name, g: alliance, a: user.a, l: tile.tileLevel });
+											tiles.wilderness.push({ s: 'TS', r: range, t: tile.tileType, e: label, x: tile.xCoord, y: tile.yCoord, m: might, u: userId, p: name, g: alliance, a: a, l: tile.tileLevel });
 											coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 										}
 								}
@@ -6280,14 +6289,16 @@ jQuery(document).ready(function(){
 						}
 					}
 
+					/*
 					tiles.city.sort(function(a, b){ return a.r - b.r; });
 					tiles.barbarian.sort(function(a, b){ return a.r - b.r; });
 					tiles.darkForest.sort(function(a, b){ return a.r - b.r; });
 					tiles.wilderness.sort(function(a, b){ return a.r - b.r; });
+					*/
 
 					KOCFIA.map.currentSearch = {x: coordX, y: coordY, rangeMin: rangeMin, rangeMax: rangeMax, tiles: tiles, coords: coords};
 
-					if( KOCFIA.map.$category.val() !== '' ) KOCFIA.map.displayResultsByCategory();
+					if( KOCFIA.map.$category.filter(':checked').length === 1 ) KOCFIA.map.displayResultsByCategory();
 					else {
 						KOCFIA.map.$filter.find('.level, .type, .status, .mist').hide();
 						KOCFIA.map.$coordsList.hide();
@@ -6335,7 +6346,7 @@ jQuery(document).ready(function(){
 										$('#kocfia-map-city-save').prop('selectedIndex', chosenCityIndex);
 									}
 									KOCFIA.map.$filter.show();
-									KOCFIA.map.$category.val('').trigger('change');
+									KOCFIA.map.$category.prop('checked', false);
 								}
 
 								return dfd.pipe( parseResults( dfd, coordX, coordY, rangeMin, rangeMax, result ) );
@@ -6374,38 +6385,41 @@ jQuery(document).ready(function(){
 			var params = window.g_ajaxparams,
 				blocks = [];
 
-
 			//get all the coordinates within a circle of rangeMax diameter,
 			//omiting the coordinates under rangeMin
 			var x = 0,
 				y = rangeMax,
 				rangeMaxSquare = Math.pow(rangeMax, 2),
 				rangeMinSquare = Math.pow(rangeMin, 2),
-				i, j, coords = {};
+				i, j, r, coords = {}, sorted = [];
 
 			for( x = 0; x < y; x += 1 ){
 				for( i = coordX - x; i <= coordX + x; i += 1 ){
 					j = coordY + y;
-					if( Math.pow(i, 2) + Math.pow(j, 2) >= rangeMinSquare ){
-						coords[ i +','+ j ] = {x: i, y: j};
+					r = Math.pow(i, 2) + Math.pow(j, 2);
+					if( r >= rangeMinSquare ){
+						coords[ i +','+ j ] = {x: i, y: j, r: r};
 					}
 				}
 				for( i = coordX - x; i <= coordX + x; i += 1 ){
 					j = coordY - y;
-					if( Math.pow(i, 2) + Math.pow(j, 2) >= rangeMinSquare ){
-						coords[ i +','+ j ] = {x: i, y: j};
+					r = Math.pow(i, 2) + Math.pow(j, 2);
+					if( r >= rangeMinSquare ){
+						coords[ i +','+ j ] = {x: i, y: j, r: r};
 					}
 				}
 				for( i = coordX - y; i <= coordX + y; i += 1 ){
 					j = coordY + x;
-					if( Math.pow(i, 2) + Math.pow(j, 2) >= rangeMinSquare ){
-						coords[ i +','+ j ] = {x: i, y: j};
+					r = Math.pow(i, 2) + Math.pow(j, 2);
+					if( r >= rangeMinSquare ){
+						coords[ i +','+ j ] = {x: i, y: j, r: r};
 					}
 				}
 				for( i = coordX - y; i <= coordX + y; i += 1 ){
 					j = coordY - x;
-					if( Math.pow(i, 2) + Math.pow(j, 2) >= rangeMinSquare ){
-						coords[ i +','+ j ] = {x: i, y: j};
+					r = Math.pow(i, 2) + Math.pow(j, 2);
+					if( r >= rangeMinSquare ){
+						coords[ i +','+ j ] = {x: i, y: j, r: r};
 					}
 				}
 
@@ -6419,6 +6433,15 @@ jQuery(document).ready(function(){
 			if( coords.hasOwnProperty( coordX +','+ coordY ) ) delete coords[ coordX +','+ coordY ];
 
 			for( i in coords ){
+				if( coords.hasOwnProperty(i) ){
+					sorted.push(coords[i]);
+				}
+			}
+
+			coords = null;
+			coords = sorted.sort(function(a, b){ return a.r - b.r; });
+
+			for( i = 0; i < coords.length; i += 1 ){
 				if( coords.hasOwnProperty(i) ){
 					blocks.push("bl_" + ( coords[ i ].x >= 750 ? coords[ i ].x - 750 : coords[ i ].x ) + "_bt_" + ( coords[ i ].y >= 750 ? coords[ i ].y - 750 : coords[ i ].y ));
 				}
@@ -6442,27 +6465,35 @@ jQuery(document).ready(function(){
 		KOCFIA.map.displayResultsByCategory = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map displayResultsByCategory function');
 			var tiles = KOCFIA.map.currentSearch.tiles,
-				category = KOCFIA.map.$category.val(),
-				code = '<table><thead><tr>',
-				coords = [],
-				i, tile, lenght;
+				category = KOCFIA.map.$category.filter(':checked').val(),
+				code = '',
+				isStart = (KOCFIA.map.displayed === 0),
+				i, tile, length;
+			console.log(isStart, KOCFIA.map.displayed);
 			switch( category ){
 				case 'C' : //cities
 					length = tiles.city.length;
-					code += '<th>Distance</th>';
-					code += '<th>Coordonnée</th>';
-					code += '<th>Nom</th>';
-					code += '<th>Joueur</th>';
-					code += '<th>Alliance</th>';
-					code += '<th>Puissance</th>';
-					code += '<th>Sous brumes</th>';
-					code += '<th>Status</th>';
-					code += '</tr></thead><tbody class="'+ category +'">';
+					tiles = tiles.city.slice(KOCFIA.map.displayed, length - 1);
+					KOCFIA.map.displayed = length;
+					length = tiles.length;
+
+					if( isStart ){
+						var sortHeaders = {1: {sorter: false}, 7: {sorter: false}};
+						code = '<table><thead><tr>',
+						code += '<th>Distance</th>';
+						code += '<th>Coordonnée</th>';
+						code += '<th>Nom</th>';
+						code += '<th>Joueur</th>';
+						code += '<th>Alliance</th>';
+						code += '<th>Puissance</th>';
+						code += '<th>Brumes</th>';
+						code += '<th>Status</th>';
+						code += '</tr></thead><tbody class="'+ category +'">';
+					}
 					for( i = 0; i < length; i += 1 ){
-						tile = tiles.city[i];
+						tile = tiles[i];
 						if( tile.s == category ){
-							coords.push( tile.x + ',' + tile.y );
-							code += '<tr class="'+ ( tile.b ? 'misted' : '' ) +' '+ Shared.getDiplomatie( tile.a ) +'" data-coord="'+ tile.x + ',' + tile.y +'">';
+							code += '<tr class="'+ ( tile.b ? 'misted' : '' ) +' '+ Shared.getDiplomacy( tile.a ) +'" data-coord="'+ tile.x + ',' + tile.y +'" data-range="'+ tile.r+'">';
 							code += '<td>'+ tile.r +'</td>';
 							code += '<td>'+ Shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 							code += '<td>'+ tile.c +'</td>';
@@ -6477,15 +6508,22 @@ jQuery(document).ready(function(){
 					break;
 				case 'CB' : //barbarian
 					length = tiles.barbarian.length;
-					code += '<th>Distance</th>';
-					code += '<th>Coordonnée</th>';
-					code += '<th>Niveau</th>';
-					code += '</tr></thead><tbody class="'+ category +'">';
+					tiles = tiles.barbarian.slice(KOCFIA.map.displayed, length - 1);
+					KOCFIA.map.displayed = length;
+					length = tiles.length;
+
+					if( isStart ){
+						var sortHeaders = {1: {sorter: false}};
+						code = '<table><thead><tr>',
+						code += '<th>Distance</th>';
+						code += '<th>Coordonnée</th>';
+						code += '<th>Niveau</th>';
+						code += '</tr></thead><tbody class="'+ category +'">';
+					}
 					for( i = 0; i < length; i += 1 ){
-						tile = tiles.barbarian[i];
+						tile = tiles[i];
 						if( tile.s == category ){
-							coords.push( tile.x + ',' + tile.y );
-							code += '<tr class="level'+ tile.l +'" data-coord="'+ tile.x + ',' + tile.y +'">';
+							code += '<tr class="level'+ tile.l +'" data-coord="'+ tile.x + ',' + tile.y +'" data-range="'+ tile.r+'">';
 							code += '<td>'+ tile.r +'</td>';
 							code += '<td>'+ Shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 							code += '<td>'+ tile.l +'</td>';
@@ -6495,15 +6533,22 @@ jQuery(document).ready(function(){
 					break;
 				case 'FO' : //dark forests
 					length = tiles.darkForest.length;
-					code += '<th>Distance</th>';
-					code += '<th>Coordonnée</th>';
-					code += '<th>Niveau</th>';
-					code += '</tr></thead><tbody class="'+ category +'">';
+					tiles = tiles.darkForest.slice(KOCFIA.map.displayed, length - 1);
+					KOCFIA.map.displayed = length;
+					length = tiles.length;
+
+					if( isStart ){
+						var sortHeaders = {1: {sorter: false}};
+						code = '<table><thead><tr>',
+						code += '<th>Distance</th>';
+						code += '<th>Coordonnée</th>';
+						code += '<th>Niveau</th>';
+						code += '</tr></thead><tbody class="'+ category +'">';
+					}
 					for( i = 0; i < length; i += 1 ){
-						tile = tiles.darkForest[i];
+						tile = tiles[i];
 						if( tile.s == category ){
-							coords.push( tile.x + ',' + tile.y );
-							code += '<tr class="level'+ tile.l +'" data-coord="'+ tile.x + ',' + tile.y +'">';
+							code += '<tr class="level'+ tile.l +'" data-coord="'+ tile.x + ',' + tile.y +'" data-range="'+ tile.r+'">';
 							code += '<td>'+ tile.r +'</td>';
 							code += '<td>'+ Shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 							code += '<td>'+ tile.l +'</td>';
@@ -6513,20 +6558,27 @@ jQuery(document).ready(function(){
 					break;
 				case 'TS' : //wilderness
 					length = tiles.wilderness.length;
-					code += '<th>Distance</th>';
-					code += '<th>Coordonnée</th>';
-					code += '<th>Type</th>';
-					code += '<th>Niveau</th>';
-					code += '<th>Joueur</th>';
-					code += '<th>Alliance</th>';
-					code += '<th>Puissance</th>';
-					code += '<th>Status</th>';
-					code += '</tr></thead><tbody class="'+ category +'">';
+					tiles = tiles.wilderness.slice(KOCFIA.map.displayed, length - 1);
+					KOCFIA.map.displayed = length;
+					length = tiles.length;
+
+					if( isStart ){
+						var sortHeaders = {1: {sorter: false}, 7: {sorter: false}};
+						code = '<table><thead><tr>',
+						code += '<th>Distance</th>';
+						code += '<th>Coordonnée</th>';
+						code += '<th>Type</th>';
+						code += '<th>Niveau</th>';
+						code += '<th>Joueur</th>';
+						code += '<th>Alliance</th>';
+						code += '<th>Puissance</th>';
+						code += '<th>Status</th>';
+						code += '</tr></thead><tbody class="'+ category +'">';
+					}
 					for( i = 0; i < length; i += 1 ){
-						tile = tiles.wilderness[i];
+						tile = tiles[i];
 						if( tile.s == category ){
-							coords.push( tile.x + ',' + tile.y );
-							code += '<tr class="level'+ tile.l +' type'+ tile.t +' '+ ( tile.p === '' ? 'free' : '' ) +' '+ Shared.getDiplomatie( tile.a ) +'" data-coord="'+ tile.x + ',' + tile.y +'">';
+							code += '<tr class="level'+ tile.l +' type'+ tile.t +' '+ ( tile.p === '' ? 'free' : '' ) +' '+ Shared.getDiplomacy( tile.a ) +'" data-coord="'+ tile.x + ',' + tile.y +'" data-range="'+ tile.r+'">';
 							code += '<td>'+ tile.r +'</td>';
 							code += '<td>'+ Shared.mapLink(tile.x + ',' + tile.y) +'</td>';
 							code += '<td>'+ tile.e +'</td>';
@@ -6541,11 +6593,30 @@ jQuery(document).ready(function(){
 					break;
 				default: break;
 			}
-			code += '</tbody></table>';
+console.log(KOCFIA.map.$results.find('tbody').find('tr').length);
 
-			KOCFIA.map.$coordsList.html( coords.join("\n") ).show();
-			KOCFIA.map.$results.html( code );
-			KOCFIA.map.filterResults();
+			if( isStart ){
+				code += '</tbody></table>';
+				KOCFIA.map.$coordsList.html('');
+				KOCFIA.map.$results.html( code );
+
+				KOCFIA.map.$results.find('table')
+					.tablesorter({headers: sortHeaders, sortList:[[0,0]]})
+					.bind('sortEnd', function(sorter){
+						var sortList = sorter.target.config.sortList;
+						KOCFIA.map.sortList = (Array.isArray(sortList[0]) ? sortList : [sortList]);
+					});
+				KOCFIA.map.filterResults();
+			} else {
+				var $table = KOCFIA.map.$results.find('table');
+				console.log(code);
+debugger;
+				$table.find('tbody').append( code );
+console.log(KOCFIA.map.$results.find('tbody').find('tr').length);
+				$table.trigger('update')
+				//$table.trigger('sorton', [[0,0]]);
+			}
+console.log(KOCFIA.map.$results.find('tbody').find('tr').length);
 		};
 
 		KOCFIA.map.filterResults = function(){
@@ -8643,7 +8714,7 @@ jQuery(document).ready(function(){
 		KOCFIA.transport.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getHelp function');
 			var help = '<div id="kocfia-transport-help" class="help" title="Aide transport">';
-			hepl += '<h4>Règles, informations et limitations</h4><ul>';
+			help += '<h4>Règles, informations et limitations</h4><ul>';
 			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
 			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
 			help += '<li>Pour chaque transport, les quantités de troupes et ressources seront limitées par les quantités disponibles et la capacité de chaque marche en fonction du niveau du point de ralliement (tiens compte des boosts en cours et des bonus de la salle du trône)</li>';
@@ -10320,7 +10391,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.alarm.checkIncomming = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm checkIncomming function');
-
+			return false;
 			if( KOCFIA.conf.alarm.active && !Array.isArray(window.seed.queue_atkinc) ){
 				var m, march, cityKey;
 				for( m in window.seed.queue_atkinc ){

@@ -166,16 +166,17 @@ jQuery(document).ready(function(){
 	var notepadCss = "#kocfia-notepad { padding: 2px 3px; }";
 		notepadCss += "\n#kocfia-notepad .title { margin: 0 }";
 		notepadCss += "\n#kocfia-notepad { position:absolute; font: 10px/20px Verdana, sans serif; font-width: normal;	z-index: 100000; display: none; }";
-		notepadCss += "\n#kocfia-notepad .ui-icon-close { position: absolute; cursor: pointer; z-index: 99999; }";
-		notepadCss += "\n#kocfia-notepad .wrapper { overflow: auto; margin: 0 10px 10px 10px; }";
-		notepadCss += "\n#kocfia-notepad .content { padding: 5px; }";
+		notepadCss += "\n#kocfia-notepad .ui-icon-close { position: absolute; cursor: pointer; z-index: 99999; right: -3px; top: -3px; }";
+		notepadCss += "\n#kocfia-notepad .wrapper { overflow: auto; margin: 0 10px 10px 10px; width: auto; text-align: left; }";
+		notepadCss += "\n#kocfia-notepad .content { padding: 5px 20px 5px 5px; }";
 		notepadCss += "\n#kocfia-notepad textarea { width: 100%; height: 150px; box-sizing: border-box; box-sizing: border-box; }";
 		notepadCss += "\n#kocfia-notepad .wrapper input + label { display: block; }";
 		notepadCss += "\n#kocfia-notepad .charsLeft { float: right; }";
+		notepadCss += "\n#kocfia-notepad .button + .button { margin-left: 5px; }";
 		notepadCss += "\n#kocfia-notepad ul { display: block; column-count: 3; column-gap: 1em; margin-top: 0; padding-left: 18px; }";
 		notepadCss += "\n#kocfia-notepad li .ui-icon { display: inline-block; position: relative; top: 2px; }";
 		notepadCss += "\n#kocfia-notepad li { white-space: nowrap; }";
-		notepadCss += "\n#kocfia-notepad li button { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }";
+		notepadCss += "\n#kocfia-notepad li .button span { max-width: 120px; text-overflow: ellipsis; overflow: hidden; }";
 
 (function(window, document, $, undefined){
 	//pointers
@@ -204,7 +205,7 @@ jQuery(document).ready(function(){
 			barbarian: 'Camps Barbares <small>(trône)</small>',
 			wilderness: 'Terres Sauvages <small>(armoiries, trône)</small>',
 			darkForest: 'Forêts Obscures <small>(éther, trône)</small>',
-			scout: 'Eclairage'
+			scout: 'Éclairages'
 		},
 		tabLabel: {
 			map: 'Carte',
@@ -599,16 +600,16 @@ jQuery(document).ready(function(){
 
 			$clone.insertBefore( $tabs.eq(2) );
 
-		//ajax sniffer
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.time('sniffer');
-			KOCFIA.ajaxSniffer();
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.timeEnd('sniffer');
-
 		//needed asap
 			KOCFIA.chat.$chatInput = $('#mod_comm_input');
 			KOCFIA.chat.$chatGeneral = $('#mod_comm_list1');
 			KOCFIA.chat.$chatAlliance = $('#mod_comm_list2');
 			KOCFIA.chat.$chat = $('#kocmain_bottom').find('.mod_comm');
+
+		//ajax sniffer
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.time('sniffer');
+			KOCFIA.ajaxSniffer();
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.timeEnd('sniffer');
 	};
 
 	/* AJAX SNIFFER */
@@ -778,25 +779,55 @@ jQuery(document).ready(function(){
 						}, false);
 						break;
 					case 'magicalboxPreview.php':
+						if( KOCFIA.conf.general.hideMagicalBoxPreview ){
+							$('.modalBox, .modalCurtain').addClass('previous');
+						}
 						this.addEventListener("load", function(){
 							//using merlinBoxClick flag to avoid closing the modal on game asked by the user
 							if( KOCFIA.conf.general.hideMagicalBoxPreview && !merlinBoxClick ){
-								window.setTimeout(function(){ window.Modal.hideModal(); }, 300);
+								$body.addClass('noModal');
+								window.setTimeout(function(){
+									window.Modal.hideModal();
+									window.setTimeout(function(){
+										$body.removeClass('noModal');
+									}, 50);
+								}, 50);
 							}
 							merlinBoxClick = false;
 						}, false);
 						break;
 					case 'viewCourt.php':
+						if( KOCFIA.conf.general.hideOtherPlayersCourtInvitation ){
+							$('.modalBox, .modalCurtain').addClass('previous');
+						}
 						this.addEventListener("load", function(){
 							if( KOCFIA.conf.general.hideOtherPlayersCourtInvitation ){
-								window.setTimeout(function(){ window.Modal.hideModal(); }, 300);
+								$body.addClass('noModal');
+								window.setTimeout(function(){
+									window.Modal.hideModal();
+									window.setTimeout(function(){
+										$body.removeClass('noModal');
+									}, 50);
+								}, 50);
 							}
 						}, false);
 						break;
 					case 'rollFriendChance.php':
+						if( KOCFIA.conf.general.hideFairPopup ){
+							$('.modalBox, .modalCurtain').addClass('previous');
+						}
 						this.addEventListener("load", function(){
 							if( KOCFIA.conf.general.hideFairPopup ){
-								window.setTimeout(function(){ $('#modalContent1').find('.button20.sendfriendbtn').click(); }, 300);
+								$body.addClass('noModal');
+								window.setTimeout(function(){
+									$('.modalBox').find('.button20.sendfriendbtn').click();
+									window.setTimeout(function(){
+										window.Modal.hideModal();
+										window.setTimeout(function(){
+											$body.removeClass('noModal');
+										}, 50);
+									}, 50);
+								}, 50);
 							}
 						}, false);
 						break;
@@ -847,10 +878,18 @@ jQuery(document).ready(function(){
 
 			//manage the checked status change of the options
 			$confPanel
-				.on('click', '.ui-icon-info', function(){
+				.on('click', '.help-toggle', function(){
 					var $this = $(this),
 						pos = $this.offset(),
 						id = '#' + $this.closest('.ui-tabs-panel').attr('id') + '-help';
+					$(id).dialog('option', 'position', [pos.left, pos.top]).dialog('open');
+				})
+				.on('click', '.history-toggle', function(){
+					var $this = $(this),
+						rel = ($this.attr('rel') ? '-'+ $this.attr('rel') : ''),
+						pos = $this.offset(),
+						id = '#' + $this.closest('.ui-tabs-panel').attr('id') + '-history' + rel;
+
 					$(id).dialog('option', 'position', [pos.left, pos.top]).dialog('open');
 				})
 				.on('change', '.conf-toggle', function(){
@@ -1040,9 +1079,11 @@ jQuery(document).ready(function(){
 				}
 			}
 
-			//help dialogs
+			//help + history dialogs
+			//and show confPanel is set as visible in configuration
 			window.setTimeout(function(){
-				KOCFIA.$confPanel.find('.help').dialog({ autoOpen: false, height: 300, width: 400, zIndex: 100002 });
+				KOCFIA.$confPanel.find('.help').dialog({ autoOpen: false, height: 300, width: 400, zIndex: 100003 });
+				KOCFIA.$confPanel.find('.history').dialog({ autoOpen: false, height: 300, width: 400, zIndex: 100002 });
 
 				if( KOCFIA.conf.confPanel.visible ){
 					KOCFIA.$confPanel.show();
@@ -1581,8 +1622,7 @@ jQuery(document).ready(function(){
 
 					var checkMarch = function(i, attempts){
 						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared refreshMarchByCity checkMarch function');
-						marchStatus[i] = false;
-						march = window.seed.queue_atkp[ attack.cityKey ][ marches[i] ];
+						march = window.seed.queue_atkp[ cityKey ][ marches[i] ];
 						// cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN 9
 						if( march && march.marchType != 9 ){
 							if( !march.hasOwnProperty('kocfiaUpdated') ){
@@ -1597,7 +1637,6 @@ jQuery(document).ready(function(){
 								})
 								.done(function(data){
 									if( data.ok ){
-										marchStatus[i] = true;
 										//set the units Return value
 										for( j = 1; j < 13; j += 1 ){
 											if( data.march['unit'+ j +'Return'] ){
@@ -1702,7 +1741,7 @@ jQuery(document).ready(function(){
 
 			Shared.cancelMarch = function( marchId, cityKey, type, attempts ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared cancelMarch function', marchId, cityKey, attempts);
-				if( marchId.indexOf('m') == -1 ) marchId = 'm' + marchId;
+				if( marchId.toString().indexOf('m') == -1 ) marchId = 'm' + marchId;
 
 				var params = $.extend({}, window.g_ajaxparams);
 				params.cid = cityKey.replace(/city/, '');
@@ -1736,7 +1775,7 @@ jQuery(document).ready(function(){
 						}
 					} else {
 						attempts -= 1;
-						if( attemps > 0 ){
+						if( attempts > 0 ){
 							return Shared.cancelMarch( marchId, cityKey, type, attempts );
 						} else {
 							return false;
@@ -1745,7 +1784,7 @@ jQuery(document).ready(function(){
 				})
 				.fail(function(){
 					attempts -= 1;
-					if( attemps > 0 ){
+					if( attempts > 0 ){
 						return Shared.cancelMarch( marchId, cityKey, type, attempts );
 					} else {
 						return false;
@@ -2653,10 +2692,10 @@ jQuery(document).ready(function(){
 
 		KOCFIA.overview.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview confPanel function');
-			var code = '<h3>&Eacute;tat des lieux des villes, troupes et resources</h3>';
+			var code = '<h3>État des lieux des villes, troupes et resources</h3>';
 				code += '<div>';
 				code += Shared.generateCheckbox('overview', 'active', 'Activer', KOCFIA.conf.overview.active);
-				code += Shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', '&Eacute;tat des lieux déplacable et redimensionnable'], [KOCFIA.conf.overview.replace, KOCFIA.conf.overview.moveable]);
+				code += Shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'État des lieux déplacable et redimensionnable'], [KOCFIA.conf.overview.replace, KOCFIA.conf.overview.moveable]);
 				code += Shared.generateButton('overview', 'resetPlacement', 'Remise à zéro de la position');
 				code += Shared.generateButton('overview', 'resetDimensions', 'Remise à zéro des dimensions');
 				code += '</div>';
@@ -2811,7 +2850,6 @@ jQuery(document).ready(function(){
 
 					if( !KOCFIA.conf.overview.parts_visible[part] ){
 						$trs.filter(':not(.toggle)').hide();
-						if( part.indexOf('_') > -1 ) $trs.filter('.toggle').hide();
 					}
 				}
 			}
@@ -3244,7 +3282,8 @@ jQuery(document).ready(function(){
 								s = Shared.readableDuration( n );
 								b = s.split(' ');
 								if( b.length > 2 ) s = b.slice(0, 2);
-								$td.html(  );
+								b = s;
+								$td.html( b );
 
 								if( KOCFIA.conf.alarm.active && KOCFIA.conf.alarm.autonomy && !isNaN(n) && n < 24 * 3600 ){
 									KOCFIA.alarm.react('autonomy', cityKey, {res: stock.key, conso: total[j] * 3600, time: n});
@@ -3373,7 +3412,7 @@ jQuery(document).ready(function(){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview moveableOn function');
 
 				KOCFIA.overview.$div
-					.prepend('<h3>&Eacute;tat des lieux</h3>')
+					.prepend('<h3>État des lieux</h3>')
 					.prepend('<span class="ui-icon ui-icon-close"></span>')
 					.append( moveHandles )
 					.draggable({
@@ -3419,7 +3458,7 @@ jQuery(document).ready(function(){
 					KOCFIA.overview.$div.hide();
 				}
 
-				var $overviewToggle = $('<button id="kocfia-overview-toggle" class="button secondary">').html('<span>&Eacute;tat des lieux</span>');
+				var $overviewToggle = $('<button id="kocfia-overview-toggle" class="button secondary">').html('<span>État des lieux</span>');
 				$overviewToggle.click(function(){
 					KOCFIA.overview.$div.toggle();
 
@@ -3553,8 +3592,6 @@ jQuery(document).ready(function(){
 			if( module == 'darkForest' ) KOCFIA[ module ].$form.find('.launch').hide();
 
 			KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', (this.module == 'darkForest' ? 1 : 2));
-
-			KOCFIA[ module ].$nextBar.show();
 
 			//using closure to have a "copy" of the attack plan
 			var i = 1, c, a;
@@ -3894,10 +3931,10 @@ jQuery(document).ready(function(){
 			code += '<br>Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
 			code += '<br>'+ attack.coords.length +' coordonnée(s)';
 			code += '<br>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '');
-			code += '<br><button class="charge button"><span>Lancer</span></button>';
-			code += '<br><button class="edit button secondary"><span>Modifier</span></button>';
-			code += '<br><button class="duplicate button secondary" title="Créer une nouvelle configuration à partir de celle-ci"><span>Copier</span></button>';
-			code += '<br><button class="delete button danger"><span>Supprimer</span></button>';
+			code += '<div><button class="charge button"><span>Lancer</span></button></div>';
+			code += '<button class="edit button secondary"><span>Modifier</span></button>';
+			code += '<div><button class="duplicate button secondary" title="Créer une nouvelle configuration à partir de celle-ci"><span>Copier</span></button></div>';
+			code += '<div><button class="delete button danger"><span>Supprimer</span></button></div>';
 			code += '</td>';
 
 			code += '<td class="coords"><small>' + Shared.mapLink( attack.coords ) +'</small></td>';
@@ -3960,7 +3997,7 @@ jQuery(document).ready(function(){
 			$tbody.append( code );
 		};
 
-		KOCFIA.autoAttack.refreshOngoingInfo = function(attack, noButton, msg){
+		KOCFIA.autoAttack.refreshOngoingInfo = function(attack, stopped, msg){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' refreshOngoingInfo function');
 
 			var $tr = KOCFIA[ this.module ].$ongoing.find('tr').filter('[data-city="'+ attack.cityKey +'"][data-attack="'+ attack.id +'"]'),
@@ -3973,7 +4010,7 @@ jQuery(document).ready(function(){
 				code += '<td class="trip">'+ city.label;
 				code += '<br>Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
 				code += '<br>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '');
-				code += '<br><button class="button stop secondary"><span>Arrêter</span></button></td>';
+				code += '<div><button class="button stop danger"><span>Arrêter</span></button></div></td>';
 				code += '<td class="coords"><small>' + Shared.mapLink( attack.coords ) +'</small></td>';
 				code += '<td class="current"></td>';
 				code += '<td class="info"></td></tr>';
@@ -3984,13 +4021,11 @@ jQuery(document).ready(function(){
 			}
 
 			//attack stopped
-			if( noButton ){
-				//show the manual launch button
-				if( KOCFIA[ this.module ].hasOwnProperty('$saved') ){
-					KOCFIA[ this.module ].$saved.find('tr').filter('[data-city="'+ attack.cityKey +'"][data-attack="'+ attack.id +'"]').find('.charge').show();
-				}
-			} else if( attack.coordIndex + 1 <= attack.coords.length ){
+			if( !stopped ){
 				$tr.find('.current').html( Shared.mapLink( attack.coords[ attack.coordIndex ] ) + '<br />' + (attack.coordIndex + 1) + 'e / ' + attack.coords.length );
+			} else {
+				$tr.find('.stop').toggleClass('stop trash secondary danger')
+					.find('span').html('Enlever').attr('title', 'Supprime le suivi de cette configuration');
 			}
 
 			//clean old messages
@@ -4000,14 +4035,14 @@ jQuery(document).ready(function(){
 
 			$msg = $tr.find('.info').find('div');
 			if( $msg.length > 9 ){
-				var $tmp = $msg.filter(':lt(9)'); //keep one for td width
-				$tmp.slideUp(500, function(){ $tmp.remove(); });
+				//keep one for td width
+				KOCFIA[ this.module ].$history.append( $msg.filter(':lt(9)') );
 			}
 			$msg.each(function(){
 				var $div = $(this);
 				msgTimestamp = $div.data('timestamp');
 				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-					$div.remove();
+					KOCFIA[ this.module ].$history.append( $div );
 				}
 			});
 
@@ -4024,10 +4059,11 @@ jQuery(document).ready(function(){
 		};
 
 		KOCFIA.autoAttack.getHeader = function(){
-			var header = '<div class="infos cf">';
-			header += '<span class="ui-icon ui-icon-info"></span>';
-			header += '<span><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
+			var header = '<div class="infos">';
+			header += '<span class="buttonset"><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
 			header += '<label for="'+ this.module +'-panel-automatic">attaques automatiques</label></span>';
+			header += '<button class="button secondary history-toggle" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"><span>Historique</span></button>';
+			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
 			header += '</div>';
 
 			return header;
@@ -4051,7 +4087,7 @@ jQuery(document).ready(function(){
 				savedPlans += '<th class="trip">Itinéraire</th>';
 				savedPlans += '<th class="coords">Coordonnées</th>';
 				savedPlans += '<th class="waves">Vagues</th>';
-				savedPlans += '<th class="keep">Converser</th>';
+				savedPlans += '<th class="keep">Conserver</th>';
 				savedPlans += '</tr></thead>';
 
 			//attacks ongoing and plan tbodies
@@ -4277,9 +4313,12 @@ jQuery(document).ready(function(){
 				//stop on next round
 				.on('click', '.stop', function(){
 					if( confirm('Etes-vous sûr ?') ){
-						$(this).toggleClass('stop trash')
-							.find('span').html('Enlever').attr('title', 'Supprime le suivi de cette configuration')
-							.closest('tr').data('stop', 1);
+						var $this = $(this),
+							attackId = $this.closest('tr').data('stop', 1).data('attack');
+						$this.toggleClass('stop trash secondary danger')
+							.find('span').html('Enlever').attr('title', 'Supprime le suivi de cette configuration');
+
+						KOCFIA[ module ].$saved.find('tr').filter('[data-attack="'+ attackId +'"]').find('.charge').show();
 					}
 				})
 				//manual launch
@@ -4310,21 +4349,32 @@ jQuery(document).ready(function(){
 				.on('click', '.build', function(){
 					var rel = $(this).attr('rel');
 					KOCFIA[ module ].$form.find('.wave').remove();
-					KOCFIA[ module ].addWaves((module == 'wilderness' ? 2 : 1), KOCFIA[ module ].$form.find('.city-choice').filter(':checked').val());
+					if( module == 'wilderness' ){
+						if( rel == '1' || rel == '1bis' ){
+							KOCFIA[ module ].addWaves(1, KOCFIA[ module ].$form.find('.city-choice').filter(':checked').val());
+						} else {
+							KOCFIA[ module ].addWaves(2, KOCFIA[ module ].$form.find('.city-choice').filter(':checked').val());
+						}
+					} else {
+						KOCFIA[ module ].addWaves(1, KOCFIA[ module ].$form.find('.city-choice').filter(':checked').val());
+					}
 
 					KOCFIA[ module ].$form.find('.detail, .keep, .launch, .save, .saveAndLaunch').show();
 
-					var $waves = KOCFIA[ module ].$form.find('.wave'),
-						$addUnit = $waves.find('.add-unit'),
-						$level = KOCFIA[ module ].$form.find('.targetLevel');
-
 					if( rel != 'empty' ){
+						var $waves = KOCFIA[ module ].$form.find('.wave'),
+							$addUnit = $waves.find('.add-unit'),
+							$level = KOCFIA[ module ].$form.find('.targetLevel');
 						if( module == 'wilderness' ){
-							$addUnit.eq(1).trigger('click');
+							if( rel != '1' && rel != '1bis' ){
+								$addUnit.eq(1).trigger('click');
+							}
 
-							if( rel == '8' || rel == '9' || rel == '9bis' ){
+							if( rel == '8' || rel == '8bis' || rel == '9' || rel == '9bis' || rel == '9rd' || rel == '10bis' ){
 								$addUnit.eq(0).trigger('click');
 							}
+						} else if( rel != '5' && rel != '6' && rel != '7' && rel != '7bis' && rel != '10' ) {
+							$addUnit.eq(0).trigger('click');
 						}
 
 						var $uChoices = $waves.find('.unit-choice'),
@@ -4335,7 +4385,9 @@ jQuery(document).ready(function(){
 				})
 				//remove ongoing attack info line
 				.on('click', '.trash', function(){
-					$(this).closest('tr').remove();
+					var $tr = $(this).closest('tr');
+					$('#kocfia-'+ this.module +'-history').append( $tr.find('.info').find('div') );
+					$tr.remove();
 				});
 		};
 
@@ -4347,15 +4399,17 @@ jQuery(document).ready(function(){
 			var form = KOCFIA[ this.module ].getForm();
 			var lists = KOCFIA[ this.module ].getListsTemplate();
 			var help = KOCFIA[ this.module ].getHelp();
+			var history = '<div id="kocfia-'+ this.module +'-history" class="history" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"></div>';
 
 			KOCFIA[ this.module ].addSectionListeners();
 
-			$section.append( header + '<div class="accordion">' + form + lists + '</div>' + help );
+			$section.append( header + '<div class="accordion">' + form + lists + '</div>' + help + history );
 
 			KOCFIA[ this.module ].$accordion = $section.find('.accordion');
 			KOCFIA[ this.module ].$form = $section.find('.attack-form');
 			KOCFIA[ this.module ].$saved = $section.find('.attack-list.saved');
 			KOCFIA[ this.module ].$ongoing = $section.find('.attack-list.ongoing');
+			KOCFIA[ this.module ].$history = $section.find('.history');
 
 
 			if( this.module == 'darkForest' ){
@@ -4907,7 +4961,7 @@ jQuery(document).ready(function(){
 			localStorage.removeItem('kocfia_'+ this.module +'_coords_' + KOCFIA.storeUniqueId);
 		};
 
-		KOCFIA.darkForest.refreshOngoingInfo = function(attack, noButton, msg){
+		KOCFIA.darkForest.refreshOngoingInfo = function(attack, stopped, msg){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' refreshOngoingInfo function');
 			var $tr = KOCFIA[ this.module ].$ongoing.find('tbody').find('tr'),
 				$trash = $tr.find('.trash');
@@ -4991,11 +5045,9 @@ jQuery(document).ready(function(){
 				KOCFIA[ this.module ].$ongoing.find('tbody').append( $tr );
 			}
 
-			//attack stopped
-			if( noButton ){
-				$tr.find('.stop').removeClass('stop').removeClass('ui-icon-cancel')
-					.addClass('trash').addClass('ui-icon-trash')
-					.attr('title', 'Enlever les informations.');
+			if( stopped ){
+				$tr.find('.stop').toggleClass('stop trash secondary danger')
+					.find('span').html('Enlever').attr('title', 'Supprime le suivi de cette configuration');
 			}
 
 			//clean old messages
@@ -5004,14 +5056,14 @@ jQuery(document).ready(function(){
 				msgTimestamp;
 			$msg = $tr.find('.info').find('div');
 			if( $msg.length > 14 ){
-				var $tmp = $msg.filter(':lt(14)'); //keep one for td width
-				$tmp.slideUp(500, function(){ $tmp.remove(); });
+				//keep one for td width
+				KOCFIA[ this.module ].$history.append( $msg.filter(':lt(14)') );
 			}
 			$msg.each(function(){
 				var $div = $(this);
 				msgTimestamp = $div.data('timestamp');
 				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-					$div.remove();
+					KOCFIA[ this.module ].$history.append( $div );
 				}
 			});
 
@@ -5422,13 +5474,23 @@ jQuery(document).ready(function(){
 			builds += '<legend>Attaques types</legend>';
 			builds += '<div>';
 			builds += '<button class="build button secondary" rel="empty"><span>Vide</span></button>';
-			builds += '<button class="build button secondary" rel="5"><span>TS5 (emp5)</span></button>';
-			builds += '<button class="build button secondary" rel="6"><span>TS6 (emp7)</span></button>';
-			builds += '<button class="build button secondary" rel="7"><span>TS7 (emp8)</span></button>';
-			builds += '<button class="build button secondary" rel="8"><span>TS8 (emp9)</span></button>';
-			builds += '<button class="build button secondary" rel="9"><span>TS9 (emp 9)</span></button>';
-			builds += '<button class="build button secondary" rel="9bis"><span>TS9 (emp10)</span></button>';
-			builds += '<button class="build button secondary" rel="10"><span>TS10 (emp10)</span></button>';
+			builds += '<button class="build button secondary" rel="1" title="Miliciens"><span>TS1</span></button>';
+			builds += '<button class="build button secondary" rel="1bis" title="Archers"><span>TS1 (emp1)</span></button>';
+			builds += '<button class="build button secondary" rel="2" title="v1 Miliciens - v2 Archers"><span>TS2 (emp2)</span></button>';
+			builds += '<button class="build button secondary" rel="3" title="v1 Miliciens - v2 Archers"><span>TS3 (emp3)</span></button>';
+			builds += '<button class="build button secondary" rel="4" title="v1 Miliciens - v2 Archers"><span>TS4 (emp4)</span></button>';
+			builds += '<button class="build button secondary" rel="5" title="v1 Miliciens - v2 Archers"><span>TS5 (emp5)</span></button>';
+			builds += '<button class="build button secondary" rel="5bis" title="v1 Miliciens - v2 Archers"><span>TS5 (emp6)</span></button>';
+			builds += '<button class="build button secondary" rel="6" title="v1 Miliciens - v2 Archers"><span>TS6 (emp6)</span></button>';
+			builds += '<button class="build button secondary" rel="6bis" title="v1 Miliciens - v2 Archers"><span>TS6 (emp7)</span></button>';
+			builds += '<button class="build button secondary" rel="7" title="v1 Miliciens - v2 Archers"><span>TS7 (emp8)</span></button>';
+			builds += '<button class="build button secondary" rel="8" title="v1 Miliciens + Balistes - v2 Archers + Balistes"><span>TS8 (emp9)</span></button>';
+			builds += '<button class="build button secondary" rel="8bis" title="v1 Miliciens + Balistes - v2 Archers + Balistes"><span>TS8 (emp9)</span></button>';
+			builds += '<button class="build button secondary" rel="9" title="v1 Miliciens + Balistes - v2 Archers + Balistes"><span>TS9 (emp 9)</span></button>';
+			builds += '<button class="build button secondary" rel="9bis" title="v1 Miliciens + Balistes - v2 Archers + Balistes"><span>TS9 (emp10)</span></button>';
+			builds += '<button class="build button secondary" rel="9rd" title="v1 Miliciens + Balistes - v2 Archers + Balistes"><span>TS9 (emp10)</span></button>';
+			builds += '<button class="build button secondary" rel="10" title="v1 Miliciens - v2 Archers"><span>TS10 (emp10)</span></button>';
+			builds += '<button class="build button secondary" rel="10bis" title="v1 Miliciens + Catapulte - v2 Archers + Catapultes"><span>TS10 (emp10)</span></button>';
 			builds += '</div>';
 			builds += '</fieldset>';
 
@@ -5438,6 +5500,51 @@ jQuery(document).ready(function(){
 		KOCFIA.wilderness.getBuildsConf = function($level, $uChoices, $uQuantity, rel){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getBuildsConf function');
 			switch( rel ){
+				case '1':
+						$level.val( 1 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('160');
+					break;
+				case '1bis':
+						$level.val( 1 );
+						//wave 1
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('80');
+					break;
+				case '2':
+						$level.val( 2 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('5');
+						//wave 2
+						$uChoices.eq(1).val('unt2');
+						$uQuantity.eq(1).val('1');
+						$uChoices.eq(2).val('unt6');
+						$uQuantity.eq(2).val('130');
+					break;
+				case '3':
+						$level.val( 3 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('10');
+						//wave 2
+						$uChoices.eq(1).val('unt2');
+						$uQuantity.eq(1).val('1');
+						$uChoices.eq(2).val('unt6');
+						$uQuantity.eq(2).val('520');
+					break;
+				case '4':
+						$level.val( 4 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('20');
+						//wave 2
+						$uChoices.eq(1).val('unt2');
+						$uQuantity.eq(1).val('1');
+						$uChoices.eq(2).val('unt6');
+						$uQuantity.eq(2).val('1.6k');
+					break;
 				case '5':
 						$level.val( 5 );
 						//wave 1
@@ -5449,6 +5556,17 @@ jQuery(document).ready(function(){
 						$uChoices.eq(2).val('unt6');
 						$uQuantity.eq(2).val('2.5k');
 					break;
+				case '5bis':
+						$level.val( 5 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('50');
+						//wave 2
+						$uChoices.eq(1).val('unt2');
+						$uQuantity.eq(1).val('1');
+						$uChoices.eq(2).val('unt6');
+						$uQuantity.eq(2).val('2.2k');
+					break;
 				case '6':
 						$level.val( 6 );
 						//wave 1
@@ -5459,6 +5577,17 @@ jQuery(document).ready(function(){
 						$uQuantity.eq(1).val('1');
 						$uChoices.eq(2).val('unt6');
 						$uQuantity.eq(2).val('4.2k');
+					break;
+				case '6bis':
+						$level.val( 6 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('100');
+						//wave 2
+						$uChoices.eq(1).val('unt2');
+						$uQuantity.eq(1).val('1');
+						$uChoices.eq(2).val('unt6');
+						$uQuantity.eq(2).val('3k');
 					break;
 				case '7':
 						$level.val( 7 );
@@ -5484,6 +5613,20 @@ jQuery(document).ready(function(){
 						$uQuantity.eq(2).val('800');
 						$uChoices.eq(3).val('unt6');
 						$uQuantity.eq(3).val('10k');
+					break;
+				case '8bis':
+						$level.val( 8 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('299');
+						$uChoices.eq(1).val('unt10');
+						$uQuantity.eq(1).val('1');
+
+						//wave 2
+						$uChoices.eq(2).val('unt10');
+						$uQuantity.eq(2).val('900');
+						$uChoices.eq(3).val('unt6');
+						$uQuantity.eq(3).val('9k');
 					break;
 				case '9':
 						$level.val( 9 );
@@ -5513,6 +5656,20 @@ jQuery(document).ready(function(){
 						$uChoices.eq(3).val('unt6');
 						$uQuantity.eq(3).val('15k');
 					break;
+				case '9rd':
+						$level.val( 9 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('599');
+						$uChoices.eq(1).val('unt10');
+						$uQuantity.eq(1).val('1');
+
+						//wave 2
+						$uChoices.eq(2).val('unt10');
+						$uQuantity.eq(2).val('900');
+						$uChoices.eq(3).val('unt6');
+						$uQuantity.eq(3).val('13k');
+					break;
 				case '10':
 						$level.val( 10 );
 						//wave 1
@@ -5524,6 +5681,20 @@ jQuery(document).ready(function(){
 						$uQuantity.eq(1).val('1');
 						$uChoices.eq(2).val('unt6');
 						$uQuantity.eq(2).val('69999');
+					break;
+				case '10bis':
+						$level.val( 10 );
+						//wave 1
+						$uChoices.eq(0).val('unt2');
+						$uQuantity.eq(0).val('1199');
+						$uChoices.eq(1).val('unt12');
+						$uQuantity.eq(1).val('1');
+
+						//wave 2
+						$uChoices.eq(2).val('unt12');
+						$uQuantity.eq(2).val('2.5k');
+						$uChoices.eq(3).val('unt6');
+						$uQuantity.eq(3).val('35k');
 					break;
 				default: break;
 			}
@@ -5540,10 +5711,95 @@ jQuery(document).ready(function(){
 			builds += '<legend>Attaques types</legend>';
 			builds += '<div>';
 			builds += '<button class="build button secondary" rel="empty"><span>Vide</span></button>';
+			builds += '<button class="build button secondary" rel="1"><span>CB1</span></button>';
+			builds += '<button class="build button secondary" rel="2"><span>CB2</span></button>';
+			builds += '<button class="build button secondary" rel="3"><span>CB3</span></button>';
+			builds += '<button class="build button secondary" rel="4"><span>CB4</span></button>';
+			builds += '<button class="build button secondary" rel="5"><span>CB5</span></button>';
+			builds += '<button class="build button secondary" rel="6"><span>CB6</span></button>';
+			builds += '<button class="build button secondary" rel="7"><span>CB7</span></button>';
+			builds += '<button class="build button secondary" rel="7bis"><span>CB7 (emp 11)</span></button>';
+			builds += '<button class="build button secondary" rel="8"><span>CB8</span></button>';
+			builds += '<button class="build button secondary" rel="9"><span>CB9</span></button>';
+			builds += '<button class="build button secondary" rel="10"><span>CB10</span></button>';
 			builds += '</div>';
 			builds += '</fieldset>';
 
 			return builds;
+		};
+
+		KOCFIA.barbarian.getBuildsConf = function($level, $uChoices, $uQuantity, rel){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getBuildsConf function');
+			switch( rel ){
+				case '1':
+						$level.val( 1 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('250');
+						$uChoices.eq(1).val('unt9');
+						$uQuantity.eq(1).val('50');
+					break;
+				case '2':
+						$level.val( 2 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('2.1k');
+						$uChoices.eq(1).val('unt9');
+						$uQuantity.eq(1).val('40');
+					break;
+				case '3':
+						$level.val( 3 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('3.5k');
+						$uChoices.eq(1).val('unt9');
+						$uQuantity.eq(1).val('50');
+					break;
+				case '4':
+						$level.val( 4 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('7.5k');
+						$uChoices.eq(1).val('unt9');
+						$uQuantity.eq(1).val('75');
+					break;
+				case '5':
+						$level.val( 5 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('16k');
+					break;
+				case '6':
+						$level.val( 6 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('40k');
+					break;
+				case '7':
+						$level.val( 7 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('47k');
+					break;
+				case '7bis':
+						$level.val( 7 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('40k');
+					break;
+				case '8':
+						$level.val( 8 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('90k');
+						$uChoices.eq(1).val('unt12');
+						$uQuantity.eq(1).val('1k');
+					break;
+				case '9':
+						$level.val( 9 );
+						$uChoices.eq(0).val('unt6');
+						$uQuantity.eq(0).val('45k');
+						$uChoices.eq(1).val('unt10');
+						$uQuantity.eq(1).val('45k');
+					break;
+				case '10':
+						$level.val( 10 );
+						$uChoices.eq(0).val('unt12');
+						$uQuantity.eq(0).val('125k');
+					break;
+				default: break;
+			}
 		};
 
 	/* SCOUT */
@@ -5576,332 +5832,287 @@ jQuery(document).ready(function(){
 		};
 
 		KOCFIA.scout.getHeader = function(){
-			var header = '<div class="infos cf">';
-			header += '<span class="ui-icon ui-icon-info"></span>';
-			header += '<span><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
-			header += '<label for="'+ this.module +'-panel-automatic">éclairages automatiques</label></span>';
-			header += '</div>';
+			var header = '<div class="infos">';
+				header += '<span class="buttonset"><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
+				header += '<label for="'+ this.module +'-panel-automatic">éclairages automatiques</label></span>';
+				header += '<button class="button secondary history-toggle" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"><span>Historique</span></button>';
+				header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+				header += '</div>';
 
-			return header;
-		};
+				return header;
+			};
 
-		KOCFIA.scout.getForm = function(){
-			var form = '<h3>Configurer un éclairage</h3>';
-			form += '<div class="attack-form">';
+			KOCFIA.scout.getForm = function(){
+				var form = '<h3>Configurer un éclairage</h3>';
+				form += '<div class="attack-form">';
 
-			//form message area
-			form += '<ul class="message"></ul>';
+				//form message area
+				form += '<ul class="message"></ul>';
 
-			//form edit inputs
-			form += '<input type="hidden" class="edit-attackId" name="attackId" value="" autocomplete="off" />';
+				//form edit inputs
+				form += '<input type="hidden" class="edit-attackId" name="attackId" value="" autocomplete="off" />';
 
-			var checkBoxes = '', units = '', keeps = '', cityKey, city;
-			form += '<table>';
-			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
-				cityKey = KOCFIA.citiesKey[i];
-				city = KOCFIA.cities[cityKey];
+				var checkBoxes = '', units = '', keeps = '', cityKey, city;
+				form += '<table>';
+				for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+					cityKey = KOCFIA.citiesKey[i];
+					city = KOCFIA.cities[cityKey];
 
-				checkBoxes += '<td class="buttonset">';
-				checkBoxes += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="checkbox" class="city-choice" autocomplete="off" required>';
-				checkBoxes += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.label +'</label>';
-				checkBoxes += '</td>';
+					checkBoxes += '<td class="buttonset">';
+					checkBoxes += '<input id="kocfia-'+ this.module +'-'+ cityKey +'" name="city" value="'+ cityKey +'" type="checkbox" class="city-choice" autocomplete="off" required>';
+					checkBoxes += '<label for="kocfia-'+ this.module +'-'+ cityKey +'">'+ city.label +'</label>';
+					checkBoxes += '</td>';
 
-				units += '<td><input class="unit-qty" name="'+ cityKey +'" type="text" autocomplete="off" required pattern="'+ Shared.numberRegExp +'" placeholder="1.2k"></td>';
-				keeps += '<td><input class="unit-qty" name="'+ cityKey +'" type="text" autocomplete="off" pattern="'+ Shared.numberRegExp +'" placeholder="1.2k"></td>';
-			}
-			form += '<tbody>';
-			form += '<tr class="cities"><td>Depuis :</td>';
-			form += checkBoxes + '</tr>';
-			form += '<tr class="quantities"><td>Quantité :</td>';
-			form += units + '</tr>';
-			form += '<tr class="keeps"><td>Conserver :</td>';
-			form += keeps + '</tr>';
-			form += '<tr><td>Garder :</td>';
-			form += '<td colspan="99">';
-			form += '<input type="number" class="rallypointSlot" required min="0" max="11" value="0"> place(s) dans le point de ralliement</td>';
-			form += '</td></tr>';
-			form += '<tr><td>Coordonnées :</td>';
-			form += '<td colspan="99">';
-			form += '<textarea name="coords" autocomplete="off" required placeholder="123,456 séparées par un espace ou un retour à la ligne"></textarea>';
-			form += '</td></tr>';
-			form += '</tbody></table>';
+					units += '<td><input class="unit-qty" name="'+ cityKey +'" type="text" autocomplete="off" required pattern="'+ Shared.numberRegExp +'" placeholder="1.2k"></td>';
+					keeps += '<td><input class="unit-qty" name="'+ cityKey +'" type="text" autocomplete="off" pattern="'+ Shared.numberRegExp +'" placeholder="1.2k"></td>';
+				}
+				form += '<tbody>';
+				form += '<tr class="cities"><td>Depuis :</td>';
+				form += checkBoxes + '</tr>';
+				form += '<tr class="quantities"><td>Quantité :</td>';
+				form += units + '</tr>';
+				form += '<tr class="keeps"><td>Conserver :</td>';
+				form += keeps + '</tr>';
+				form += '<tr><td>Garder :</td>';
+				form += '<td colspan="99">';
+				form += '<input type="number" class="rallypointSlot" required min="0" max="11" value="0"> place(s) dans le point de ralliement</td>';
+				form += '</td></tr>';
+				form += '<tr><td>Coordonnées :</td>';
+				form += '<td colspan="99">';
+				form += '<small>Format: x,y. Soit en ligne séparées par un espace, soit en colonne séparées par un retour à la ligne.</small>';
+				form += '<textarea name="coords" autocomplete="off" required placeholder="x,y"></textarea>';
+				form += '</td></tr>';
+				form += '</tbody></table>';
 
-			//buttons
-			form += '<button class="launch">Lancer</button>';
-			form += '<button class="save">Sauvegarder</button>';
-			form += '<button class="saveAndLaunch">Sauvegarder et Lancer</button>';
-			form += '<button class="reset">Annuler</button>';
+				//buttons
+				form += '<button class="launch button secondary">Lancer</button>';
+				form += '<button class="save button modify">Sauvegarder</button>';
+				form += '<button class="saveAndLaunch button modify">Sauvegarder et Lancer</button>';
+				form += '<button class="reset button danger">Annuler</button>';
 
-			form += '</div>';
+				form += '</div>';
 
-			return form;
-		};
+				return form;
+			};
 
-		KOCFIA.scout.getListsTemplate = function(){
-			//attacks list
-				var onGoing = '<h3>Eclairage en cours</h3>';
-				onGoing += '<div class="attack-list ongoing">';
-				onGoing += '<table><thead><tr>';
-				onGoing += '<th class="trip">Détails</th>';
-				onGoing += '<th class="coords">Coordonnées</th>';
-				onGoing += '<th class="current">Cible</th>';
-				onGoing += '<th class="info">Info</th>';
-				onGoing += '</tr></thead>';
-				onGoing += '<tbody></tbody></table></div>';
+			KOCFIA.scout.getListsTemplate = function(){
+				//attacks list
+					var onGoing = '<h3>Eclairage en cours</h3>';
+					onGoing += '<div class="attack-list ongoing">';
+					onGoing += '<table><thead><tr>';
+					onGoing += '<th class="trip">Détails</th>';
+					onGoing += '<th class="coords">Coordonnées</th>';
+					onGoing += '<th class="current">Cible</th>';
+					onGoing += '<th class="info">Info</th>';
+					onGoing += '</tr></thead>';
+					onGoing += '<tbody></tbody></table></div>';
 
-			//attacks plan
-				var savedPlans = '<h3>Eclairages enregistrées</h3>';
-				savedPlans += '<div class="attack-list saved">';
-				savedPlans += '<table><thead><tr>';
-				savedPlans += '<th class="trip">Détails</th>';
-				savedPlans += '<th class="coords">Coordonnées</th>';
-				savedPlans += '</tr></thead>';
-				savedPlans += '<tbody></tbody></table></div>';
+				//attacks plan
+					var savedPlans = '<h3>Eclairages enregistrées</h3>';
+					savedPlans += '<div class="attack-list saved">';
+					savedPlans += '<table><thead><tr>';
+					savedPlans += '<th class="trip">Détails</th>';
+					savedPlans += '<th class="coords">Coordonnées</th>';
+					savedPlans += '</tr></thead>';
+					savedPlans += '<tbody></tbody></table></div>';
 
-			return savedPlans + onGoing;
-		};
+				return savedPlans + onGoing;
+			};
 
-		KOCFIA.scout.addSectionListeners = function(){
-			var module = this.module;
-			KOCFIA.$confPanel.find('#kocfia-'+ this.module)
-				.on('change', '#'+ module +'-panel-automatic', function(){
-					var checked = $(this).prop('checked');
-					$('#'+ module +'-automatic').prop('checked', checked).change();
-					if( checked ) KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
-				})
-				//reset form
-				.on('click', '.reset', function(){
-					var $inputs = KOCFIA[ module ].$form.find('input');
+			KOCFIA.scout.addSectionListeners = function(){
+				var module = this.module;
+				KOCFIA.$confPanel.find('#kocfia-'+ this.module)
+					.on('change', '#'+ module +'-panel-automatic', function(){
+						var checked = $(this).prop('checked');
+						$('#'+ module +'-automatic').prop('checked', checked).change();
+						if( checked ) KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
+					})
+					//reset form
+					.on('click', '.reset', function(){
+						var $inputs = KOCFIA[ module ].$form.find('input');
 
-					$inputs.filter('[type="checkbox"]').prop('checked', false);
-					$inputs.filter('[type="text"]').val('');
-					KOCFIA[ module ].$form.find('textarea').val('');
-				})
-				//launch
-				.on('click', '.launch', function(){
-					if( KOCFIA.conf[ module ].active ){
+						$inputs.filter('[type="checkbox"]').prop('checked', false);
+						$inputs.filter('[type="text"]').val('');
+						KOCFIA[ module ].$form.find('textarea').val('');
+					})
+					//launch
+					.on('click', '.launch', function(){
+						if( KOCFIA.conf[ module ].active ){
+							var result = KOCFIA[ module ].planAttack();
+							if( result.errors.length ){
+								KOCFIA[ module ].$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
+							} else {
+								KOCFIA[ module ].$form.find('.message').empty();
+								result.attack.id = Math.floor( Date.timestamp() );
+								KOCFIA[ module ].launchAttack( result.attack );
+
+								//open ongoing accordion
+								KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
+							}
+						} else {
+							alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
+						}
+					})
+					//save
+					.on('click', '.save, .saveAndLaunch', function(){
 						var result = KOCFIA[ module ].planAttack();
 						if( result.errors.length ){
 							KOCFIA[ module ].$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 						} else {
 							KOCFIA[ module ].$form.find('.message').empty();
+
+							var editAttackId = KOCFIA[ module ].$form.find('.edit-attackId').val();
+							if( editAttackId !== '' ){
+								KOCFIA[ module ].deletePlan( editAttackId, false );
+
+								KOCFIA[ module ].$saved.find('tbody')
+									.find('tr').filter('[data-attack="'+ editAttackId +'"]')
+									.remove();
+							}
+
 							result.attack.id = Math.floor( Date.timestamp() );
-							KOCFIA[ module ].launchAttack( result.attack );
 
-							//open ongoing accordion
-							KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
-						}
-					} else {
-						alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
-					}
-				})
-				//save
-				.on('click', '.save, .saveAndLaunch', function(){
-					var result = KOCFIA[ module ].planAttack();
-					if( result.errors.length ){
-						KOCFIA[ module ].$form.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
-					} else {
-						KOCFIA[ module ].$form.find('.message').empty();
-
-						var editAttackId = KOCFIA[ module ].$form.find('.edit-attackId').val();
-						if( editAttackId !== '' ){
-							KOCFIA[ module ].deletePlan( editAttackId, false );
+							KOCFIA[ module ].attacks[ result.attack.id ] = result.attack;
 
 							KOCFIA[ module ].$saved.find('tbody')
-								.find('tr').filter('[data-attack="'+ editAttackId +'"]')
-								.remove();
-						}
+								.append( KOCFIA[ module ].attackInfo( result.attack ) );
 
-						result.attack.id = Math.floor( Date.timestamp() );
+							KOCFIA[ module ].storeAttacks();
 
-						KOCFIA[ module ].attacks[ result.attack.id ] = result.attack;
-
-						KOCFIA[ module ].$saved.find('tbody')
-							.append( KOCFIA[ module ].attackInfo( result.attack ) );
-
-						KOCFIA[ module ].storeAttacks();
-
-						if( KOCFIA.conf[ module ].active && $(this).hasClass('saveAndLaunch') ){
-							KOCFIA[ module ].launchAttack( result.attack );
-
-							//open ongoing accordion
-							KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
-						} else {
-							//open saved accordion
-							KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 1);
-						}
-					}
-				})
-				//attack plan delete
-				.on('click', '.delete', function(){
-					if( confirm('Etes-vous sûr ?') ){
-						var $this = $(this),
-							$tr = $(this).closest('tr'),
-							attackId = $tr.data('attack');
-
-						KOCFIA[ module ].deletePlan( attackId, true );
-						$tr.remove();
-					}
-				})
-				//attack plan edit and duplication
-				.on('click', '.edit, .duplicate', function(){
-					//reset
-					var $inputs = KOCFIA[ module ].$form.find('input');
-
-					$inputs.filter('[type="checkbox"]').prop('checked', false);
-					$inputs.filter('[type="text"]').val('');
-					KOCFIA[ module ].$form.find('textarea').val('');
-
-					var $this = $(this),
-						$tr = $this.closest('tr'),
-						attackId = $tr.data('attack'),
-						attack = KOCFIA[ module ].attacks[ attackId ],
-						cityKey;
-
-					if( attack ){
-						if( $this.hasClass('edit') ){
-							KOCFIA[ module ].$form.find('.edit-attackId').val( attack.id );
-						}
-
-						var $checkBoxes = KOCFIA[ module ].$form.find('.cities').find('input');
-						$checkBoxes.each(function(){
-							var $cb = $(this);
-							if( $.inArray($cb.val(), attack.cities) > -1 ) $cb.prop('checked', true);
-						});
-
-						var $quantities = KOCFIA[ module ].$form.find('.quantities').find('input');
-						$quantities.each(function(){
-							cityKey = this.name;
-							if( attack.units.hasOwnProperty( cityKey ) ){
-								this.value = Shared.format(attack.units[ cityKey ]);
-							}
-						});
-
-						var $keeps = KOCFIA[ module ].$form.find('.keeps').find('input');
-						$keeps.each(function(){
-							cityKey = this.name;
-							if( attack.units.hasOwnProperty( cityKey ) ){
-								this.value = Shared.format(attack.keeps[ cityKey ]);
-							}
-						});
-
-						KOCFIA[ module ].$form.find('textarea').val(attack.coords.join("\n"));
-						KOCFIA[ module ].$form.find('.rallypointSlot').val(attack.rpSlot);
-
-						//open form accordion
-						KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 0);
-					} else {
-						alert('Plan d\'attaque introuvable.');
-					}
-				})
-				//stop on next round
-				.on('click', '.stop', function(){
-					if( confirm('Etes-vous sûr ?') ){
-						$(this).closest('tr').data('stop', 1);
-					}
-				})
-				//manual launch
-				.on('click', '.charge', function(){
-					if( KOCFIA.conf[ module ].active ){
-						if( !KOCFIA.conf[ module ].automatic ){
-							var $tr = $(this).hide().closest('tr');
-							var attack = KOCFIA[ module ].attacks[ $tr.data('attack') ];
-							if( attack ){
-								attack.coordIndex = 0;
-								attack.marching = [];
-								KOCFIA[ module ].refreshOngoingInfo( attack, false );
-								KOCFIA[ module ].launchAttack( attack );
+							if( KOCFIA.conf[ module ].active && $(this).hasClass('saveAndLaunch') ){
+								KOCFIA[ module ].launchAttack( result.attack );
 
 								//open ongoing accordion
 								KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
 							} else {
-								alert('Plan d\'attaque introuvable.');
+								//open saved accordion
+								KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 1);
+							}
+						}
+					})
+					//attack plan delete
+					.on('click', '.delete', function(){
+						if( confirm('Etes-vous sûr ?') ){
+							var $this = $(this),
+								$tr = $(this).closest('tr'),
+								attackId = $tr.data('attack');
+
+							KOCFIA[ module ].deletePlan( attackId, true );
+							$tr.remove();
+						}
+					})
+					//attack plan edit and duplication
+					.on('click', '.edit, .duplicate', function(){
+						//reset
+						var $inputs = KOCFIA[ module ].$form.find('input');
+
+						$inputs.filter('[type="checkbox"]').prop('checked', false);
+						$inputs.filter('[type="text"]').val('');
+						KOCFIA[ module ].$form.find('textarea').val('');
+
+						var $this = $(this),
+							$tr = $this.closest('tr'),
+							attackId = $tr.data('attack'),
+							attack = KOCFIA[ module ].attacks[ attackId ],
+							cityKey;
+
+						if( attack ){
+							if( $this.hasClass('edit') ){
+								KOCFIA[ module ].$form.find('.edit-attackId').val( attack.id );
+							}
+
+							var $checkBoxes = KOCFIA[ module ].$form.find('.cities').find('input');
+							$checkBoxes.each(function(){
+								var $cb = $(this);
+								if( $.inArray($cb.val(), attack.cities) > -1 ) $cb.prop('checked', true);
+							});
+
+							var $quantities = KOCFIA[ module ].$form.find('.quantities').find('input');
+							$quantities.each(function(){
+								cityKey = this.name;
+								if( attack.units.hasOwnProperty( cityKey ) ){
+									this.value = Shared.format(attack.units[ cityKey ]);
+								}
+							});
+
+							var $keeps = KOCFIA[ module ].$form.find('.keeps').find('input');
+							$keeps.each(function(){
+								cityKey = this.name;
+								if( attack.units.hasOwnProperty( cityKey ) ){
+									this.value = Shared.format(attack.keeps[ cityKey ]);
+								}
+							});
+
+							KOCFIA[ module ].$form.find('textarea').val(attack.coords.join("\n"));
+							KOCFIA[ module ].$form.find('.rallypointSlot').val(attack.rpSlot);
+
+							//open form accordion
+							KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 0);
+						} else {
+							alert('Plan d\'attaque introuvable.');
+						}
+					})
+					//stop on next round
+					.on('click', '.stop', function(){
+						if( confirm('Etes-vous sûr ?') ){
+							var $this = $(this),
+								attackId = $this.closest('tr').data('stop', 1).data('attack');
+							$this.toggleClass('stop trash secondary danger')
+								.find('span').html('Enlever').attr('title', 'Supprime le suivi de cette configuration');
+
+							KOCFIA[ module ].$saved.find('tr').filter('[data-attack="'+ attackId +'"]').find('.charge').show();
+						}
+					})
+					//manual launch
+					.on('click', '.charge', function(){
+						if( KOCFIA.conf[ module ].active ){
+							if( !KOCFIA.conf[ module ].automatic ){
+								var $tr = $(this).hide().closest('tr');
+								var attack = KOCFIA[ module ].attacks[ $tr.data('attack') ];
+								if( attack ){
+									attack.coordIndex = 0;
+									attack.marching = [];
+									KOCFIA[ module ].refreshOngoingInfo( attack, false );
+									KOCFIA[ module ].launchAttack( attack );
+
+									//open ongoing accordion
+									KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 2);
+								} else {
+									alert('Plan d\'attaque introuvable.');
+								}
+							} else {
+								alert('Le mode automatic est activé. Le lancement d\'attaque sauvegardée est bloqué (attaque déjà en cours).');
 							}
 						} else {
-							alert('Le mode automatic est activé. Le lancement d\'attaque sauvegardée est bloqué (attaque déjà en cours).');
+							alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
 						}
-					} else {
-						alert('Le module n\'est pas actif. Les lancements d\'attaques sont bloqués.');
-					}
-				})
-				//remove ongoing attack info line
-				.on('click', '.trash', function(){
-					$(this).closest('tr').remove();
-				});
-		};
+					})
+					//remove ongoing attack info line
+					.on('click', '.trash', function(){
+						var $tr = $(this).closest('tr');
+						$('#kocfia-'+ this.module +'-history').append( $tr.find('.info').find('div') );
+						$tr.remove();
+					});
+			};
 
-		KOCFIA.scout.deletePlan = function( attackId, save ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' deletePlan function', attackId, save);
-			delete KOCFIA[ this.module ].attacks[ attackId ];
+			KOCFIA.scout.deletePlan = function( attackId, save ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' deletePlan function', attackId, save);
+				delete KOCFIA[ this.module ].attacks[ attackId ];
 
-			if( save ) KOCFIA[ this.module ].storeAttacks();
-		};
+				if( save ) KOCFIA[ this.module ].storeAttacks();
+			};
 
-		KOCFIA.scout.attackInfo = function( attack ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' attackInfo function', attack);
+			KOCFIA.scout.attackInfo = function( attack ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' attackInfo function', attack);
 
-			var code = '<tr data-attack="'+ attack.id +'">';
-			code += '<td class="trip">';
-			var cityKey, city, i;
-			for( i = 0; i < attack.cities.length; i += 1 ){
-				cityKey= attack.cities[i];
-				city = KOCFIA.cities[ cityKey ];
-
-				code += '<div>';
-				code += city.label + ': ';
-				code += Shared.format( attack.units[ cityKey ] );
-				if( attack.keeps.hasOwnProperty(cityKey) ){
-					code += ' ('+ Shared.format( attack.keeps[ cityKey ] ) +')';
-				}
-				code += '</div>';
-			}
-			code += '<div>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '') +' dans le point de ralliement</div>';
-			code += '<div>'+ attack.coords.length +' coordonnée(s)</div>';
-			code += '<div><span class="ui-icon ui-icon-flag charge" title="Lancer"></span>';
-			code += '<span class="ui-icon ui-icon-pencil edit" title="Modifier"></span>';
-			code += '<span class="ui-icon ui-icon-copy duplicate" title="Dupliquer"></span>';
-			code += '<span class="ui-icon ui-icon-trash delete" title="Supprimer"></span>';
-			code += '</div></td>';
-			code += '<td class="coords">' + Shared.mapLink( attack.coords ) +'</td>';
-			code += '</tr>';
-
-			return code;
-		};
-
-		KOCFIA.scout.listAttacks = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' listAttacks function');
-			var $tbody = KOCFIA[ this.module ].$saved.find('tbody');
-			$tbody.empty();
-
-			var code = '', a;
-			if( !$.isEmptyObject(KOCFIA[ this.module ].attacks) ){
-				for( a in KOCFIA[ this.module ].attacks ){
-					if( KOCFIA[ this.module ].attacks.hasOwnProperty(a) ){
-						code += KOCFIA[ this.module ].attackInfo( KOCFIA[ this.module ].attacks[a] );
-					}
-				}
-			}
-
-			$tbody.append( code );
-		};
-
-		KOCFIA.scout.refreshOngoingInfo = function(attack, noButton, msg){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' refreshOngoingInfo function');
-
-			var $tr = KOCFIA[ this.module ].$ongoing.find('tr').filter('[data-attack="'+ attack.id +'"]'),
-				$trash = $tr.find('.trash');
-			if( $tr.length === 0 || $trash.length ){
-				if( $trash.length ) $tr.remove();
-				var code = '<tr data-attack="'+ attack.id +'" data-stop="0">';
+				var code = '<tr data-attack="'+ attack.id +'">';
 				code += '<td class="trip">';
-
 				var cityKey, city, i;
 				for( i = 0; i < attack.cities.length; i += 1 ){
-					cityKey = attack.cities[i];
+					cityKey= attack.cities[i];
 					city = KOCFIA.cities[ cityKey ];
 
 					code += '<div>';
-					if( i === 0 ) code += '<span class="ui-icon ui-icon-cancel stop" title="Arrêter l\'éclairage"></span>';
 					code += city.label + ': ';
 					code += Shared.format( attack.units[ cityKey ] );
 					if( attack.keeps.hasOwnProperty(cityKey) ){
@@ -5910,137 +6121,189 @@ jQuery(document).ready(function(){
 					code += '</div>';
 				}
 				code += '<div>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '') +'</div>';
-				code += '</td><td class="coords">' + Shared.mapLink( attack.coords ) +'</td>';
-				code += '<td class="current"></td>';
-				code += '<td class="info"></td>';
+				code += '<div>'+ attack.coords.length +' coordonnée(s)</div>';
+				code += '<div><button class="charge button" title="Lancer cette configuration"><span>Lancer</span></button></div>';
+				code += '<div><button class="edit button secondary" title="Modifier cette configuration"><span>Modifier</span></button>';
+				code += '<button class="duplicate button secondary" title="Créer une nouvelle configuration à partir de celle-ci"><span>Copier</span></button></div>';
+				code += '<div><button class="delete button danger" title="Supprimer cette configuration"><span>Supprimer</span></button>';
+				code += '</div></td>';
+				code += '<td class="coords">' + Shared.mapLink( attack.coords ) +'</td>';
 				code += '</tr>';
 
-				$tr = $( code );
+				return code;
+			};
 
-				KOCFIA[ this.module ].$ongoing.find('tbody').append( $tr );
-			}
+			KOCFIA.scout.listAttacks = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' listAttacks function');
+				var $tbody = KOCFIA[ this.module ].$saved.find('tbody');
+				$tbody.empty();
 
-			//attack stopped
-			if( noButton ){
-				$tr.find('.stop').removeClass('stop').removeClass('ui-icon-cancel')
-					.addClass('trash').addClass('ui-icon-trash')
-					.attr('title', 'Enlever les informations.');
-
-				//show the manual launch button
-				KOCFIA[ this.module ].$saved.find('tr').filter('[data-attack="'+ attack.id +'"]').find('.charge').show();
-			} else {
-				$tr.find('.current').html( Shared.mapLink( attack.coords[ attack.coordIndex ] ) + '<br>' + (attack.coordIndex + 1) + 'e / ' + attack.coords.length );
-			}
-
-			//clean old messages
-			var timestamp = Date.timestamp(),
-				obsolete = 5 * 60 * 1000,
-				msgTimestamp;
-			$msg = $tr.find('.info').find('div');
-			if( $msg.length > 9 ){
-				var $tmp = $msg.filter(':lt(9)'); //keep one for td width
-				$tmp.slideUp(500, function(){ $tmp.remove(); });
-			}
-			$msg.each(function(){
-				var $div = $(this);
-				msgTimestamp = $div.data('timestamp');
-				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-					$div.remove();
-				}
-			});
-
-			if( !$.isEmptyObject(msg) ){
-				$tr.find('.info').append('<div data-timestamp="'+ timestamp +'">'+ msg +'</div>');
-			}
-		};
-
-		KOCFIA.scout.planAttack = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' planAttack function');
-			var errors = [],
-				regexp = /[^0-9, ]/,
-				rule;
-
-			//check form
-				var $checkBoxes = KOCFIA[ this.module ].$form.find('.cities').find('input').filter(':checked'),
-					cities = $checkBoxes.map(function(){ return this.value; }).get();
-
-				if( cities.length === 0 ){
-					errors.push('Au moins une cité sélectionnée est nécessaire.');
-				}
-
-				var $quantities = KOCFIA[ this.module ].$form.find('.quantities').find('input'),
-					units = {}, q, cityKey;
-				$quantities.each(function(i, input){
-					q = $.trim( input.value );
-					if( q !== '' ){
-						q = Shared.decodeFormat( q );
-						cityKey = input.name;
-
-						if( q === false || q < 1 ){
-							errors.push('Au moins une des quantités pour éclairer est invalide.');
-						} else {
-							units[ cityKey ] = q;
+				var code = '', a;
+				if( !$.isEmptyObject(KOCFIA[ this.module ].attacks) ){
+					for( a in KOCFIA[ this.module ].attacks ){
+						if( KOCFIA[ this.module ].attacks.hasOwnProperty(a) ){
+							code += KOCFIA[ this.module ].attackInfo( KOCFIA[ this.module ].attacks[a] );
 						}
 					}
-				});
-
-				if( $.isEmptyObject(units) ){
-					errors.push('Au moins une quantité pour éclairer est nécessaire.');
 				}
 
-				var $keeps = KOCFIA[ this.module ].$form.find('.keeps').find('input'),
-					keeps = {};
-				$keeps.each(function(i, input){
-					q = $.trim( input.value );
-					if( q !== '' ){
-						q = Shared.decodeFormat( q );
-						cityKey = input.name;
+				$tbody.append( code );
+			};
 
-						if( q === false || q < 1 ){
-							errors.push('Au moins une des quantités à conserver est invalide.');
-						} else {
-							keeps[ cityKey ] = q;
+			KOCFIA.scout.refreshOngoingInfo = function(attack, stopped, msg){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' refreshOngoingInfo function');
+
+				var $tr = KOCFIA[ this.module ].$ongoing.find('tr').filter('[data-attack="'+ attack.id +'"]'),
+					$trash = $tr.find('.trash');
+				if( $tr.length === 0 || $trash.length ){
+					if( $trash.length ) $tr.remove();
+					var code = '<tr data-attack="'+ attack.id +'" data-stop="0">';
+					code += '<td class="trip">';
+
+					var cityKey, city, i;
+					code += '<div>';
+					code += '<button class="stop button danger" title="Arrêter l\'éclairage"><span>Arrêter</span></button>';
+					code += '</div>';
+					for( i = 0; i < attack.cities.length; i += 1 ){
+						cityKey = attack.cities[i];
+						city = KOCFIA.cities[ cityKey ];
+
+						code += '<div>';
+						code += city.label + ': ';
+						code += Shared.format( attack.units[ cityKey ] );
+						if( attack.keeps.hasOwnProperty(cityKey) ){
+							code += ' ('+ Shared.format( attack.keeps[ cityKey ] ) +')';
 						}
+						code += '</div>';
 					}
-				});
+					code += '<div>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '') +'</div>';
+					code += '</td><td class="coords">' + Shared.mapLink( attack.coords ) +'</td>';
+					code += '<td class="current"></td>';
+					code += '<td class="info"></td>';
+					code += '</tr>';
 
-				//coords
-				var coord,
-					coords = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') );
-				if( coords.length === 0 ){
-					errors.push('Au moins une coordonnée est requise.');
-				} else if( regexp.test( coords ) ){
-					errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne ou un espace entre deux coordonnées.');
+					$tr = $( code );
+
+					KOCFIA[ this.module ].$ongoing.find('tbody').append( $tr );
+				}
+
+				//attack stopped
+				if( !stopped ){
+					$tr.find('.current').html( Shared.mapLink( attack.coords[ attack.coordIndex ] ) + '<br>' + (attack.coordIndex + 1) + 'e / ' + attack.coords.length );
 				} else {
-					coords = coords.split(' ');
-					var wrongGPS = false, i, length = coords.length;
-					for( i = 0; i < length; i += 1 ){
-						coord = coords[i].split(',');
-						if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
-							wrongGPS = true;
+					$tr.find('.stop').toggleClass('stop trash secondary danger')
+						.find('span').html('Enlever').attr('title', 'Supprime le suivi de cette configuration');
+				}
+
+				//clean old messages
+				var timestamp = Date.timestamp(),
+					obsolete = 5 * 60 * 1000,
+					msgTimestamp;
+				$msg = $tr.find('.info').find('div');
+				if( $msg.length > 9 ){
+					//keep one for td width
+					KOCFIA[ this.module ].$history.append( $msg.filter(':lt(9)') );
+				}
+				$msg.each(function(){
+					var $div = $(this);
+					msgTimestamp = $div.data('timestamp');
+					if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
+						KOCFIA[ this.module ].$history.append( $div );
+					}
+				});
+
+				if( !$.isEmptyObject(msg) ){
+					$tr.find('.info').append('<div data-timestamp="'+ timestamp +'">'+ msg +'</div>');
+				}
+			};
+
+			KOCFIA.scout.planAttack = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' planAttack function');
+				var errors = [],
+					regexp = /[^0-9, ]/,
+					rule;
+
+				//check form
+					var $checkBoxes = KOCFIA[ this.module ].$form.find('.cities').find('input').filter(':checked'),
+						cities = $checkBoxes.map(function(){ return this.value; }).get();
+
+					if( cities.length === 0 ){
+						errors.push('Au moins une cité sélectionnée est nécessaire.');
+					}
+
+					var $quantities = KOCFIA[ this.module ].$form.find('.quantities').find('input'),
+						units = {}, q, cityKey;
+					$quantities.each(function(i, input){
+						q = $.trim( input.value );
+						if( q !== '' ){
+							q = Shared.decodeFormat( q );
+							cityKey = input.name;
+
+							if( q === false || q < 1 ){
+								errors.push('Au moins une des quantités pour éclairer est invalide.');
+							} else {
+								units[ cityKey ] = q;
+							}
+						}
+					});
+
+					if( $.isEmptyObject(units) ){
+						errors.push('Au moins une quantité pour éclairer est nécessaire.');
+					}
+
+					var $keeps = KOCFIA[ this.module ].$form.find('.keeps').find('input'),
+						keeps = {};
+					$keeps.each(function(i, input){
+						q = $.trim( input.value );
+						if( q !== '' ){
+							q = Shared.decodeFormat( q );
+							cityKey = input.name;
+
+							if( q === false || q < 1 ){
+								errors.push('Au moins une des quantités à conserver est invalide.');
+							} else {
+								keeps[ cityKey ] = q;
+							}
+						}
+					});
+
+					//coords
+					var coord,
+						coords = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') );
+					if( coords.length === 0 ){
+						errors.push('Au moins une coordonnée est requise.');
+					} else if( regexp.test( coords ) ){
+						errors.push('Pour les coordonnées, veuillez respecter le format x,y avec un saut de ligne ou un espace entre deux coordonnées.');
+					} else {
+						coords = coords.split(' ');
+						var wrongGPS = false, i, length = coords.length;
+						for( i = 0; i < length; i += 1 ){
+							coord = coords[i].split(',');
+							if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
+								wrongGPS = true;
+							}
+						}
+						if( wrongGPS ){
+							errors.push('Au moins une des coordonnées est erronée.');
 						}
 					}
-					if( wrongGPS ){
-						errors.push('Au moins une des coordonnées est erronée.');
+
+					//rally point free slot
+					var rps = $.trim(KOCFIA[ this.module ].$form.find('.rallypointSlot').val());
+					if( rps === '' ) rps = 0;
+					rps = parseInt( rps, 10 );
+					if( isNaN(rps) || rps < 0 ){
+						errors.push('Le nombre de places à conserver dans le point de ralliement doit être un chiffre positif.');
 					}
-				}
 
-				//rally point free slot
-				var rps = $.trim(KOCFIA[ this.module ].$form.find('.rallypointSlot').val());
-				if( rps === '' ) rps = 0;
-				rps = parseInt( rps, 10 );
-				if( isNaN(rps) || rps < 0 ){
-					errors.push('Le nombre de places à conserver dans le point de ralliement doit être un chiffre positif.');
-				}
+					if( errors.length ){
+						errors = errors.unique();
+					}
 
-				if( errors.length ){
-					errors = errors.unique();
-				}
+					rule = {cities: cities, units: units, keeps: keeps, category: this.module, type: 'scout', rpSlot: rps, coords: coords};
 
-				rule = {cities: cities, units: units, keeps: keeps, category: this.module, type: 'scout', rpSlot: rps, coords: coords};
-
-			return {attack: rule, errors: errors};
-		};
+				return {attack: rule, errors: errors};
+			};
 
 	/* NOTEPAD */
 		KOCFIA.notepad = {
@@ -6079,14 +6342,14 @@ jQuery(document).ready(function(){
 			code += '<br><label for="kocfia-notepad-note-text">';
 			code += '<span class="charsLeft">1000 caractères restant</span>Contenu&nbsp;:&nbsp;</label>';
 			code += '<textarea id="kocfia-notepad-note-text"></textarea>';
-			code += '<br /><button class="save">Enregistrer</button>';
-			code += '<button class="cancel">Annuler</button>';
+			code += '<br /><button class="save button modify">Enregistrer</button>';
+			code += '<button class="cancel button secondary">Annuler</button>';
 
 			code += '<h3>Notes :</h3><ul class="notes">';
 			for( var n in KOCFIA.notepad.notes ){
 				if( KOCFIA.notepad.notes.hasOwnProperty(n) ){
 					var note = KOCFIA.notepad.notes[n];
-					code += '<li><button data-id="'+ n +'">'+ note.name +'</button><span class="ui-icon ui-icon-trash"></span></li>';
+					code += '<li><button class="button secondary" data-id="'+ n +'"><span>'+ note.name +'</span></button><span class="ui-icon ui-icon-trash"></span></li>';
 				}
 			}
 			code += '</ul></div></div>';
@@ -6140,7 +6403,7 @@ jQuery(document).ready(function(){
 							KOCFIA.notepad.notes[ id ] = {name: name, text: text};
 							KOCFIA.notepad.storeNotes();
 
-							KOCFIA.notepad.$notes.append( '<li><button data-id="'+ id +'">'+ name +'</button><span class="ui-icon ui-icon-trash"></span></li>' );
+							KOCFIA.notepad.$notes.append( '<li><button class="button secondary" data-id="'+ id +'"><span>'+ name +'</span></button><span class="ui-icon ui-icon-trash"></span></li>' );
 						}
 					} else {
 						alert('Nom de la note invalide.');
@@ -6365,7 +6628,7 @@ jQuery(document).ready(function(){
 			code += '<input type="checkbox" id="kocfia-map-type-plain" value="50" />';
 			code += '<label for="kocfia-map-type-plain">Plaine</label></div>';
 
-			code += '<div class="status buttonset"><label>&Eacute;tat&nbsp;:&nbsp;</label>';
+			code += '<div class="status buttonset"><label>État&nbsp;:&nbsp;</label>';
 			code += '<input type="checkbox" id="kocfia-map-status" />';
 			code += '<label for="kocfia-map-status">Libre</label></div>';
 
@@ -7069,10 +7332,10 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-formation').html('');
 
-			var form = '<div class="infos cf">';
-			form += '<span class="ui-icon ui-icon-info"></span>';
-			form += '<span><input type="checkbox" id="formation-panel-automatic" '+ (KOCFIA.conf.formation.automatic ? 'checked' : '') +' autocomplete="off" />';
+			var form = '<div class="infos">';
+			form += '<span class="buttonset"><input type="checkbox" id="formation-panel-automatic" '+ (KOCFIA.conf.formation.automatic ? 'checked' : '') +' autocomplete="off" />';
 			form += '<label for="formation-panel-automatic">formations automatiques</label></span>';
+			form += '<button class="button secondary help-toggle"><span>Aide</span></button>';
 			form += '</div><h3>Configurations</h3>';
 			form += '<div class="forms">';
 
@@ -7080,7 +7343,11 @@ jQuery(document).ready(function(){
 				form += '<h3>Formations automatiques</h3>';
 				form += '<div class="automatic-train-form">';
 				form += '<ul class="message"></ul>';
-				form += '<button class="save">Enregistrer</button>';
+				form += '<div class="cf">';
+				form += '<button class="save button modify">Enregistrer</button>';
+				form += '<label for="kocfia-formation-rule-name">Nom de la configuration : </label>';
+				form += '<input type="text" id="kocfia-formation-rule-name" autocomplete="off">';
+				form += '</div>';
 
 				var i, j, u, d, f, res,
 					cLength = KOCFIA.citiesKey.length,
@@ -7091,17 +7358,12 @@ jQuery(document).ready(function(){
 					form += KOCFIA.formation.getFieldset( KOCFIA.citiesKey[i], true );
 				}
 
-				form += '<button class="save">Enregistrer</button>';
+				form += '<div class="cf"><button class="save button modify">Enregistrer</button></div>';
 				form += '</div>';
 
 			//automatic formation rules save / charge form
-				form += '<h3>Commutateur de règles automatiques</h3>';
+				form += '<h3>Configurations enregistrées</h3>';
 				form += '<div class="rule-switch-form">';
-				form += '<table><tbody><tr><td>';
-				form += '<label for="kocfia-formation-rule-name">Nom de la règle : </label>';
-				form += '<input type="text" id="kocfia-formation-rule-name" autocomplete="off">';
-				form += '<button class="train-rule-save">Sauvegarder</button>';
-				form += '</td><td>';
 				form += '<select id="kocfia-formation-rule-switch">';
 				form += '<option value="">Choisir</option>';
 				for( var ruleName in KOCFIA.formation.savedRules ){
@@ -7110,9 +7372,9 @@ jQuery(document).ready(function(){
 					}
 				}
 				form += '</select>';
-				form += '<button class="train-rule-load">Activer</button>';
-				form += '<button class="train-rule-delete">Supprimer</button>';
-				form += '</td></tr></tbody></table></div>';
+				form += '<button class="button modifiy train-rule-load">Activer</button>';
+				form += '<button class="button danger train-rule-delete">Supprimer</button>';
+				form += '</div>';
 
 			//manual formation form
 				form += '<h3>Formations manuelles</h3>';
@@ -7129,8 +7391,8 @@ jQuery(document).ready(function(){
 				}
 				form += '</select>';
 				form += '<div class="dynamic"></div>';
-				form += '<button class="launch">Former</button>';
-				form += '<button class="reset">Annuler</button>';
+				form += '<button class="launch button modify">Former</button>';
+				form += '<button class="reset button danger">Annuler</button>';
 				form += '</fieldset>';
 				form += '</div>';
 
@@ -7139,49 +7401,36 @@ jQuery(document).ready(function(){
 			//formations list
 				var onGoing = '<h3>Formations en cours';
 				onGoing += '<span class="nextIteration"></span>';
+				onGoing += '<button class="button secondary history-toggle" title="Historique des formations"><span>Historique</span></button>';
 				onGoing += '</h3><div class="formation-list ongoing">';
-				onGoing += '<table><thead><tr><th class="unit">Formations</th><th class="fort">Fortifications</th><th class="info">Infos</th></tr></thead>';
+				var cels = '', headers = '', toggles = '';
 				for( i = 0; i < cLength; i += 1 ){
 					cityKey = KOCFIA.citiesKey[i];
 					city = KOCFIA.cities[cityKey];
 
-					onGoing += '<tbody data-city="'+ cityKey +'"><tr class="toggle"><th colspan="3">';
-					onGoing += '<span class="ui-icon ui-icon-triangle-1-se"></span>';
-					onGoing += city.label +'</th></tr></tbody>';
+					toggles += '<input type="checkbox" value="'+ cityKey +'" id="kocfia-formation-ongoing-unit-'+ cityKey +'" checked>';
+					toggles += '<label for="kocfia-formation-ongoing-unit-'+ cityKey +'" title="Cacher la colonne de '+ city.label +'">'+ city.label +'</label>';
+					headers += '<th data-city="'+ cityKey +'">'+ city.roman +'</th>';
+					cels += '<td data-city="'+ cityKey +'"></td>';
 				}
-				onGoing += '</table></div>';
+				onGoing += '<div class="unit-toggles buttonset">'+ toggles +'</div>';
+				onGoing += '<table class="unit"><thead><tr>'+ headers +'<th>Suivi</th></tr></thead>';
+				onGoing += '<tbody><tr>'+ cels +'<td class="info"></td></tr></tbody></table></div>';
 
-			//help
-				var help = '<div id="kocfia-formation-help" class="help" title="Aide formation">';
-				help += '<h4>Formation automatique</h4><ul>';
-				help += '<li>Cocher les villes ou la formation automatique sera utilisée</li>';
-				help += '<li>Une ville décochée sera omise lors des tentatives de formations automatique</li>';
-				help += '<li>Choisir une unité ou une fortification ou les deux</li>';
-				help += '<li>Spécifier une quantité de troupe minimum et maximum</li>';
-				help += '<li>Spécifier une vitesse (optionnel, par défaut vitesse de base)</li>';
-				help += '<li>Choisir le pourcentage de travailleurs utilisables (optionnel, par défaut 0%)</li>';
-				help += '<li>Spécifier une quantité de fortification</li>';
-				help += '<li>Spécifier les quantités de ressources à conserver (optionnel)</li>';
-				help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
-				help += '<li>Cliquer sur enregistrer</li>';
-				help += '<li>Si les formations automatiques sont actives, la modification sera prise en compte dès la prochaine tentative de formation</li>';
-				help += '<li>Douze minutes entre chaque tentative</li>';
-				help += '</ul><h4>Commutateur</h4><ul>';
-				help += '<li>La configuration automatique en cours peut être sauvegardée</li>';
-				help += '<li>Une configuration sauvegardée peut être chargée ou supprimée</li>';
-				help += '<li>Une configuration chargée sera prise en compte à la prochaine tentative de formation (pour les villes cochées)</li>';
-				help += '<li>Une configuration supprimée n\'affecte pas la configuration en cours</li>';
-				help += '</ul><h4>Formation manuelle</h4><ul>';
-				help += '<li>Choisir une ville</li>';
-				help += '<li>Le remplissage du formulaire se fait comme pour les formations automatiques</li>';
-				help += '<li>Cliquer sur Former</li>';
-				help += '<li>La file d\'attente sera remplie jusqu\'à ne plus avoir de place dans les casernes ou d\'avoir une erreur</li>';
-				help += '<li>20 secondes entre chaque tentative</li>';
-				help += '</ul></div>';
+				onGoing += '<h3>Fortifications en cours';
+				onGoing += '<button class="button secondary history-toggle" title="Historique des fortifications"><span>Historique</span></button>';
+				onGoing += '</h3><div class="formation-list ongoing">';
+				onGoing += '<div class="fort-toggles buttonset">'+ toggles +'</div>';
+				onGoing += '<table class="fort"><thead><tr>'+ headers +'<th>Suivi</th></tr></thead>';
+				onGoing += '<tbody><tr>'+ cels +'<td class="info"></td></tr></tbody></table></div>';
 
-			$section.append( form + onGoing + help );
+			var help = KOCFIA.formation.getHelp();
+			var history = '<div id="kocfia-formation-history" class="history unit" title="Historique des formations"></div>';
+			var history = '<div id="kocfia-formation-history" class="history fort" title="Historique des fortifications"></div>';
 
-			KOCFIA.formation.addFormListeners();
+			$section.append( form + onGoing + help + history );
+
+			KOCFIA.formation.addSectionListeners();
 
 			KOCFIA.formation.$forms = $section.find('.forms');
 			KOCFIA.formation.$autoForm = $section.find('.automatic-train-form');
@@ -7190,6 +7439,10 @@ jQuery(document).ready(function(){
 			KOCFIA.formation.$ruleSwitch = $section.find('#kocfia-formation-rule-switch');
 			KOCFIA.formation.$ruleName = $section.find('#kocfia-formation-rule-name');
 			KOCFIA.formation.$nextTrainBar = $section.find('.nextIteration');
+			KOCFIA.formation.$unitHistory = $section.find('.history.unit');
+			KOCFIA.formation.$fortHistory = $section.find('.history.fort');
+			KOCFIA.formation.$unitInfo = KOCFIA.formation.$ongoing.find('.unit').find('.info');
+			KOCFIA.formation.$fortInfo = KOCFIA.formation.$ongoing.find('.fort').find('.info');
 
 			KOCFIA.formation.$autoForm.find('.train-max, .train-qty').trigger('change');
 
@@ -7205,7 +7458,7 @@ jQuery(document).ready(function(){
 			.accordion('activate', false);
 		};
 
-		KOCFIA.formation.addFormListeners = function(){
+		KOCFIA.formation.addSectionListeners = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation modPanel function');
 			KOCFIA.$confPanel.find('#kocfia-formation')
 				.on('change', '#formation-panel-automatic', function(){
@@ -7217,10 +7470,26 @@ jQuery(document).ready(function(){
 					if( result.errors.length ){
 						KOCFIA.formation.$autoForm.find('.message').html( '<li>' + result.errors.join('</li><li>') + '</li>' );
 					} else {
-						KOCFIA.formation.$autoForm.find('.message').empty();
-
 						KOCFIA.formation.rules = result.rules;
+						KOCFIA.formation.$autoForm.find('.message').empty();
 						KOCFIA.formation.storeRules();
+
+						var name = $.trim( KOCFIA.formation.$ruleName.val() ),
+							code = '<option value="">Choisir</option>',
+							ruleName;
+						if( name !== '' && KOCFIA.formation.savedRules.hasOwnProperty( name ) ){
+							if( confirm('Ecraser la configuration portant ce nom ?') ){
+								KOCFIA.formation.savedRules[ name ] = $.extend({}, KOCFIA.formation.rules);
+								KOCFIA.formation.storeSavedRules();
+
+								for( ruleName in KOCFIA.formation.savedRules ){
+									if( KOCFIA.formation.savedRules.hasOwnProperty( ruleName ) ){
+										code += '<option value="'+ ruleName +'">'+ ruleName +'</option>';
+									}
+								}
+								KOCFIA.formation.$ruleSwitch.empty().append( code );
+							}
+						}
 					}
 				})
 				//city change in manual formation
@@ -7396,7 +7665,7 @@ jQuery(document).ready(function(){
 					}
 				})
 				//training and fortification cancel
-				.on('click', '.ongoing .unit .ui-icon-trash', function(){
+				.on('click', '.ongoing .unit .ui-icon-trash, .ongoing .unit .recursive', function(){
 					var $this = $(this),
 						cityKey = $this.closest('tbody').data('city'),
 						$info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ cityKey +'"]').find('.info');
@@ -7426,7 +7695,7 @@ jQuery(document).ready(function(){
 						KOCFIA.formation.cancelTraining( null, null, null, $this.attr('rel'), 3 );
 					}
 				})
-				.on('click', '.ongoing .fort .ui-icon-trash', function(){
+				.on('click', '.ongoing .fort .ui-icon-trash, .ongoing .fort .recursive', function(){
 					var $this = $(this),
 						cityKey = $this.closest('tbody').data('city'),
 						$info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ cityKey +'"]').find('.info');
@@ -7458,7 +7727,7 @@ jQuery(document).ready(function(){
 					}
 				})
 				//keep values copy accross fieldsets
-				.on('click', '.ui-icon-copy', function(){
+				.on('click', '.copy', function(){
 					var $this = $(this),
 						$fieldset = $this.closest('fieldset'),
 						$other = $fieldset.siblings('fieldset'),
@@ -7511,28 +7780,6 @@ jQuery(document).ready(function(){
 						$other.find('.train-qty').trigger('change');
 					}
 				})
-				//current rule save
-				.on('click', '.train-rule-save', function(){
-					var name = $.trim( KOCFIA.formation.$ruleName.val() ),
-						code = '<option value="">Choisir</option>',
-						ruleName;
-					if( name !== '' ){
-						if( KOCFIA.formation.savedRules.hasOwnProperty( name ) ){
-							alert('Nom déjà utilisé');
-						} else {
-							KOCFIA.formation.$ruleName.val('');
-							KOCFIA.formation.savedRules[ name ] = $.extend({}, KOCFIA.formation.rules);
-							KOCFIA.formation.storeSavedRules();
-
-							for( ruleName in KOCFIA.formation.savedRules ){
-								if( KOCFIA.formation.savedRules.hasOwnProperty( ruleName ) ){
-									code += '<option value="'+ ruleName +'">'+ ruleName +'</option>';
-								}
-							}
-							KOCFIA.formation.$ruleSwitch.empty().append( code );
-						}
-					}
-				})
 				//saved rule load
 				.on('click', '.train-rule-load', function(){
 					var choice = KOCFIA.formation.$ruleSwitch.val(),
@@ -7545,9 +7792,11 @@ jQuery(document).ready(function(){
 							code += KOCFIA.formation.getFieldset( KOCFIA.citiesKey[i], true );
 						}
 
-						KOCFIA.formation.$autoForm.find('button').eq(0).after( code );
+						KOCFIA.formation.$autoForm.find('div').eq(0).after( code );
 
 						KOCFIA.formation.$forms.accordion('activate', false).accordion('activate', 0);
+
+						KOCFIA.formation.$form.find('#kocfia-formation-rule-name').val( choice );
 
 						KOCFIA.formation.$ruleSwitch.val('');
 						KOCFIA.formation.storeRules();
@@ -7569,17 +7818,15 @@ jQuery(document).ready(function(){
 						}
 					}
 				})
-				//toggle
-				.on('click', '.toggle', function(){
+				//city toggles
+				.on('change', '.unit-toggles input, .fort-toggles input', function(){
 					var $this = $(this),
-						$triangle = $this.find('.ui-icon'),
-						$trs = $this.parent().find('tr').filter(':gt(0)');
-						opened = !$triangle.hasClass('ui-icon-triangle-1-se');
+						cityKey = $this.val(),
+						checked = $this.prop('checked'),
+						target = ($this.closest('div').hasClass('unit-toggles') ? '.unit' : '.fort'),
+						$table = KOCFIA.formation.$ongoing.find(target);
 
-					if( opened ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
-					else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
-
-					$trs.toggle( opened );
+					$table.find('th, td').filter('[data-city="'+ cityKey +'"]').toggle( checked );
 				});
 		};
 
@@ -7632,6 +7879,38 @@ jQuery(document).ready(function(){
 			//Shared.stopProgress( KOCFIA.formation.$nextTrainBar );
 		};
 
+		KOCFIA.formation.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation getHelp function');
+			var help = '<div id="kocfia-formation-help" class="help" title="Aide formation">';
+			help += '<h4>Formation automatique</h4><ul>';
+			help += '<li>La configuration automatique en cours peut être sauvegardée en lui attribuant un nom</li>';
+			help += '<li>Cocher les villes ou la formation automatique sera utilisée</li>';
+			help += '<li>Une ville décochée sera omise lors des tentatives de formations automatique</li>';
+			help += '<li>Choisir une unité ou une fortification ou les deux</li>';
+			help += '<li>Spécifier une quantité de troupe minimum et maximum</li>';
+			help += '<li>Spécifier une vitesse (optionnel, par défaut vitesse de base)</li>';
+			help += '<li>Choisir le pourcentage de travailleurs utilisables (optionnel, par défaut 0%)</li>';
+			help += '<li>Spécifier une quantité de fortification</li>';
+			help += '<li>Spécifier les quantités de ressources à conserver (optionnel)</li>';
+			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
+			help += '<li>Cliquer sur enregistrer</li>';
+			help += '<li>Si les formations automatiques sont actives, la modification sera prise en compte dès la prochaine tentative de formation</li>';
+			help += '<li>Douze minutes entre chaque tentative</li>';
+			help += '</ul><h4>Configurations enregistrées</h4><ul>';
+			help += '<li>Une configuration sauvegardée peut être chargée ou supprimée</li>';
+			help += '<li>Une configuration chargée sera prise en compte à la prochaine tentative de formation (pour les villes cochées)</li>';
+			help += '<li>Une configuration supprimée n\'affecte pas la configuration en cours</li>';
+			help += '</ul><h4>Formation manuelle</h4><ul>';
+			help += '<li>Choisir une ville</li>';
+			help += '<li>Le remplissage du formulaire se fait comme pour les formations automatiques</li>';
+			help += '<li>Cliquer sur Former</li>';
+			help += '<li>La file d\'attente sera remplie jusqu\'à ne plus avoir de place dans les casernes ou d\'avoir une erreur</li>';
+			help += '<li>20 secondes entre chaque tentative</li>';
+			help += '</ul></div>';
+
+			return help;
+		};
+
 		KOCFIA.formation.getFieldset = function( cityKey, withWrapper ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation getFieldset function');
 			var city = KOCFIA.cities[ cityKey ],
@@ -7650,7 +7929,6 @@ jQuery(document).ready(function(){
 			}
 
 			form += '<p class="unit">';
-			if( withWrapper ) form += '<span class="ui-icon ui-icon-copy" rel="unit"></span>';
 			//choose unit (check building requirements and tech requirements)
 				form += '<label for="kocfia-formation-auto-'+ cityKey +'-unit">Unités&nbsp;:&nbsp;</label>';
 				form += '<select id="kocfia-formation-auto-'+ cityKey +'-unit" class="train-unit" name="unit" autocomplete="off">';
@@ -7662,7 +7940,7 @@ jQuery(document).ready(function(){
 						if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
 						else if( name == 'Wagon de Ravitaillement' ) name = 'Wagon';
 
-						form += '<option value="'+ u +'" '+ ( rule && rule.troop == u ? 'selected' : '' ) +'>'+ name +'</option>';
+						form += '<option value="'+ u +'" '+ ( withWrapper && rule && rule.troop == u ? 'selected' : '' ) +'>'+ name +'</option>';
 					}
 				}
 				form += '</select>';
@@ -7670,18 +7948,18 @@ jQuery(document).ready(function(){
 			//choose pack size min and max
 				form += '<label for="kocfia-formation-auto-'+ cityKey +'-min">Min&nbsp;:&nbsp;</label>';
 				form += '<input type="text" id="kocfia-formation-auto-'+ cityKey +'-min" name="min" class="train-min" pattern="'+ Shared.numberRegExp +'" placeholder="1.2k" ';
-				form += 'autocomplete="off" value="'+ ( rule && rule.min >= 0 ? Shared.format(rule.min) : '' ) +'">';
+				form += 'autocomplete="off" value="'+ ( withWrapper && rule && rule.min >= 0 ? Shared.format(rule.min) : '' ) +'">';
 				form += '<label for="kocfia-formation-auto-'+ cityKey +'-max">Max&nbsp;:&nbsp;</label>';
 				form += '<input type="text" id="kocfia-formation-auto-'+ cityKey +'-max" name="max" class="train-max" pattern="'+ Shared.numberRegExp +'" placeholder="1.2k" ';
-				form += 'autocomplete="off" value="'+ ( rule && rule.max >= 0 ? Shared.format(rule.max) : '' ) +'">';
-				form += '<button class="train-unit-max">max</button>';
+				form += 'autocomplete="off" value="'+ ( withWrapper && rule && rule.max >= 0 ? Shared.format(rule.max) : '' ) +'">';
+				form += '<button class="train-unit-max button secondary">Maximum</button>';
 
 			//choose speed
 				form += '<br /><label for="kocfia-formation-auto-'+ cityKey +'-speed">Vitesse&nbsp;:&nbsp;</label>';
 				form += '<select id="kocfia-formation-auto-'+ cityKey +'-speed" name="speed" class="train-speed" autocomplete="off">';
 				form += '<option value="0">Normal</option>';
-				form += '<option value="1"'+ ( rule && rule.speed == 1 ? 'selected' : '' ) +'>5-15% (coût x2)</option>';
-				form += '<option value="2"'+ ( rule && rule.speed == 2 ? 'selected' : '' ) +'>10-25% (coût x4)</option>';
+				form += '<option value="1"'+ ( withWrapper && rule && rule.speed == 1 ? 'selected' : '' ) +'>5-15% (coût x2)</option>';
+				form += '<option value="2"'+ ( withWrapper && rule && rule.speed == 2 ? 'selected' : '' ) +'>10-25% (coût x4)</option>';
 				form += '</select>';
 
 			//choose boost
@@ -7700,10 +7978,10 @@ jQuery(document).ready(function(){
 				form += '<label for="kocfia-formation-auto-'+ cityKey +'-workforce">Travailleurs&nbsp;:&nbsp;</label>';
 				form += '<select id="kocfia-formation-auto-'+ cityKey +'-workforce" name="workforce" class="train-workforce" autocomplete="off">';
 				form += '<option value="0">0%</option>';
-				form += '<option value="0.25" '+ ( rule && rule.workforce == 0.25 ? 'selected' : '' ) +'>25%</option>';
-				form += '<option value="0.50" '+ ( rule && rule.workforce == 0.50 ? 'selected' : '' ) +'>50%</option>';
-				form += '<option value="0.75" '+ ( rule && rule.workforce == 0.75 ? 'selected' : '' ) +'>75%</option>';
-				form += '<option value="1"'+ ( rule && rule.workforce == 1 ? 'selected' : '' ) +'>100%</option>';
+				form += '<option value="0.25" '+ ( withWrapper && rule && rule.workforce == 0.25 ? 'selected' : '' ) +'>25%</option>';
+				form += '<option value="0.50" '+ ( withWrapper && rule && rule.workforce == 0.50 ? 'selected' : '' ) +'>50%</option>';
+				form += '<option value="0.75" '+ ( withWrapper && rule && rule.workforce == 0.75 ? 'selected' : '' ) +'>75%</option>';
+				form += '<option value="1"'+ ( withWrapper && rule && rule.workforce == 1 ? 'selected' : '' ) +'>100%</option>';
 				form += '</select>';
 
 			//duration
@@ -7713,30 +7991,28 @@ jQuery(document).ready(function(){
 
 			//defenses
 				form += '<p class="defense">';
-				if( withWrapper ) form += '<span class="ui-icon ui-icon-copy" rel="defense"></span>';
 				form += '<label for="kocfia-formation-auto-'+ cityKey +'-defense">Défenses&nbsp;:&nbsp;</label>';
 				form += '<select id="kocfia-formation-auto-'+ cityKey +'-defense" name="defense" class="train-defense" autocomplete="off">';
 				form += '<option value=""></option>';
 				for( d in defenses ){
 					if( defenses.hasOwnProperty(d) ){
 						f = d.replace(/frt/, 'fort');
-						form += '<option value="'+ d +'" '+ ( rule && rule.defense == d ? 'selected' : '' ) +'>';
+						form += '<option value="'+ d +'" '+ ( withWrapper && rule && rule.defense == d ? 'selected' : '' ) +'>';
 						form += window.fortcost[d][0] +'</option>';
 					}
 				}
 				form += '</select>';
 				form += '<label for="kocfia-formation-auto-'+ cityKey +'-qty">Quantité&nbsp;:&nbsp;</label>';
 				form += '<input type="text" id="kocfia-formation-auto-'+ cityKey +'-quantity" name="quantity" class="train-quantity" pattern="'+ Shared.numberRegExp +'" placeholder="1.2k" ';
-				form += 'autocomplete="off" value="'+ ( rule && rule.quantity >= 0  ? rule.quantity : '' ) +'">';
-				form += '<button class="train-defense-max">max</button>';
+				form += 'autocomplete="off" value="'+ ( withWrapper && rule && rule.quantity >= 0  ? rule.quantity : '' ) +'">';
+				form += '<button class="button secondary train-defense-max">Maximum</button>';
 				form += '<label>Durée&nbsp;:&nbsp;</label>';
 				form += '<output class="def-duration"></output>';
 				form += '</p>';
 
 			//keep resources ? (in easy format, with validation)
 				form += '<p class="train-keep">';
-				if( withWrapper ) form += '<span class="ui-icon ui-icon-copy" rel="keep"></span>';
-				form += '<label>Garder&nbsp;:&nbsp;</label>';
+				form += '<label>Conserver&nbsp;:&nbsp;</label>';
 				for( j = 0; j < rLength; j += 1 ){
 					res = KOCFIA.resources[j];
 					if( res.name != 'resource5' ){
@@ -7745,11 +8021,19 @@ jQuery(document).ready(function(){
 						form += '</label>';
 						form += '<input type="text" id="kocfia-formation-auto-'+ cityKey +'-keep-'+ res.name +'" ';
 						form += 'name="'+ res.key +'" autocomplete="off" pattern="'+ Shared.numberRegExp +'" placeholder="1.2k" ';
-						form += 'value="'+ ( rule && rule.keep[ res.key ] >= 0 ? Shared.format(rule.keep[ res.key ]) : '' ) +'">';
+						form += 'value="'+ ( withWrapper && rule && rule.keep[ res.key ] >= 0 ? Shared.format(rule.keep[ res.key ]) : '' ) +'">';
 					}
 				}
 			form += '</p>';
-			if( withWrapper ) form += '</fieldset>';
+			if( withWrapper ){
+				form += '<div class="cf">';
+				form += 'Appliquer ces réglages dans les autres villes : ';
+				form += '<button class="copy button secondary" rel="unit"><span>Unités</span></button>';
+				form += '<button class="copy button secondary" rel="defense"><span>Défenses</span></button>';
+				form += '<button class="copy button secondary" rel="keep"><span>Conservation</span></button>';
+				form += '</div>';
+				form += '</fieldset>';
+			}
 
 			return form;
 		};
@@ -8001,49 +8285,70 @@ jQuery(document).ready(function(){
 
 		KOCFIA.formation.listCityFormations = function( cityKey ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation listCityFormations function', cityKey);
-			var $tbody = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ cityKey +'"]'),
-				$tr = $tbody.find('tr').filter(':gt(0)'),
-				updateOnly = false;
-			if( $tr.length ) updateOnly = true;
-			var code = '', formations = '', fortifications = '',
-				i, formation, unit,
-				queue = window.seed.queue_unt[cityKey];
+			var $unit = KOCFIA.formation.$ongoing.find('.unit'),
+				$unitTh = $unit.find('th').filter('[data-city="'+ cityKey +'"]'),
+				$unitTd = $unit.find('td').filter('[data-city="'+ cityKey +'"]'),
+				$fort =  KOCFIA.formation.$ongoing.find('.fort'),
+				$fortTh = $fort.find('th').filter('[data-city="'+ cityKey +'"]'),
+				$fortTd = $fort.find('td').filter('[data-city="'+ cityKey +'"]'),
+				code = '', formations = '', fortifications = '',
+				i, formation, unit, queue, duration, smallDuration,
+				timestamp = Date.timestamp();
 			//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
 
 			//troops
-			formations += '<div class="global">Supprimer &ge; 2e <span class="ui-icon ui-icon-trash recursive"></span></div>';
+			queue = window.seed.queue_unt[cityKey];
+			if( queue.length > 0 ){
+				formations += '<div class="global"><button class="button danger recursive" title="Supprimer les formations de cette ville à partir de la deuxième incluse">';
+				formations += '<span>Supprimer &ge; 2e</span></button></div>';
+			}
 			formations += '<ol class="formations">';
 			for( i = 0; i < queue.length; i += 1 ){
 				formation = queue[i];
 				unit = KOCFIA.unitInfo[ 'unt' + formation[0] ];
 
-				formations += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
-				formations += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
-				formations += '<span class="unit">'+ Shared.format( formation[1] ) +'</span>';
-				formations += '<span class="time">'+ Shared.readableDuration( formation[3] - formation[2] ) +'</span></li>';
+				formations += '<li title="'+ unit.label +' - '+ Shared.readable( formation[1] ) +' - '+ Shared.readableDuration(parseFloat(formation[3]) - parseFloat(formation[2])) +'">';
+				formations += '<span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
+				formations += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"> ';
+				formations += '<span class="unit">'+ Shared.format( formation[1] ) +'</span></li>';
 			}
+			if( queue.length > 0 ){
+				duration = Shared.readableDuration( parseFloat(formation[3]) - timestamp );
+				smallDuration = duration.split(' ');
+				if( smallDuration.length >= 2 ) smallDuration = smallDuration.slice(0, 2).join(' ');
+				else smallDuration = duration;
+
+				$unitTh.attr('title', duration).find('span').remove().end().append('<span>'+ smallDuration +'</span>');
+			} else $unitTh.attr('title', '').find('span').remove();
+			$unitTd.html( formations );
 			formations += '</ol>';
 
 			//defenses
-			fortifications += '<div class="global">Supprimer &ge; 2e <span class="ui-icon ui-icon-trash recursive"></span></div>';
-			fortifications += '<ol class="defenses">';
 			queue = window.seed.queue_fort[cityKey];
+			if( queue.length > 0 ){
+				fortifications += '<div class="global"><button class="button danger recursive" title="Supprimer les formations de cette ville à partir de la deuxième incluse">';
+				fortifications += '<span>Supprimer &ge; 2e</span></button></div>';
+			}
+			fortifications += '<ol class="defenses">';
 			for( i = 0; i < queue.length; i += 1 ){
 				formation = queue[i];
 				unit = KOCFIA.fortInfo[ 'frt' + formation[0] ];
 
-				fortifications += '<li><span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
-				fortifications += '<img src="'+ unit.icon +'" alt="'+ unit.label +'" title="'+ unit.label +'" />&nbsp;';
-				fortifications += '<span class="unit">'+ Shared.format( formation[1] ) +'</span>';
-				fortifications += Shared.readableDuration( formation[3] - formation[2] ) +'</li>';
+				fortifications += '<li title="'+ unit.label +' - '+ Shared.readable( formation[1] ) +' - '+ Shared.readableDuration(parseFloat(formation[3]) - parseFloat(formation[2])) +'">';
+				fortifications += '<span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
+				fortifications += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"> ';
+				fortifications += '<span class="unit">'+ Shared.format( formation[1] ) +'</span></li>';
 			}
+			if( queue.length > 0 ){
+				duration = Shared.readableDuration( parseFloat(formation[3]) - timestamp );
+				smallDuration = duration.split(' ');
+				if( smallDuration.length >= 2 ) smallDuration = smallDuration.slice(0, 2).join(' ');
+				else smallDuration = duration;
+
+				$fortTh.attr('title', duration).find('span').remove().end().append('<span>'+ smallDuration +'</span>');
+			} else $fortTh.attr('title', '').find('span').remove();
+			$fortTd.html( fortifications );
 			fortifications += '</ol>';
-
-			if( updateOnly ){
-				$tr.find('.unit').html( formations );
-				$tr.find('.fort').html( fortifications );
-
-			} else $tbody.append( '<tr><td class="unit">' + formations + '</td><td class="fort">' + fortifications + '</td><td class="info"></td></tr>' );
 		};
 
 		KOCFIA.formation.getTrainableUnits = function( cityKey ){
@@ -8133,11 +8438,11 @@ jQuery(document).ready(function(){
 				resources = window.seed.resources[cityKey],
 				cityStat = window.seed.citystats[cityKey];
 
-			if( speed === 0 ){
+			if( speed == '0' ){
 				mod = 1;
-			} else if( speed === 1 ){
+			} else if( speed == '1' ){
 				mod = ~~ (1 * window.gambleOptionResults1[2]);
-			} else if( speed === 2 ){
+			} else if( speed == '2' ){
 				mod = ~~ (1 * window.gambleOptionResults2[2]);
 			}
 
@@ -8273,11 +8578,11 @@ jQuery(document).ready(function(){
 
 			time = Math.round(time / (1 + (window.cm.ThroneController.effectBonus(77) / 100)));
 
-			if( speed === 0 ){
+			if( speed == '0' ){
 				return time;
-			} else if( speed === 1 ){
+			} else if( speed == '1' ){
 				return [Math.ceil((100 - window.gambleOptionResults1[1]) / 100 * time), Math.ceil((100 - window.gambleOptionResults1[0]) / 100 * time)];
-			} else if( speed === 2 ){
+			} else if( speed == '2' ){
 				return [Math.ceil((100 - window.gambleOptionResults2[1]) / 100 * time), Math.ceil((100 - window.gambleOptionResults2[0]) / 100 * time)];
 			}
 		};
@@ -8526,7 +8831,7 @@ jQuery(document).ready(function(){
 						if( costs[8].hasOwnProperty(k) ){
 							level = Shared.buildingHighestLevel( rule.cityKey, k.substr(1) );
 							if( level < costs[8][k][1] ){
-								msg.push([Date.timestamp(), 'Cette unité ne peut être entraînée dans cette ville (niveau de bâtiment requis trop bas).']);
+								msgUnit.push(city.label +': cette unité ne peut être entraînée dans cette ville (niveau de bâtiment requis trop bas).');
 								return udfd.resolve();
 							}
 						}
@@ -8538,7 +8843,7 @@ jQuery(document).ready(function(){
 					for( t in costs[9] ){  // check tech requirement
 						if( costs[9].hasOwnProperty(t) ){
 							if( parseInt(window.seed.tech['tch' + t.substr(1)], 10) < costs[9][t][1] ){
-								msg.push([Date.timestamp(), 'Cette unité ne peut être entraînée (niveau de recherche trop bas).']);
+								msgUnit.push(city.label +': cette unité ne peut être entraînée (niveau de recherche trop bas).');
 								return udfd.resolve();
 							}
 						}
@@ -8577,7 +8882,7 @@ jQuery(document).ready(function(){
 				}
 
 				if( qty < rule.min ){
-					msg.push([Date.timestamp(), 'Pas assez de population ou de ressources disponibles (unité).']);
+					msgUnit.push(city.label +': pas assez de population ou de ressources disponibles (unité).');
 					return udfd.resolve();
 				}
 
@@ -8595,7 +8900,7 @@ jQuery(document).ready(function(){
 				if( barracksCount - slotsUsed > 0 ){
 					return udfd.pipe( train(udfd) );
 				} else {
-					msg.push([Date.timestamp(), 'Pas de caserne disponible.']);
+					msgUnit.push(city.label +': pas de caserne disponible.');
 					return udfd.resolve();
 				}
 			};
@@ -8637,19 +8942,19 @@ jQuery(document).ready(function(){
 							*/
 
 							unit = KOCFIA.unitInfo[ rule.troop ];
-							msg.push([Date.timestamp(), 'Lancement de '+ Shared.format( qty ) +' <img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />.']);
+							msgUnit.push(city.label +': lancement de '+ Shared.format( qty ) +' <img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />.');
 
 							return udfd.resolve();
 						} else {
 							if( result.msg ){
-								msg.push([Date.timestamp(), 'Formation refusée ('+ result.msg +').']);
+								msgUnit.push(city.label +': formation refusée ('+ result.msg +').');
 								return udfd.resolve();
 							} else {
 								trainAttempts -= 1;
 								if( trainAttempts > 0 ){
 									window.setTimeout(function(){ udfd.pipe( train(udfd) ); }, 10000);
 								} else {
-									msg.push([Date.timestamp(), 'Formation refusée.']);
+									msgUnit.push(city.label +': formation refusée.');
 									return udfd.resolve();
 								}
 							}
@@ -8661,7 +8966,7 @@ jQuery(document).ready(function(){
 						if( trainAttempts > 0 ){
 							window.setTimeout(function(){ udfd.pipe( train(udfd) ); }, 10000);
 						} else {
-							msg.push([Date.timestamp(), 'Formation refusée (requête KO).']);
+							msgUnit.push(city.label +': formation refusée (erreur internet).');
 							return udfd.resolve();
 						}
 					});
@@ -8689,7 +8994,7 @@ jQuery(document).ready(function(){
 						if( costs[8].hasOwnProperty(k) ){
 							level = Shared.buildingHighestLevel( rule.cityKey, k.substr(1) );
 							if( level < costs[8][k][1] ){
-								msg.push([Date.timestamp(), 'Cette fortification ne peut être construite dans cette ville (niveau de bâtiment requis trop bas).']);
+								msgFort.push(city.label +': cette fortification ne peut être construite dans cette ville (niveau de bâtiment requis trop bas).');
 								return fdfd.resolve();
 							}
 						}
@@ -8701,7 +9006,7 @@ jQuery(document).ready(function(){
 					for( t in costs[9] ){  // check tech requirement
 						if( costs[9].hasOwnProperty(t) ){
 							if( parseInt(window.seed.tech['tch' + t.substr(1)], 10) < costs[9][t][1] ){
-								msg.push([Date.timestamp(), 'Cette fortification ne peut être construite (niveau de recherche trop bas).']);
+								msgFort.push(city.label +': cette fortification ne peut être construite (niveau de recherche trop bas).');
 								return fdfd.resolve();
 							}
 						}
@@ -8727,7 +9032,7 @@ jQuery(document).ready(function(){
 				}
 
 				if( qty < rule.min ){
-					msg.push([Date.timestamp(), 'Pas assez de ressources disponibles (fortifications).']);
+					msgFort.push(city.label +': pas assez de ressources disponibles (fortifications).');
 					return fdfd.resolve();
 				}
 
@@ -8746,7 +9051,7 @@ jQuery(document).ready(function(){
 				if( wallSlots - slotsUsed > 0 ){
 					return fdfd.pipe( build(fdfd) );
 				} else {
-					msg.push([Date.timestamp(), 'Rempart déjà occupé (queue pleine).']);
+					msgFort.push(city.label +': rempart déjà occupé (queue pleine).');
 					return fdfd.resolve();
 				}
 			};
@@ -8789,19 +9094,19 @@ jQuery(document).ready(function(){
 							window.seed.queue_fort[rule.cityKey].push([def, qty, result.initTS, parseInt(result.initTS, 10) + time, 0, time, result.fortifyId]);
 
 							unit = KOCFIA.fortInfo[ rule.defense ];
-							msg.push([Date.timestamp(), 'Lancement de '+ Shared.format( qty ) +' <img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />.']);
+							msgFort.push(city.label +': lancement de '+ Shared.format( qty ) +' <img src="'+ unit.icon +'" alt="'+ unit.label[0] +'" title="'+ unit.label[0] +'" />.');
 
 							return fdfd.resolve();
 						} else {
 							if( result.msg ){
-								msg.push([Date.timestamp(), 'Formation refusée ('+ result.msg +').']);
+								msgFort.push(city.label +': formation refusée ('+ result.msg +').');
 								return fdfd.resolve();
 							} else {
 								trainAttempts -= 1;
 								if( trainAttempts > 0 ){
 									window.setTimeout(function(){ fdfd.pipe( train(fdfd) ); }, 10000);
 								} else {
-									msg.push([Date.timestamp(), 'Formation refusée.']);
+									msgFort.push(city.label +': formation refusée.');
 									return fdfd.resolve();
 								}
 							}
@@ -8813,7 +9118,7 @@ jQuery(document).ready(function(){
 						if( trainAttempts > 0 ){
 							window.setTimeout(function(){ fdfd.pipe( train(fdfd) ); }, 10000);
 						} else {
-							msg.push([Date.timestamp(), 'Formation refusée (requête KO).']);
+							msgFort.push(city.label +': formation refusée (requête KO).');
 							return fdfd.resolve();
 						}
 					});
@@ -8830,10 +9135,12 @@ jQuery(document).ready(function(){
 			};
 
 			var qty, r,
-				msg = [],
+				msgUnit = [],
+				msgFort = [],
 				resNeeded = [],
 				resAvailable = [],
-				trainAttempts = 3;
+				trainAttempts = 3,
+				city = KOCFIA.cities[ rule.cityKey ];
 
 			var baseParams = jQuery.extend(true, {}, window.g_ajaxparams);
 			if( $.isEmptyObject(baseParams) ){
@@ -8842,37 +9149,32 @@ jQuery(document).ready(function(){
 			}
 			baseParams.cid = rule.cityKey.replace(/city/, '');
 
-			var $info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ rule.cityKey +'"]').find('.info');
-
 			$.when( trainUnitSequence(), buildFortificationSequence() )
 				.always(function(){
 					//clean old messages
-					var timestamp = Date.timestamp(),
-						obsolete = 60 * 60 * 1000,
-						msgTimestamp;
-					$msg = $info.find('div');
-					if( $msg.length > 9 ) $msg.filter(':lt(10)').remove();
-					if( $msg.length ){
-						$msg.each(function(){
-							var $div = $(this);
-							msgTimestamp = parseFloat($div.data('timestamp'));
-							if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-								$div.remove();
-							}
-						});
+					var m = '', i;
+
+					$msgUnit = KOCFIA.formation.$unitInfo.find('div');
+					if( $msgUnit.length > 15 ) $msgUnit.filter(':lt(15)').appendTo( KOCFIA.formation.$unitHistory );
+					if( msgUnit.length ){
+						for( i = 0; i < msgUnit.length; i += 1 ){
+							m += '<div>'+ msgUnit[i] +'</div>';
+						}
+						KOCFIA.formation.$unitInfo.append( m );
 					}
 
-					if( msg.length ){
-						var m = '', i;
-						for( i = 0; i < msg.length; i += 1 ){
-							m += '<div data-timestamp="'+ msg[i][0] +'">'+ msg[i][1] +'</div>';
+					$msgFort = KOCFIA.formation.$fortInfo.find('div');
+					if( $msgFort.length > 15 ) $msgFort.filter(':lt(15)').appendTo( KOCFIA.formation.$fortHistory );
+					if( msgFort.length ){
+						for( i = 0; i < msgFort.length; i += 1 ){
+							m += '<div>'+ msgFort[i] +'</div>';
 						}
-						$info.append( m );
+						KOCFIA.formation.$fortInfo.append( m );
 					}
 
 					//manual launch
 					if( dfd ){
-						if( msg.length ){
+						if( msgUnit.length > 0 || msgFort.length > 0 ){
 							return dfd.reject();
 						} else {
 							KOCFIA.formation.listCityFormations( rule.cityKey );
@@ -8894,12 +9196,11 @@ jQuery(document).ready(function(){
 				}).promise();
 			};
 
-			var $info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ rule.cityKey +'"]').find('.info');
-
 			$.when( fillSequence() )
 				.always(function(){
 					//user information by city
-					$info.append('<div data-timestamp="'+ Date.timestamp() +'">Lancement des formations fini.</div>');
+					KOCFIA.formation.$ongoing.find('.unit').find('.info').append('<div>'+ city.label +': lancement des formations fini.</div>');
+					KOCFIA.formation.$ongoing.find('.fort').find('.info').append('<div>'+ city.label +': lancement des fortifications fini.</div>');
 					KOCFIA.formation.listCityFormations( rule.cityKey );
 				});
 		};
@@ -8938,15 +9239,17 @@ jQuery(document).ready(function(){
 				onGoing = KOCFIA.transport.getListsTemplate(),
 				help = KOCFIA.transport.getHelp();
 
-			var code = '<div class="infos cf">';
-			code += '<span class="ui-icon ui-icon-info"></span>';
-			code += '<span><input type="checkbox" id="transport-panel-automatic" '+ (KOCFIA.conf.transport.automatic ? 'checked' : '') +' autocomplete="off" />';
+			var code = '<div class="infos">';
+			code += '<span class="buttonset"><input type="checkbox" id="transport-panel-automatic" '+ (KOCFIA.conf.transport.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="formation-panel-automatic">transports automatiques</label></span>';
+			code += '<button class="button secondary"><span>Aide</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
 			code +=  manualForm + pileUpForm + supplyForm;
 			code += '</div><div>'+ onGoing +'</div>';
 			code += help;
+			code += '<div id="kocfia-transport-history-pileUp" class="history pileUp" title="Historique des approvisionnements"></div>';
+			code += '<div id="kocfia-transport-history-supply" class="history supply" title="Historique des stockages"></div>';
 
 			$section.append( code )
 			//listener
@@ -8962,6 +9265,8 @@ jQuery(document).ready(function(){
 			KOCFIA.transport.$ongoingSupply = $section.find('.ongoing.supply');
 			KOCFIA.transport.$nextPileUpBar = $section.find('.nextIteration.pileUp');
 			KOCFIA.transport.$nextSupplyBar = $section.find('.nextIteration.supply');
+			KOCFIA.transport.$pileUpHistory = $section.find('.history.pileUp');
+			KOCFIA.transport.$supplyHistory = $section.find('.history.supply');
 
 			$section.find('.accordion').accordion({
 				collapsible: true,
@@ -9061,10 +9366,12 @@ jQuery(document).ready(function(){
 
 			var form = '<h3>Suivi Stockage';
 			form += '<span class="nextIteration pileUp"></span>';
+			form += '<button class="button secondary history-toggle" rel="pileUp" title="Historique des stockages"><span>Historique</span></button>';
 			form += '</h3>';
 			form += '<div class="ongoing pileUp"></div>';
 			form += '<h3>Suivi Approvisionnement';
 			form += '<span class="nextIteration supply"></span>';
+			form += '<button class="button secondary history-toggle" rel="supply" title="Historique des approvisionnements"><span>Historique</span></button>';
 			form += '</h3>';
 			form += '<div class="ongoing supply"></div>';
 
@@ -9089,7 +9396,7 @@ jQuery(document).ready(function(){
 				$m = $(this);
 				msgTimestamp = $m.data('timestamp');
 				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-					$m.remove();
+					$m.appendTo( (type == 'pileUp' ? KOCFIA.transport.$pileUpHistory : KOCFIA.transport.supplyHistory) );
 				}
 			});
 
@@ -9153,11 +9460,11 @@ jQuery(document).ready(function(){
 						if( n > 0 ){
 							info = KOCFIA.unitInfo[u];
 							d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
-							code += '<button rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +'">';
-							code += '<img src="'+ info.icon +'">';
-							code += '<small>'+ Shared.format(n);
-							code += (d !== '' ? '<br>'+ Shared.readableDuration( d ) : '');
-							code += '</small></button>';
+							code += '<button class="button" rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +' - '+ (d !== '' ? Shared.readableDuration( d ) : '') +'">';
+							code += '<img src="'+ info.icon +'"><span>';
+							code += Shared.format(n);
+							code += (d !== '' ? ' - '+ Shared.readableDuration( d ) : '');
+							code += '</span></button>';
 						}
 					}
 				}
@@ -9168,11 +9475,11 @@ jQuery(document).ready(function(){
 						if( n > 0 ){
 							info = KOCFIA.unitInfo[u];
 							d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
-							code += '<button rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +'">';
-							code += '<img src="'+ info.icon +'">';
-							code += '<small>'+ Shared.format(n);
-							code += (d !== '' ? '<br>'+ Shared.readableDuration( d ) : '');
-							code += '</small></button>';
+							code += '<button class="button secondary" rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +' - '+ (d !== '' ? Shared.readableDuration( d ) : '') +'">';
+							code += '<img src="'+ info.icon +'"><span>';
+							code += Shared.format(n);
+							code += (d !== '' ? ' - '+ Shared.readableDuration( d ) : '');
+							code += '</span></button>';
 						}
 					}
 				}
@@ -9186,24 +9493,24 @@ jQuery(document).ready(function(){
 			var cityKey = KOCFIA.transport.$manualForm.find('.from').find('input').filter(':checked').val(),
 				code = '', i, type, inSeed, n,
 				res = window.seed.resources[ cityKey ],
-				gold = window.seed.citystats[ cityKey ]['gold'];
+				gold = window.seed.citystats[ cityKey ].gold;
 
 			for( i = 0; i < KOCFIA.resources.length; i += 1 ){
 				type = KOCFIA.resources[i];
 				inSeed = KOCFIA.inSeed.resources[ type.name ];
 
 				if( inSeed ){
-					if( inSeed['var'] == 'gold' ){
-						n = parseFloat( gold[ inSeed.index ] );
-					} else {
+					if( inSeed.hasOwnProperty('type') ){
 						n = parseFloat( res[ inSeed.type ][ inSeed.index ] );
+					} else {
+						n = parseFloat( gold[ inSeed.index ] );
 					}
 
 					if( n > 0 ){
 						if( type.name.indexOf('x3600') > -1 ) n = n / 3600;
 
-						code += '<button rel="'+ type.key +'" title="'+ type.label +' - '+ Shared.readable(n) +'">';
-						code += '<img src="'+ type.icon +'" alt="'+ type.label +'"><small>'+ Shared.format(n) +'</small></button>';
+						code += '<button class="button secondary" rel="'+ type.key +'" title="'+ type.label +' - '+ Shared.readable(n) +'">';
+						code += '<img src="'+ type.icon +'" alt="'+ type.label +'"><span>'+ Shared.format(n) +'</span></button>';
 					}
 				}
 			}
@@ -9356,8 +9663,8 @@ jQuery(document).ready(function(){
 			form += '<div class="items buttonset"></div>';
 
 			form += '<div class="buttons">';
-			form += '<button class="launch">Envoyer</button>';
-			form += '<button class="reset">Annuler</button>';
+			form += '<button class="launch button">Envoyer</button>';
+			form += '<button class="reset button danger">Annuler</button>';
 			form += '</div>';
 
 			form += '<div class="result"></div>';
@@ -9446,7 +9753,7 @@ jQuery(document).ready(function(){
 						code += '<span class="ui-icon ui-icon-trash remove"></span>';
 						code += '<label title="'+ info.label +'"><img src="'+ info.icon +'"></label>&nbsp;';
 						code += '<input type="text" name="'+ rel +'" value="" required pattern="'+ Shared.numberRegExp +'">';
-						code += '<button class="minTroop">Minimum</buton>';
+						code += '<button class="minTroop button secondary" title="Calculer le minimum de cette troupe nécessaire pour transporter les ressources définies">Minimum</buton>';
 						code += '</div>';
 
 						$chosen.append( code );
@@ -9468,7 +9775,7 @@ jQuery(document).ready(function(){
 						code += '<span class="ui-icon ui-icon-trash remove"></span>';
 						code += '<label title="'+ info.label +'"><img src="'+ info.icon +'"></label>&nbsp;';
 						code += '<input type="text" name="'+ rel +'" value="" required pattern="'+ Shared.numberRegExp +'">';
-						code += '<button class="maxLoad">Maximum</buton>';
+						code += '<button class="maxLoad button secondary" title="Calculer le maximum transportable de cette ressource pour les troupes définies">Maximum</buton>';
 						code += '</div>';
 
 						$chosen.append( code );
@@ -9917,8 +10224,8 @@ jQuery(document).ready(function(){
 			var form = '<h3>'+ (type == 'pileUp' ? 'Stockage' : 'Approvisionnement') +' Automatique</h3>';
 			form += '<div class="'+ type +' transport-form">';
 			form += '<div class="buttons">';
-			form += '<button class="save">Enregistrer</button>';
-			form += '<button class="reset">Annuler</button>';
+			form += '<button class="save button modify">Enregistrer</button>';
+			form += '<button class="reset button secondary">Annuler</button>';
 			form += '</div><div class="result"></div>';
 			form += '<table><thead><tr>';
 			form += '<th>Ressources</th><th>Règles</th>';
@@ -9928,15 +10235,14 @@ jQuery(document).ready(function(){
 				res = KOCFIA.resources[i];
 				form += '<tr data-res="'+ res.key +'"><td class="res">';
 				form += '<img src="'+ res.icon +'" alt="'+ res.label +'"><br>';
-				form += '<span class="ui-icon ui-icon-plusthick addRule" title="Ajouter une règle"></span>';
-				form += '<span class="ui-icon ui-icon-copy copyRules" title="Dupplique cette ressource dans les autres"></span>';
+				form += '<button class="button secondary addRule" title="Ajouter une configuration pour cette ressource"><span>Ajouter</span></button>';
 				form += '</td><td class="rules"></td></tr>';
 			}
 
 			form += '</tbody></table>';
 			form += '<div class="buttons">';
-			form += '<button class="save">Enregistrer</button>';
-			form += '<button class="reset">Annuler</button>';
+			form += '<button class="save button modify">Enregistrer</button>';
+			form += '<button class="reset button secondary">Annuler</button>';
 			form += '</div>';
 			form += '</div>';
 
@@ -9966,21 +10272,21 @@ jQuery(document).ready(function(){
 					var $form = $(this).closest('.transport-form');
 
 					var code = '<div class="rule">';
-					code += '<span class="ui-icon ui-icon-trash remove"></span>';
-					code += '<span class="ui-icon ui-icon-copy duplicate" title="Duppliquer cette règle pour les villes manquantes de cette ressource"></span>';
-					code += '<input type="checkbox" class="active" title="activer cette règle">&nbsp;';
+					code += '<div><input type="checkbox" class="active" title="Activer cette configuration">&nbsp;';
 					code += 'Depuis&nbsp;:&nbsp;'+ citiesSelect.replace(/target/, 'from');
 					code += ' Vers&nbsp;:&nbsp;'+ citiesSelect.replace(/target/, 'to');
-					code += ' ou <input type="text" class="coord">';
+					code += ' ou <input type="text" class="coord"></div><div>';
 					if( $form.hasClass('pileUp') ){
-						code += '<br>Stocker&nbsp;au&nbsp;dessus&nbsp;de&nbsp;:&nbsp;';
+						code += 'Envoyer&nbsp;au&nbsp;dessus&nbsp;de&nbsp;:&nbsp;';
 					} else {
-						code += '<br>Approvisionner&nbsp;en&nbsp;dessous&nbsp;de&nbsp;:&nbsp;';
+						code += 'Approvisionner&nbsp;en&nbsp;dessous&nbsp;de&nbsp;:&nbsp;';
 					}
 					code += '<input type="text" class="quantity" value="0">';
 					code += ' avec&nbsp;:&nbsp;';
 					code += troopsSelect;
-					code += '</div>';
+					code += '<button class="remove button danger"><span>Supprimer</span></button>';
+					code += '<button class="duplicate button secondary" title="Copie ou applique dans cette ressource cette configuration pour vos autres villes"><span>Copier</span></button>';
+					code += '</div></div>';
 
 					$(this).closest('td').siblings('.rules').append( code );
 				})
@@ -10003,24 +10309,31 @@ jQuery(document).ready(function(){
 						quantity = $rule.find('.quantity').val(),
 						troop = $rule.find('.troop').val(),
 						active = $rule.find('.active').prop('checked'),
-						senders = {}, i, $clone;
+						senders = {}, i, $clone, cityKey, $div;
 
 					if( sender !== '' ) senders[ sender ] = 1;
 					if( receiver !== '' ) senders[ receiver ] = 1;
 
-					$sib.find('.from').each(function(){
-						if( this.value !== '' ) senders[ this.value ] = 1;
-					});
+					if( isPileUp ){
+						$sib.find('.from').each(function(){
+							if( this.value !== '' ) senders[ this.value ] = 1;
+						});
+					} else {
+						$sib.find('.to').each(function(){
+							if( this.value !== '' ) senders[ this.value ] = 1;
+						});
+					}
 
 					for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
-						if( !senders.hasOwnProperty( KOCFIA.citiesKey[i] ) ){
+						cityKey = KOCFIA.citiesKey[i];
+						if( !senders.hasOwnProperty( cityKey ) ){
 							$clone = $rule.clone();
 							if( isPileUp ){
-								$clone.find('.from').val( KOCFIA.citiesKey[i] );
+								$clone.find('.from').val( cityKey );
 								$clone.find('.to').val( receiver );
 							} else {
 								$clone.find('.from').val( sender );
-								$clone.find('.to').val( KOCFIA.citiesKey[i] );
+								$clone.find('.to').val( cityKey );
 							}
 							$clone.find('.coord').val( coord );
 							$clone.find('.quantity').val( quantity );
@@ -10030,12 +10343,36 @@ jQuery(document).ready(function(){
 							$clone.css('display', 'none');
 
 							$rules.append( $clone );
+						} else if( sender != cityKey && receiver != cityKey ){
+							if( isPileUp ){
+								$sib.find('.from').each(function(){
+									if( this.value == cityKey ){
+										$div = $(this).closest('.rule');
+										$div.find('.coord').val( coord );
+										$div.find('.quantity').val( quantity );
+										$div.find('.troop').val( troop );
+										$div.find('.active').prop('checked', active);
+										return false; //break
+									}
+								});
+							} else {
+								$sib.find('.to').each(function(){
+									if( this.value == cityKey ){
+										$div = $(this).closest('.rule');
+										$div.find('.coord').val( coord );
+										$div.find('.quantity').val( quantity );
+										$div.find('.troop').val( troop );
+										$div.find('.active').prop('checked', active);
+										return false; //break
+									}
+								});
+							}
 						}
 					}
 
 					$rules.find('.rule').css('display', '');
 				})
-				.on('click', '.copyRules', function(){
+				/*.on('click', '.copyRules', function(){
 					var $tr = $(this).closest('tr'),
 						$rules = $tr.find('.rules'),
 						$inputs = $rules.find('input, select'),
@@ -10053,7 +10390,7 @@ jQuery(document).ready(function(){
 
 						$(this).replaceWith( $clone );
 					});
-				})
+				})*/
 				.on('click', '.save', function(){
 					var $form = $(this).closest('.transport-form'),
 						type = ($form.hasClass('pileUp') ? 'pileUp' : 'supply'),
@@ -11150,7 +11487,7 @@ jQuery(document).ready(function(){
 					var marches = [],
 						marchesCoord = [];
 
-					var checkMarch = function(dfd, i){
+					var checkMarch = function(dfd, i, attempts){
 						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkMarch function');
 
 						if( mod == 'wilderness' || mod == 'barbarian' ){
@@ -11279,7 +11616,7 @@ jQuery(document).ready(function(){
 								return dfd.pipe( resetTracks(dfd) );
 							}
 
-							return dfd.pipe( checkMarch(dfd, i) );
+							return dfd.pipe( checkMarch(dfd, i, 3) );
 						} else {
 							return dfd.pipe( resetTracks(dfd) );
 						}
@@ -11288,7 +11625,7 @@ jQuery(document).ready(function(){
 						if( mLength === 0 ){
 							return dfd.pipe( resetTracks(dfd) );
 						} else {
-							return dfd.pipe( checkMarch(dfd, i) );
+							return dfd.pipe( checkMarch(dfd, i, 3) );
 						}
 					}
 				};

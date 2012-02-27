@@ -194,9 +194,9 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.4.13',
+		version: '0.4.14',
 		debug: true,
-		debugWhat: {transport: 1},
+		debugWhat: {darkForest: 1},
 		server: null,
 		modules: ['chat', 'overview', 'barbarian', 'wilderness', 'darkForest', 'scout', 'formation', 'transport', 'fbWallPopup', 'notepad', 'map', 'alarm'],
 		modulesLabel: {
@@ -6518,6 +6518,223 @@ jQuery(document).ready(function(){
 		KOCFIA.notepad.storeNotes = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('notepad') ) console.info('KOCFIA notepad storeNotes function');
 			localStorage.setObject('kocfia_notepad_notes_' + KOCFIA.storeUniqueId, KOCFIA.notepad.notes);
+		};
+
+	/* SUMMARY */
+		KOCFIA.summary = {
+			options: {
+				active: 1,
+				visible: 0,
+				moveable: 1,
+				position: {top: 10, left: 10},
+				size: {width: 300, height: 280}
+			}
+		};
+
+		KOCFIA.summary.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary confPanel function');
+			var code = '<h3>Bloc-note</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('summary', 'active', 'Activer', KOCFIA.conf.summary.active);
+			code += Shared.generateButton('summary', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions');
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.summary.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary on function');
+			$head.append( $('<style id="kocfia-summary-css">').html(summaryCss) );
+
+			var $summary = $('<div id="kocfia-summary" class="ui-widget ui-widget-content ui-corner-all">');
+
+			var code = '<h3 class="title">Résumé</h3><div class="wrapper"><div class="content">';
+			code += '<table><thead><tr><th>&nbsp;</th>';
+			var i, length, city, cels, info;
+			for( i = 0, length = KOCFIA.citiesKey.length; i < length; i += 1 ){
+				city = KOCFIA.cities[ KOCFIA.citiesKey[ i ] ];
+				code += '<th title="'+ city.name +'">'+ city.roman +'</th>';
+				cels += '<td></td>';
+			}
+			code += '</tr><tbody>';
+
+			//troops
+			var keys = ['unt2', 'unt8', 'unt12'];
+			for( i = 0, length = keys.length; i < length; i += 1 ){
+				info = KOCFIA.unitInfo[ keys[i] ];
+				code += '<tr><td title="'+ info.name +' à l\'heure"><img src="'+ info.icon +'"> / h</td>'+ cels +'</tr>';
+			}
+
+			//population
+			code += '<tr><td>Population</td>'+ cels +'</tr>';
+			//delta
+			for( i = 0, length = keys.length; i < length; i += 1 ){
+				info = KOCFIA.unitInfo[ keys[i] ];
+				code += '<tr><td title="différence '+ info.name +'">&delta; <img src="'+ info.icon +'"></td>' + cels + '</tr>';
+			}
+
+			//hapiness
+			code += '<tr><td>Bonheur</td>'+ cels +'</tr>';
+
+			//next training
+			code += '<tr><td>Fin prochaine formation<td>'+ cels +'</tr>';
+			code += '<tr><td>Total durée formations</td>'+ cels +'</tr>';
+
+			//next construction
+			code += '<tr><td>Fin prochaine construction<td>'+ cels +'</tr>';
+
+			code += '</tbody></table></div>';
+
+			$summary
+				.append( '<span class="ui-icon ui-icon-close"></span>' )
+				.append( code )
+				.append( moveHandles )
+				.draggable({
+					handle: 'h3, .move-handle',
+					scroll: true,
+					distance: 20,
+					stop: function(event, ui){
+						KOCFIA.conf.summary.position = ui.position;
+						Shared.storeConf();
+					}
+				})
+				.resizable({
+					minWidth: 200,
+					minHeight: 200,
+					handles: 'n, e, s, w, ne, se, sw, nw',
+					resize: function(){
+						KOCFIA.summary.$wrapper.css('height', KOCFIA.summary.calcInnerHeight());
+					},
+					stop: function(event, ui){
+						KOCFIA.conf.summary.size = ui.size;
+						KOCFIA.conf.summary.position = ui.position;
+						Shared.storeConf();
+					}
+				})
+				.css({
+					top: KOCFIA.conf.summary.position.top,
+					left: KOCFIA.conf.summary.position.left,
+					width: KOCFIA.conf.summary.size.width,
+					height: KOCFIA.conf.summary.size.height
+				})
+				.on('click', '.ui-icon-close', function(){
+					KOCFIA.summary.$div.hide();
+					KOCFIA.conf.summary.visible = 0;
+					Shared.storeConf();
+				});
+
+			$body.append( $summary );
+
+			KOCFIA.summary.$div = $('#kocfia-summary');
+			KOCFIA.summary.$wrapper = KOCFIA.summary.$div.find('.wrapper');
+			KOCFIA.summary.$title = KOCFIA.summary.$div.find('.title');
+			KOCFIA.summary.$trs = KOCFIA.summary.$div.find('tbody').find('tr');
+
+			if( KOCFIA.conf.summary.visible ){
+				KOCFIA.summary.$div.show();
+				KOCFIA.summary.$wrapper.css('height', KOCFIA.summary.calcInnerHeight());
+			}
+
+			var $summaryToggle = $('<button id="kocfia-summary-toggle" class="button secondary">').append( '<span>Résumé</span>' );
+			$summaryToggle.click(function(){
+				KOCFIA.summary.$div.toggle();
+
+				KOCFIA.conf.summary.visible = (KOCFIA.summary.$div.is(':visible') ? 1 : 0);
+
+				if( KOCFIA.conf.summary.visible ) KOCFIA.summary.$wrapper.css('height', KOCFIA.summary.calcInnerHeight());
+
+				Shared.storeConf();
+			});
+
+			KOCFIA.$buttons.append($summaryToggle);
+		};
+
+		KOCFIA.summary.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary off function');
+			KOCFIA.summary.$div.remove();
+			$('#kocfia-summary-toggle').remove();
+			$('#kocfia-summary-css').remove();
+		};
+
+		KOCFIA.summary.calcInnerHeight = function(){
+			return KOCFIA.summary.$div.innerHeight() - KOCFIA.summary.$title.height() - 15;
+		};
+
+		KOCFIA.summary.resetPositionAndDimension = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary resetPositionAndDimension function');
+
+			KOCFIA.summary.$div.css({
+				top: KOCFIA.summary.options.position.top,
+				left: KOCFIA.summary.options.position.left,
+				width: KOCFIA.summary.options.size.width,
+				height: KOCFIA.summary.options.size.height
+			});
+
+			KOCFIA.conf.summary.position.top = KOCFIA.summary.options.position.top;
+			KOCFIA.conf.summary.position.left = KOCFIA.summary.options.position.left;
+			KOCFIA.conf.summary.size.width = KOCFIA.summary.options.size.width;
+			KOCFIA.conf.summary.size.height = KOCFIA.summary.options.size.height;
+
+			Shared.storeConf();
+		};
+
+		KOCFIA.summary.update = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary update function');
+			var i, b, bid, blvl, length, knight, barrackModifier, geometry, infantryModifier,
+				nbBarracks, barracksLevelSum, barrackLevel, workshopLevel, stableLevel, blacksmithLevel, marshalCombat,
+				timestamp = Datetime.timestamp();
+
+			var cityData = [];
+			for( i = 0, length = KOCFIA.citiesKey.length; i < length; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+				city = KOCFIA.cities[ cityKey ];
+				nbBarracks = 0;
+				barracksLevelSum = 0;
+				barrackLevel = 0;
+				workshopLevel = 0;
+				stableLevel = 0;
+				blacksmithLevel = 0;
+				marshalCombat = 0;
+				cityData[ i ] = {};
+
+				for( b in window.seed.buildings[ cityKey ] ){
+					if( window.seed.builbings[ cityKey ].hasOwnProperty(b) ){
+						building = window.seed.builbings[ cityKey ][ b ];
+
+						if( building[0] == 13 ){
+							nbBarracks += 1;
+							barracksLevelSum += parseInt(building[1], 10);
+							if( building[1] > barrackLevel ) barrackLevel = parseInt(building[1], 10);
+						} else if( building[0] == 15 ){
+							blacksmithLevel = parseInt(building[1], 10);
+						} else if( building[0] == 16 ){
+							workshopLevel = parseInt(building[1], 10);
+						} else if( building[0] == 17 ){
+							stableLevel = parseInt(building[1], 10);
+						}
+					}
+				}
+
+				if( window.seed.knights.hasOwnProperty( cityKey ) ){
+					knight = window.seed.knights[ cityKey ][ 'knt'+ window.seed.leaders[ cityKey ].combatKnightId ];
+					if( knight ){
+						marshalCombat = parseInt(knight.combat, 10);
+						if( knight.combatBoostExpireUnixtime > timestamp ){
+							marshalCombat *= 1.25;
+						}
+					}
+				}
+
+				barrackModifier = nbBarracks + 0.1 * (barracksLevelSum - nbBarracks);
+				geometry = parseInt(window.seed.tech.tch5, 10);
+				infantryModifier = 1 + marshalCombat / 200 + geometry;
+
+				cityData[i].unt2Time = (barrackLevel > 0 ? 50 / (barrackModifier * infantryModifier) / 2 : 0);
+
+				cityData[i].unt8Time = (barrackLevel > 6 && blacksmithLevel > 4 && stableLevel > 4 && parseInt(window.seed.tech.tch12, 10) > 4 ? 1500 / (barrackModifier * (infantryModifier + stableLevel / 10)) : 0);
+
+				cityData[i].unt12Time = (barrackLevel > 9 && stableLevel > 1 && workshopLevel > 8 && fletching > 9 && parseInt(window.seed.tech.tch13, 10) > 9 ? 6000 / (barrackModifier * (infantryModifier + stableLevel / 10) + workshopLevel / 10) : 0);
+			}
 		};
 
 	/* MAP */

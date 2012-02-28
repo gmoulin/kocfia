@@ -812,6 +812,19 @@ body.noModal .modalBox:not(.previous) {
 			top: 4px;
 		}
 
+		#kocfia-transport .manual-form .items.buttonset label:after {
+			content: attr(data-count);
+			position: absolute;
+			font-size: 9px;
+			line-height: 9px;
+			bottom: 1px;
+			right: 2px;
+			background-color: rgba(0, 0, 0, 0.5);
+			color: #fff;
+			display: inline-block;
+			padding: 0 1px 1px;
+		}
+
 		#kocfia-transport .available .button {
 			height: 26px;
 			padding: 2px;
@@ -868,6 +881,64 @@ body.noModal .modalBox:not(.previous) {
 
 		#kocfia-transport .transport-form select + .button,
 		#kocfia-transport .transport-form .button + .button { margin: 0 0 0 5px; }
+
+/* knights tab */
+	#kocfia-knights table { width: 100%; }
+
+	#kocfia-knights .update { top: 0; }
+
+	#kocfia-knights td,
+	#ckofia-knights th { padding: 0 2px; }
+
+	#kocfia-knights tbody th { background-color: #E5DDC9; }
+
+	#kocfia-knights tr td:nth-child(3),
+	#kocfia-knights tr td:nth-child(4),
+	#kocfia-knights tr td:nth-child(5),
+	#kocfia-knights tr td:nth-child(6),
+	#kocfia-knights tr td:nth-child(7),
+	#kocfia-knights tr td:nth-child(8) { text-align: center; }
+
+	#kocfia-knights .boosted { background-color: #EEC973; }
+
+	#kocfia-knights .primary { font-weight: bold; }
+
+	#kocfia-knights .skillPointsLeft .stat { cursor: pointer; }
+
+	#kocfia-knights .boost,
+	#kocfia-knights .button { margin: 1px; }
+
+	#kocfia-knights td select { max-width: 60px; }
+
+	#kocfia-knights .boost {
+		cursor: pointer;
+		display: inline-block;
+		position: relative;
+	}
+
+	#kocfia-knights .boost img {
+		width: 20px;
+		top: 0;
+	}
+
+	#kocfia-knights .boost:after {
+		content: attr(data-count);
+		position: absolute;
+		font-size: 9px;
+		line-height: 9px;
+		bottom: 0;
+		right: 2px;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: #fff;
+		display: inline-block;
+		padding: 0 1px 1px;
+	}
+
+	#kocfia-knights .skillPointsLeft td:nth-child(3) {
+		color: #0030FF;
+		font-weight: bold;
+	}
+
 
 /* input radio and checkbox normalize */
 	#kocfia-conf-panel input[type="checkbox"],

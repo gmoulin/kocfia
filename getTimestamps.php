@@ -9,8 +9,8 @@ $urls = array(
 	'//'.$_SERVER['SERVER_NAME'].'/jquery.miniColors.min.js',
 	'//'.$_SERVER['SERVER_NAME'].'/jquery.tipsy.css',
 	'//'.$_SERVER['SERVER_NAME'].'/jquery.tipsy.min.js',
-	'//'.$_SERVER['SERVER_NAME'].'/kocfia.confPanel.css?ts=' + filemtime('kocfia.confPanel.css'),
-	'//'.$_SERVER['SERVER_NAME'].'/kocfia.js?ts=' + filemtime('kocfia.js')
+	'//'.$_SERVER['SERVER_NAME'].'/kocfia.confPanel.css?ts='.filemtime('kocfia.confPanel.css'),
+	'//'.$_SERVER['SERVER_NAME'].'/kocfia.js?ts='.filemtime('kocfia.js')
 );
 
 echo json_encode($urls);

@@ -259,6 +259,8 @@ body.noModal .modalBox:not(.previous) {
 		display: none;
 	}
 
+	#kocfia-map .status label + label { margin-bottom: 5px; }
+
 	#kocfia-map fieldset > div { margin: 5px 0; }
 
 	#kocfia-map .filter > div { margin: 3px 0; }
@@ -724,6 +726,8 @@ body.noModal .modalBox:not(.previous) {
 
 	#kocfia-formation .forms fieldset + fieldset { margin-top: 5px; }
 
+	#kocfia-formation .forms fieldset:last-of-type { margin-bottom: 10px; }
+
 	#kocfia-formation fieldset .unit { margin-top: 2px; }
 
 	#kocfia-formation .manual-train-form .launch,
@@ -779,7 +783,7 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .manual-form .chosen input { width: 80px; }
 
 		#kocfia-transport .manual-form .resources,
-		#kocfia-transport .manual-form .troop { margin: 12px 0; }
+		#kocfia-transport .manual-form .troop { margin: 22px 0; }
 
 		#kocfia-transport .manual-form input[type=number],
 		#kocfia-transport .manual-form input[type=text] { text-align: center; }
@@ -791,42 +795,12 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .manual-form .minTroop,
 		#kocfia-transport .manual-form .maxLoad { margin-left: 5px; }
 
+		#kocfia-transport .manual-form .available { display: inline-block; }
+
 		#kocfia-transport .manual-form .available img {
 			margin: 0 3px 0 0;
 			top: 0;
 			padding: 0;
-		}
-
-		#kocfia-transport .manual-form .available .button:before {
-			content: attr(data-count);
-			position: absolute;
-			font-size: 9px;
-			line-height: 9px;
-			top: -9px;
-			left: 0;
-			background-color: rgba(0, 0, 0, 0.5);
-			color: #fff;
-			display: inline-block;
-			padding: 0 1px 1px;
-			width: 100%;
-			text-align: center;
-			border-radius: 3px 3px 0 0;
-		}
-
-		#kocfia-transport .manual-form .available .button[data-time]:after {
-			content: attr(data-time);
-			position: absolute;
-			font-size: 9px;
-			line-height: 9px;
-			bottom: -9px;
-			left: 0;
-			background-color: rgba(0, 0, 0, 0.5);
-			color: #fff;
-			display: inline-block;
-			padding: 0 1px 1px;
-			width: 100%;
-			text-align: center;
-			border-radius: 0 0 3px 3px;
 		}
 
 		#kocfia-transport .manual-form .from,
@@ -860,13 +834,6 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .available .button {
 			height: 26px;
 			padding: 2px;
-		}
-
-		#kocfia-transport .available .button span {
-			height: 26px;
-			line-height: 26px;
-			position: relative;
-			top: -4px;
 		}
 
 		#kocfia-transport .button + .button { margin: 5px 0 0 5px; }
@@ -935,7 +902,7 @@ body.noModal .modalBox:not(.previous) {
 
 	#kocfia-knights .primary { font-weight: bold; }
 
-	#kocfia-knights .skillPointsLeft .stat { cursor: pointer; }
+	#kocfia-knights .skillPointsLeft .stats { cursor: pointer; }
 
 	#kocfia-knights .boost,
 	#kocfia-knights .button { margin: 1px; }
@@ -1146,6 +1113,14 @@ body.noModal .modalBox:not(.previous) {
 	.button > img,
 	.button > img + span {
 		display: inline-block;
+	}
+
+	.button > img + span {
+		line-height: 11px;
+		font-size: 9px;
+		top: 0;
+		text-align: right;
+		text-shadow: none;
 	}
 
 	.ui-widget .button {

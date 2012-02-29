@@ -3,7 +3,7 @@
 	<head>
 		<title>koc test</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery-ui-1.8.17.custom.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.miniColors.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.tipsy.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/kocfia.confPanel.css?<?php echo filemtime(__DIR__.'/../kocfia.confPanel.css'); ?>" />
@@ -17,7 +17,7 @@
 	<body>
 		<div id="main_engagement_tabs"></div>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-		<script src="http://kocfia.kapok.dev/jquery-ui-1.8.17.custom.min.js"></script>
+		<script src="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery.miniColors.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery.tipsy.min.js"></script>
 		<script>
@@ -6420,5 +6420,8 @@
 			g_ajaxparams.tvuid=tvuid;
 		</script>
 		<script src="http://kocfia.kapok.dev/kocfia.js?<?php echo filemtime(__DIR__.'/../kocfia.js'); ?>"></script>
+		<script src="http://kocfia.kapok.dev/kocfia.fb.user.js"></script>
+		<script src="http://kocfia.kapok.dev/kocfia.fb-popup.user.js"></script>
+		<script src="http://kocfia.kapok.dev/kocfia.frame.user.js"></script>
 	</body>
 </html>

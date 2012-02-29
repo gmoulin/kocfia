@@ -797,6 +797,38 @@ body.noModal .modalBox:not(.previous) {
 			padding: 0;
 		}
 
+		#kocfia-transport .manual-form .available .button:before {
+			content: attr(data-count);
+			position: absolute;
+			font-size: 9px;
+			line-height: 9px;
+			top: -9px;
+			left: 0;
+			background-color: rgba(0, 0, 0, 0.5);
+			color: #fff;
+			display: inline-block;
+			padding: 0 1px 1px;
+			width: 100%;
+			text-align: center;
+			border-radius: 3px 3px 0 0;
+		}
+
+		#kocfia-transport .manual-form .available .button[data-time]:after {
+			content: attr(data-time);
+			position: absolute;
+			font-size: 9px;
+			line-height: 9px;
+			bottom: -9px;
+			left: 0;
+			background-color: rgba(0, 0, 0, 0.5);
+			color: #fff;
+			display: inline-block;
+			padding: 0 1px 1px;
+			width: 100%;
+			text-align: center;
+			border-radius: 0 0 3px 3px;
+		}
+
 		#kocfia-transport .manual-form .from,
 		#kocfia-transport .manual-form .to,
 		#kocfia-transport .manual-form .items { display: inline-block; }

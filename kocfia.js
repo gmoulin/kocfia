@@ -207,6 +207,8 @@ jQuery(document).ready(function(){
 
 	var KOCFIA = {
 		version: '0.4.14',
+		jQueryVersion: '1.7.1',
+		jQueryUiVersion: '1.8.18',
 		debug: true,
 		debugWhat: {knights: 1},
 		server: null,
@@ -500,6 +502,10 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.time('confPanel');
 			KOCFIA.confPanel();
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.timeEnd('confPanel');
+
+		if( $.fn.jquery != KOCFIA.jqVersion || $.ui.version != KOCFIA.jQueryUiVersion ){
+				KOCFIA.$buttons.append( $('<a href="'+ kocfiaDomain +'/kocfia.frame.user.js" title="Met à jour le script GreaseMonkey">Mise à jour !</a>') );
+		}
 
 		//modules init
 			var initModule = function(i){
@@ -2079,7 +2085,7 @@ jQuery(document).ready(function(){
 			Shared.getDiplomacy = function( allianceId ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getDiplomacy function');
 
-				if( allianceId === null || allianceId === '' ) return '';
+				if( allianceId === null || allianceId === '' ) return 'guildless';
 
 				if( window.seed.allianceDiplomacies === null || $.isEmptyObject(window.seed.allianceDiplomacies) ){
 					return 'neutral';
@@ -6984,27 +6990,38 @@ jQuery(document).ready(function(){
 			code += '<input type="number" id="kocfia-map-level-max" class="coord" min="1" max="10"></div>';
 
 			code += '<div class="type buttonset"><label>Type&nbsp;:&nbsp;</label>';
-			code += '<input type="checkbox" id="kocfia-map-type-grassland" value="10" />';
+			code += '<input type="checkbox" id="kocfia-map-type-grassland" value="10">';
 			code += '<label for="kocfia-map-type-grassland">Prairie</label>';
-			code += '<input type="checkbox" id="kocfia-map-type-lake" value="11" />';
+			code += '<input type="checkbox" id="kocfia-map-type-lake" value="11">';
 			code += '<label for="kocfia-map-type-lake">Lac</label>';
-			code += '<input type="checkbox" id="kocfia-map-type-forest" value="20" />';
+			code += '<input type="checkbox" id="kocfia-map-type-forest" value="20">';
 			code += '<label for="kocfia-map-type-forest">Forêt</label>';
-			code += '<input type="checkbox" id="kocfia-map-type-hill" value="30" />';
+			code += '<input type="checkbox" id="kocfia-map-type-hill" value="30">';
 			code += '<label for="kocfia-map-type-hill">Colline</label>';
-			code += '<input type="checkbox" id="kocfia-map-type-mountain" value="40" />';
+			code += '<input type="checkbox" id="kocfia-map-type-mountain" value="40">';
 			code += '<label for="kocfia-map-type-mountain">Montagne</label>';
-			code += '<input type="checkbox" id="kocfia-map-type-plain" value="50" />';
+			code += '<input type="checkbox" id="kocfia-map-type-plain" value="50">';
 			code += '<label for="kocfia-map-type-plain">Plaine</label></div>';
 
+			//states (misted, free, diplomacy)
 			code += '<div class="status buttonset"><label>État&nbsp;:&nbsp;</label>';
-			code += '<input type="checkbox" id="kocfia-map-status" />';
-			code += '<label for="kocfia-map-status">Libre</label></div>';
-
-			code += '<div class="mist buttonset">';
-			code += '<input type="checkbox" id="kocfia-map-mist" />';
+			code += '<input type="checkbox" id="kocfia-map-free">';
+			code += '<label for="kocfia-map-free">Libre</label>';
+			code += '<input type="checkbox" id="kocfia-map-mist">';
 			code += '<label for="kocfia-map-mist">Sous brumes</label>';
-			code += '</div></fieldset>';
+			code += '<input type="checkbox" id="kocfia-map-guildless">';
+			code += '<label for="kocfia-map-guildless">Sans alliance</label>';
+			code += '<input type="checkbox" id="kocfia-map-neutral">';
+			code += '<label for="kocfia-map-neutral">Neutre</label>';
+			code += '<input type="checkbox" id="kocfia-map-ally">';
+			code += '<label for="kocfia-map-ally">Allié</label>';
+			code += '<input type="checkbox" id="kocfia-map-friendly">';
+			code += '<label for="kocfia-map-friendly">Amical</label>';
+			code += '<input type="checkbox" id="kocfia-map-hostile">';
+			code += '<label for="kocfia-map-hostile">Amical</label>';
+			code += '</div>';
+
+			code += '</fieldset>';
 
 			code += '<div class="search-status"></div><div class="search-result"></div>';
 
@@ -7108,16 +7125,17 @@ jQuery(document).ready(function(){
 						$inputs.filter('[type="checkbox"]').prop('checked', false);
 						$inputs.filter('[type="text"]').val('');
 
-						KOCFIA.map.$filter.find('.level, .type, .status, .mist').hide();
+						KOCFIA.map.$filter.find('.level, .type, .status, #kocfia-map-free').hide();
 						KOCFIA.map.$coordsList.hide();
 
 						if( category !== '' ){
 							if( category != 'C' ) KOCFIA.map.$filter.find('.level').show();
+							else {
+								KOCFIA.map.$filter.find('.status, #kocfia-map-free').show();
+							}
 
 							if( category == 'TS' ){
 								KOCFIA.map.$filter.find('.type, .status').show();
-							} else if( category == 'C' ){
-								KOCFIA.map.$filter.find('.mist').show();
 							}
 
 							KOCFIA.map.$filter.show();
@@ -7450,7 +7468,6 @@ jQuery(document).ready(function(){
 					length = tiles.length;
 
 					if( isStart ){
-						sortHeaders = {1: {sorter: false}, 7: {sorter: false}};
 						code = '<table><thead><tr>';
 						code += '<th>Distance</th>';
 						code += '<th>Coordonnée</th>';
@@ -7485,7 +7502,6 @@ jQuery(document).ready(function(){
 					length = tiles.length;
 
 					if( isStart ){
-						sortHeaders = {1: {sorter: false}};
 						code = '<table><thead><tr>';
 						code += '<th>Distance</th>';
 						code += '<th>Coordonnée</th>';
@@ -7510,7 +7526,6 @@ jQuery(document).ready(function(){
 					length = tiles.length;
 
 					if( isStart ){
-						sortHeaders = {1: {sorter: false}};
 						code = '<table><thead><tr>';
 						code += '<th>Distance</th>';
 						code += '<th>Coordonnée</th>';
@@ -7535,7 +7550,6 @@ jQuery(document).ready(function(){
 					length = tiles.length;
 
 					if( isStart ){
-						sortHeaders = {1: {sorter: false}, 7: {sorter: false}};
 						code = '<table><thead><tr>';
 						code += '<th>Distance</th>';
 						code += '<th>Coordonnée</th>';
@@ -7590,7 +7604,7 @@ jQuery(document).ready(function(){
 			}
 
 			trs = null;
-			$tbofy = null;
+			$tbody = null;
 			$trs = null;
 		};
 
@@ -7616,7 +7630,7 @@ jQuery(document).ready(function(){
 					max = i;
 				}
 				for( i = min; i <= max; i += 1 ){
-					levels.push( '.level' + i );
+					levels.push( '.level'+ i );
 				}
 				if( levels.length ) classes.push( levels );
 			}
@@ -7625,20 +7639,16 @@ jQuery(document).ready(function(){
 				var $types = KOCFIA.map.$filter.find('.type').find('input').filter(':checked');
 				if( $types.length ){
 					$types.each(function(){
-						types.push( '.type' + this.value );
+						types.push( '.type'+ this.value );
 					});
 					if( types.length ) classes.push( types );
 				}
-				if( KOCFIA.map.$filter.find('.status').find('input').filter(':checked').length ){
-					status.push('.free');
-					classes.push( status );
-				}
-			}
-
-			if( category == 'C' ){
-				if( KOCFIA.map.$filter.find('.mist').find('input').filter(':checked').length ){
-					status.push('.misted');
-					classes.push( status );
+				var $status = KOCFIA.map.$filter.find('.status').find('input').filter(':checked');
+				if( $status.length ){
+					$status.each(function(){
+						status.push( '.'+ this.value );
+					});
+					if( status.length ) classes.push( status );
 				}
 			}
 
@@ -9578,7 +9588,11 @@ jQuery(document).ready(function(){
 		KOCFIA.transport = {
 			options: {
 				active: 1,
-				automatic: 0
+				automatic: 0,
+				priority: {
+					pileUp: ['rec4', 'rec3', 'rec2', 'rec1', 'rec5'],
+					supply:['rec2', 'rec4', 'rec3', 'rec1', 'rec5']
+				}
 			},
 			stored: ['pileUp', 'supply'],
 			pileUp: {},
@@ -9829,11 +9843,11 @@ jQuery(document).ready(function(){
 						if( n > 0 ){
 							info = KOCFIA.unitInfo[u];
 							d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
-							code += '<button class="button" rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +' - '+ (d !== '' ? Shared.readableDuration( d ) : '') +'">';
-							code += '<img src="'+ info.icon +'"><span>';
-							code += Shared.format(n);
-							code += (d !== '' ? ' - '+ Shared.readableDuration( d ) : '');
-							code += '</span></button>';
+							code += '<button class="button" rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +' - '+ (d !== '' ? Shared.readableDuration( d ) : '') +'"';
+							code += ' data-count="'+ Shared.format(n) +'"';
+							code += (d !== '' ? ' data-time="'+ Shared.readableDuration( d ) +'"' : '');
+							code += '><img src="'+ info.icon +'">';
+							code += '</button>';
 						}
 					}
 				}
@@ -9844,11 +9858,11 @@ jQuery(document).ready(function(){
 						if( n > 0 ){
 							info = KOCFIA.unitInfo[u];
 							d = KOCFIA.transport.getDuration( cityKeyFrom, cityKeyTo, coord, u );
-							code += '<button class="button secondary" rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +' - '+ (d !== '' ? Shared.readableDuration( d ) : '') +'">';
-							code += '<img src="'+ info.icon +'"><span>';
-							code += Shared.format(n);
-							code += (d !== '' ? ' - '+ Shared.readableDuration( d ) : '');
-							code += '</span></button>';
+							code += '<button class="button secondary" rel="'+ u +'" title="'+ info.label + ' - ' + Shared.readable(n) +' - '+ (d !== '' ? Shared.readableDuration( d ) : '') +'"';
+							code += ' data-count="'+ Shared.format(n) +'"';
+							code += (d !== '' ? ' data-time="'+ Shared.readableDuration( d ) +'"' : '');
+							code += '><img src="'+ info.icon +'">';
+							code += '</button>';
 						}
 					}
 				}
@@ -11109,8 +11123,8 @@ jQuery(document).ready(function(){
 					//get the rules units
 					if( units.length === 0 ){
 						units = {};
-						for( j = 0; j < KOCFIA.resources.length; j += 1 ){
-							res = KOCFIA.resources[ j ];
+						for( j = 0; j < KOCFIA.conf.transport.priority[ type ].length; j += 1 ){
+							res = KOCFIA.resourceInfo[ KOCFIA.conf.transport.priority[ type ][ j ] ];
 							resKey = res.key;
 
 							if( rules.hasOwnProperty( resKey ) ){
@@ -11187,8 +11201,8 @@ jQuery(document).ready(function(){
 
 
 					//loop each resource to find a corresponding active rule using currentUnit
-					for( j = 0; j < KOCFIA.resources.length; j += 1 ){
-						res = KOCFIA.resources[ j ];
+					for( j = 0; j < KOCFIA.conf.transport.priority[ type ].length; j += 1 ){
+						res = KOCFIA.resourceInfo[ KOCFIA.conf.transport.priority[ type ][ j ] ];
 						resKey = res.key;
 						if( rules.hasOwnProperty( resKey ) ){
 							rule = rules[ resKey ];

@@ -12,7 +12,40 @@
  * i.e. no console, no localStorage, ...
  */
 
-//console.log('ok');
+/* array isArray */
+if( !Array.hasOwnProperty('isArray') ){
+	Array.isArray = function(value){
+		return Object.prototype.toString.apply(value) === '[object Array]';
+	};
+}
+
+//preload KOCFIA but do not execute it
+var domain = 'http://kocfia.kapok.dev/',
+	d = new Date(), i,
+	preload = [
+		'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js', //latest 1.x.x jquery
+		domain + "jquery-ui-1.8.18.custom.min.js",
+		domain + "jquery-ui-1.8.18.custom.css",
+		domain + "jquery.miniColors.css",
+		domain + "jquery.miniColors.min.js",
+		domain + "jquery.tipsy.css",
+		domain + "jquery.tipsy.min.js",
+		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
+		domain + "kocfia.js?ts=" + d.getTime()
+	];
+
+//try to get timestamps
+var request = new XMLHttpRequest();
+request.open('GET', domain + 'getTimestamps.php', false);
+request.send(null);
+if( request.status === 200 ){
+	var tmp = JSON.parse(request.responseText);
+	if( Array.isArray(tmp) && tmp.length ){
+		preload = tmp;
+	}
+}
+window.setTimeout(function(){ request.abort(); }, 3000);
+
 var kocFrame = parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
 if( kocFrame ) kocFrame.style.width = '100%';
@@ -33,29 +66,11 @@ var kocCss = document.createElement('style');
 kocCss.innerHTML = "#crossPromoBarContainer, #progressBar { display: none !important; }";
 document.head.appendChild( kocCss );
 
-//preload KOCFIA but do not execute it
-var domain = 'http://kocfia.kapok.dev/',
-	d = new Date(), i,
-	preload = [
-		'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js',
-		domain + "jquery-ui-1.8.17.custom.min.js",
-		domain + "jquery-ui-1.8.17.custom.css",
-		domain + "jquery.miniColors.css",
-		domain + "jquery.miniColors.min.js",
-		domain + "jquery.tipsy.css",
-		domain + "jquery.tipsy.min.js",
-		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
-		domain + "kocfia.js?ts=" + d.getTime()
-	];
-
 var loadInCache = function(url){
-	//console.log('loadInCache');
 	var obj = document.createElement('object');
 	obj.data = url;
 	obj.width  = 0;
 	obj.height = 0;
-	/*obj.onload = function(){ cached++; };
-	obj.onerror = function(){ cached++; };*/
 	document.body.appendChild(obj);
 };
 
@@ -67,7 +82,6 @@ var trys = 60;
 var tag;
 var anchor = document.getElementsByTagName('script')[0];
 var load = function(){
-	//console.log('load');
 	if( window.seed && !isEmptyObject(window.seed.cities) && !isEmptyObject(window.seed.citystats) ){
 		for( i = 0; i < preload.length; i += 1 ){
 			if( preload[i].indexOf('.css') === -1 ){
@@ -75,7 +89,7 @@ var load = function(){
 				if( preload[i].indexOf('jquery.min.js') > -1 ){
 					tag.onload = function(){
 						tag = document.createElement('script');
-						tag.innerHTML = "jQuery.noConflict();";
+						tag.innerHTML = "jQuery.noConflict();" + "var kocfiaDomain = "+ domain;
 						anchor.parentNode.insertBefore(tag, anchor);
 					};
 				}
@@ -97,10 +111,8 @@ var load = function(){
 
 //if the page is already loaded, call load immediatly, else preload and listen for window load event
 if( "undefined" != typeof(document.readyState) && "complete" === document.readyState ){
-	//console.log('immediate');
 	load();
 } else {
-	//console.log('delayed');
 	for( i = 0; i < preload.length; i += 1 ){
 		loadInCache( preload[i] );
 	}

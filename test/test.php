@@ -6420,8 +6420,10 @@
 			g_ajaxparams.tvuid=tvuid;
 		</script>
 		<script src="http://kocfia.kapok.dev/kocfia.js?<?php echo filemtime(__DIR__.'/../kocfia.js'); ?>"></script>
+		<!--
 		<script src="http://kocfia.kapok.dev/kocfia.fb.user.js"></script>
 		<script src="http://kocfia.kapok.dev/kocfia.fb-popup.user.js"></script>
 		<script src="http://kocfia.kapok.dev/kocfia.frame.user.js"></script>
+		-->
 	</body>
 </html>

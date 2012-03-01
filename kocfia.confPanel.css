@@ -388,78 +388,134 @@ body.noModal .modalBox:not(.previous) {
 	.attack-form .rallypointSlot { margin-right: 5px; }
 
 	/* dark forest attack form */
-	.darkForest-form .buttons {
-		text-align: right;
-		margin-bottom: 5px;
-	}
+		.darkForest-form .buttons {
+			text-align: right;
+			margin-bottom: 5px;
+		}
 
-	.darkForest-form .buttons .button { margin: 0 5px 0 0; }
+		.darkForest-form > .buttons { display: none; }
 
-	.darkForest-form .city-toggles { margin-bottom: 5px; }
+		.darkForest-form .buttons .button { margin: 0 5px 0 0; }
 
-	.darkForest-form table { width: 100%; }
+		.darkForest-form .city-toggles { margin-bottom: 5px; }
 
-	.darkForest-form th div {
-		float: right;
-		font-weight: normal;
-	}
+		.darkForest-form table { width: 100%; }
 
-	.darkForest-form th,
-	.darkForest-form td {
-		padding: 3px;
-		vertical-align: top;
-		text-align: left;
-	}
+		.darkForest-form th div {
+			float: right;
+			font-weight: normal;
+			margin-right: 5px;
+		}
 
-	.darkForest-form h4 {
-		text-align: center;
-		margin: 0 0 5px 0;
-	}
+		.darkForest-form th { background-color: #E5DDC9; }
 
-	.darkForest-form .rps,
-	.darkForest-form .level {
-		width: 25px;
-		text-align: center;
-		margin: 0 3px;
-	}
+		.darkForest-form th,
+		.darkForest-form td {
+			padding: 3px;
+			vertical-align: top;
+			text-align: left;
+		}
 
-	.darkForest-form .builds { width: 90px; }
+		.darkForest-form h4,
+		.darkForest-form h5 {
+			text-align: center;
+			margin: 0 0 5px 0;
+		}
 
-	.darkForest-form .builds .button { margin: 3px; }
+		.darkForest-form h5 { font-size: 11px; }
 
-	.darkForest-form .keep,
-	.darkForest-form .waves {
-		width: 200px;
-		white-space: nowrap;
-	}
+		.darkForest-form .rps,
+		.darkForest-form .level {
+			width: 25px;
+			text-align: center;
+			margin: 0 3px;
+		}
 
-	.darkForest-form .waves { display: inline-block; }
+		.darkForest-form .builds { width: 90px; }
 
-	#kocfia-conf-panel .darkForest-form .waves img,
-	#kocfia-conf-panel .darkForest-form .keep img {
-		width: 20px;
-		vertical-align: middle;
-		margin: 0;
-		top: -2px;
-	}
+		.darkForest-form .builds div {
+			-moz-column-count: 2;
+			-moz-column-gap: 5px;
+			-webkit-column-count: 2;
+			-webkit-column-gap: 5px;
+			column-count: 2;
+			column-gap: 5px;
+		}
 
-	.darkForest-form .waves input,
-	.darkForest-form .keep input {
-		width: 60px;
-		margin-left: 5px;
-	}
+		.darkForest-form .form .button,
+		.darkForest-form .builds .button { margin: 3px; }
 
-	.darkForest-form .waves label,
-	.darkForest-form .keep label {
-		display: inline-block;
-	}
+		.darkForest-form .keep,
+		.darkForest-form .wave { white-space: nowrap; }
 
-	.darkForest-form .wave,
-	.darkForest-form .keep div {
-		float: left;
-		padding: 2px 3px;
-	}
+		.darkForest-form .keep,
+		.darkForest-form .wave { width: 165px; }
 
+		.darkForest-form .detail {
+			width: 150px;
+			height: 205px;
+		}
+
+		.darkForest-form .waves { display: inline-block; }
+
+		.darkForest-form .form > h4 { border-bottom: 1px solid #999; }
+
+		.darkForest-form .detail { border-right: 1px solid #999; }
+
+		.darkForest-form .wave + .wave { border-left: 1px solid #999; }
+
+		.darkForest-form .form .detail > div,
+		.darkForest-form .form .buttons { text-align: center; }
+
+		.darkForest-form .form .detail > div { margin: 2px; }
+
+		.darkForest-form .form .detail > div + div { margin-top: 10px; }
+
+		#kocfia-conf-panel .darkForest-form .waves img,
+		#kocfia-conf-panel .darkForest-form .keep img {
+			width: 20px;
+			vertical-align: middle;
+			margin: 0;
+			top: -2px;
+		}
+
+		.darkForest-form .waves input,
+		.darkForest-form .keep input {
+			width: 45px;
+			margin-left: 5px;
+			text-align: center;
+		}
+
+		.darkForest-form .waves label,
+		.darkForest-form .keep label { display: inline-block; }
+
+		.darkForest-form .detail,
+		.darkForest-form .wave,
+		.darkForest-form .waves { float: left; }
+
+		.darkForest-form .keep .units div,
+		.darkForest-form .wave .units div { padding: 2px 3px; }
+
+		.darkForest-form .keep .units,
+		.darkForest-form .wave .units {
+			-moz-column-count: 2;
+			-moz-column-gap: 3px;
+			-webkit-column-count: 2;
+			-webkit-column-gap: 3px;
+			column-count: 2;
+			column-gap: 3px;
+		}
+
+		.darkForest-form .waves .wave:first-child:last-child .remove { display: none; }
+
+		.darkForest-form .waves { counter-reset: fo-wave; }
+
+		.darkForest-form .waves .wave h5:after {
+			counter-increment: fo-wave;
+			content: ' ' counter(fo-wave);
+		}
+
+		.darkForest-form .waves .wave:first-child:last-child h5:after { display: none; }
 
 	/* scout attack form */
 		#kocfia-scout .attack-form .launch,

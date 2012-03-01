@@ -2983,7 +2983,6 @@ jQuery(document).ready(function(){
 
 			for( i = 0; i < length; i += 1 ){
 				cityKey = KOCFIA.citiesKey[i];
-
 				//barbarian camps
 					barbariansRes = [];
 					barbariansTroops = [];
@@ -3349,7 +3348,7 @@ jQuery(document).ready(function(){
 						if( stockInSeed ){
 							if( stockInSeed.hasOwnProperty('type') ){
 								s = parseFloat( window.seed.resources[ cityKey ][ stockInSeed.type ][ stockInSeed.index ] );
-								if( stock.name.indexOf('x3600') > -1 ) s = s / 3600;
+								if( stock.name.indexOf('x3600') > -1 ) s /= 3600;
 							} else {
 								s = parseFloat( window.seed.citystats[ cityKey ].gold[ stockInSeed.index ] );
 							}
@@ -3362,8 +3361,8 @@ jQuery(document).ready(function(){
 								n = s / ( -1 * total[j] ) * 3600;
 								s = Shared.readableDuration( n );
 								b = s.split(' ');
-								if( b.length > 2 ) s = b.slice(0, 2);
-								b = s;
+								if( b.length > 2 ) b = b.slice(0, 2).join(' ');
+								else b = s;
 								$td.html( b );
 
 								if( KOCFIA.conf.alarm.active && KOCFIA.conf.alarm.autonomy && !isNaN(n) && n < 24 * 3600 ){
@@ -3477,7 +3476,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('kocfia overview calcInnerSizes function');
 			KOCFIA.overview.$cityTds.css('width', '');
 
-			var tableH = size.height - 30 - (KOCFIA.overview.movable ? KOCFIA.overview.$div.find('h3').outerHeight(true) - 10 : 0);
+			var tableH = size.height - (KOCFIA.overview.movable ? KOCFIA.overview.$div.find('h3').outerHeight(true) - 10 : 4);
 			KOCFIA.overview.$wrap.css('height', tableH);
 			KOCFIA.overview.$tbody.css('height', tableH - 3 - KOCFIA.overview.$header.height());
 
@@ -5148,8 +5147,6 @@ jQuery(document).ready(function(){
 			buttons += '<button class="button danger whole-reset">Annuler</button>';
 			buttons += '</div>';
 
-			form += buttons;
-
 			//toggle
 			form += '<div class="city-toggles buttonset">';
 			form += '<label>Afficher :</label>';
@@ -5162,6 +5159,8 @@ jQuery(document).ready(function(){
 				tbodies += '<tbody data-city="'+ cityKey +'"></tbody>';
 			}
 			form += '</div>';
+
+			form += buttons;
 
 			form += '<table>';
 			form += tbodies;
@@ -5325,6 +5324,8 @@ jQuery(document).ready(function(){
 							code = '<tr><th colspan="3">',
 							city = KOCFIA.cities[ cityKey ];
 
+						KOCFIA.darkForest.$form.find('table').siblings('.buttons').show();
+
 						code += '<div><label for="kocfia-darkForest-rps-'+ cityKey +'">Laisser :</label>';
 						code += '<input type="number" id="kocfia-darkForest-rps-'+ cityKey +'" class="rps" min="0" max="11" required value="0">';
 						code += 'place(s) dans le point de ralliement</div>';
@@ -5334,24 +5335,28 @@ jQuery(document).ready(function(){
 
 						code += '</th></tr>';
 						code += '<tr><td class="builds">';
-						code += '<h4>Attaques type</h4>';
-						code += KOCFIA.darkForest.getBuildsList();
+						code += '<h4>Configurations</h4>';
+						code += '<div>'+ KOCFIA.darkForest.getBuildsList() +'</div>';
 
 						code += '</td><td class="keep">';
-						code += '<h4>Conserver</h4>';
+						code += '<h4>Conserver</h4><div class="units">';
 						for( var i = 0, l = KOCFIA.troops.length; i < l; i += 1 ){
 							unitInfo = KOCFIA.troops[ i ];
 							code += '<div><label id="kocfia-darkForest-keep-'+ unitInfo.name +'-qty" title="'+ unitInfo.label +'"><img src="'+ unitInfo.icon +'"></label>';
 							code += '<input id="kocfia-darkForest-keep-'+ unitInfo.name +'-qty" type="text" rel="'+ unitInfo.name +'" pattern="'+ Shared.numberRegExp +'">';
 							code += '</div>';
 						}
-						code += '</td><td class="form" rowspan="2"></td></tr>';
-
-						code += '<tr><td colspan="2" class="summary">';
+						code += '</div></td><td class="summary">';
 						code += '<h4>Résumé</h4>';
-						code += '<td></tr>';
+						code += '</td></tr>';
+
+						code += '<tr><td class="form" colspan="3"></td></tr>';
 
 						$tbody.append( code );
+					} else {
+						if( KOCFIA.darkForest.$form.find('.city-toggles').find('input').filter(':checked').length === 0 ){
+							KOCFIA.darkForest.$form.find('table').siblings('.buttons').hide();
+						}
 					}
 				})
 				//builds management
@@ -5359,68 +5364,147 @@ jQuery(document).ready(function(){
 					var $this = $(this),
 						rel = $this.attr('rel'),
 						$tr = $this.closest('tr'),
-						cityKey = $tr.closest('tbody').data('city'),
-						$form = $tr.find('.form');
-
-					if( $form.length ) $form.remove();
+						$tbody = $tr.closest('tbody'),
+						cityKey = $tbody.data('city'),
+						$placeholder = $tbody.find('.form');
 
 					var $form = $tr.find('.keep').clone();
 
-					var level = '<label for="kocfia-darkForest-form-'+ cityKey +'-level">Niveau :</label>';
-					level += '<input type="number" required min="1" max="10" id="kocfia-darkForest-form-'+ cityKey +'-level" class="level">';
+					var level = '<div><label for="kocfia-darkForest-form-'+ cityKey +'-level">Niveau :</label>';
+					level += '<input type="number" required min="1" max="10" id="kocfia-darkForest-form-'+ cityKey +'-level" class="level"></div>';
+
+					var knight = '<div><label for="kocfia-darkForest-form-knight-'+ cityKey +'">Chevalier :</label>';
+					knight += '<select id="kocfia-darkForest-form-knight-'+ cityKey +'" class="knight-priority">';
+					knight += '<option value="">N\'importe</option>';
+					knight += '<option value="highest">Combat haut</option>';
+					knight += '<option value="lowest">Combat bas</option>';
+					knight += '</select></div>';
 
 					var waves = '<div class="waves"><div class="wave"><h5>Vague</h5></div></div>',
-						$units = $form.find('div').detach();
+						$units = $form.find('.units').detach();
 
 					var buttons = '<div class="buttons">';
+					buttons += '<button class="button secondary add"><span>Ajouter une vague</span></button>';
 					buttons += '<button class="button modify minimize" title="Valide cette configuration et la déplace dans le résumé"><span>Appliquer et Réduire</span></button>';
 					buttons += '<button class="button danger reset" title="Remet à zéro cette configuration"><span>Annuler</span></button>';
 					buttons += '<button class="button danger delete" title="Supprime cette configuration"><span>Supprimer</span></button>';
 					buttons += '</div>';
 
 					var waveButtons = '<div class="buttons">';
-					buttons += '<button class="button modify remove" title="Supprime cette vague"><span>Enlever</span></button>';
-					buttons += '<button class="button modify copy" title="Ajoute une nouvelle cette vague à partir de celle-ci"><span>Copier</span></button>';
-					buttons += '</div>';
+					waveButtons += '<button class="button modify copy" title="Ajoute une nouvelle cette vague à partir de celle-ci"><span>Copier</span></button>';
+					waveButtons += '<button class="button danger remove" title="Supprime cette vague"><span>Enlever</span></button>';
+					waveButtons += '</div>';
 
 					$form.removeClass('keep').addClass('form')
-						.attr('rowspan', 2)
-						.find('h4').html('Configuration')
+						.attr('colspan', 3)
+						.find('h4').html('Configuration de l\'attaque')
 						.end()
-						.append( level )
-						.append( '<button class="button secondary add"><span>Ajouter une autre vague</span></button>' )
-						.append( waves )
-						.append( buttons )
+						.append( '<div class="detail"><h5>Détails</h5>'+ level + knight + buttons +'</div>' )
+						.append( waves );
 
 					$form.find('.wave')
 						.append( waveButtons )
 						.append( $units );
 
-					$form.appendTo( $tr );
+					$placeholder.replaceWith( $form );
 
 					if( rel != 'empty' ){
 						KOCFIA.darkForest.setBuildConf( rel, $form );
 					}
 				})
 				//empty wave add
-				.on('clic', '.form .add', function(){
+				.on('click', '.detail .add', function(){
 					var $form = $(this).closest('.form'),
 						$waves = $form.find('.waves');
 
 					var $wave = $waves.find('.wave').eq(0).clone();
 					$wave.find('input').val('');
 
-					$wave.appendTo( $waves );
+					$waves.append( $wave );
 				})
 				//check the rule, if ok transform and move it to the summary
-				.on('clic', '.form .minimize', function(){
+				.on('click', '.detail .minimize', function(){
 					var $form = $(this).closest('.form'),
-						$waves = $form.find('.waves');
+						$waves = $form.find('.wave');
 
-					//@TODO
+					var rule = {},
+						errors = [];
+
+					var $level = $form.find('.level');
+					if( $level[0].checkValidity() ){
+						rule.level = $level.val();
+					} else {
+						errors.push('Niveau non valide');
+					}
+
+					rule.knightPriority = $form.find('.knight-priority').val();
+
+					var waves = [], i = 1, unitInfo;
+					$waves.each(function(){
+						var wave = [];
+						$(this).find('input').each(function(){
+							var $this = $(this),
+								qty = $.trim( $(this).val() ),
+								unit = $this.attr('rel');
+							if( qty !== '' ){
+								qty = Shared.decodeFormat( qty );
+								if( qty !== false ) wave.push({id: unit, qty: qty});
+								else {
+									unitInfo = KOCFIA.resourceInfo[ unit ];
+									errors.push('Quantité invalide pour '+ unitInfo.labelBis + unitInfo.label +' de la vague '+ i);
+								}
+							}
+						});
+						if( wave.length ) waves.push( wave );
+						else {
+							errors.push('Aucune unité valide pour la vague '+ i);
+						}
+						i += 1;
+					});
+
+					if( waves.length > 0 && errors.length === 0 ){
+						rule.waves = waves;
+
+						var $summary = $form.closest('tbody').find('.summary');
+							$rule = $summary.find('.rule').filter('[data-level="'+ rule.level +'"]');
+
+						var line = '<div class="rule" data-level="'+ rule.level +'" data-knightPriority="'+ rule.knightPriority +'"';
+						line += ' data-waves="'+ JSON.stringify( rule.waves ) +'">';
+						line += 'FO'+ rule.level;
+						line += ' | chevalier : ';
+						if( rule.knightPriority === '' ) line += 'n\'importe';
+						else if( rule.knightPriority == 'highest' ) line += 'combat haut';
+						else line += 'combat bas';
+
+						var wavesLength, unitsLength, j;
+						for( i = 0, wavesLength = rule.waves.length, j; i < wavesLength; i += 1 ){
+							line += ' | vague '+ (i + 1) + ' :';
+							for( j = 0, unitsLength = rules.waves[i].length; j < unitsLength; j += 1 ){
+								unit = rules.waves[i][j].id;
+								unitInfo = KOCFIA.unitInfo[ unit ];
+								qty = rules.waves[i][j].qty;
+								if( j > 0 ) line += ',';
+								line += ' <span title="'+ unitInfo.label +' - '+ Shared.readable(qty) +'"><img src="'+ unitInfo.icon +'">'+ Shared.format(qty) +'</span>';
+							}
+						}
+						line += '</div>';
+
+						if( $rule.length ){
+							$rule.replaceWith( line );
+						} else {
+							$summary.append( line );
+						}
+
+						$form.find('.delete').trigger('click');
+					} else {
+						errors.push('Attaque invalide');
+						var $target = $this.closest('.ui-accordion-content');
+						$target.find('.kocfia-error, .kocfia-success').remove();
+						Shared.notify( $target, $this, errors.unique() );
+					}
 				})
 				//reset the rule form
-				.on('clic', '.form .reset', function(){
+				.on('click', '.detail .reset', function(){
 					var $form = $(this).closest('.form'),
 						$waves = $form.find('.waves');
 
@@ -5429,15 +5513,17 @@ jQuery(document).ready(function(){
 					$form.find('input').val('');
 				})
 				//delete the rule
-				.on('clic', '.form .delete', function(){
-					$(this).closest('.form').remove();
+				.on('click', '.detail .delete', function(){
+					$(this).closest('.form').replaceWith('<td colspan="3" class="form"></td>');
+					$('.tipsy').remove();
 				})
 				//delete the wave
-				.on('clic', '.form .wave .remove', function(){
+				.on('click', '.wave .remove', function(){
 					$(this).closest('.wave').remove();
+					$('.tipsy').remove();
 				})
 				//delete the wave
-				.on('clic', '.form .wave .copy', function(){
+				.on('click', '.wave .copy', function(){
 					var $this = $(this),
 						$wave = $this.closest('.wave').clone();
 

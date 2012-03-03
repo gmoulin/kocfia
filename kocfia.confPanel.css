@@ -401,6 +401,8 @@ body.noModal .modalBox:not(.previous) {
 
 		.darkForest-form table { width: 100%; }
 
+		.darkForest-form tbody tr { display: none; }
+
 		.darkForest-form th div {
 			float: right;
 			font-weight: normal;
@@ -471,6 +473,7 @@ body.noModal .modalBox:not(.previous) {
 
 		.darkForest-form .form .detail > div + div { margin-top: 10px; }
 
+		#kocfia-conf-panel .darkForest-form .summary img,
 		#kocfia-conf-panel .darkForest-form .waves img,
 		#kocfia-conf-panel .darkForest-form .keep img {
 			width: 20px;
@@ -478,6 +481,16 @@ body.noModal .modalBox:not(.previous) {
 			margin: 0;
 			top: -2px;
 		}
+
+		#kocfia-conf-panel .darkForest-form .summary img { margin-left: 2px; }
+
+		.darkForest-form .summary .rule { margin: 2px 0; }
+
+		.darkForest-form .summary .rule img { margin-left: 2px; }
+
+		.darkForest-form .summary .rule span + .button { margin-left: 5px; }
+
+		.darkForest-form .summary .rule .button { margin: 0 2px; }
 
 		.darkForest-form .waves input,
 		.darkForest-form .keep input {
@@ -507,8 +520,6 @@ body.noModal .modalBox:not(.previous) {
 		}
 
 		.darkForest-form .waves .wave:first-child:last-child .remove { display: none; }
-
-		.darkForest-form .waves { counter-reset: fo-wave; }
 
 		.darkForest-form .waves .wave h5:after {
 			counter-increment: fo-wave;
@@ -999,7 +1010,7 @@ body.noModal .modalBox:not(.previous) {
 	.kocfia-error,
 	.kocfia-success {
 		position: absolute;
-		top: 0;
+		top: 40%;
 		left: 0;
 		z-index: 100002;
 		background-color: rgba(0, 0, 0, 0.8);

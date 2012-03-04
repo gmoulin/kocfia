@@ -453,6 +453,11 @@ body.noModal .modalBox:not(.previous) {
 		.darkForest-form .keep,
 		.darkForest-form .wave { width: 165px; }
 
+		.darkForest-form .keep div:not(.units) {
+			margin-top: 10;
+			text-align: center;
+		}
+
 		.darkForest-form .detail {
 			width: 150px;
 			height: 205px;
@@ -681,33 +686,8 @@ body.noModal .modalBox:not(.previous) {
 		}
 
 	/* dark forest specific */
-		#kocfia-darkForest .ongoing .trip > div {
-			position: relative;
-			padding-bottom: 5px;
-			margin: 0 5px 5px 5px;
-		}
-
-		#kocfia-darkForest .ongoing .trip > div:not(:last-child) {
-			border-bottom: 1px solid #ccc;
-		}
-
-		#kocfia-darkForest .ongoing .trip div div {
-			width: 200px;
-			height: 60px;
-			float: left;
-			padding: 2px 4px;
-		}
-
-		#kocfia-darkForest .ongoing .trip div div:not(:last-child) {
-			border-right: 1px solid #ccc;
-			margin-right: 10px;
-			margin-bottom: 8px;
-		}
-
-		#kocfia-darkForest .ongoing .trip div .ui-icon {
-			position: absolute;
-			top: 0;
-			left: 0;
+		#kocfia-darkForest .ongoing .rules div {
+			margin: 2px 0;
 		}
 
 	/* transport specific */

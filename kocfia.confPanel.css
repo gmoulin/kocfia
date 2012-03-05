@@ -968,6 +968,38 @@ body.noModal .modalBox:not(.previous) {
 		font-weight: bold;
 	}
 
+/* estates tab */
+	#kocfia-estates table { width: 100%; }
+
+	#kocfia-estates .update,
+	#kocfia-estates .defend { top: 0; }
+
+	#kocfia-estates .defend { margin-left: 20px; }
+
+	#kocfia-estates td,
+	#ckofia-estates th { padding: 0 2px; }
+
+	#kocfia-estates tbody th { background-color: #E5DDC9; }
+
+	#kocfia-estates tr td:nth-child(1),
+	#kocfia-estates tr td:nth-child(2) { text-align: center; }
+
+	#kocfia-estates tr td:nth-child(4),
+	#kocfia-estates tr td:nth-child(5) { text-align: right; }
+
+	#kocfia-estates .traps {
+		width: 40px;
+		text-align: center;
+		margin: 0 3px;
+	}
+
+	#kocfia-estates .max { top: 0; }
+
+	#kocfia-conf-panel #kocfia-estates th img {
+		top: -2px;
+		vertical-align: middle;
+		width: 20px;
+	}
 
 /* input radio and checkbox normalize */
 	#kocfia-conf-panel input[type="checkbox"],

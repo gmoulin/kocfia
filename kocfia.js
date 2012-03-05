@@ -187,11 +187,11 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.5.0',
+		version: '0.5.1',
 		jQueryVersion: '1.7.1',
 		jQueryUiVersion: '1.8.18',
-		debug: false,
-		debugWhat: {darkForest: 1},
+		debug: true,
+		debugWhat: {estates: 1},
 		server: null,
 		modules: [
 			'chat', 'overview', 'map',
@@ -199,7 +199,7 @@ jQuery(document).ready(function(){
 			'formation', 'transport',
 			'fbWallPopup', 'notepad',
 			'alarm',
-			'summary', 'knights'//, 'estates'
+			'summary', 'knights', 'estates'
 		],
 		modulesLabel: {
 			overview: 'Résumé',
@@ -209,7 +209,7 @@ jQuery(document).ready(function(){
 			darkForest: 'Forêts Obscures <small>(éther, trône)</small>',
 			scout: 'Éclairages',
 			knights: 'Chevaliers',
-			estates: 'Terres'
+			estates: 'Terres Sauvages conquises'
 		},
 		tabLabel: {
 			map: 'Carte',
@@ -217,7 +217,8 @@ jQuery(document).ready(function(){
 			wilderness: 'TS',
 			darkForest: 'Forêts',
 			scout: 'Eclairage',
-			knights: 'Chevaliers'
+			knights: 'Chevaliers',
+			estates: 'Terres'
 		},
 		stored: ['conf'],
 		/* default configuration */
@@ -6258,7 +6259,7 @@ jQuery(document).ready(function(){
 
 						KOCFIA[ module ].storeAttacks();
 
-						KOCFIA.[ module ].$form.find('.reset').trigger('click');
+						KOCFIA[ module ].$form.find('.reset').trigger('click');
 
 						if( $(this).hasClass('saveAndLaunch') ){
 							KOCFIA[ module ].launchAttack( result.attack );
@@ -12134,7 +12135,10 @@ jQuery(document).ready(function(){
 			KOCFIA.knights.buttons.unpromote = '<button class="unpromote button danger"><span>Révoque</span></button>';
 			KOCFIA.knights.buttons.fire = '<button class=" button danger"><span>Licencie</span></button>';
 
-			var header = '<div class="buttonset">';
+			var header = '<div class="infos">';
+			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '</div><h3>Configurations</h3>';
+			header += '<div class="buttonset">Afficher : ';
 
 			var code = '<table><thead><tr>';
 			code += '<th><button class="button update" title="Met à jour les informations sur les chevaliers"><span>Raffraîchir</span></button></th>';
@@ -12163,7 +12167,9 @@ jQuery(document).ready(function(){
 			header += '</div>';
 			code += '</table>';
 
-			$section.append( header + code )
+			var help = KOCFIA.knights.getHelp();
+
+			$section.append( header + code + help )
 				.on('change', '.buttonset input', function(){
 					KOCFIA.knights.$tbodies.filter('[data-city="'+ this.value +'"]').toggle( $(this).prop('checked') );
 				})
@@ -12291,6 +12297,15 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights off function');
 		};
 
+		KOCFIA.knights.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights getHelp function');
+			var help = '<div id="kocfia-knights-help" class="help" title="Aide gestion des '+ KOCFIA.modLabels.knights +'">';
+			help += '<h4>todo</h4><ul>';
+			help += '</ul></div>';
+
+			return help;
+		};
+
 		KOCFIA.knights.update = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights update function');
 
@@ -12309,7 +12324,7 @@ jQuery(document).ready(function(){
 			var code = '<tbody data-city="'+ cityKey +'">',
 				knights = window.seed.knights[ cityKey ],
 				leaders = window.seed.leaders[ cityKey ],
-				options = '';
+				options = '', k;
 
 			code += '<tr><th colspan="12">'+ KOCFIA.cities[ cityKey ].label +'</th></tr>';
 
@@ -12701,6 +12716,516 @@ jQuery(document).ready(function(){
 				};
 
 				return dfd.pipe( request(3) );
+			}).promise();
+		};
+
+	/* ESTATES */
+		KOCFIA.estates = {
+			options: {
+				active: 1
+			},
+			mercenaryCost: [0, 200, 400, 1000],
+			current: {}, //current defenses by cityKey and tileKey
+			modifications: {} //user modifications by cityKey and tileKey
+		};
+
+		KOCFIA.estates.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.estates +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('estates', 'active', 'Activer', KOCFIA.conf.estates.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.estates.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-estates').html('');
+
+			var i, cityKey, city;
+
+			var header = '<h3>'+ KOCFIA.modLabels.estates +'</h3>';
+			header += '<div class="buttonset">Afficher : ';
+
+			var code = '<table><thead><tr>';
+			code += '<th>Actions</th>';
+			code += '<th>Coordonnées</th>';
+			code += '<th>Type</th>';
+			code += '<th colspan="2">Défenses</th>';
+			code += '</tr></thead>';
+
+			for( i = 0, l = KOCFIA.citiesKey.length; i < l; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+				city = KOCFIA.cities[ cityKey ];
+
+				header += '<input type="checkbox" id="kocfia-estates-'+ cityKey +'" value="'+ cityKey +'" checked>';
+				header += '<label for="kocfia-estates-'+ cityKey +'">'+ city.label +'</label>';
+
+				code += KOCFIA.estates.byCity( cityKey );
+			}
+
+			header += '</div>';
+			code += '</table>';
+
+			var help = KOCFIA.estates.getHelp();
+
+			$section.append( header + code + help )
+				.on('change', '.buttonset input', function(){
+					KOCFIA.estates.$tbodies.filter('[data-city="'+ this.value +'"]').toggle( $(this).prop('checked') );
+				})
+				.on('click', '.update', function(){
+					var $tbody = $(this).closest('tbody'),
+						cityKey = $tbody.data('city'),
+						$code = $( KOCFIA.estates.byCity(cityKey) );
+
+						$tbody.html( $code.html() );
+						$('.tipsy').remove();
+				})
+				.on('click', '.abandon', function(){
+					var $this = $(this),
+						tileKey = $this.attr('rel'),
+						$tbody = $this.closest('tbody'),
+						cityKey = $tbody.data('city');
+
+					$.when( KOCFIA.estates.abandon( cityKey, tileKey ) )
+						.done(function(){
+							Shared.success( null );
+							var $code = $( KOCFIA.estates.byCity( cityKey ) );
+							$tbody.html( $code.html() );
+						})
+						.fail(function(){
+							Shared.notify('Erreur');
+						});
+				})
+				.on('click', '.max', function(){
+					var $this = $(this),
+						max = parseInt($this.attr('data-max'), 10),
+						$tr = $this.closest('tr'),
+						tileKey = $tr.data('tile'),
+						$tbody = $tr.closest('tbody'),
+						cityKey = $tbody.data('city'),
+						$cost = $tbody.find('.cost'),
+						$input = $this.siblings('input'),
+						t, cost = 0;
+
+					$input.val( Shared.readable( max ) );
+
+					if( !KOCFIA.estates.modifications.hasOwnProperty( cityKey ) ){
+						KOCFIA.estates.modifications[ cityKey ] = {};
+					}
+
+					if( !KOCFIA.estates.modifications[ cityKey ].hasOwnProperty( tileKey ) ){
+						KOCFIA.estates.modifications[ cityKey ][ tileKey ] = {};
+					}
+
+					KOCFIA.estates.modifications[ cityKey ][ tileKey ].traps = max;
+
+					for( t in KOCFIA.estates.modifications[ cityKey ] ){
+						if( KOCFIA.estates.modifications[ cityKey ].hasOwnProperty(t) ){
+							if( KOCFIA.estates.modifications[ cityKey ][ t ].hasOwnProperty('traps') ){
+								cost += KOCFIA.estates.modifications[ cityKey ][ t ]['traps'] * 200;
+							}
+							if( KOCFIA.estates.modifications[ cityKey ][ t ].hasOwnProperty('mercenary') ){
+								cost += KOCFIA.estates.mercenaryCost[ KOCFIA.estates.modifications[ cityKey ][ t ]['mercenaries'] ];
+							}
+						}
+					}
+
+					$cost.html( Shared.format( cost ) )
+						.attr('title', Shared.readable( cost ))
+						.removeAttr('original-title');
+				})
+				.on('keyup', '.traps', function(){
+					var $this = $(this),
+						$max = $this.siblings('.button'),
+						max = parseInt($max.attr('data-max'), 10),
+						$tr = $this.closest('tr'),
+						tileKey = $tr.data('tile'),
+						$tbody = $tr.closest('tbody'),
+						cityKey = $tbody.data('city'),
+						$cost = $tbody.find('.cost'),
+						value, cost = 0, t;
+
+					value = (this.checkValidity() ? Shared.decode( this.value ) || 0 : 0);
+					if( value > max ){
+						value = max;
+						$this.val( Shared.format( max ) );
+					}
+
+					if( !KOCFIA.estates.modifications.hasOwnProperty( cityKey ) ){
+						KOCFIA.estates.modifications[ cityKey ] = {};
+					}
+
+					if( !KOCFIA.estates.modifications[ cityKey ].hasOwnProperty( tileKey ) ){
+						KOCFIA.estates.modifications[ cityKey ][ tileKey ] = {};
+					}
+
+					KOCFIA.estates.modifications[ cityKey ][ tileKey ].traps = value;
+
+					for( t in KOCFIA.estates.modifications[ cityKey ] ){
+						if( KOCFIA.estates.modifications[ cityKey ].hasOwnProperty(t) ){
+							if( KOCFIA.estates.modifications[ cityKey ][ t ].hasOwnProperty('traps') ){
+								cost += KOCFIA.estates.modifications[ cityKey ][ t ]['traps'] * 200;
+							}
+							if( KOCFIA.estates.modifications[ cityKey ][ t ].hasOwnProperty('mercenary') ){
+								cost += KOCFIA.estates.mercenaryCost[ KOCFIA.estates.modifications[ cityKey ][ t ]['mercenaries'] ];
+							}
+						}
+					}
+
+					$cost.html( Shared.format( cost ) )
+						.attr('title', Shared.readable( cost ))
+						.removeAttr('original-title');
+				})
+				.on('change', '.mercenaries', function(){
+					var $this = $(this),
+						index = parseInt($this.val(), 10),
+						$tr = $this.closest('tr'),
+						tileKey = $tr.data('tile'),
+						$tbody = $tr.closest('tbody'),
+						cityKey = $tbody.data('city'),
+						$cost = $tbody.find('.cost'),
+						cost = 0, t;
+
+					if( !KOCFIA.estates.modifications.hasOwnProperty( cityKey ) ){
+						KOCFIA.estates.modifications[ cityKey ] = {};
+					}
+
+					if( !KOCFIA.estates.modifications[ cityKey ].hasOwnProperty( tileKey ) ){
+						KOCFIA.estates.modifications[ cityKey ][ tileKey ] = {};
+					}
+
+					KOCFIA.estates.modifications[ cityKey ][ tileKey ].mercenaries = index;
+
+					for( t in KOCFIA.estates.modifications[ cityKey ] ){
+						if( KOCFIA.estates.modifications[ cityKey ].hasOwnProperty(t) ){
+							if( KOCFIA.estates.modifications[ cityKey ][ t ].hasOwnProperty('traps') ){
+								cost += KOCFIA.estates.modifications[ cityKey ][ t ]['traps'] * 200;
+							}
+							if( KOCFIA.estates.modifications[ cityKey ][ t ].hasOwnProperty('mercenaries') ){
+								cost += KOCFIA.estates.mercenaryCost[ KOCFIA.estates.modifications[ cityKey ][ t ]['mercenaries'] ];
+							}
+						}
+					}
+
+					$cost.html( Shared.format( cost ) )
+						.attr('title', Shared.readable( cost ))
+						.removeAttr('original-title');
+				})
+				.on('click', '.defend', function(){
+					var $this = $(this),
+						$tbody = $this.closest('tbody'),
+						cityKey = $tbody.data('city');
+
+					$.when( KOCFIA.estates.defend( cityKey ) )
+						.done(function(){
+							Shared.success( null );
+							var $code = $( KOCFIA.estates.byCity( cityKey ) );
+							$tbody.html( $code.html() );
+						})
+						.fail(function(){
+							Shared.notify('Erreur');
+							var $code = $( KOCFIA.estates.byCity( cityKey ) );
+							$tbody.html( $code.html() );
+						});
+				});
+
+			KOCFIA.estates.$tbodies = $('#kocfia-estates').find('tbody');
+		};
+
+		KOCFIA.estates.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates on function');
+		};
+
+		KOCFIA.estates.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates off function');
+		};
+
+		KOCFIA.estates.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA estates getHelp function');
+			var help = '<div id="kocfia-estates-help" class="help" title="Aide gestion des '+ KOCFIA.modLabels.estate +'">';
+			help += '<h4>todo</h4><ul>';
+			help += '</ul></div>';
+
+			return help;
+		};
+
+		KOCFIA.estates.update = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates update function');
+			var cityKey, $code;
+
+			for( i = 0, l = KOCFIA.citiesKey.length; i < l; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+
+				$code = $( KOCFIA.estates.byCity( cityKey ) );
+				KOCFIA.estates.$tbodies.filter('[data-city="'+ cityKey +'"]').html( $code.html() );
+			}
+		};
+
+		KOCFIA.estates.byCity = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates byCity function');
+			var code = '<tbody data-city="'+ cityKey +'">',
+				estates = window.seed.wilderness[ cityKey ],
+				e, estate, maxTraps, ownedTraps, mercenaryIndex,
+				types = {10: 'Plaine', 11: 'Prairie', 20: 'Forêt', 30: 'Colline', 40: 'Montagne'},
+				nb = 0, max = window.seed.buildings[ cityKey ]['pos0'][1];
+
+			if( max == 11 ) max = 12;
+			else if( max == 12 ) max = 14;
+
+			for( e in estates ){
+				if( estates.hasOwnProperty(e) ) nb += 1;
+			}
+
+			code += '<tr>';
+			code += '<th><button class="button secondary update" title="Met à jour les informations sur les terres sauvages conquises de cette ville"><span>Raffraîchir</span></button></th>';
+			code += '<th>'+ KOCFIA.cities[ cityKey ].label +'</th>';
+			code += '<th>'+ nb +'/'+ max +'</th>';
+			code += '<th colspan="2">Coût <img src="'+ KOCFIA.resourceInfo.gold.icon +'" title="'+ KOCFIA.resourceInfo.gold.label +'">: ';
+			code += '<span class="cost" title="0">0</span> / <span title="'+ Shared.readable( window.seed.citystats[ cityKey ].gold[0] ) +'">';
+			code += Shared.format( window.seed.citystats[ cityKey ].gold[0] ) + '</span>';
+			code += '<button class="button modify defend" title="Construit les pièges et engages des mercenaires paramétrés pour les terres sauvages conquises de cette ville"><span>Appliquer</span></button></th>';
+			code += '</tr>';
+
+			if( KOCFIA.estates.modifications.hasOwnProperty(cityKey) ) delete KOCFIA.estates.modifications[ cityKey ];
+			if( !KOCFIA.estates.current.hasOwnProperty(cityKey) ) KOCFIA.estates.current[ cityKey ] = {};
+
+			for( e in estates ){
+				if( estates.hasOwnProperty(e) ){
+					estate = estates[e];
+
+					maxTraps = parseInt(estate.tileLevel, 10) * 100;
+					ownedTraps = parseInt(window.seed.wildDef[ e ].fort60Count, 10) || 0;
+					mercenaryIndex = parseInt(window.seed.wildDef[ e ].mercLevel, 10) || 0;
+					if( mercenaryIndex == 90 ) mercenaryIndex = 0;
+
+					KOCFIA.estates.current[ cityKey ][ e ] = {traps: ownedTraps, mercenaries: mercenaryIndex};
+
+					code += '<tr data-tile="'+ e +'">';
+					code += '<td><button class="button danger abandon" rel="t'+ estate.tileId +'"><span>Abandonne</span></button></td>';
+					code += '<td>'+ Shared.mapLink( estate.xCoord +','+ estate.yCoord ) +'</td>';
+					code += '<td>'+ types[ estate.tileType ] +' '+ estate.tileLevel +'</td>';
+					code += '<td>';
+					code += '<label for="kocfia-estates-'+ cityKey +'-'+ e +'-traps">Pièges :</label>';
+					code += '<input type="text" id="kocfia-estates-'+ cityKey +'-'+ e +'-traps" class="traps" value="'+ Shared.format( ownedTraps ) +'" pattern="'+ Shared.numberRegExp +'">';
+					code += '<button class="button secondary max" data-max="'+ maxTraps +'"><span>Maximum</span></button>';
+					code += '</td><td>';
+					code += '<label for="kocfia-estates-'+ cityKey +'-'+ e +'-mercenaries">Mercenaires :</label>';
+					code += '<select class="mercenaries" id="kocfia-estates-'+ cityKey +'-'+ e +'-mercenaries">';
+					code += '<option value="0" '+ (mercenaryIndex === 0 ? 'selected' : '') +'>Aucun</option>';
+					code += '<option value="1" '+ (mercenaryIndex === 1 ? 'selected' : '') +'>Novices</option>';
+					code += '<option value="2" '+ (mercenaryIndex === 2 ? 'selected' : '') +'>Intermédiaires</option>';
+					code += '<option value="3" '+ (mercenaryIndex === 3 ? 'selected' : '') +'>Vétérans</option>';
+					code += '</select></td>';
+					code += '</tr>';
+				}
+			}
+
+			code += '</tbody>';
+
+			return code;
+		};
+
+		KOCFIA.estates.abandon = function( cityKey, tileKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates abandon function');
+			return $.Deferred(function(dfd){
+				var params = $.extend({}, window.g_ajaxparams),
+					estate = window.seed.wilderness[ cityKey ][ tileKey ];
+				params.cid = cityKey.replace(/city/, '');
+				params.tid = estate.tileId;
+				params.x = estate.xCoord;
+				params.y = estate.yCoord;
+
+				var request = function( attempts ){
+					$.ajax({
+						url: window.g_ajaxpath + "ajax/abandonWilderness.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function(data){
+						if( data.ok ){
+							delete window.seed.wilderness[ cityKey ][ tileKey ];
+							if( $.isEmptyObject(window.seed.wilderness[ cityKey ]) ){
+								window.seed.wilderness[ cityKey ] = [];
+							}
+
+							if( data.returningMarches && !Array.isArray( data.returningMarches ) ){
+								var cityKey, march, marchKey, marchTime, timestamp = Date.timestamp();
+								for( cityKey in data.returningMarches ){
+									if( data.returningMarches.hasOwnProperty(cityKey) ){
+										for( j = 0; j < data.returningMarches[ cityKey ].length; j += 1 ){
+											marchKey = 'm'+ data.returningMarches[ cityKey ][ j ];
+											march = window.seed.queue_atkp[ cityKey ][ marchKey ];
+											if( march ){
+												marchTime = Math.abs(parseInt(march.destinationUnixTime, 10) - parseInt(march.marchUnixTime, 10));
+												window.seed.queue_atkp[ cityKey ][ marchKey ].destinationUnixTime = timetstamp;
+												window.seed.queue_atkp[ cityKey ][ marchKey ].marchUnixTime = timetstamp - marchTime;
+												window.seed.queue_atkp[ cityKey ][ marchKey ].returnUnixTime = timetstamp + marchTime;
+												window.seed.queue_atkp[ cityKey ][ marchKey ].marchStatus = 8;
+											}
+										}
+									}
+								}
+							}
+
+							if( data.updateSeed ){
+								window.update_seed( data.updateSeed );
+							}
+
+							return dfd.resolve();
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								return dfd.pipe( request( attempts ) );
+							} else {
+								return dfd.reject();
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							return dfd.pipe( request( attempts ) );
+						} else {
+							return dfd.reject();
+						}
+					});
+				};
+
+				return dfd.pipe( request(3) );
+			}).promise();
+		};
+
+		KOCFIA.estates.defend = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates abandon function');
+			return $.Deferred(function(dfd){
+				var params = $.extend({}, window.g_ajaxparams);
+				params.cid = cityKey.replace(/city/, '');
+
+				if( !KOCFIA.estates.modifications.hasOwnProperty( cityKey ) || $.isEmptyObject(KOCFIA.estates.modifications[ cityKey ]) ){
+					Shared.notify('Aucune modification trouvée');
+					return dfd.reject();
+				}
+
+				var modificationsIndex = 0,
+					modifiedTiles = Object.keys(KOCFIA.estates.modification[ cityKey ]),
+					length = modifiedTiles.length,
+					tileKey, modification;
+
+				var loop = function(){
+					if( modificationsIndex > length ){
+						return dfd.resolve();
+					}
+
+					if( !KOCFIA.estates.modification[ cityKey ].hasOwnProperty( modifiedTiles[ modificationsIndex ] ) ){
+						modificationsIndex += 1;
+						return dfd.pipe( loop() );
+					}
+
+					tileKey = modifiedTiles[ modificationsIndex ];
+
+					modification = KOCFIA.estates.modification[ cityKey ][ tileKey ];
+
+					params.tid = parseInt(tileKey.replace(/t/, ''), 10);
+
+					return dfd.pipe( traps(3) );
+				};
+
+				var traps = function( attempts ){
+					if( !modification.hasOwnProperty('traps') ){
+						return dfd.pipe( mercenaries(3) );
+					}
+
+					tParams = $.extend({}, params);
+					tParams.quant = modification.traps;
+
+					$.ajax({
+						url: window.g_ajaxpath + "ajax/buyWildTraps.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: tParams,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function(data){
+						if( data.ok ){
+							window.seed.wildDef[ tileKey ].fort60Count = (parseInt(window.seed.wildDef[ tileKey ].fort60Count, 10) || 0) + parseInt(modification.traps, 10);
+							delete KOCFIA.estates.modifications[ cityKey ][ tileKey ].traps;
+
+							if( data.updateSeed ){
+								window.update_seed( data.updateSeed );
+							}
+
+							return dfd.pipe( mercenaries(3) );
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								return dfd.pipe( traps( attempts ) );
+							} else {
+								return dfd.reject();
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							return dfd.pipe( traps( attempts ) );
+						} else {
+							return dfd.reject();
+						}
+					});
+				};
+
+				var mercenaries = function( attempts ){
+					if( !modification.hasOwnProperty('mercenaries') ){
+						modificationsIndex += 1;
+						return dfd.pipe( loop() );
+					}
+
+					mParams = $.extend({}, params);
+					mParams.lv = modification.mercenaries;
+					mParams.olv = KOCFIA.estates.current[ cityKey ][ tileKey ].mercenaries;
+
+					$.ajax({
+						url: window.g_ajaxpath + "ajax/hireWildMerc.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: mParams,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function(data){
+						if( data.ok ){
+							window.seed.wildDef[ tileKey ].mercLevel = modification.mercenaries;
+							delete KOCFIA.estates.modifications[ cityKey ][ tileKey ].mercenaries;
+
+							if( data.updateSeed ){
+								window.update_seed( data.updateSeed );
+							}
+
+							modificationsIndex += 1;
+							return dfd.pipe( loop() );
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								return dfd.pipe( traps( attempts ) );
+							} else {
+								return dfd.reject();
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							return dfd.pipe( traps( attempts ) );
+						} else {
+							return dfd.reject();
+						}
+					});
+				};
+
+				return dfd.pipe( loop() );
 			}).promise();
 		};
 

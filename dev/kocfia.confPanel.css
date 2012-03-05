@@ -96,7 +96,8 @@ body.noModal .modalBox:not(.previous) {
 		}
 
 		.ui-tabs-panel h3 span,
-		.ui-tabs-panel h3 .button {
+		.ui-tabs-panel h3 .button,
+		#kocfia-conf-panel .ui-tabs-panel h3 .button + .button {
 			float: right;
 			margin: 0 5px;
 		}
@@ -169,6 +170,18 @@ body.noModal .modalBox:not(.previous) {
 	#kocfia-reload-msg { top: 3px; }
 
 	/* dialog with draggable zone near borders */
+		.ui-resizable-se {
+			bottom: -4px;
+			height: 16px;
+			right: -4px;
+			width: 16px;
+		}
+
+		.ui-resizable-ne,
+		.ui-resizable-se,
+		.ui-resizable-nw,
+		.ui-resizable-sw { z-index: 100000 !important; }
+
 		.ui-draggable.ui-resizable .move-handle {
 			display: block;
 			line-height: 0;
@@ -258,6 +271,8 @@ body.noModal .modalBox:not(.previous) {
 		height: 70px;
 		display: none;
 	}
+
+	#kocfia-map .status label + label { margin-bottom: 5px; }
 
 	#kocfia-map fieldset > div { margin: 5px 0; }
 
@@ -372,6 +387,152 @@ body.noModal .modalBox:not(.previous) {
 
 	.attack-form .rallypointSlot { margin-right: 5px; }
 
+	/* dark forest attack form */
+		.darkForest-form .buttons {
+			text-align: right;
+			margin-bottom: 5px;
+		}
+
+		.darkForest-form > .buttons { display: none; }
+
+		.darkForest-form .buttons .button { margin: 0 5px 0 0; }
+
+		.darkForest-form .city-toggles { margin-bottom: 5px; }
+
+		.darkForest-form table { width: 100%; }
+
+		.darkForest-form tbody tr { display: none; }
+
+		.darkForest-form th div {
+			float: right;
+			font-weight: normal;
+			margin-right: 5px;
+		}
+
+		.darkForest-form th { background-color: #E5DDC9; }
+
+		.darkForest-form th,
+		.darkForest-form td {
+			padding: 3px;
+			vertical-align: top;
+			text-align: left;
+		}
+
+		.darkForest-form h4,
+		.darkForest-form h5 {
+			text-align: center;
+			margin: 0 0 5px 0;
+		}
+
+		.darkForest-form h5 { font-size: 11px; }
+
+		.darkForest-form .rps,
+		.darkForest-form .level {
+			width: 25px;
+			text-align: center;
+			margin: 0 3px;
+		}
+
+		.darkForest-form .builds { width: 90px; }
+
+		.darkForest-form .builds div {
+			-moz-column-count: 2;
+			-moz-column-gap: 5px;
+			-webkit-column-count: 2;
+			-webkit-column-gap: 5px;
+			column-count: 2;
+			column-gap: 5px;
+		}
+
+		.darkForest-form .form .button,
+		.darkForest-form .builds .button { margin: 3px; }
+
+		.darkForest-form .keep,
+		.darkForest-form .wave { white-space: nowrap; }
+
+		.darkForest-form .keep,
+		.darkForest-form .wave { width: 165px; }
+
+		.darkForest-form .keep div:not(.units) {
+			margin-top: 10;
+			text-align: center;
+		}
+
+		.darkForest-form .detail {
+			width: 150px;
+			height: 205px;
+		}
+
+		.darkForest-form .waves { display: inline-block; }
+
+		.darkForest-form .form > h4 { border-bottom: 1px solid #999; }
+
+		.darkForest-form .detail { border-right: 1px solid #999; }
+
+		.darkForest-form .wave + .wave { border-left: 1px solid #999; }
+
+		.darkForest-form .form .detail > div,
+		.darkForest-form .form .buttons { text-align: center; }
+
+		.darkForest-form .form .detail > div { margin: 2px; }
+
+		.darkForest-form .form .detail > div + div { margin-top: 10px; }
+
+		#kocfia-conf-panel .darkForest-form .summary img,
+		#kocfia-conf-panel .darkForest-form .waves img,
+		#kocfia-conf-panel .darkForest-form .keep img {
+			width: 20px;
+			vertical-align: middle;
+			margin: 0;
+			top: -2px;
+		}
+
+		#kocfia-conf-panel .darkForest-form .summary img { margin-left: 2px; }
+
+		.darkForest-form .summary .rule { margin: 2px 0; }
+
+		.darkForest-form .summary .rule img { margin-left: 2px; }
+
+		.darkForest-form .summary .rule span + .button { margin-left: 5px; }
+
+		.darkForest-form .summary .rule .button { margin: 0 2px; }
+
+		.darkForest-form .waves input,
+		.darkForest-form .keep input {
+			width: 45px;
+			margin-left: 5px;
+			text-align: center;
+		}
+
+		.darkForest-form .waves label,
+		.darkForest-form .keep label { display: inline-block; }
+
+		.darkForest-form .detail,
+		.darkForest-form .wave,
+		.darkForest-form .waves { float: left; }
+
+		.darkForest-form .keep .units div,
+		.darkForest-form .wave .units div { padding: 2px 3px; }
+
+		.darkForest-form .keep .units,
+		.darkForest-form .wave .units {
+			-moz-column-count: 2;
+			-moz-column-gap: 3px;
+			-webkit-column-count: 2;
+			-webkit-column-gap: 3px;
+			column-count: 2;
+			column-gap: 3px;
+		}
+
+		.darkForest-form .waves .wave:first-child:last-child .remove { display: none; }
+
+		.darkForest-form .waves .wave h5:after {
+			counter-increment: fo-wave;
+			content: ' ' counter(fo-wave);
+		}
+
+		.darkForest-form .waves .wave:first-child:last-child h5:after { display: none; }
+
 	/* scout attack form */
 		#kocfia-scout .attack-form .launch,
 		#kocfia-scout .attack-form .save,
@@ -413,134 +574,6 @@ body.noModal .modalBox:not(.previous) {
 		}
 
 		#kocfia-scout .attack-form button { margin-right: 5px; }
-
-	/* dark forest specific form */
-		.darkForest-form table + .buttons {
-			border-top: 1px solid #CCC;
-			padding-top: 5px;
-		}
-
-		.darkForest-form .buttons button {
-			margin: 0 5px 0 0;
-		}
-
-		.darkForest-form table { width: 100%; }
-
-		.darkForest-form tr td:not(:last-child) { border-right: 1px solid #ccc; }
-
-		.darkForest-form .city-header td { background-color: #CCCCCC; }
-
-		.darkForest-form .city-header button {
-			margin: 0 5px 0 0;
-		}
-
-		.darkForest-form .city-header td > label {
-			font-weight: bold;
-			font-size: 13px;
-		}
-
-		.darkForest-form .city-header td div {
-			margin: 0 15px;
-			float: right;
-			width: auto;
-		}
-
-		.darkForest-form .city-header div input {
-			width: 20px;
-			margin-right: 3px;
-		}
-
-		.darkForest-form input[type=number],
-		.darkForest-form input[type=text] { text-align: center; }
-
-		.darkForest-form .rule,
-		.darkForest-form .keep {
-			text-align: center;
-			vertical-align: top;
-		}
-
-		#kocfia-conf-panel .darkForest-form .rule .level-active {
-			position: absolute;
-			top: 2px;
-			left: 2px;
-		}
-
-		.darkForest-form .targetLevel { width: 20px; }
-
-		.darkForest-form tr:not(.city-header) td > div {
-			margin: 4px 0;
-			width: 200px;
-			margin: 0 auto;
-		}
-
-		.darkForest-form .rule div,
-		.darkForest-form .keep div {
-			position: relative;
-			padding: 2px;
-		}
-
-		.darkForest-form div .ui-icon {
-			position: absolute;
-			top: 0;
-			right: 0;
-		}
-
-		.darkForest-form .waves { counter-reset: waves; }
-
-		.darkForest-form .wave {
-			margin: 4px 15px;
-			border-top: 1px dotted #666;
-		}
-
-		#kocfia-conf-panel .darkForest-form .rule .ui-icon-trash {
-			position: absolute;
-			top: 4px;
-			right: 2px;
-		}
-
-		#kocfia-conf-panel .darkForest-form .rule .ui-icon-copy {
-			position: absolute;
-			top: 4px;
-			right: 23px;
-		}
-
-		#kocfia-conf-panel .darkForest-form .ui-icon.ui-icon-plusthick {
-			position: absolute;
-			left: 13px;
-			top: 1px;
-		}
-
-		#kocfia-conf-panel .darkForest-form .keep .ui-icon.ui-icon-plusthick { top: 0; }
-
-		#kocfia-conf-panel .darkForest-form .ui-icon.ui-icon-minusthick {
-			position: absolute;
-			top: 1px;
-			right: 13px;
-		}
-
-		#kocfia-conf-panel .darkForest-form .unit-block .ui-icon.ui-icon-minusthick {
-			right: -3px;
-			top: 6px;
-		}
-
-		#kocfia-conf-panel .darkForest-form .keep .unit-block .ui-icon.ui-icon-minusthick { right: 15px; }
-
-		#kocfia-conf-panel .darkForest-form .keep .ui-icon.ui-icon-copy {
-			position: absolute;
-			top: 0;
-			right: 13px;
-		}
-
-		.darkForest-form .wave strong:after {
-			counter-increment: waves;
-			content: ' ' counter(waves);
-		}
-
-		.darkForest-form label { font-weight: bold; }
-
-		.darkForest-form .unit-qty { width: 45px; }
-
-		.darkForest-form .unit-choice { width: 90px; }
 
 /* auto attack ongoing and save list */
 	.attack-list.ui-accordion-content { padding: 2px; }
@@ -653,33 +686,8 @@ body.noModal .modalBox:not(.previous) {
 		}
 
 	/* dark forest specific */
-		#kocfia-darkForest .ongoing .trip > div {
-			position: relative;
-			padding-bottom: 5px;
-			margin: 0 5px 5px 5px;
-		}
-
-		#kocfia-darkForest .ongoing .trip > div:not(:last-child) {
-			border-bottom: 1px solid #ccc;
-		}
-
-		#kocfia-darkForest .ongoing .trip div div {
-			width: 200px;
-			height: 60px;
-			float: left;
-			padding: 2px 4px;
-		}
-
-		#kocfia-darkForest .ongoing .trip div div:not(:last-child) {
-			border-right: 1px solid #ccc;
-			margin-right: 10px;
-			margin-bottom: 8px;
-		}
-
-		#kocfia-darkForest .ongoing .trip div .ui-icon {
-			position: absolute;
-			top: 0;
-			left: 0;
+		#kocfia-darkForest .ongoing .rules div {
+			margin: 2px 0;
 		}
 
 	/* transport specific */
@@ -723,6 +731,8 @@ body.noModal .modalBox:not(.previous) {
 	#kocfia-formation .forms fieldset { clear: both; }
 
 	#kocfia-formation .forms fieldset + fieldset { margin-top: 5px; }
+
+	#kocfia-formation .forms fieldset:last-of-type { margin-bottom: 10px; }
 
 	#kocfia-formation fieldset .unit { margin-top: 2px; }
 
@@ -771,6 +781,28 @@ body.noModal .modalBox:not(.previous) {
 /* transport tab */
 	#kocfia-transport .accordion + div { margin-top: 15px; }
 
+	.priority-list img {
+		width: 30px;
+		margin-right: 3px;
+		vertical-align: middle;
+	}
+
+	.priority-list ol {
+		list-style: decimal inside;
+		margin: 0;
+		padding: 0;
+	}
+
+	.priority-list li {
+		border: 1px solid #666;
+		padding: 3px 10px;
+		margin: 3px 0;
+		height: 30px;
+		line-height: 30px;
+		border-radius: 6px;
+		cursor: move;
+	}
+
 	/* manual form */
 		#kocfia-transport .manual-form .chosen { margin-top: 2px; }
 
@@ -779,7 +811,7 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .manual-form .chosen input { width: 80px; }
 
 		#kocfia-transport .manual-form .resources,
-		#kocfia-transport .manual-form .troop { margin: 12px 0; }
+		#kocfia-transport .manual-form .troop { margin: 22px 0; }
 
 		#kocfia-transport .manual-form input[type=number],
 		#kocfia-transport .manual-form input[type=text] { text-align: center; }
@@ -790,6 +822,8 @@ body.noModal .modalBox:not(.previous) {
 
 		#kocfia-transport .manual-form .minTroop,
 		#kocfia-transport .manual-form .maxLoad { margin-left: 5px; }
+
+		#kocfia-transport .manual-form .available { display: inline-block; }
 
 		#kocfia-transport .manual-form .available img {
 			margin: 0 3px 0 0;
@@ -812,16 +846,22 @@ body.noModal .modalBox:not(.previous) {
 			top: 4px;
 		}
 
+		#kocfia-transport .manual-form .items.buttonset label:after {
+			content: attr(data-count);
+			position: absolute;
+			font-size: 9px;
+			line-height: 9px;
+			bottom: 1px;
+			right: 2px;
+			background-color: rgba(0, 0, 0, 0.5);
+			color: #fff;
+			display: inline-block;
+			padding: 0 1px 1px;
+		}
+
 		#kocfia-transport .available .button {
 			height: 26px;
 			padding: 2px;
-		}
-
-		#kocfia-transport .available .button span {
-			height: 26px;
-			line-height: 26px;
-			position: relative;
-			top: -4px;
 		}
 
 		#kocfia-transport .button + .button { margin: 5px 0 0 5px; }
@@ -869,10 +909,72 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .transport-form select + .button,
 		#kocfia-transport .transport-form .button + .button { margin: 0 0 0 5px; }
 
+/* knights tab */
+	#kocfia-knights table { width: 100%; }
+
+	#kocfia-knights .update { top: 0; }
+
+	#kocfia-knights td,
+	#ckofia-knights th { padding: 0 2px; }
+
+	#kocfia-knights tbody th { background-color: #E5DDC9; }
+
+	#kocfia-knights tr td:nth-child(3),
+	#kocfia-knights tr td:nth-child(4),
+	#kocfia-knights tr td:nth-child(5),
+	#kocfia-knights tr td:nth-child(6),
+	#kocfia-knights tr td:nth-child(7),
+	#kocfia-knights tr td:nth-child(8) { text-align: center; }
+
+	#kocfia-knights .boosted { background-color: #EEC973; }
+
+	#kocfia-knights .primary { font-weight: bold; }
+
+	#kocfia-knights .skillPointsLeft .stats { cursor: pointer; }
+
+	#kocfia-knights .skillPointsLeft .stats:hover { background-color: #CAD2D6; }
+
+	#kocfia-knights .boost,
+	#kocfia-knights .button { margin: 1px; }
+
+	#kocfia-knights td select { max-width: 60px; }
+
+	#kocfia-knights .boost {
+		cursor: pointer;
+		display: inline-block;
+		position: relative;
+	}
+
+	#kocfia-knights .boost img {
+		width: 20px;
+		top: 0;
+	}
+
+	#kocfia-knights .boost:after {
+		content: attr(data-count);
+		position: absolute;
+		font-size: 9px;
+		line-height: 9px;
+		bottom: 0;
+		right: 2px;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: #fff;
+		display: inline-block;
+		padding: 0 1px 1px;
+	}
+
+	#kocfia-knights .skillPointsLeft td:nth-child(3) {
+		color: #0030FF;
+		font-weight: bold;
+	}
+
+
 /* input radio and checkbox normalize */
 	#kocfia-conf-panel input[type="checkbox"],
 	#kocfia-conf-panel input[type="radio"] {
 		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
 		padding: 0;
 		*width: 13px;
 		*height: 13px;
@@ -884,6 +986,47 @@ body.noModal .modalBox:not(.previous) {
 	select:invalid {
 		box-shadow: 0 0 1.5px 1px #FFC300;
 	}
+
+	.kocfia-error,
+	.kocfia-success {
+		position: absolute;
+		top: 40%;
+		left: 0;
+		z-index: 100002;
+		background-color: rgba(0, 0, 0, 0.8);
+		width: 100%;
+		padding: 5px;
+		text-align: center;
+		box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+	}
+
+	.kocfia-error .close {
+		display: inline-block;
+		font-size: 10px;
+		position: relative;
+		margin-left: 10px;
+		color: #fff;
+		font-weight: bold;
+		top: -4px;
+		cursor: pointer;
+	}
+
+	.kocfia-error { color: #FF7700; }
+
+	.kocfia-success {
+		color: #82F418;
+		font-weight: bold;
+	}
+
+	.kocfia-error h4 {
+		margin: 0;
+		padding: 0;
+		font-weight: bold;
+	}
+
+	.kocfia-error ul { margin: 8px 0 0; }
 
 /* placeholder */
 	::-webkit-input-placeholder {
@@ -1043,6 +1186,14 @@ body.noModal .modalBox:not(.previous) {
 	.button > img,
 	.button > img + span {
 		display: inline-block;
+	}
+
+	.button > img + span {
+		line-height: 11px;
+		font-size: 9px;
+		top: 0;
+		text-align: right;
+		text-shadow: none;
 	}
 
 	.ui-widget .button {

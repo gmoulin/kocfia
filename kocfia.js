@@ -12137,7 +12137,7 @@ jQuery(document).ready(function(){
 
 			var header = '<div class="infos">';
 			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
-			header += '</div><h3>Configurations</h3>';
+			header += '</div><h3>'+ KOCFIA.modulesLabel.knights +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
 
 			var code = '<table><thead><tr>';
@@ -12189,18 +12189,12 @@ jQuery(document).ready(function(){
 
 					$.when( KOCFIA.knights.promote(cityKey, knightKey, position, flag) )
 						.done(function(){
+							Shared.success( null );
 							$('.tipsy').remove();
 							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						})
 						.fail(function(){
-							var $tds = $tr.find('td');
-
-							$tds.eq(7).find('div').remove();
-							$('<div>Erreur</div>').appendTo( $tds.eq(7) ).fadeIn(300, function(){
-								window.setTimeout(function(){
-									$tds.eq(7).find('div').fadeOut(300, function(){ $(this).remove(); })
-								}, 3000);
-							});
+							Shared.notify('Erreur');
 						});
 				})
 				.on('click', '.fire', function(){
@@ -12212,18 +12206,12 @@ jQuery(document).ready(function(){
 
 					$.when( KOCFIA.knights.dismiss(cityKey, knightKey) )
 						.done(function(){
+							Shared.success( null );
 							$('.tipsy').remove();
 							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						})
 						.fail(function(){
-							var $tds = $tr.find('td');
-
-							$tds.eq(7).find('div').remove();
-							$('<div>Erreur</div>').appendTo( $tds.eq(7) ).fadeIn(300, function(){
-								window.setTimeout(function(){
-									$tds.eq(7).find('div').fadeOut(300, function(){ $(this).remove(); })
-								}, 3000);
-							});
+							Shared.notify('Erreur');
 						});
 				})
 				.on('click', '.stats', function(){
@@ -12248,17 +12236,12 @@ jQuery(document).ready(function(){
 
 					$.when( KOCFIA.knights.skillUp(cityKey, knightKey, stats, points) )
 						.done(function(){
+							Shared.success( null );
 							$('.tipsy').remove();
 							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						})
 						.fail(function(){
-
-							$tds.eq(7).find('div').remove();
-							$('<div>Erreur</div>').appendTo( $tds.eq(7)).fadeIn(300, function(){
-								window.setTimeout(function(){
-									$tds.eq(7).find('div').fadeOut(300, function(){ $(this).remove(); })
-								}, 3000);
-							});
+							Shared.notify('Erreur');
 						});
 				})
 				.on('click', '.boost', function(){
@@ -12271,18 +12254,12 @@ jQuery(document).ready(function(){
 
 					$.when( KOCFIA.knights.boost(cityKey, knightKey, itemKey, ($this.hasClass('xp') ? 'xp' : 'stat')) )
 						.done(function(){
+							Shared.success( null );
 							$('.tipsy').remove();
 							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						})
 						.fail(function(){
-							var $tds = $tr.find('td');
-
-							$tds.eq(7).find('div').remove();
-							$('<div>Erreur</div>').appendTo( $tds.eq(7)).fadeIn(300, function(){
-								window.setTimeout(function(){
-									$tds.eq(7).find('div').fadeOut(300, function(){ $(this).remove(); })
-								}, 3000);
-							});
+							Shared.notify('Erreur');
 						});
 				});
 
@@ -12299,8 +12276,12 @@ jQuery(document).ready(function(){
 
 		KOCFIA.knights.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights getHelp function');
-			var help = '<div id="kocfia-knights-help" class="help" title="Aide gestion des '+ KOCFIA.modLabels.knights +'">';
-			help += '<h4>todo</h4><ul>';
+			var help = '<div id="kocfia-knights-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.knights +'">';
+			help += '<h4>Gestion des chevaliers</h4><ul>';
+			help += '<li>Seuls les chevaliers en ville peuvent être gérés</li>';
+			help += '<li>Les listes des chevaliers ne sont pas mises à jour tout le temps lors d\'autre action externe à l\'onglet</li>';
+			help += '<li>Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville</li>';
+			help += '<li>Pour attribuer des points à un chevalier, cliquer sur la compétence voulue (par exemple le score de combat)</li>';
 			help += '</ul></div>';
 
 			return help;
@@ -12745,7 +12726,9 @@ jQuery(document).ready(function(){
 
 			var i, cityKey, city;
 
-			var header = '<h3>'+ KOCFIA.modLabels.estates +'</h3>';
+			var header = '<div class="infos">';
+			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '</div><h3>'+ KOCFIA.modulesLabel.estates +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
 
 			var code = '<table><thead><tr>';
@@ -12793,6 +12776,7 @@ jQuery(document).ready(function(){
 							Shared.success( null );
 							var $code = $( KOCFIA.estates.byCity( cityKey ) );
 							$tbody.html( $code.html() );
+							$('.tipsy').remove();
 						})
 						.fail(function(){
 							Shared.notify('Erreur');
@@ -12921,13 +12905,14 @@ jQuery(document).ready(function(){
 					$.when( KOCFIA.estates.defend( cityKey ) )
 						.done(function(){
 							Shared.success( null );
-							var $code = $( KOCFIA.estates.byCity( cityKey ) );
-							$tbody.html( $code.html() );
 						})
 						.fail(function(){
 							Shared.notify('Erreur');
+						})
+						.always(function(){
 							var $code = $( KOCFIA.estates.byCity( cityKey ) );
 							$tbody.html( $code.html() );
+							$('.tipsy').remove();
 						});
 				});
 
@@ -12944,8 +12929,15 @@ jQuery(document).ready(function(){
 
 		KOCFIA.estates.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA estates getHelp function');
-			var help = '<div id="kocfia-estates-help" class="help" title="Aide gestion des '+ KOCFIA.modLabels.estate +'">';
-			help += '<h4>todo</h4><ul>';
+			var help = '<div id="kocfia-estates-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.estate +'">';
+			help += '<h4>Ajouter des défenses à une terre sauvage conquise</h4><ul>';
+			help += '<li>Les terres conquises ne sont pas mises à jour automatiquement lors d\'une conquête ou toute autre action externe à l\'onglet</li>';
+			help += '<li>Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville</li>';
+			help += '<li>Les mercenaires sont payés à l\'heure</li>';
+			help += '<li>Le coût est de 200 pour des novices, 400 pour des intermédiaires et 1000 pour des vétérans</li>';
+			help += '<li>Le coût de chaque piège est de 200</li>';
+			help += '<li>Chaque terre peut contenir 100 pièges par niveau</li>';
+			help += '<li>Cliquer sur le bouton appliquer pour construire les pièges et engager les mercenaires configurés</li>';
 			help += '</ul></div>';
 
 			return help;
@@ -13036,8 +13028,9 @@ jQuery(document).ready(function(){
 				params.tid = estate.tileId;
 				params.x = estate.xCoord;
 				params.y = estate.yCoord;
+				//var cityKey = cityKey;
 
-				var request = function( attempts ){
+				var abandon = function( attempts ){
 					$.ajax({
 						url: window.g_ajaxpath + "ajax/abandonWilderness.php" + window.g_ajaxsuffix,
 						type: 'post',
@@ -13053,18 +13046,18 @@ jQuery(document).ready(function(){
 							}
 
 							if( data.returningMarches && !Array.isArray( data.returningMarches ) ){
-								var cityKey, march, marchKey, marchTime, timestamp = Date.timestamp();
-								for( cityKey in data.returningMarches ){
-									if( data.returningMarches.hasOwnProperty(cityKey) ){
-										for( j = 0; j < data.returningMarches[ cityKey ].length; j += 1 ){
-											marchKey = 'm'+ data.returningMarches[ cityKey ][ j ];
-											march = window.seed.queue_atkp[ cityKey ][ marchKey ];
+								var c, march, marchKey, marchTime, timestamp = Date.timestamp();
+								for( c in data.returningMarches ){
+									if( data.returningMarches.hasOwnProperty(c) ){
+										for( j = 0; j < data.returningMarches[ c ].length; j += 1 ){
+											marchKey = 'm'+ data.returningMarches[ c ][ j ];
+											march = window.seed.queue_atkp[ c ][ marchKey ];
 											if( march ){
 												marchTime = Math.abs(parseInt(march.destinationUnixTime, 10) - parseInt(march.marchUnixTime, 10));
-												window.seed.queue_atkp[ cityKey ][ marchKey ].destinationUnixTime = timetstamp;
-												window.seed.queue_atkp[ cityKey ][ marchKey ].marchUnixTime = timetstamp - marchTime;
-												window.seed.queue_atkp[ cityKey ][ marchKey ].returnUnixTime = timetstamp + marchTime;
-												window.seed.queue_atkp[ cityKey ][ marchKey ].marchStatus = 8;
+												window.seed.queue_atkp[ c ][ marchKey ].destinationUnixTime = timetstamp;
+												window.seed.queue_atkp[ c ][ marchKey ].marchUnixTime = timetstamp - marchTime;
+												window.seed.queue_atkp[ c ][ marchKey ].returnUnixTime = timetstamp + marchTime;
+												window.seed.queue_atkp[ c ][ marchKey ].marchStatus = 8;
 											}
 										}
 									}
@@ -13079,7 +13072,7 @@ jQuery(document).ready(function(){
 						} else {
 							attempts -= 1;
 							if( attempts > 0 ){
-								return dfd.pipe( request( attempts ) );
+								return dfd.pipe( abandon( attempts ) );
 							} else {
 								return dfd.reject();
 							}
@@ -13088,19 +13081,19 @@ jQuery(document).ready(function(){
 					.fail(function(){
 						attempts -= 1;
 						if( attempts > 0 ){
-							return dfd.pipe( request( attempts ) );
+							return dfd.pipe( abandon( attempts ) );
 						} else {
 							return dfd.reject();
 						}
 					});
 				};
 
-				return dfd.pipe( request(3) );
+				return dfd.pipe( abandon(3) );
 			}).promise();
 		};
 
 		KOCFIA.estates.defend = function( cityKey ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates abandon function');
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates defend function');
 			return $.Deferred(function(dfd){
 				var params = $.extend({}, window.g_ajaxparams);
 				params.cid = cityKey.replace(/city/, '');
@@ -13111,7 +13104,7 @@ jQuery(document).ready(function(){
 				}
 
 				var modificationsIndex = 0,
-					modifiedTiles = Object.keys(KOCFIA.estates.modification[ cityKey ]),
+					modifiedTiles = Object.keys(KOCFIA.estates.modifications[ cityKey ]),
 					length = modifiedTiles.length,
 					tileKey, modification;
 
@@ -13120,14 +13113,14 @@ jQuery(document).ready(function(){
 						return dfd.resolve();
 					}
 
-					if( !KOCFIA.estates.modification[ cityKey ].hasOwnProperty( modifiedTiles[ modificationsIndex ] ) ){
+					if( !KOCFIA.estates.modifications[ cityKey ].hasOwnProperty( modifiedTiles[ modificationsIndex ] ) ){
 						modificationsIndex += 1;
 						return dfd.pipe( loop() );
 					}
 
 					tileKey = modifiedTiles[ modificationsIndex ];
 
-					modification = KOCFIA.estates.modification[ cityKey ][ tileKey ];
+					modification = KOCFIA.estates.modifications[ cityKey ][ tileKey ];
 
 					params.tid = parseInt(tileKey.replace(/t/, ''), 10);
 

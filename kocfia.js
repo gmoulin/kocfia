@@ -1437,7 +1437,7 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.generateSelect = function(module, name, label, selected, options){
-				var code = '<p><label for="'+ module + '-' + name +'">'+ label +'</label><select id="'+ module + '-' + name +'" class="conf-choice"><option value=""></option>';
+				var code = '<p><label for="'+ module + '-' + name +'">'+ label +'</label><select id="'+ module + '-' + name +'" class="conf-choice">';
 				if( options.values && options.labels && options.values.length == options.labels.length){
 					var values = options.values,
 						labels = options.labels,
@@ -6874,7 +6874,8 @@ jQuery(document).ready(function(){
 				visible: 0,
 				moveable: 1,
 				position: {top: 10, left: 10},
-				size: {width: 300, height: 280}
+				size: {width: 300, height: 280},
+				workForce: 0.5
 			}
 		};
 
@@ -6883,10 +6884,14 @@ jQuery(document).ready(function(){
 			var code = '<h3>Résumé</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('summary', 'active', 'Activer', KOCFIA.conf.summary.active);
+			code += Shared.generateSelect('summary', 'workForce', 'Pourcentage des travailleurs utilisés pour les formations', KOCFIA.conf.summary.workForce, {labels: ['0%', '25%', '50%', '75%', '90%', '100%'], values: [0, 0.25, 0.5, 0.75, 0.9, 1]});
 			code += Shared.generateButton('summary', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions');
 			code += '</div>';
 
-			$section.append( code );
+			$section.append( code )
+				.on('change', '#summary-workForce', function(){
+					KOCFIA.summary.update();
+				});
 		};
 
 		KOCFIA.summary.on = function(){
@@ -7074,7 +7079,14 @@ jQuery(document).ready(function(){
 				blacksmithLevel = 0;
 				marshalCombat = 0;
 
-				popPerHour = parseInt(window.seed.citystats[ cityKey ].pop[1], 10) / 2;
+				//the population is repleanished eavery hour
+				popPerHour = parseInt(window.seed.citystats[ cityKey ].pop[1], 10);
+
+				//substract the necessary workforce for the fields
+				popPerHour -= parseInt(window.seed.citystats[ cityKey ].pop[3], 10);
+				//add the percentage of the workforce that will be used for formations
+				popPerHour += parseInt(window.seed.citystats[ cityKey ].pop[3], 10) * KOCFIA.conf.summary.workForce;
+
 				hapiness = parseInt(window.seed.citystats[ cityKey ].pop[2], 10);
 
 				for( b in window.seed.buildings[ cityKey ] ){

@@ -1,0 +1,28 @@
+https://www314.kingdomsofcamelot.com/fb/e2/src/ajax/listReports.php
+group	a
+
+{"ok":true,
+"totalPages":29,
+"arReports":{
+	"0r39573176":{
+		"reportType":"0",
+		"reportId":"39573176",
+		"reportUnixTime":"1331060427",
+		"side0XCoord":"66",
+		"side0YCoord":"586",
+		"side0TileType":"51",
+		"side0TileLevel":"9",
+		"side0CityId":"47364",
+		"side0PlayerId":"10496374",
+		"side0AllianceId":"0",
+		"side1XCoord":"9",
+		"side1YCoord":"623",
+		"side1CityId":"73864",
+		"side1PlayerId":"12657181",
+		"side1AllianceId":"769",
+		"marchType":"4",
+		"marchTypeState":"1"
+	},"0r39571923":{"reportType":"0","reportId":"39571923","reportUnixTime":"1331059957","side0XCoord":"63","side0YCoord":"581","side0TileType":"51","side0TileLevel":"9","side0CityId":"49098","side0PlayerId":"10496374","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"4","marchTypeState":"1"},"0r39571423":{"reportType":"0","reportId":"39571423","reportUnixTime":"1331059764","side0XCoord":"55","side0YCoord":"591","side0TileType":"51","side0TileLevel":"9","side0CityId":"40423","side0PlayerId":"10496374","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"4","marchTypeState":"1"},"0r39552437":{"reportType":"0","reportId":"39552437","reportUnixTime":"1331052549","side0XCoord":"717","side0YCoord":"590","side0TileType":"51","side0TileLevel":"9","side0CityId":"2268","side0PlayerId":"7259406","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"},"0r39552436":{"reportType":"0","reportId":"39552436","reportUnixTime":"1331052536","side0XCoord":"712","side0YCoord":"589","side0TileType":"51","side0TileLevel":"10","side0CityId":"1520","side0PlayerId":"7259406","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"},"0r39552434":{"reportType":"0","reportId":"39552434","reportUnixTime":"1331052532","side0XCoord":"63","side0YCoord":"581","side0TileType":"51","side0TileLevel":"9","side0CityId":"49098","side0PlayerId":"10496374","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"},"0r39552308":{"reportType":"0","reportId":"39552308","reportUnixTime":"1331052491","side0XCoord":"737","side0YCoord":"582","side0TileType":"51","side0TileLevel":"9","side0CityId":"12046","side0PlayerId":"15340062","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"},"0r39552251":{"reportType":"0","reportId":"39552251","reportUnixTime":"1331052483","side0XCoord":"736","side0YCoord":"573","side0TileType":"51","side0TileLevel":"12","side0CityId":"4466","side0PlayerId":"15340062","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"},"0r39552221":{"reportType":"0","reportId":"39552221","reportUnixTime":"1331052474","side0XCoord":"54","side0YCoord":"565","side0TileType":"51","side0TileLevel":"9","side0CityId":"33636","side0PlayerId":"15588866","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"},"0r39552220":{"reportType":"0","reportId":"39552220","reportUnixTime":"1331052467","side0XCoord":"714","side0YCoord":"584","side0TileType":"51","side0TileLevel":"9","side0CityId":"23517","side0PlayerId":"7259406","side0AllianceId":"0","side1XCoord":"9","side1YCoord":"623","side1CityId":"73864","side1PlayerId":"12657181","side1AllianceId":"769","marchType":"3","marchTypeState":"1"}},
+	"arPlayerNames":{"p10496374":"lounat","g10496374":"F","p12657181":"ced67","g12657181":"M","p7259406":"Ybvampire","g7259406":"F","p15340062":"gregorius62","g15340062":"M","p15588866":"williamkramps","g15588866":"M"},
+	"arCityNames":{"c73864":"ced67","c49098":"moustache","c2268":"Ybvampire II","c1520":"Ybvampire","c12046":"aldorande","c4466":"gregorius62","c33636":"williamcity","c23517":"Ybvampire VI","c40423":"nathime","c47364":"lounat 5"},
+	"arAllianceNames":{"a769":"LES GAIS POUTREURS"}}

@@ -13108,7 +13108,8 @@ jQuery(document).ready(function(){
 				playSoundForAllianceReport: 0
 			},
 			underAttack: {}, //city keys
-			incommings: {} //march ids
+			incommings: {}, //march ids
+			lastScanned: {} //format 0r39573176
 		};
 
 		KOCFIA.alarm.confPanel = function( $section ){
@@ -13144,7 +13145,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.conf.alarm.watchAllianceReports ){
 				watchReportsInterval = window.setInterval(function(){
 					KOCFIA.alarm.scanReports();
-				}, 30 * 1000);
+				}, 2 * 60 * 1000);
 			}
 		};
 
@@ -13414,6 +13415,95 @@ jQuery(document).ready(function(){
 
 		KOCFIA.alarm.scanReports = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm scanReports function');
+
+			var params = $.extend({}, window.g_ajaxparams),
+				found = false,
+				scanning = {},
+				messages = [];
+
+			params.group = 'a';
+			params.pageNo = 1;
+
+			var request = function( attempts ){
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/listReports.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(result){
+					if( result.ok ){
+						if( result.hasOwnProperty('arReports') && !$.isEmptyObject(result.arReports) ){
+							var r, report, timestamp = Date.timestamp();
+							for( r in result.arReports ){
+								if( result.arReports.hasOwnProperty(r) ){
+									report = result.arReports[ r ];
+
+									if( KOCFIA.alarm.lastScanned.hasOwnProperty(report.reportId) ){
+										found = true;
+										break;
+									}
+
+									scanning[ report.reportId ] = 1;
+
+									elapsed = parseInt(report.reportUnixTime) - timestamp;
+
+									//MARCH_TYPE_SCOUT 3, MARCH_TYPE_ATTACK 4
+									if( (report.marchType == 3 || report.marchType == 4) && elapsed > 0 && elapsed < 10 * 60 && report.marchTypeState == 1 ){
+										//"side0XCoord":"66", "side0YCoord":"586", "side0TileType":"51", "side0TileLevel":"9", "side0CityId":"47364", "side0PlayerId":"10496374", "side0AllianceId":"0",
+										//"side1XCoord":"9", "side1YCoord":"623", "side1CityId":"73864", "side1PlayerId":"12657181", "side1AllianceId":"769"
+
+										//side 0 defender
+										//side 1 attacker
+
+										msg = result.arPlayerNames[ report.side0PlayerId ];
+										msg += ' a été '+ (report.marchType == 3 ? 'éclairé' : 'attaqué');
+										msg += ' par '+ result.arPlayerNames[ report.side1PlayerId ];
+										msg += ' '+ result.arAllianceNames[ report.side1AllianceId ];
+										msg += ' sur '+ result.arCityNames[ 'c'+ report.side0CityId ];
+										msg += ' '+ Shared.mapLink(report.side0XCoord +','+ report.side0YCoord) + (report.side0TileType != '51' ? ' (TS)' : '');
+										msg += ' depuis '+ result.arCityNames[ 'c'+ report.side1CityId ];
+
+										messages.push(msg);
+									}
+								}
+							}
+
+							if( !found ){
+								params.pageNo += 1;
+								return request(3);
+							} else {
+								KOCFIA.alarm.lastScanned = scanning;
+								return displayMessages();
+							}
+						}
+
+						return displayMessages();
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							return request( attempts );
+						} else {
+							return displayMessages();
+						}
+					}
+				})
+				.fail(function(){
+					attempts -= 1;
+					if( attempts > 0 ){
+						return request( attempts );
+					} else {
+						return displayMessages();
+					}
+				});
+			};
+
+			var displayMessages = function(){
+
+			};
+
+			request(3);
 		};
 
 	/* KNIGHTS */

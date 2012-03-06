@@ -694,7 +694,7 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .ongoing { margin: 5px 0 10px 0; }
 
 /* formation tab - form */
-	#kocfia-formation .forms fieldset input[type=text] {
+	#kocfia-forma, manuel et automatiquetion .forms fieldset input[type=text] {
 		width: 40px;
 		text-align: center;
 	}
@@ -806,8 +806,6 @@ body.noModal .modalBox:not(.previous) {
 	/* manual form */
 		#kocfia-transport .manual-form .chosen { margin-top: 2px; }
 
-		#kocfia-transport .manual-form .chosen img { width: 20px; }
-
 		#kocfia-transport .manual-form .chosen input { width: 80px; }
 
 		#kocfia-transport .manual-form .resources,
@@ -877,10 +875,6 @@ body.noModal .modalBox:not(.previous) {
 
 		#kocfia-transport .transport-form .res img { margin-bottom: 10px; }
 
-		#kocfia-transport .transport-form .res .ui-icon {
-			margin: 0 5px;
-		}
-
 		#kocfia-transport .transport-form td {
 			padding: 5px;
 			vertical-align: top;
@@ -908,6 +902,108 @@ body.noModal .modalBox:not(.previous) {
 
 		#kocfia-transport .transport-form select + .button,
 		#kocfia-transport .transport-form .button + .button { margin: 0 0 0 5px; }
+
+/* transport tab */
+	#kocfia-reassign .accordion + div { margin-top: 15px; }
+
+	/* manual form */
+		#kocfia-reassign .manual-form .chosen { margin-top: 2px; }
+
+		#kocfia-reassign .manual-form .chosen input { width: 80px; }
+
+		#kocfia-reassign .manual-form .knight,
+		#kocfia-reassign .manual-form .troop { margin: 22px 0; }
+
+		#kocfia-reassign .manual-form input[type=number],
+		#kocfia-reassign .manual-form input[type=text] { text-align: center; }
+
+		#kocfia-reassign .manual-form .items { margin-bottom: 6px; }
+
+		#kocfia-reassign .manual-form .buttons { margin-top: 6px; display: none; }
+
+		#kocfia-reassign .manual-form .available { display: inline-block; }
+
+		#kocfia-reassign .manual-form .available img {
+			margin: 0 3px 0 0;
+			top: 0;
+			padding: 0;
+		}
+
+		#kocfia-reassign .manual-form select.available { display: none; }
+
+		#kocfia-reassign .manual-form .from,
+		#kocfia-reassign .manual-form .to,
+		#kocfia-reassign .manual-form .items { display: inline-block; }
+
+		#kocfia-reassign .manual-form .items img,
+		#kocfia-reassign .manual-form .troop img { width: 20px; }
+
+		#kocfia-reassign .manual-form .buttonset label img { top: 1px; }
+
+		#kocfia-reassign .manual-form .items.buttonset label {
+			position: relative;
+			top: 4px;
+		}
+
+		#kocfia-reassign .manual-form .items.buttonset label:after {
+			content: attr(data-count);
+			position: absolute;
+			font-size: 9px;
+			line-height: 9px;
+			bottom: 1px;
+			right: 2px;
+			background-color: rgba(0, 0, 0, 0.5);
+			color: #fff;
+			display: inline-block;
+			padding: 0 1px 1px;
+		}
+
+		#kocfia-reassign .available .button {
+			height: 26px;
+			padding: 2px;
+		}
+
+		#kocfia-reassign .button + .button { margin: 5px 0 0 5px; }
+
+	/* auto form */
+		#kocfia-reassign .reassign-form .buttons { text-align: right; }
+
+		#kocfia-reassign .reassign-form .buttons button { margin-left: 10px; }
+
+		#kocfia-reassign .reassign-form table { width: 100%; }
+
+		#kocfia-reassign .reassign-form .unit { text-align: center; }
+
+		#kocfia-reassign .reassign-form .unit img { margin-bottom: 10px; }
+
+		#kocfia-reassign .reassign-form td {
+			padding: 5px;
+			vertical-align: top;
+		}
+
+		#kocfia-reassign .reassign-form td .rule:not(:last-child) {
+			padding-bottom: 5px;
+			border-bottom: 1px solid #ccc;
+			margin-bottom: 5px;
+		}
+
+		#kocfia-reassign .reassign-form .rule > div + div {
+			margin-top: 3px;
+		}
+
+		#kocfia-reassign .reassign-form .quantity {
+			width: 50px;
+			text-align: center;
+		}
+
+		#kocfia-reassign .reassign-form .rule select {
+			max-width: 100px;
+			margin-right: 5px;
+		}
+
+		#kocfia-reassign .reassign-form .from { margin-right: 15px; }
+
+		#kocfia-reassign .reassign-form .button + .button { margin: 0 0 0 5px; }
 
 /* knights tab */
 	#kocfia-knights table { width: 100%; }

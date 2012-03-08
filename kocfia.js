@@ -7080,7 +7080,7 @@ jQuery(document).ready(function(){
 				marshalCombat = 0;
 
 				//the population is repleanished eavery hour
-				popPerHour = parseInt(window.seed.citystats[ cityKey ].pop[1], 10);
+				popPerHour = parseInt(window.seed.citystats[ cityKey ].pop[1], 10); //population limit
 
 				//substract the necessary workforce for the fields
 				popPerHour -= parseInt(window.seed.citystats[ cityKey ].pop[3], 10);
@@ -8030,7 +8030,8 @@ jQuery(document).ready(function(){
 		KOCFIA.formation = {
 			options: {
 				active: 1,
-				automatic: 0
+				automatic: 0,
+				minPercentage: 0.75
 			},
 			stored: ['rules', 'savedRules'],
 			rules: {}, //by city id
@@ -8043,6 +8044,7 @@ jQuery(document).ready(function(){
 			code += '<div>';
 			code += Shared.generateCheckbox('formation', 'active', 'Activer', KOCFIA.conf.formation.active);
 			code += Shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOCFIA.conf.formation.automatic);
+			code += Shared.generateDropdown('formation', 'minPercentage', 'Pourcentage du maximum pour calculer la quantité minimum d\'une formation', KOCFIA.conf.formation.minPercentage, {labels: ['0%', '25%', '50%', '75%', '90%', '100%'], values: [0, 0.25, 0.5, 0.75, 0.9, 1]});
 			code += Shared.generateButton('formation', 'deleteAllRules', 'Supprimer toutes les configurations de formation enregistrées');
 			code += '</div>';
 
@@ -8292,7 +8294,7 @@ jQuery(document).ready(function(){
 						$output.html( Shared.readableDuration(time[0]) + ' - ' + Shared.readableDuration(time[1]) );
 					} else $output.html( Shared.readableDuration(time) );
 				})
-				//fortification quantit' change affect duration
+				//fortification quantity change affect duration
 				.on('keyup change', '.train-quantity', function(){
 					var $fieldset = $(this).closest('fieldset');
 
@@ -8325,10 +8327,11 @@ jQuery(document).ready(function(){
 					}
 
 					var speed = $fieldset.find('.train-speed').val(),
+						workforce = $fieldset.find('.train-workforce').val(),
 						cityKey = $fieldset.find('.train-city').val();
 
-					var max = KOCFIA.formation.calcMaxUnit( cityKey, unit, speed ),
-						min = Math.floor(max * 0.75);
+					var max = KOCFIA.formation.calcMaxUnit( cityKey, unit, speed, workforce ),
+						min = Math.floor(max * KOCFIA.conf.formation.minPercentage);
 
 					$min.val( Shared.format(min) || 0 ).attr('title', Shared.readable(min) || 0).trigger('change');
 					$max.val( Shared.format(max) || 0 ).attr('title', Shared.readable(max) || 0).trigger('change');
@@ -9163,7 +9166,7 @@ jQuery(document).ready(function(){
 			return forts;
 		};
 
-		KOCFIA.formation.calcMaxUnit = function( cityKey, unit, speed ){
+		KOCFIA.formation.calcMaxUnit = function( cityKey, unit, speed, workforce ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation calcMaxUnit function');
 
 			var mod, i, nb, cost = [], res = [],
@@ -9188,7 +9191,7 @@ jQuery(document).ready(function(){
 			res.push( parseInt(cityStat.gold[0], 10) );
 
 			cost.push( parseInt(unitcost[6], 10) );
-			res.push( parseInt(cityStat.pop[0], 10) - parseInt(cityStat.pop[3], 10) );
+			res.push( parseInt(cityStat.pop[0], 10) - parseInt(cityStat.pop[3], 10) +  parseInt(cityStat.pop[3], 10) * workforce );
 
 			nb = res[0] / cost[0];
 			for( i = 1; i < cost.length; i += 1 ){
@@ -9615,7 +9618,7 @@ jQuery(document).ready(function(){
 
 				var pop = parseInt(stats.pop[0], 10) - parseInt(stats.pop[3], 10);
 				if( rule.workforce > 0 ){
-					pop += parseInt( (parseInt(stats.pop[3], 10) * rule.workforce), 10);
+					pop += parseInt(stats.pop[3], 10) * rule.workforce;
 				}
 				resAvailable.push( pop );
 
@@ -13465,7 +13468,7 @@ jQuery(document).ready(function(){
 										msg += ' '+ Shared.mapLink(report.side0XCoord +','+ report.side0YCoord) + (report.side0TileType != '51' ? ' (TS)' : '');
 										msg += ' depuis '+ result.arCityNames[ 'c'+ report.side1CityId ];
 
-										messages.push(msg);
+										messages.push('<div>'+ msg +'</div>');
 									}
 								}
 							}
@@ -13500,7 +13503,56 @@ jQuery(document).ready(function(){
 			};
 
 			var displayMessages = function(){
+				if( !KOCFIA.alarm.hasOwnProperty('$warning') ){
+					var $warning = $('<div id="kocfia-alliance-warning" class="ui-widget ui-widget-content ui-corner-all">');
 
+					var code = '<h3 class="title">Résumé</h3><div class="wrap"></div>';
+
+					$warning
+						.append( '<span class="ui-icon ui-icon-close"></span>' )
+						.append( code )
+						.append( moveHandles )
+						.draggable({
+							handle: 'h3, .move-handle',
+							scroll: true,
+							distance: 20
+						})
+						.resizable({
+							minWidth: 200,
+							minHeight: 200,
+							handles: 'n, e, s, w, ne, se, sw, nw',
+							resize: function(event, ui){
+								var wrapH = size.height - KOCFIA.alarm.$warning.find('.title').outerHeight(true) - 10; /* wrap bottom margin */
+								KOCFIA.alarm.$warning.find('.wrap').css('height', wrapH);
+							}
+						})
+						.css({
+							top: 100,
+							left: 100,
+							width: 250,
+							height: 250
+						})
+						.on('click', '.ui-icon-close', function(){
+							KOCFIA.alarm.$warning.hide();
+						});
+
+					$body.append( $warning );
+
+					KOCFIA.alarm.$warning = $('#kocfia-alarm-alliance-warning');
+
+					var $allianceWarningToggle = $('<button id="kocfia-alliance-warning-toggle" class="button warning">').append( '<span>Alliance attaquée !</span>' );
+					$allianceWarningToggle.click(function(){
+						KOCFIA.alarm.$warning.toggle();
+					});
+
+					KOCFIA.$buttons.append($allianceWarningToggle);
+				}
+
+				KOCFIA.alarm.$warning.find('.wrap').prepend( messages.join('') );
+
+				if( KOCFIA.conf.alarm.playSoundForAllianceReport ){
+
+				}
 			};
 
 			request(3);

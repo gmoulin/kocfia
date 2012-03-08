@@ -694,7 +694,7 @@ body.noModal .modalBox:not(.previous) {
 		#kocfia-transport .ongoing { margin: 5px 0 10px 0; }
 
 /* formation tab - form */
-	#kocfia-forma, manuel et automatiquetion .forms fieldset input[type=text] {
+	#kocfia-formation .forms fieldset input[type=text] {
 		width: 40px;
 		text-align: center;
 	}
@@ -1097,6 +1097,39 @@ body.noModal .modalBox:not(.previous) {
 		width: 20px;
 	}
 
+/* alliance warning */
+	#kocfia-alliance-warning {
+		display: none;
+		padding: 0;
+	}
+
+	#kocfia-summary .title {
+		margin: 2px 0;
+		text-indent: 10px;
+	}
+
+	#kocfia-summary {
+		position:absolute;
+		font: 10px/20px Verdana, sans serif;
+		font-width: normal;
+		z-index: 100005;
+		display: none;
+	}
+
+	#kocfia-summary .ui-icon-close {
+		position: absolute;
+		cursor: pointer;
+		z-index: 99999;
+		right: -3px;
+		top: -3px;
+	}
+
+	#kocfia-summary .wrap {
+		overflow: auto;
+		margin: 0 10px 10px 10px;
+		text-align: left;
+	}
+
 /* input radio and checkbox normalize */
 	#kocfia-conf-panel input[type="checkbox"],
 	#kocfia-conf-panel input[type="radio"] {
@@ -1377,6 +1410,20 @@ body.noModal .modalBox:not(.previous) {
 
 	.button.modify:hover {
 		color: #FFE388;
+	}
+
+	.button.warning {
+		background-color: #FF9000;
+		background-image: -moz-linear-gradient(#FF9000, #FF7600);
+		background-image: -webkit-linear-gradient(#FF9000, #FF7600);
+		background-image: linear-gradient(#FF9000, #FF7600);
+		border-color: #FFC200 #FFC200 #BF5901;
+		text-shadow: 0 1px rgba(255, 255, 255, 0.9);
+		color: #000;
+	}
+
+	.button.warning:hover {
+		color: #660000;
 	}
 
 	#kocfia-buttons { margin: 4px 3px 0 3px; }

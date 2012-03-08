@@ -235,11 +235,14 @@ body.noModal .modalBox:not(.previous) {
 		text-align: right;
 	}
 
+	#kocfia-options .alarmColors,
 	#kocfia-chat .kocfia-chat-colors input {
 		width: 65px;
 		margin: 2px 0;
 	}
 
+
+	#kocfia-options .alarmColors + .miniColors-trigger,
 	#kocfia-chat .kocfia-chat-colors .miniColors-trigger {
 		position: relative;
 		top: -2px;

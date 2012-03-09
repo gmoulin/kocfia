@@ -9,6 +9,17 @@
 		<ul>
 			<li>Onglet Formation, formation auto avec plusieurs types de troupes</li>
 			<li>Onglet Carte, ajout de tris</li>
+			<li>Refonte approvisionnement et formation pour fonctionner en flux tendu, permettant de laisser juste le strict minimum (or et nourriture) sur les villes secondaires :
+				<ol>
+					<li>Une ville secondaire va pouvoir faire une formation (détection de l'évolution de la population)</li>
+					<li>Calcul des ressources nécessaires à la formation</li>
+					<li>Ajout d'une demande de ressource qui sera étudiée par l'approvisionnement</li>
+					<li>Si les ressources sont disponibles, approvisionnement de la ville secondaire</li>
+					<li>Calcul pour que l'approvisionnement arrive juste avant le "tick" de population permettant la formation</li>
+					<li>Lancement de la formation</li>
+					<li>Calcul du laps de temps jusqu'à la prochaine formation pour prévoir le prochain approvisionnement</li>
+				</ol>
+			</li>
 		</ul>
 
 		<h3>Prochainement</h3>

@@ -2076,7 +2076,8 @@
 		overflow: hidden;
 	}
 
-/* alliance reports warnings */
+/* alliance reports warnings and alarm summary */
+	#kocfia-alarm-summary,
 	#kocfia-alarm-alliance-warning {
 		position: absolute;
 		font: 10px/20px Verdana, sans serif;
@@ -2086,10 +2087,12 @@
 		padding: 2px 3px;
 	}
 
+	#kocfia-alarm-summary .title,
 	#kocfia-alarm-alliance-warning .title {
 		margin: 0
 	}
 
+	#kocfia-alarm-summary .ui-icon-close,
 	#kocfia-alarm-alliance-warning .ui-icon-close {
 		position: absolute;
 		cursor: pointer;
@@ -2098,6 +2101,7 @@
 		top: -3px;
 	}
 
+	#kocfia-alarm-summary .wrapper,
 	#kocfia-alarm-alliance-warning .wrapper {
 		overflow: auto;
 		margin: 0 10px 10px 10px;

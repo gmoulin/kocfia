@@ -149,7 +149,8 @@ jQuery(document).ready(function(){
 			'formation', 'transport', 'reassign',
 			'fbWallPopup', 'notepad',
 			'alarm',
-			'summary', 'knights', 'estates'
+			'summary', 'knights', 'estates',
+			'dataAndStats'
 		],
 		modulesLabel: {
 			overview: 'Résumé',
@@ -160,7 +161,8 @@ jQuery(document).ready(function(){
 			scout: 'Éclairages',
 			knights: 'Chevaliers',
 			estates: 'Terres Sauvages conquises',
-			reassign: 'Réassignements de troupes'
+			reassign: 'Réassignements de troupes',
+			dataAndStats: 'Statistiques'
 		},
 		tabLabel: {
 			map: 'Carte',
@@ -170,7 +172,8 @@ jQuery(document).ready(function(){
 			scout: 'Eclairage',
 			knights: 'Chevaliers',
 			estates: 'Terres',
-			reassign: 'Réassignements'
+			reassign: 'Réassignements',
+			dataAndStats: 'Stats'
 		},
 		stored: ['conf'],
 		/* default configuration */
@@ -12691,7 +12694,7 @@ jQuery(document).ready(function(){
 
 							finalPlan[ from ][ to ][ u ] = {
 								active: plan[ u ][ from ].active,
-								quantity: plan[ u ][ from ].qty,
+								quantity: plan[ u ][ from ].qty
 							};
 						}
 					}
@@ -13039,7 +13042,7 @@ jQuery(document).ready(function(){
 			},
 			drawCoords: function( coords ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas drawCoords function');
-				if( !$.isArray( coords ) ) coords = [ coords ];
+				if( !Array.isArray( coords ) ) coords = [ coords ];
 
 				var size = KOCFIA.canvas.cv.width,
 					scale = size / 750,
@@ -13576,7 +13579,7 @@ jQuery(document).ready(function(){
 
 									scanning[ report.reportId ] = 1;
 
-									elapsed = parseInt(report.reportUnixTime) - timestamp;
+									elapsed = parseInt(report.reportUnixTime, 10) - timestamp;
 
 									//MARCH_TYPE_SCOUT 3, MARCH_TYPE_ATTACK 4
 									if( (report.marchType == 3 || report.marchType == 4) && elapsed > 0 && elapsed < 5 * 60 && report.marchTypeState == 1 ){
@@ -13767,7 +13770,7 @@ jQuery(document).ready(function(){
 					}
 				}
 			} else {
-				march.toTileId = .tileId;
+				march.toTileId = city.tileId;
 			}
 
 			march.arrivalTime = timestamp + 10000;
@@ -14982,6 +14985,310 @@ jQuery(document).ready(function(){
 
 				return dfd.pipe( loop() );
 			}).promise();
+		};
+
+	/* DATA AND STATS */
+		KOCFIA.dataAndStats = {
+			options: {
+				active: 1
+			},
+			stats: {} //by cityKey
+		};
+
+		KOCFIA.dataAndStats.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.estates +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('dataAndStats', 'active', 'Activer', KOCFIA.conf.dataAndStats.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.dataAndStats.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-dataAndStats').html('');
+
+			var header = '<h3>'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
+
+			var data = '<table><thead><tr>';
+			data += '<th rowspan="2">&nbsp;</th>';
+			data += '<th colspan="6">Coûts</th>';
+			data += '<th colspan="6">Statistiques</th>';
+			data += '</tr><tr>';
+			data += '<th title="'+ KOCFIA.resourceInfo['rec0'].label +'"><img src="'+ KOCFIA.resourceInfo['rec0'].icon +'"></th>';
+			data += '<th title="'+ KOCFIA.resourceInfo['rec1'].label +'"><img src="'+ KOCFIA.resourceInfo['rec1'].icon +'"></th>';
+			data += '<th title="'+ KOCFIA.resourceInfo['rec2'].label +'"><img src="'+ KOCFIA.resourceInfo['rec2'].icon +'"></th>';
+			data += '<th title="'+ KOCFIA.resourceInfo['rec3'].label +'"><img src="'+ KOCFIA.resourceInfo['rec3'].icon +'"></th>';
+			data += '<th title="'+ KOCFIA.resourceInfo['rec4'].label +'"><img src="'+ KOCFIA.resourceInfo['rec4'].icon +'"></th>';
+			data += '<th title="'+ KOCFIA.population[0].label[0] +'"><img src="'+ KOCFIA.population[0].icon +'"></th>';
+			data += '<th>Vie</th>';
+			data += '<th title="Attaque">Att</th>';
+			data += '<th title="Défence">Déf</th>';
+			data += '<th title="Vitesse">Vit</th>';
+			data += '<th title="Portée">Por</th>';
+			data += '<th title="Capacité de charge">Cha</th>';
+			data += '</tr></thead><tbody>';
+
+			var i, unitKey, fortKey, unit,
+				fortmight = {
+					frt53: "4",
+					frt55: "7",
+					frt60: "1",
+					frt61: "2",
+					frt62: "3"
+				};
+			for( i = 0; i < KOCFIA.troops.length; i += 1 ){
+				unit = KOCFIA.troops[i];
+				unitKey = unit.name;
+
+				data += '<tr>';
+				data += '<th title="'+ unit.label +'"><img src="'+ unit.icon +'"></th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][5] +'</th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][1] +'</th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][2] +'</th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][3] +'</th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][4] +'</th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][6] +'</th>';
+				data += '<th>'+ window.unitstats[ unitKey ][0] +'</th>';
+				data += '<th>'+ window.unitstats[ unitKey ][1] +'</th>';
+				data += '<th>'+ window.unitstats[ unitKey ][2] +'</th>';
+				data += '<th>'+ window.unitstats[ unitKey ][3] +'</th>';
+				data += '<th>'+ window.unitstats[ unitKey ][4] +'</th>';
+				data += '<th>'+ window.unitstats[ unitKey ][5] +'</th>';
+				data += '</tr>';
+			}
+
+			for( i = 0; i < KOCFIA.defenses.length; i += 1 ){
+				unit = KOCFIA.defenses[i];
+				fortKey = unit.frt;
+				unitKey = fortKey.replace(/frt/, 'unt');
+
+				data += '<tr>';
+				data += '<th title="'+ unit.label +'"><img src="'+ unit.icon +'"></th>';
+				data += '<th>'+ window.fortcost[ unitKey ][5] +'</th>';
+				data += '<th>'+ window.fortcost[ unitKey ][1] +'</th>';
+				data += '<th>'+ window.fortcost[ unitKey ][2] +'</th>';
+				data += '<th>'+ window.fortcost[ unitKey ][3] +'</th>';
+				data += '<th>'+ window.fortcost[ unitKey ][4] +'</th>';
+				data += '<th>'+ window.fortcost[ unitKey ][6] +'</th>';
+				data += '<th>'+ window.fortstats[ fortKey ][0] +'</th>';
+				data += '<th>'+ window.fortstats[ fortKey ][1] +'</th>';
+				data += '<th>'+ window.fortstats[ fortKey ][2] +'</th>';
+				data += '<th>'+ window.fortstats[ fortKey ][3] +'</th>';
+				data += '<th>'+ window.fortstats[ fortKey ][4] +'</th>';
+				data += '<th>'+ window.fortstats[ fortKey ][5] +'</th>';
+				data += '</tr>';
+			}
+			data += '</tbody></table>';
+
+			data += '<br><br>';
+			data += '<table><thead><tr><th colspan="5">Entretien et Puissance</th>';
+			data += '</tr><tr>';
+			data += '<th>&nbsp;</th>';
+			data += '<th title="'+ KOCFIA.resourceInfo['rec0'].label +'"><img src="'+ KOCFIA.resourceInfo['rec0'].icon +'"></th>';
+			data += '<th>Puissance</th>';
+			data += '<th title="en secondes">Durée</th>';
+			data += '<th>Puissance / h</th>';
+			data += '</tr><thead><tbody>';
+			for( i = 0; i < KOCFIA.troops.length; i += 1 ){
+				unit = KOCFIA.troops[i];
+				unitKey = unit.name;
+
+				data += '<tr>';
+				data += '<th title="'+ unit.label +'">1 <img src="'+ unit.icon +'"></th>';
+				data += '<th>'+ window.unitupkeeps[ unitKey ] +'</th>';
+				data += '<th>'+ window.unitmight[ unitKey ] +'</th>';
+				data += '<th>'+ window.unitcosts[ unitKey ][7] +'</th>';
+				data += '<th>'+ (3600 / window.unitcosts[ unitKey ][7] * window.unitmight[ unitKey ]) +'</th>';
+				data += '</tr>';
+			}
+			data += '</tbody></table>';
+
+			var stats = KOCFIA.dataAndStats.update();
+
+			$section.append( header + data + stats )
+				.on('click', '.update', function(){
+					$(this).closest('table').replaceWith( KOCFIA.dataAndStats.update() );
+				});
+		};
+
+		KOCFIA.dataAndStats.update = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats update function');
+
+			var code = '';
+
+			return code;
+		};
+
+		KOCFIA.dataAndStats.compute = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats compute function');
+
+			var cityKey, city, i, b, stats, building,
+				timestamp = Date.timestamp(),
+				marshall, foreman,
+				barrackMod, combatMod, politicMod, geometryMod, stableMod, blacksmithMod, giantStrenghtMod,
+				infantryBonus, cavaleryBonus, siegeBonus, defenseBonus, throneBonus, boost;
+			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+				city = KOCFIA.cities[ cityKey ];
+
+				stats = {
+					nbBarracks: 0,
+					highestBarrack: 0,
+					sumLvlBarracks: 0,
+					blacksmith: 0,
+					stable: 0,
+					workshop: 0,
+					wall: 0
+				};
+
+				//parse buildings list
+				for( b in window.seed.buildings[ cityKey ] ){
+					if( window.seed.buildings[ cityKey ].hasOwnProperty(b) ){
+						building = window.seed.buildings[ cityKey ][ b ];
+
+						var bname = parseIntNan(b['pos'+j][0]);
+							var blvl = parseIntNan(b['pos'+j][1]);
+						if( building[0] == 13 ){
+							stats.nbBarracks++;
+							lvl = parseInt(building[0], 10);
+							stats.sumLvlBarracks += lvl;
+							if( lvl > stats.highestBarrack ) stats.highestBarrack = lvl;
+						} else if( building[0] == 16 ){
+							stats.blacksmith = parseInt(building[0], 10);
+						} else if( building[0] == 15 ){
+							stats.workshop = parseInt(building[0], 10);
+						} else if( building[0] == 17 ){
+							stats.stable = parseInt(building[0], 10);
+						} else if( building[0] == 18 ){
+							stats.wall = parseInt(building[0], 10);
+						}
+					}
+				}
+
+
+				stat.combat = 0;
+				stat.politic = 0;
+				knights = window.seed.knights[ cityKey ];
+				if( knights ){
+					marshall = knights[ 'knt'+ window.seed.leaders[ cityKey ].combatKnightId ];
+					if( marshall ){
+						stat.combat = marshall.combat;
+						if( marshall.combatBoostExpireUnixtime > timestamp ){
+							stat.combat *= 1.25;
+						}
+					}
+
+					foreman = knights[ 'knt'+ window.seed.leaders[ cityKey ].politicsKnightId ];
+					if( foreman ){
+						stat.politic = foreman.politics;
+						if( foreman.politicsBoostExpireUnixtime > timestamp ){
+							stat.politic *= 1.25;
+						}
+					}
+				}
+
+				stat.logging = parseInt(window.seed.tech.tch2, 10);
+				stat.geometry = parseInt(window.seed.tech.tch5, 10);
+				stat.eagleEyes = parseInt(window.seed.tech.tch6, 10);
+				stat.poisonedEdge = parseInt(window.seed.tech.tch8, 10);
+				stat.metalAlloys = parseInt(window.seed.tech.tch9, 10);
+				stat.featherweightPowder = parseInt(window.seed.tech.tch10, 10);
+				stat.alloyHorseshoes = parseInt(window.seed.tech.tch12, 10);
+				stat.fletching = parseInt(window.seed.tech.tch13, 10);
+				stat.giantsStrength = parseInt(window.seed.tech.tch16, 10);
+
+				var bm = city.numBarracks + 0.1 * (city.totLevelsBarracks - city.numBarracks);
+				var mf = city.marshallCombatScore/200;
+				var gf = city.geometryLevel/10;
+				var sf = city.stableLevel/10;
+				var wf = city.blacksmithLevel/10;
+				var isf = bm * (1+mf+gf);
+				var csf = bm * (1+mf+gf+sf);
+				var ssf = bm * (1+mf+gf+sf+wf);
+				var pf = city.foremanBasePoliticsScore/200;
+				var gsf = city.giantsStrengthLevel/10;
+				var dsf = 1+pf+gsf;
+				var h=uW.cm.ThroneController.effectBonus(77);
+				var boost=(1+(h/100));
+			}
+
+	/*
+Training Time FormulaeEdit
+
+    BT = Base Training Time, as found in the table above
+
+    NB = number of barracks in the city
+
+    TBL = sum of the levels of all the barracks in the city
+
+    BM = total speed modifier for barracks
+
+    BM = 0.9 * NB + 0.1 * TBL (or if you prefer, BM = NB + (TBL-NB) * 0.1 )
+
+    MCS = Combat Score of the Knight assigned to the role of Marshal in your city
+
+    MF = Marshal Speedup Factor = MCS / 200
+
+    GF = Geometry Speedup Factor = Geometry Level / 10
+
+    SF = Stable Speedup Factor = Stable Level / 10
+
+    WF = Workshop Speedup Factor = Workshop Level / 10
+
+
+    Training time for Infantry Units (Supply Troop, Militiaman, Scout, Pikeman, Swordsman, and Archer):
+
+        Time = BT / ( BM * (1 + MF + GF) )
+
+    Training time for Cavalry Units (Cavalry and Heavy Cavalry):
+
+        Time = BT / ( BM * (1 + MF + GF + SF) )
+
+    Training time for Machine Units (Supply Wagon, Balista, Battering Ram, and Catapult):
+
+        Time = BT / ( BM * (1 + MF + GF + SF + WF) )
+
+
+    Note that there appears to be a bug in the Geometry code, and that speedup currently applies to all types of troop training as seen above.
+
+    The Stable speedup applies to all non-infantry units: cavalry, wagons, and siege engines.
+
+    The Workshop provides an additional bonus to wagons and siege engines.
+
+	var bm = city.numBarracks + 0.1 * (city.totLevelsBarracks - city.numBarracks);
+	var mf = city.marshallCombatScore/200;
+	var gf = city.geometryLevel/10;
+	var sf = city.stableLevel/10;
+	var wf = city.blacksmithLevel/10;
+	var isf = bm * (1+mf+gf);
+	var csf = bm * (1+mf+gf+sf);
+	var ssf = bm * (1+mf+gf+sf+wf);
+	var pf = city.foremanBasePoliticsScore/200;
+	var gsf = city.giantsStrengthLevel/10;
+	var dsf = 1+pf+gsf;
+	var h=uW.cm.ThroneController.effectBonus(77);
+	var boost=(1+(h/100));
+
+	city.Troop1Time = ((city.maxBarracks > 0)?((50/boost)/isf):0);
+	city.Troop2Time = city.Troop1Time/2;
+	city.Troop3Time = ((city.maxBarracks > 1 && city.eagleEyesLevel > 0)?((100/boost)/isf):0);
+	city.Troop4Time = ((city.maxBarracks > 1 && city.poisonedEdgeLevel > 0)?((150/boost)/isf):0);
+	city.Troop5Time = ((city.maxBarracks > 2 && city.workshopLevel > 0 && city.metalAlloysLevel > 0)?((225/boost)/isf):0);
+	city.Troop6Time = ((city.maxBarracks > 3 && city.fletchingLevel > 0)?((350/boost)/isf):0);
+	city.Troop7Time = ((city.maxBarracks > 4 && city.stableLevel > 0 && city.alloyHorseshoesLevel > 0)?((500/boost)/csf):0);
+	city.Troop8Time = ((city.maxBarracks > 6 && city.workshopLevel > 4 && city.stableLevel > 4 && city.alloyHorseshoesLevel > 4)?((1500/boost)/csf):0);
+	city.Troop9Time = ((city.maxBarracks > 5 && city.stableLevel > 0 && city.blacksmithLevel > 2 && city.featherweightPowderLevel > 0)?((1000/boost)/ssf):0);
+	city.Troop10Time = ((city.maxBarracks > 7 && city.stableLevel > 1 && city.blacksmithLevel > 4 && city.geometryLevel > 4 && city.fletchingLevel > 5)?((3000/boost)/ssf):0);
+	city.Troop11Time = ((city.maxBarracks > 8 && city.workshopLevel > 4 && city.stableLevel > 2 && city.blacksmithLevel > 6 && city.metalAlloysLevel > 7 && city.geometryLevel > 6)?((4500/boost)/ssf):0);
+	city.Troop12Time = ((city.maxBarracks > 9 && city.stableLevel > 1 && city.blacksmithLevel > 8 && city.geometryLevel > 9 && city.fletchingLevel > 9)?((6000/boost)/ssf):0);
+	// Ce n'est pas bon - les temps estimés sur les défenses remparts
+	city.Def53Time = ((city.wallLevel > 5 && city.blacksmithLevel > 5 && city.fletchingLevel > 4)?(180/dsf):0);
+	city.Def55Time = ((city.wallLevel > 7 && city.blacksmithLevel > 7 && city.fletchingLevel > 6 && city.geometryLevel > 6)?(135/dsf):0);
+	city.Def60Time = ((city.wallLevel > 3 && city.blacksmithLevel > 3 && city.poisonedEdgeLevel > 1)?(90/dsf):0);
+	city.Def61Time = ((city.wallLevel > 0 && city.metalAlloysLevel > 0)?(30/dsf):0);
+	city.Def62Time = ((city.wallLevel > 1 && city.blacksmithLevel > 1 && city.loggingLevel > 1)?(60/dsf):0);*/
 		};
 
 	/* CHECK AND LAUNCH ATTACK */
@@ -16224,7 +16531,6 @@ jQuery(document).ready(function(){
 	//- auto-suppression
 	//- sauvegarde
 	//- consultation simplifiée
-	//- scan des rapports d'alliance
 	//- vision claire des horaires
 
 	//Attaque :

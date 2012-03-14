@@ -162,7 +162,9 @@ jQuery(document).ready(function(){
 			knights: 'Chevaliers',
 			estates: 'Terres Sauvages conquises',
 			reassign: 'Réassignements de troupes',
-			dataAndStats: 'Informations et Statistiques'
+			dataAndStats: 'Informations et Statistiques',
+			gifts: 'Cadeaux',
+			build: 'Construction'
 		},
 		tabLabel: {
 			map: 'Carte',
@@ -173,7 +175,9 @@ jQuery(document).ready(function(){
 			knights: 'Chevaliers',
 			estates: 'Terres',
 			reassign: 'Réassignements',
-			dataAndStats: 'Infos & Stats'
+			dataAndStats: 'Infos & Stats',
+			gifts: 'Cadeaux',
+			build: 'Construction'
 		},
 		stored: ['conf'],
 		/* default configuration */
@@ -2001,16 +2005,35 @@ jQuery(document).ready(function(){
 			Shared.buildingHighestLevel = function( cityKey, buildingId ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared buildingHighestLevel function');
 
-				var level = 0, b;
-				for( b in window.seed.buildings[cityKey] ){
-					if( window.seed.buildings[cityKey].hasOwnProperty(b) ){
-						var building = window.seed.buildings[cityKey][b],
-							buildingLevel = parseInt(building[1], 10);
-
-						if( building[0] == buildingId && level < buildingLevel ) level = buildingLevel;
-					}
+				var map = {
+					 8: 'embassy',
+					12: 'rallypoint',
+					13: 'barrack',
+					15: 'blacksmith',
+					16: 'workshop',
+					17: 'stable',
+					18: 'wall'
 				}
-				return level;
+
+				if( KOCFIA.dataAndStats.stats.hasOwnProperty( cityKey )
+					&& map.hasOwnProperty( buildingId )
+					&& KOCFIA.dataAndStats.stats[ cityKey ].hasOwnProperty( map[ buildingId ] )
+				){
+					return KOCFIA.dataAndStats.stats[ cityKey ][ map[ buildingId ] ]
+				} else {
+					console.log(buildingId);
+					var level = 0, b;
+					for( b in window.seed.buildings[cityKey] ){
+						if( window.seed.buildings[cityKey].hasOwnProperty(b) ){
+							var building = window.seed.buildings[cityKey][b],
+								buildingLevel = parseInt(building[1], 10);
+
+							if( building[0] == buildingId && level < buildingLevel ) level = buildingLevel;
+						}
+					}
+
+					return level;
+				}
 			};
 
 			Shared.barracksCount = function( cityKey ){
@@ -15166,7 +15189,7 @@ jQuery(document).ready(function(){
 
 				stat = {
 					nbBarracks: 0,
-					highestBarrack: 0,
+					barrack: 0,
 					sumLvlBarracks: 0,
 					blacksmith: 0,
 					stable: 0,
@@ -15179,11 +15202,15 @@ jQuery(document).ready(function(){
 					if( window.seed.buildings[ cityKey ].hasOwnProperty(b) ){
 						building = window.seed.buildings[ cityKey ][ b ];
 
-						if( building[0] == 13 ){
+						if( building[0] == 8 ){
+							stat.embassy = parseInt(building[0], 10);
+						} else if( building[0] == 12 ){
+							stat.rallypoint = parseInt(building[0], 10);
+						} else if( building[0] == 13 ){
 							stat.nbBarracks++;
 							lvl = parseInt(building[0], 10);
 							stat.sumLvlBarracks += lvl;
-							if( lvl > stat.highestBarrack ) stat.highestBarrack = lvl;
+							if( lvl > stat.barrack ) stat.barrack = lvl;
 						} else if( building[0] == 16 ){
 							stat.workshop = parseInt(building[0], 10);
 						} else if( building[0] == 15 ){
@@ -15246,18 +15273,18 @@ jQuery(document).ready(function(){
 				stat.siegeBonus = stat.barrackMod * (1 + stat.combatMod + stat.geometryMod + stat.stableMod + stat.workshopMod);
 				boost = 1 + (window.cm.ThroneController.effectBonus(77) / 100);
 
-				stat.unit1Time = (stat.highestBarrack > 0 ? parseFloat(window.unitcost.unt1[7]) / boost / stat.infantryBonus : 0);
-				stat.unit2Time = (stat.highestBarrack > 0 ? parseFloat(window.unitcost.unt2[7]) / boost / stat.infantryBonus : 0);
-				stat.unit3Time = (stat.highestBarrack > 1 && stat.eagleEyes > 0 ? parseFloat(window.unitcost.unt3[7]) / boost / stat.infantryBonus : 0);
-				stat.unit4Time = (stat.highestBarrack > 1 && stat.poisonedEdge > 0 ? parseFloat(window.unitcost.unt4[7]) / boost / stat.infantryBonus : 0);
-				stat.unit5Time = (stat.highestBarrack > 2 && stat.workshop > 0 && stat.metalAlloys > 0 ? parseFloat(window.unitcost.unt5[7]) / boost / stat.infantryBonus : 0);
-				stat.unit6Time = (stat.highestBarrack > 3 && stat.fletching > 0 ? parseFloat(window.unitcost.unt6[7]) / boost / stat.infantryBonus : 0);
-				stat.unit7Time = (stat.highestBarrack > 4 && stat.stable > 0 && stat.alloyHorseshoes > 0 ? parseFloat(window.unitcost.unt7[7]) / boost / stat.cavaleryBonus : 0);
-				stat.unit8Time = (stat.highestBarrack > 6 && stat.workshop > 4 && stat.stable > 4 && stat.alloyHorseshoes > 4 ? parseFloat(window.unitcost.unt8[7]) / boost / stat.cavaleryBonus : 0);
-				stat.unit9Time = (stat.highestBarrack > 5 && stat.stable > 0 && stat.blacksmith > 2 && stat.featherweightPowder > 0 ? parseFloat(window.unitcost.unt9[7]) / boost / stat.siegeBonus : 0);
-				stat.unit10Time = (stat.highestBarrack > 7 && stat.stable > 1 && stat.blacksmith > 4 && stat.geometry > 4 && stat.fletching > 5 ? parseFloat(window.unitcost.unt10[7]) / boost / stat.siegeBonus : 0);
-				stat.unit11Time = (stat.highestBarrack > 8 && stat.workshop > 4 && stat.stable > 2 && stat.blacksmith > 6 && stat.metalAlloys > 7 && stat.geometry > 6 ? parseFloat(window.unitcost.unt11[7]) / boost / stat.siegeBonus : 0);
-				stat.unit12Time = (stat.highestBarrack > 9 && stat.stable > 1 && stat.blacksmith > 8 && stat.geometry > 9 && stat.fletching > 9 ? parseFloat(window.unitcost.unt12[7]) / boost / stat.siegeBonus : 0);
+				stat.unit1Time = (stat.barrack > 0 ? parseFloat(window.unitcost.unt1[7]) / boost / stat.infantryBonus : 0);
+				stat.unit2Time = (stat.barrack > 0 ? parseFloat(window.unitcost.unt2[7]) / boost / stat.infantryBonus : 0);
+				stat.unit3Time = (stat.barrack > 1 && stat.eagleEyes > 0 ? parseFloat(window.unitcost.unt3[7]) / boost / stat.infantryBonus : 0);
+				stat.unit4Time = (stat.barrack > 1 && stat.poisonedEdge > 0 ? parseFloat(window.unitcost.unt4[7]) / boost / stat.infantryBonus : 0);
+				stat.unit5Time = (stat.barrack > 2 && stat.workshop > 0 && stat.metalAlloys > 0 ? parseFloat(window.unitcost.unt5[7]) / boost / stat.infantryBonus : 0);
+				stat.unit6Time = (stat.barrack > 3 && stat.fletching > 0 ? parseFloat(window.unitcost.unt6[7]) / boost / stat.infantryBonus : 0);
+				stat.unit7Time = (stat.barrack > 4 && stat.stable > 0 && stat.alloyHorseshoes > 0 ? parseFloat(window.unitcost.unt7[7]) / boost / stat.cavaleryBonus : 0);
+				stat.unit8Time = (stat.barrack > 6 && stat.workshop > 4 && stat.stable > 4 && stat.alloyHorseshoes > 4 ? parseFloat(window.unitcost.unt8[7]) / boost / stat.cavaleryBonus : 0);
+				stat.unit9Time = (stat.barrack > 5 && stat.stable > 0 && stat.blacksmith > 2 && stat.featherweightPowder > 0 ? parseFloat(window.unitcost.unt9[7]) / boost / stat.siegeBonus : 0);
+				stat.unit10Time = (stat.barrack > 7 && stat.stable > 1 && stat.blacksmith > 4 && stat.geometry > 4 && stat.fletching > 5 ? parseFloat(window.unitcost.unt10[7]) / boost / stat.siegeBonus : 0);
+				stat.unit11Time = (stat.barrack > 8 && stat.workshop > 4 && stat.stable > 2 && stat.blacksmith > 6 && stat.metalAlloys > 7 && stat.geometry > 6 ? parseFloat(window.unitcost.unt11[7]) / boost / stat.siegeBonus : 0);
+				stat.unit12Time = (stat.barrack > 9 && stat.stable > 1 && stat.blacksmith > 8 && stat.geometry > 9 && stat.fletching > 9 ? parseFloat(window.unitcost.unt12[7]) / boost / stat.siegeBonus : 0);
 
 				stat.unit1PerHour = stat.unit1Time > 0 ? 3600 / stat.unit1Time : 0;
 				stat.unit2PerHour = stat.unit2Time > 0 ? 3600 / stat.unit2Time : 0;
@@ -15312,6 +15339,94 @@ jQuery(document).ready(function(){
 			}
 
 			KOCFIA.dataAndStats.sums = sums;
+		};
+
+	/* GIFTS */
+		KOCFIA.gifts = {
+			options: {
+				active: 1
+			}
+		};
+
+		KOCFIA.gifts.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.gifts +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('gifts', 'active', 'Activer', KOCFIA.conf.gifts.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.gifts.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts on function');
+		}
+
+		KOCFIA.gifts.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts off function');
+		}
+
+		KOCFIA.gifts.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-gifts').html('');
+
+			var header = '<h3>'+ KOCFIA.modulesLabel.gifts +'</h3>';
+		};
+
+	/* BUILD */
+		KOCFIA.build = {
+			options: {
+				active: 1
+			}
+		};
+		//Construction :
+			//- mise en place de la ville (à détailler)
+				//- positionnement
+				//- nombre
+			//- file d'attente des construction par ville
+				//- modifiable (suppression, insertion, ordre)
+			//- gestion des erreurs
+		//fill fields with
+		//upgrade fields to 9
+		//upgrade barracks to 9
+		//build x houses
+		//add to queue by clicking
+		/*toggleStateMode: function(obj){
+		  var t = Tabs.build;
+		  obj = ById('pbBuildMode');
+		  if (obj.value == 'Mode Construction = OFF') {
+		  unsafeWindow.buildslot = t.bot_buildslot;
+		  obj.value = "Mode Construction = ON";
+
+		  }      else {
+		  unsafeWindow.buildslot = t.koc_buildslot;
+		  obj.value = "Mode Construction = OFF";
+		  }
+		  },*/
+
+		KOCFIA.build.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.build +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.build.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build on function');
+		}
+
+		KOCFIA.build.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build off function');
+		}
+
+		KOCFIA.build.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-build').html('');
+
+			var header = '<h3>'+ KOCFIA.modulesLabel.build +'</h3>';
 		};
 
 	/* CHECK AND LAUNCH ATTACK */

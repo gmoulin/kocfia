@@ -2109,3 +2109,29 @@
 		text-align: left;
 	}
 
+/* data and stats */
+	#kocfia-dataAndStats table {
+		width: 100%;
+		margin-bottom: 20px;
+	}
+
+	#kocfia-dataAndStats .might {
+		width: auto;
+		margin: 0 auto 20px;
+	}
+
+	#kocfia-dataAndStats .stats {
+		margin-bottom: 5px;
+	}
+
+	#kocfia-dataAndStats img {
+		top: 0;
+		vertical-align: 0;
+		width: 20px;
+	}
+
+	#kocfia-dataAndStats td {
+		text-align: right;
+		vertical-align: top;
+		padding: 2px 5px 2px 2px;
+	}

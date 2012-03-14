@@ -109,7 +109,7 @@ var request = GM_xmlhttpRequest({
 	method: 'GET',
 	url: domain + 'getTimestamps.php',
 	onload: function(response){
-		var tmp = JSON.parse(request.responseText);
+		var tmp = JSON.parse(response.responseText);
 		if( Array.isArray(tmp) && tmp.length ){
 			preload = tmp;
 		}

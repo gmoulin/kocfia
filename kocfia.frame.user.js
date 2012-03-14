@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name			KOCFIA-MAIN
-// @version			0.1
-// @namespace		KOC
+// @version			2
+// @namespace		KOCFIA
 // @description		améliorations et automatisations diverses pour KOC
 // @include			*kingdomsofcamelot.com/*main_src.php*
 // ==/UserScript==
@@ -12,34 +12,6 @@ if( !Array.hasOwnProperty('isArray') ){
 		return Object.prototype.toString.apply(value) === '[object Array]';
 	};
 }
-
-//preload KOCFIA but do not execute it
-var domain = 'http://kocfia.kapok.dev/',
-	d = new Date(), i,
-	preload = [
-		'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js', //latest 1.x.x jquery
-		domain + "jquery-ui-1.8.18.custom.min.js",
-		domain + "jquery-ui-1.8.18.custom.css",
-		domain + "jquery.miniColors.css",
-		domain + "jquery.miniColors.min.js",
-		domain + "jquery.tipsy.css",
-		domain + "jquery.tipsy.min.js",
-		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
-		domain + "kocfia.js?ts=" + d.getTime()
-	];
-/*
-//try to get timestamps
-var request = new XMLHttpRequest();
-request.open('GET', domain + 'getTimestamps.php', false);
-request.send(null);
-if( request.status === 200 ){
-	var tmp = JSON.parse(request.responseText);
-	if( Array.isArray(tmp) && tmp.length ){
-		preload = tmp;
-	}
-}
-window.setTimeout(function(){ request.abort(); }, 3000);
-*/
 
 var kocFrame = unsafeWindow.parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
@@ -104,14 +76,51 @@ var load = function(){
 	}
 };
 
-//if the page is already loaded, call load immediatly, else preload and listen for window load event
-if( "undefined" != typeof(unsafeWindow.document.readyState) && "complete" === unsafeWindow.document.readyState ){
-	load();
-} else {
-	for( i = 0; i < preload.length; i += 1 ){
-		loadInCache( preload[i] );
-	}
+var start = function(){
+	//if the page is already loaded, call load immediatly, else preload and listen for window load event
+	if( "undefined" != typeof(unsafeWindow.document.readyState) && "complete" === unsafeWindow.document.readyState ){
+		load();
+	} else {
+		for( i = 0; i < preload.length; i += 1 ){
+			loadInCache( preload[i] );
+		}
 
-	unsafeWindow.addEventListener('load', load, false);
+		unsafeWindow.addEventListener('load', load, false);
+	}
 }
 
+//preload KOCFIA but do not execute it
+var domain = 'http://kocfia.kapok.dev/',
+	d = new Date(), i,
+	preload = [
+		'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js', //latest 1.x.x jquery
+		domain + "jquery-ui-1.8.18.custom.min.js",
+		domain + "jquery-ui-1.8.18.custom.css",
+		domain + "jquery.miniColors.css",
+		domain + "jquery.miniColors.min.js",
+		domain + "jquery.tipsy.css",
+		domain + "jquery.tipsy.min.js",
+		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
+		domain + "kocfia.js?ts=" + d.getTime()
+	];
+
+//try to get timestamps
+var request = GM_xmlhttpRequest({
+	method: 'GET',
+	url: domain + 'getTimestamps.php',
+	onload: function(response){
+		var tmp = JSON.parse(request.responseText);
+		if( Array.isArray(tmp) && tmp.length ){
+			preload = tmp;
+		}
+		start();
+	},
+	onerror: function(){
+		start();
+	},
+	onabort: function(){
+		start();
+	}
+});
+
+window.setTimeout(function(){ request.abort(); }, 3000);

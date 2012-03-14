@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name			KOCFIA-FB-PAGE
-// @version			0.1
-// @namespace		KOC
+// @version			1
+// @namespace		KOCFIA
 // @description		facebook page improvement for KOC (outside the KOC iframe)
 // @include			*apps.facebook.com/kingdomsofcamelot*
 // ==/UserScript==

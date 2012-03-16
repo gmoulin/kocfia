@@ -15556,6 +15556,8 @@ jQuery(document).ready(function(){
 			options: {
 				active: 1
 			},
+			stored: ['queues', 'currents'],
+			currents: {},
 			queues: {} //by citiesKey
 		};
 		//Construction :
@@ -15588,6 +15590,9 @@ jQuery(document).ready(function(){
 			var code = '<h3>'+ KOCFIA.modulesLabel.build +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
+			code += Shared.generateButton('build', 'deleteQueues', 'Supprimer toutes les files d\'attente  enregistrées');
+			//paying mode
+			//code += Shared.generateButton('build', 'deleteCurrents', 'Supprimer toutes les tâches de constructions courrante enregistrées');
 			code += '</div>';
 
 			$section.append( code );
@@ -15607,27 +15612,42 @@ jQuery(document).ready(function(){
 
 			var header = '<h3>'+ KOCFIA.modulesLabel.build +'</h3>';
 
-			/*
-			code += '<div id="kocfia-transport-priority-supply" class="priority-list" title="Priorité des resources lors des approvisionnements">';
-			code += '<ol rel="supply">';
-			for( i = 0, l = KOCFIA.conf.transport.priority.supply.length; i < l; i += 1 ){
-				resKey = KOCFIA.conf.transport.priority.supply[i];
-				resInfo = KOCFIA.resourceInfo[ resKey ];
-				code += '<li rel="'+ resKey +'"><img src="'+ resInfo.icon +'">'+ resInfo.label +'</li>';
+			var queues = '<ul>',
+				i, j, l, cityKey, city;
+			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+				city = KOCFIA.cities[ cityKey ];
+
+				queues += '<li>';
+				queues += '<div>'+ city.label +'</div>';
+				queues += '<div class="current">En cours : ';
+				if( KOCFIA.build.currents.hasOwnProperty(cityKey) ){
+					queues += KOCFIA.build.currents[ cityKey ];
+					queues += '<div>';
+					queues += '<button class="button secondary requeue" title="Remettre à la fin de la liste d\'attente"><span></span></button>';
+					//paying mode
+					//queues += '<button class="button danger remove" title="Supprimer la tâche en cours"><span>Supprimer</span></button>';
+					queues += '</div>';
+				} else {
+					queues += 'rien';
+				}
+				queues += '</div>';
+				queues += '<button class="button secondary queue-toggle" rel="'+ cityKey +'"><span>Liste d\'attente</span></button>';
+				queues += '<button class="button danger queue-reset" rel="'+ cityKey +'" title="Vider la liste d\'attente de cette ville"><span>Vider</span></button>';
+				queues += '<div id="kocfia-build-queue-'+ cityKey +'" class="queue-list">';
+				queues += '<ol rel="'+ cityKey +'">';
+				if( KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
+					for( j = 0, l = KOCFIA.build.queue[ cityKey ].length; i < l; i += 1 ){
+						queues += '<li rel="">todo</li>'; //queue item
+					}
+				}
+				queues += '</ol></div></li>';
 			}
-			code += '</ol></div>';
-
-
-				.on('click', '.priority', function(){
-					var rel = $(this).attr('rel');
-					$('#kocfia-transport-priority-'+ rel).dialog('open');
-				});
-
-
+			queues += '</ul>';
 
 			$section
-				.find('.priority-list')
-				.dialog({autoOpen: false, height: 300, width: 400, zIndex: 100001 })
+				.find('.queue-list')
+				.dialog({autoOpen: false, height: 'auto', width: 400, zIndex: 100001 })
 				.find('ol').sortable({
 					zIndex: 100002,
 					update: function(event, ui){
@@ -15635,18 +15655,66 @@ jQuery(document).ready(function(){
 							rel = $list.attr('rel'),
 							list = $list.find('li').map(function(){ return $(this).attr('rel'); }).get();
 
-						KOCFIA.conf.transport.priority[ rel ] = list;
-						Shared.storeConf();
+						KOCFIA.build.queues[ rel ] = list;
+						KOCFIA.build.storeQueue();
 					}
-				});*/
+				});
 
-			$section.append( header );
+			$section.append( header + form + queues )
+				.on('click', '.queue-toggle', function(){
+					var rel = $(this).attr('rel');
+					$('#kocfia-build-queue-'+ rel).dialog('open');
+				})
+				.on('click', '.queue-reset', function(){
+					if( confirm('Êtes-vous sûr ?') ){
+						var $this = $(this),
+							rel = $this.attr('rel');
+						KOCFIA.build.deleteQueueByCity( rel );
+						$this.parent().find('ol')[0].innerHTML = '';
+					}
+				})
+				.on('click', '.requeue', function(){
+					//requeue the current task at the end of the queue
+				})
+				//paying mode
+				/*.on('click', '.remove', function(){
+					if( confirm('Êtes-vous sûr ?') ){
+
+					}
+				})*/
+				;
 		};
 
-		KOCFIA.build.getQueue = function( cityKey ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build getQueue function', cityKey);
+		KOCFIA.build.storeQueues = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build storeQueues function');
+			localStorage.setObject('kocfia_build_queues_' + KOCFIA.storeUniqueId, KOCFIA.build.storeQueues);
+		};
 
+		KOCFIA.build.deleteQueues = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteQueues function');
+			localStorage.removeItem('kocfia_build_queues_' + KOCFIA.storeUniqueId);
 
+			KOCFIA.build.queues = {};
+		};
+
+		KOCFIA.build.deleteQueueByCity = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteQueues function');
+			if( KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
+				delete KOCFIA.build.queues[ cityKey ];
+				KOCFIA.build.storeQueues();
+			}
+		};
+
+		KOCFIA.build.storeCurrents = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build storeCurrents function');
+			localStorage.setObject('kocfia_build_currents_' + KOCFIA.storeUniqueId, KOCFIA.build.storecurrents);
+		};
+
+		KOCFIA.build.deleteCurrents = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteCurrents function');
+			localStorage.removeItem('kocfia_build_currents_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.build.currents = {};
 		};
 
 	/* CHECK AND LAUNCH ATTACK */

@@ -89,6 +89,14 @@
 		background-position: right 0;
 	}
 
+	.kocfia-conf-panel-tab.on.pileUp.supply {
+		background-image: -webkit-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent), -webkit-linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
+		background-image: -moz-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent), -moz-linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
+		background-image: linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent), linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
+		background-repeat: no-repeat, no-repeat;
+		background-position: 0 0, right 0;
+	}
+
 	.kocfia-conf-panel-tab.off {
 		display: none;
 	}
@@ -274,6 +282,14 @@
 			left: 2px;
 			width: 98%;
 		}
+
+/* history popups */
+	.history img {
+		width: 20px;
+		vertical-align: middle;
+		margin: 0;
+		top: -2px;
+	}
 
 /* option tab */
 	#kocfia-options p {
@@ -901,6 +917,12 @@
 	/* dark forest specific */
 		#kocfia-darkForest .ongoing .rules div {
 			margin: 2px 0;
+			white-space: normal;
+		}
+
+		#kocfia-darkForest .ongoing .info {
+			min-width: 200px;
+			max-width: 300px;
 		}
 
 	/* transport specific */
@@ -1822,6 +1844,7 @@
 	}
 
 	#kocfia-transport h3 .nextIteration + .button,
+	#kocfia-reassign h3 .nextIteration + .button,
 	#kocfia-formation h3 .nextIteration + .button {
 		margin-right: 55px;
 	}
@@ -2151,3 +2174,44 @@
 		vertical-align: top;
 		padding: 2px 5px 2px 2px;
 	}
+
+/* gifts */
+	#kocfia-gifts > div {
+		margin: 2px 0;
+		text-align: center;
+	}
+
+	#kocfia-gifts .header {
+		margin: 2px 0;
+	}
+
+	#kocfia-gifts .header > span {
+		margin: 5px;
+		display: inline-block;
+	}
+
+
+	#kocfia-gifts .giftType {
+		border-top: 1px solid #ccc;
+		padding: 2px;
+		margin: 2px;
+		display: none;
+	}
+
+	#kocfia-gifts h4 {
+		margin: 2px;
+		text-align: center;
+	}
+
+	#kocfia-gifts ol {
+		margin: 0;
+	}
+
+	#kocfia-gifts li {
+		text-align: left;
+	}
+
+	#kocfia-gifts .button {
+		margin: 0 3px;
+	}
+

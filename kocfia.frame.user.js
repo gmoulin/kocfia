@@ -13,6 +13,22 @@ if( !Array.hasOwnProperty('isArray') ){
 	};
 }
 
+/* object isObject */
+if( !Object.hasOwnProperty('isObject') ){
+	Object.isObject = function(value){
+		return Object.prototype.toString.apply(value) === '[object Object]';
+	};
+}
+
+/* string trim */
+if( !String.prototype.hasOwnProperty('trim') ){
+	String.prototype.trim = (function(re){
+		return function(){
+			return this.replace(re, "$1");
+		};
+	}(/^\s*(\S*(\s+\S+)*)\s*$/));
+}
+
 var kocFrame = unsafeWindow.parent.document.getElementById('kocIframes1');
 //force koc iframe to width 100%
 if( kocFrame ) kocFrame.style.width = '100%';
@@ -123,4 +139,46 @@ var request = GM_xmlhttpRequest({
 	}
 });
 
-window.setTimeout(function(){ request.abort(); }, 3000);
+unsafeWindow.setTimeout(function(){ request.abort(); }, 3000);
+
+unsafeWindow.addEventListener('message', function(event){
+	//console.log('unsafeWindow message', event);
+	if( event.origin.indexOf('kingdomsofcamelot.com') != -1 ){
+		unsafeWindow.console.info('event frame', event.data);
+		if( Object.isObject(event.data) && event.data.hasOwnProperty('task') && !event.data.hasOwnProperty('result') ){
+			if( event.data.task == 'firstMethodStepTwo' ){
+				GM_xmlhttpRequest({
+					method: 'POST',
+					url: event.data.url,
+					param: event.data.param + cookieAsURI(),
+					onload: function( response ){
+						//unsafeWindow.console.log('frame load', {task: event.data.task, result: response.responseText});
+						event.source.postMessage({task: event.data.task, result: response.responseText}, event.origin);
+					}
+				});
+			} else if( event.data.task == 'firstMethodStepThree' ){
+				GM_xmlhttpRequest({
+					method: 'POST',
+					url: event.data.url,
+					param: event.data.param + cookieAsURI(),
+					onload: function( response ){
+						//unsafeWindow.console.log('frame load', {task: event.data.task, result: response.responseText});
+						event.source.postMessage({task: event.data.task, result: response.responseText}, event.origin);
+					}
+				});
+			} else if( event.data.task == 'secondMethodStepTwo' ){
+				var xhr = GM_xmlhttpRequest({
+					method: 'POST',
+					url: event.data.url,
+					param: event.data.param,
+					onload: function( response ){
+						//unsafeWindow.console.log('frame load', {task: event.data.task, result: response.responseText});
+						event.source.postMessage({task: event.data.task, result: response.responseText}, event.origin);
+					}
+				});
+						unsafeWindow.console.log('frame xhr', xhr);
+			}
+		}
+	}
+}, false);
+

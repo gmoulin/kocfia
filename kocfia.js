@@ -5861,7 +5861,7 @@ jQuery(document).ready(function(){
 				.on('click', '.trash', function(){
 					var $tbody = $(this).closest('tbody');
 					$('#kocfia-'+ this.module +'-history').append( $tbody.find('.info').find('div') );
-					$tbody.innerHTML = '';
+					$tbody[0].innerHTML = '';
 					$('.tipsy').remove();
 				});
 		};
@@ -15692,7 +15692,7 @@ jQuery(document).ready(function(){
 					}, 15000);
 
 					$iframe.load(function(e){
-						var content = $iframe[0].contentWindow.document.body.innerHTML;
+						var content = $iframe.contents().find('html').html();
 
 						$form.remove();
 						$iframe.remove();
@@ -15791,7 +15791,7 @@ jQuery(document).ready(function(){
 					//use iframe to get the result of a <form> submit
 					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
 					var $form = $('<form>', {method: 'post', target: 'firstMethodStepTwo', action: url}).css('display', 'none').appendTo( $body );
-					$form.append( $('<input type="hidden" name="signed_request">').val( params[p] ) );
+					$form.append( $('<input type="hidden" name="signed_request">').val( signed ) );
 
 					var $iframe = $('<iframe name="firstMethodStepTwo">').hide().appendTo( $body );
 
@@ -15804,7 +15804,9 @@ jQuery(document).ready(function(){
 					}, 15000);
 
 					$iframe.load(function(e){
-						var content = $iframe[0].contentWindow.document.body.innerHTML;
+						var content = $iframe.contents().find('html').html();
+						console.log('firstMethodStepTwo');
+						console.log(content);
 
 						$form.remove();
 						$iframe.remove();
@@ -15866,7 +15868,7 @@ jQuery(document).ready(function(){
 						}, 15000);
 
 						$iframe.load(function(e){
-							var content = $iframe[0].contentWindow.document.body.innerHTML;
+							var content = $iframe.contents().find('body').html();
 
 							$form.remove();
 							$iframe.remove();
@@ -15901,6 +15903,7 @@ jQuery(document).ready(function(){
 		KOCFIA.gifts.firstMethodStepFour = function( data ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts firstMethodStepFour function');
 			if( KOCFIA.gifts.stop ) return;
+			data = eval(data);
 			if( Object.isObject(data) && data.ok ){
 				KOCFIA.gifts.$gift.parent().append('<span> - Ok</span>').fadeOut('slow', function(){ $(this).remove(); });
 			} else {

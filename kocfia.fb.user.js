@@ -29,11 +29,11 @@ var reloadWindow = setTimeout(function(){ console.log('reloading'); unsafeWindow
 
 unsafeWindow.addEventListener('message', function(event){
 	if( event.origin.indexOf('kingdomsofcamelot.com') != -1 ){
-		unsafeWindow.console.info('event fb', event.data);
 		if( event.data == 'loaded' ){
 			clearTimeout( reloadWindow );
 			reloadWindow = setTimeout(function(){ console.log('reloading'); unsafeWindow.location.reload(true); }, 120000);
 		} else if( event.data == 'giftList' ){
+			unsafeWindow.console.info('event fb', event.data);
 			GM_xmlhttpRequest({
 				method: 'GET',
 				url: unsafeWindow.location.protocol +'//www.facebook.com/reqs.php#confirm_130402594779_0',
@@ -43,6 +43,7 @@ unsafeWindow.addEventListener('message', function(event){
 				}
 			});
 		} else if( Object.isObject(event.data) && event.data.hasOwnProperty('task') ){
+			unsafeWindow.console.info('event fb', event.data);
 			if( event.data.task == 'firstMethodStepOne' ){
 				GM_xmlhttpRequest({
 					method: 'GET',

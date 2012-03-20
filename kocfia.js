@@ -424,16 +424,6 @@ jQuery(document).ready(function(){
 							KOCFIA.gifts.secondMethodStepTwo(event.data.result);
 						}
 					}
-				} else if( event.origin.indexOf('kingdomsofcamelot.com') > -1 ){
-					if( Object.isObject(event.data) && event.data.hasOwnProperty('task') && event.data.hasOwnProperty('result') ){
-						if( event.data.task == 'firstMethodStepTwo' ){
-							KOCFIA.gifts.firstMethodStepThree(event.data.result);
-						} else if( event.data.task == 'firstMethodStepThree' ){
-							KOCFIA.gifts.firstMethodStepFour(event.data.result);
-						} else if( event.data.task == 'secondMethodStepTwo' ){
-							KOCFIA.gifts.secondMethodStepThree(event.data.result);
-						}
-					}
 				}
 			}, false);
 
@@ -2282,10 +2272,15 @@ jQuery(document).ready(function(){
 			*/
 
 		/* form notifications */
-			Shared.success = function( message ){
+			Shared.notificationRemoval = function(){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared success function');
 
-				KOCFIA.$confPanelWrapper.find('.kocfia-error, .kocfia-success').remove();
+				KOCFIA.$confPanelWrapper.find('.kocfia-error, .kocfia-success, .kocfia-working').remove();
+			};
+
+			Shared.success = function( message ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared success function');
+				Shared.notificationRemoval();
 
 				var code = '<div class="kocfia-success" style="display: none;">';
 				if( message === null || message === '' ) message = 'Enregistrement réussi';
@@ -2299,8 +2294,7 @@ jQuery(document).ready(function(){
 
 			Shared.notify = function( message ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared notify function');
-
-				KOCFIA.$confPanelWrapper.find('.kocfia-error, .kocfia-success').remove();
+				Shared.notificationRemoval();
 
 				var code = '<div class="kocfia-error" style="display: none;">';
 
@@ -2320,6 +2314,18 @@ jQuery(document).ready(function(){
 						.appendTo( KOCFIA.$confPanelWrapper )
 						.fadeIn(200, function(){ var $self = $(this); window.setTimeout(function(){ $self.fadeOut(500); }, 5000); });
 				}
+			};
+
+			Shared.working = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared working function');
+				Shared.notificationRemoval();
+
+				var code = '<div class="kocfia-working" style="display: none;">';
+				code += '<h4>Traitement en cours<span class="close">x</span></h4>';
+				code += '</div>';
+				$( code )
+					.appendTo( KOCFIA.$confPanelWrapper )
+					.fadeIn(200);
 			};
 
 	/* FACEBOOK WALL POST POPUP */
@@ -10230,6 +10236,7 @@ jQuery(document).ready(function(){
 			help += '<li>Vous devrez choisir une ville expéditrice, une destination (ville ou coordonnée)</li>';
 			help += '<li>Vous devrez choisir une quantité de la ressource et la troupe servant au transport</li>';
 			help += '<li>Pour chaque transport, la quantité minimum de troupe à utiliser sera calculée en fonction de la quantité de ressources que contiendra le transport</li>';
+			help += '<li>Pour chaque transport, la quantité minimum de ressources pour valider le transport est 100k</li>';
 			help += '<li>Pour un stockage, si la ressource dépasse la quantité le surplus sera envoyé à la destination après vérifications (point de ralliement, troupes)</li>';
 			help += '<li>Pour un approvisionnement, si la ressource dans la ville de destination est en deça de la quantité la différence sera envoyé à la destination après vérifications (point de ralliement, troupes)</li>';
 			help += '<li>Pour chaque couple expéditeur / destinataire il y aura autant de marches que de troupes différentes (3 configurations avec wagon, 4 avec cavalerie équivaut à 2 marches)</li>';
@@ -11737,7 +11744,7 @@ jQuery(document).ready(function(){
 					}
 
 					//is a transport needed ?
-					if( unitsArr[ uId ] > 0 && totalResources > 0 ){
+					if( unitsArr[ uId ] > 0 && totalResources > 100000 ){ //minimum 100k resource to confirm launch
 						//compute the transport units and resources for display
 						resourcesSummary = [];
 						for( j = 0; j < resources.length; j += 1 ){
@@ -11751,15 +11758,22 @@ jQuery(document).ready(function(){
 						unitSummary = '<img src="'+ unitInfo.icon +'" alt="'+ unitInfo.label +'" title="'+ unitInfo.label +' '+ Shared.readable( unitsArr[ uId ] ) +'"> '+ Shared.format( unitsArr[ uId ] );
 
 						return dfd.pipe( launch(dfd, params, 3) );
+					} else if( totalResources > 0 ){
+						if( type == 'pileUp' ){
+							KOCFIA.transport.refreshOnGoing('Minimum requis non atteint depuis '+ city.label +'.', type);
+						} else {
+							KOCFIA.transport.refreshOnGoing('Minimum requis non atteint depuis '+ city.label +' vers '+ currentDestination +'.', type);
+						}
 					} else {
 						if( type == 'pileUp' ){
 							KOCFIA.transport.refreshOnGoing('Rien à stocker via '+ unitInfo.label +' depuis '+ city.label +'.', type);
 						} else {
 							KOCFIA.transport.refreshOnGoing('Rien à approvisionner via '+ unitInfo.label +' depuis '+ city.label +' vers '+ currentDestination +'.', type);
 						}
-						unitIndex += 1;
-						return dfd.pipe( getUnits(dfd) );
 					}
+
+					unitIndex += 1;
+					return dfd.pipe( getUnits(dfd) );
 				};
 
 				//step 5 - try to launch the march
@@ -11791,17 +11805,23 @@ jQuery(document).ready(function(){
 								//any free slot left ?
 								if( Shared.getRallyPointSlots( cityKey ) === 0 ){
 									KOCFIA.transport.refreshOnGoing('Vérifications pour '+ city.label +' finies.', type);
-									cityIndex += 1;
-									return dfd.pipe( fromCity(dfd) );
+									window.setTimeout(function(){
+										cityIndex += 1;
+										return dfd.pipe( fromCity(dfd) );
+									}, 5000);
+								} else {
+									window.setTimeout(function(){
+										unitIndex += 1;
+										return dfd.pipe( getUnits(dfd) );
+									}, 5000);
 								}
-
-								unitIndex += 1;
-								return dfd.pipe( getUnits(dfd) );
 
 							} else if( data.user_action ){
 								if( data.user_action == 'marchWarning' ){
-									tParams.marchWarning = 1;
-									return dfd.pipe( launch(dfd, tParams, 3) );
+									window.setTimeout(function(){
+										tParams.marchWarning = 1;
+										return dfd.pipe( launch(dfd, tParams, 3) );
+									}, 5000);
 								} else if( data.user_action == 'marchCaptcha' ){
 									KOCFIA.transport.refreshOnGoing('Captcha détecté, transport annulé.', type);
 									dfd.reject();
@@ -11810,20 +11830,27 @@ jQuery(document).ready(function(){
 									if( attempts > 0 ) dfd.pipe( launch(dfd, tParams, attempts) );
 									else {
 										KOCFIA.transport.refreshOnGoing('Transport refusé (serveur, action utilisateur requise) : '+ resourcesSummary.join(', ') +' avec '+ unitSummary +' depuis '+ city.label +' vers '+ currentDestination +'.', type);
-										unitIndex += 1;
-										return dfd.pipe( getUnits(dfd) );
+										window.setTimeout(function(){
+											unitIndex += 1;
+											return dfd.pipe( getUnits(dfd) );
+										}, 5000);
 									}
 								}
 							} else if( data.msg ){
 								//{"ok":false,"error_code":4,"feedback":"3-7-0","msg":"Unable to dispatch march. Not enough units"}
 								KOCFIA.transport.refreshOnGoing('Transport refusé ('+ data.msg +') : '+ resourcesSummary.join(', ') +' avec '+ unitSummary +' depuis '+ city.label +' vers '+ currentDestination +'.', type);
 								//detect message to pipe to the correct function (not enough units, not enough resource, PR full, ...)
-								unitIndex += 1;
-								return dfd.pipe( getUnits(dfd) );
+								window.setTimeout(function(){
+									unitIndex += 1;
+									return dfd.pipe( getUnits(dfd) );
+								}, 5000);
 							} else {
+								console.error(data);
 								KOCFIA.transport.refreshOnGoing('Transport refusé (serveur) : '+ resourcesSummary.join(', ') +' avec '+ unitSummary +' depuis '+ city.label +' vers '+ currentDestination +'.', type);
-								unitIndex += 1;
-								return dfd.pipe( getUnits(dfd) );
+								window.setTimeout(function(){
+									unitIndex += 1;
+									return dfd.pipe( getUnits(dfd) );
+								}, 5000);
 							}
 						})
 						.fail(function(){
@@ -11831,8 +11858,10 @@ jQuery(document).ready(function(){
 							if( attempts > 0 ) dfd.pipe( launch(dfd, tParams, attempts) );
 							else {
 								KOCFIA.transport.refreshOnGoing('Transport refusé (internet) : '+ resourcesSummary.join(', ') +' avec '+ unitSummary +' depuis '+ city.label +' vers '+ currentDestination +'.', type);
-								unitIndex += 1;
-								return dfd.pipe( getUnits(dfd) );
+								window.setTimeout(function(){
+									unitIndex += 1;
+									return dfd.pipe( getUnits(dfd) );
+								}, 5000);
 							}
 						});
 				};
@@ -13960,6 +13989,7 @@ jQuery(document).ready(function(){
 
 					if( flag === true && isNaN(position) ) return;
 
+					Shared.working();
 					$.when( KOCFIA.knights.promote(cityKey, knightKey, position, flag) )
 						.done(function(){
 							Shared.success( null );
@@ -13977,6 +14007,7 @@ jQuery(document).ready(function(){
 						cityKey = $this.closest('tbody').data('city'),
 						knightKey = $tr.data('knight');
 
+					Shared.working();
 					$.when( KOCFIA.knights.dismiss(cityKey, knightKey) )
 						.done(function(){
 							Shared.success( null );
@@ -14007,6 +14038,7 @@ jQuery(document).ready(function(){
 					else if( $this.hasClass('i') ) stats[2] += points;
 					else if( $this.hasClass('r') ) stats[3] += points;
 
+					Shared.working();
 					$.when( KOCFIA.knights.skillUp(cityKey, knightKey, stats, points) )
 						.done(function(){
 							Shared.success( null );
@@ -14025,6 +14057,7 @@ jQuery(document).ready(function(){
 						knightKey = $tr.data('knight'),
 						itemKey = $this.attr('rel');
 
+					Shared.working();
 					$.when( KOCFIA.knights.boost(cityKey, knightKey, itemKey, ($this.hasClass('xp') ? 'xp' : 'stat')) )
 						.done(function(){
 							Shared.success( null );
@@ -14555,6 +14588,7 @@ jQuery(document).ready(function(){
 						$tbody = $this.closest('tbody'),
 						cityKey = $tbody.data('city');
 
+					Shared.working();
 					$.when( KOCFIA.estates.abandon( cityKey, tileKey ) )
 						.done(function(){
 							Shared.success( null );
@@ -14686,6 +14720,7 @@ jQuery(document).ready(function(){
 						$tbody = $this.closest('tbody'),
 						cityKey = $tbody.data('city');
 
+					Shared.working();
 					$.when( KOCFIA.estates.defend( cityKey ) )
 						.done(function(){
 							Shared.success( null );
@@ -15641,10 +15676,35 @@ jQuery(document).ready(function(){
 				}
 
 				if( action && signed ){
-					signed = 'signed_request='+ signed;
-					window.postMessage({task: 'secondMethodStepTwo', url: action, param: signed}, document.location.protocol +'//'+ document.location.hostname);
+					//use iframe to get the result of a <form> submit
+					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
+					$form = $('<form>', {method: 'post', target: 'secondMethodStepTwo', action: action}).css('display', 'none').appendTo( $body );
+					$form.append( $('<input type="hidden" name="signed_request">').val( signed ) );
+
+					var $iframe = $('<iframe name="secondMethodStepTwo">').hide().appendTo( $body );
+
+					var failure = window.setTimeout(function(){
+						$form.remove();
+						$iframe.remove();
+						KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2a</span>');
+						KOCFIA.gifts.index += 1;
+						KOCFIA.gifts.openGift();
+					}, 15000);
+
+					$iframe.load(function(e){
+						var content = $iframe[0].contentWindow.document.body.innerHTML;
+
+						$form.remove();
+						$iframe.remove();
+
+						window.clearTimeout( failure );
+
+						KOCFIA.gifts.secondMethodStepThree( content );
+					});
+
+					$form.submit();
 				} else {
-					KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2a</span>');
+					KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2b</span>');
 					KOCFIA.gifts.index += 1;
 					KOCFIA.gifts.openGift();
 					return false;
@@ -15728,10 +15788,33 @@ jQuery(document).ready(function(){
 					url += 'fbIframeOn=1&standalone=0&res=1&iframe=1&lang=en&ts='+ (Date.now() / 1000) +'&page=claimgift&appBar=&cts='+ parseInt(Date.timestamp(), 10);
 					url += '&'+ params.join('&');
 
-					signed = 'signed_request='+ signed;
+					//use iframe to get the result of a <form> submit
+					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
+					var $form = $('<form>', {method: 'post', target: 'firstMethodStepTwo', action: url}).css('display', 'none').appendTo( $body );
+					$form.append( $('<input type="hidden" name="signed_request">').val( params[p] ) );
 
-					//avoid cross origin error, ask "top" greaseMonkey script to do the request and send back the response
-					window.postMessage({task: 'firstMethodStepTwo', url: url, param: signed}, document.location.protocol +'//'+ document.location.hostname);
+					var $iframe = $('<iframe name="firstMethodStepTwo">').hide().appendTo( $body );
+
+					var failure = window.setTimeout(function(){
+						$form.remove();
+						$iframe.remove();
+						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2a</span>');
+						KOCFIA.gifts.index += 1;
+						KOCFIA.gifts.openGift();
+					}, 15000);
+
+					$iframe.load(function(e){
+						var content = $iframe[0].contentWindow.document.body.innerHTML;
+
+						$form.remove();
+						$iframe.remove();
+
+						window.clearTimeout( failure );
+
+						KOCFIA.gifts.firstMethodStepThree( content );
+					});
+
+					$form.submit();
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2b</span>');
 					KOCFIA.gifts.index += 1;
@@ -15761,9 +15844,39 @@ jQuery(document).ready(function(){
 						params.selectedS = KOCFIA.gifts.domainId;
 						params.ver = 2;
 
-						//avoid cross origin error, ask "top" greaseMonkey script to do the request and send back the response
-						window.postMessage({task: 'firstMethodStepThree', url: window.g_ajaxpath +'ajax/claimgift.php'+ window.g_ajaxsuffix, param: params}, document.location.protocol +'//'+ document.location.hostname);
+						var url = window.g_ajaxpath +'ajax/claimgift.php'+ window.g_ajaxsuffix;
 
+						//use iframe to get the result of a <form> submit
+						//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
+						var $form = $('<form>', {method: 'post', target: 'firstMethodStepThree', action: url}).css('display', 'none').appendTo( $body );
+						for( var p in params ){
+							if( params.hasOwnProperty(p) ){
+								$form.append( $('<input type="hidden" name="'+ p +'">').val( params[p] ) );
+							}
+						}
+
+						var $iframe = $('<iframe name="firstMethodStepThree">').hide().appendTo( $body );
+
+						var failure = window.setTimeout(function(){
+							$form.remove();
+							$iframe.remove();
+							KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3a</span>');
+							KOCFIA.gifts.index += 1;
+							KOCFIA.gifts.openGift();
+						}, 15000);
+
+						$iframe.load(function(e){
+							var content = $iframe[0].contentWindow.document.body.innerHTML;
+
+							$form.remove();
+							$iframe.remove();
+
+							window.clearTimeout( failure );
+
+							KOCFIA.gifts.firstMethodStepFour( content );
+						});
+
+						$form.submit();
 					} else {
 						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3b</span>');
 						KOCFIA.gifts.index += 1;

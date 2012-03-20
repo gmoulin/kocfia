@@ -1550,6 +1550,7 @@
 		box-shadow: 0 0 1.5px 1px #FFC300;
 	}
 
+	.kocfia-working,
 	.kocfia-error,
 	.kocfia-success {
 		position: absolute;
@@ -1565,6 +1566,7 @@
 		-webkit-box-sizing: border-box;
 	}
 
+	.kocfia-working .close,
 	.kocfia-error .close {
 		display: inline-block;
 		font-size: 10px;
@@ -1576,6 +1578,10 @@
 		cursor: pointer;
 	}
 
+	.kocfia-working {
+		color: #18B6F4;
+	}
+
 	.kocfia-error {
 		color: #FF7700;
 	}
@@ -1585,6 +1591,7 @@
 		font-weight: bold;
 	}
 
+	.kocfia-working h4,
 	.kocfia-error h4 {
 		margin: 0;
 		padding: 0;

@@ -16008,9 +16008,15 @@ jQuery(document).ready(function(){
 				queues += '<div id="kocfia-build-queue-'+ cityKey +'" class="queue-list">';
 				queues += '<ol rel="'+ cityKey +'">';
 				if( KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
+					var current = {}, queued;
 					for( j = 0, l = KOCFIA.build.queue[ cityKey ].length; i < l; i += 1 ){
-						queues += '<li rel="">todo</li>'; //queue item
+						queued = KOCFIA.build.queue[ cityKey ][ j ];
+						//format type, target, level
+						if( !$.isEmptyOject(current) && current.type != queue.type ){
+
+						}
 					}
+					queues += '<li rel="">todo</li>'; //queue item
 				}
 				queues += '</ol></div></li>';
 			}
@@ -17368,4 +17374,5 @@ jQuery(document).ready(function(){
 			//y catapultes
 		//clever training (population optimisation)
 		//clever building
+		//occupied wilderness attack option
 */

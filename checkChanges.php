@@ -34,7 +34,7 @@ if( $lastModified > 0 ){
 		$oChecker->timestamp = $lastModified;
 		$oChecker->save();
 
-		mail('gmoulin.dev@gmail.com', 'kabam code change', date('Y-m-d H:i:s', $lastModified));
+		mail('gmoulin.dev@gmail.com', 'kabam code change', date('Y-m-d H:i:s', $lastModified), 'From: kocfia@kapok.fr');
 	}
 }
 ?>

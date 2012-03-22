@@ -2211,6 +2211,8 @@
 	}
 
 	#kocfia-gifts ol {
+		-moz-column-count: 3;
+		-moz-column-gap: 50px;
 		margin: 0;
 	}
 
@@ -2222,3 +2224,6 @@
 		margin: 0 3px;
 	}
 
+	#kocfia-gifts .success {
+		color: #1BCC42;
+	}

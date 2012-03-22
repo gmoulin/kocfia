@@ -33,7 +33,6 @@ unsafeWindow.addEventListener('message', function(event){
 			clearTimeout( reloadWindow );
 			reloadWindow = setTimeout(function(){ console.log('reloading'); unsafeWindow.location.reload(true); }, 120000);
 		} else if( event.data == 'giftList' ){
-			unsafeWindow.console.info('event fb', event.data);
 			GM_xmlhttpRequest({
 				method: 'GET',
 				url: unsafeWindow.location.protocol +'//www.facebook.com/reqs.php#confirm_130402594779_0',
@@ -43,7 +42,6 @@ unsafeWindow.addEventListener('message', function(event){
 				}
 			});
 		} else if( Object.isObject(event.data) && event.data.hasOwnProperty('task') ){
-			unsafeWindow.console.info('event fb', event.data);
 			if( event.data.task == 'firstMethodStepOne' ){
 				GM_xmlhttpRequest({
 					method: 'GET',
@@ -63,13 +61,16 @@ unsafeWindow.addEventListener('message', function(event){
 					}
 				});
 			} else if( event.data.task == 'deleteGift' ){
+				unsafeWindow.console.info('event fb', event.data);
 				GM_xmlhttpRequest({
 					method: 'POST',
-					url: event.data.url,
+					url: unsafeWindow.location.protocol+'//www.facebook.com/ajax/reqs.php?__a=1',
 					param: event.data.param,
 					onload: function( response ){
-						//unsafeWindow.console.log('load fb', {task: event.data.task, result: response.responseText});
-						event.source.postMessage({task: event.data.task, result: response.responseText}, event.origin);
+						unsafeWindow.console.log('load fb', {task: event.data.task, result: response.responseText});
+					},
+					onerror: function( response ){
+						unsafeWindow.console.log('load fb', {task: event.data.task, result: response});
 					}
 				});
 			}

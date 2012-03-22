@@ -409,7 +409,6 @@ jQuery(document).ready(function(){
 		//set message event listener
 		//used to pass data between iframes
 			window.addEventListener('message', function(event){
-				console.info('kocfia', event.data);
 				//return the conf values for fbWallPopup module
 				if( event.origin.indexOf('facebook.com') > -1 ){
 					if( event.data == 'fbWallPopup module conf please' ){
@@ -1485,21 +1484,7 @@ jQuery(document).ready(function(){
 
 				if( 0 === speed ) return "";
 
-				var guardianBonus = 0;
-				for( i = 0; i < window.seed.guardian.length; i += 1 ){
-					guardian = window.seed.guardian[i];
-					if( guardian.city == cityKey && guardian.type == 'food' && guardian.level > 0 ){
-						guardianBonus = guardian.level;
-						break;
-					}
-				}
-
-				var multiplier = 1 + (guardianBonus * 0.01),
-					barbarian_raid = false;
-
-				if( !barbarian_raid ){
-					speed = speed * multiplier;
-				}
+				var barbarian_raid = false;
 
 				if( type == 'transport' || type == 'reinforce' || type == 'reassign' ){
 					var level = Shared.buildingHighestLevel(cityKey, 18);
@@ -1525,6 +1510,11 @@ jQuery(document).ready(function(){
 				var throneBoost = throne67 + throne68 + throne69 + throne70 + throne71 + throne72;
 				if( !barbarian_raid ){
 					speed = speed * (1 + (throneBoost * 0.01));
+				}
+
+				var multiplier = 1 + (cm.guardianModalModel.getMarchBonus() * 0.01);
+				if( !barbarian_raid && window.cm.WorldSettings.isOn("GUARDIAN_MARCH_EFFECT") ){
+					speed = speed * (1 + (multiplier * 0.01));
 				}
 
 				time = 0;
@@ -9310,12 +9300,13 @@ jQuery(document).ready(function(){
 			if( u > 8 ) modifier = stat.cavaleryBonus;
 			else if( u > 6 ) modifier = stat.cavaleryBonus;
 
-			time = Math.max(1, Math.ceil(time / modifier));
-
-			time = Math.round(time / (1 + (window.cm.ThroneController.effectBonus(77) / 100)));
+			modifier = modifier * (1 + (window.cm.ThroneController.effectBonus(77) / 100));
+			if( window.cm.WorldSettings.isOn("GUARDIAN_MARCH_EFFECT") ){
+				modifier = modifier * (1 + window.cm.guardianModalModel.getStoneTrainingSpeedBonus());
+			}
 
 			if( speed == '0' ){
-				return time;
+				return Math.max(1, Math.ceil(time / modifier));
 			} else if( speed == '1' ){
 				return [Math.ceil((100 - window.gambleOptionResults1[1]) / 100 * time), Math.ceil((100 - window.gambleOptionResults1[0]) / 100 * time)];
 			} else if( speed == '2' ){
@@ -15530,7 +15521,15 @@ jQuery(document).ready(function(){
 				})
 				.on('click', '.open', function(){
 					$(this).removeClass('open gather').addClass('cancel danger').find('span').html('Stopper');
+					KOCFIA.gifts.stop = 0;
 					KOCFIA.gifts.openGifts();
+				})
+				.on('click', '.refresh', function(){
+					var $this = $(this);
+					$this.siblings('.button').removeClass('open gather').addClass('cancel danger').find('span').html('Stopper');
+					KOCFIA.gifts.stop = 0;
+					KOCFIA.gifts.gatherAvailableGifts();
+					$this.remove();
 				})
 				.on('click', '.all, .none', function(){
 					var $this = $(this);
@@ -15562,24 +15561,28 @@ jQuery(document).ready(function(){
 
 		KOCFIA.gifts.parseGiftPage = function(data){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts parseGiftPage function');
-			var list = {};
+			var list = {}, count = {};
 			if( data.length > 0 ){
 				var forms = data.match(/<form[^>]*>(.*)<\/form>/gi),
-					$li, $form, j = 0;
+					$li, $form, j = 0,
+					$request, request_id,
+					from, giftText,
+					$confirm,
+					tmp, value, id;
+				KOCFIA.gifts.infos = {};
 				if( forms && forms.length ){
 					for( var i = 0; i < forms.length; i += 1 ){
 						$form = $(forms[i]);
 						$li = $form.find('#confirm_130402594779');
 						if( $li.length ){
-							$li.find('.appRequest').each(function(){
-								var $request = $(this),
-									id = $request.attr('id'),
-									from = $request.find('.UIImageBlock_Image').attr('title'),
-									giftText = $request.find('.UIImageBlock_Content').find('div').eq(2).text(),
-									$confirm = $request.find('.UIImageBlock_Ext').find('.uiButtonConfirm').find('input'),
-									tmp, value;
+							$li.find('li').find('form').each(function(){
+								$request = $(this);
+								request_id = $request.find('.appRequest').attr('id');
+								from = $request.find('.UIImageBlock_Image').attr('title');
+								giftText = $request.find('.UIImageBlock_Content').find('div').eq(2).text();
+								$confirm = $request.find('.UIImageBlock_Ext').find('.uiButtonConfirm').find('input');
 
-								id = id.split('_');
+								id = request_id.split('_');
 								tmp = $confirm.attr('name').match(/actions\[(.*)\]/);
 								if( tmp && tmp.length ) value = tmp[1];
 								if( value === null || value == 'accept' ){
@@ -15588,9 +15591,22 @@ jQuery(document).ready(function(){
 
 								tmp = giftText.match(/a gift of (.+) in/);
 								if( tmp && tmp.length && value ){
-									if( !list.hasOwnProperty(tmp[1]) ) list[ tmp[1] ] = '';
-									list[ tmp[1] ] += '<li><input type="checkbox" value="'+ value +'" id="kocfia-gift-'+ j +'" checked rel="'+ $li.find('input').filter('[type="hidden"]').serialize() +'">';
+									if( !list.hasOwnProperty(tmp[1]) ){
+										list[ tmp[1] ] = '';
+										count[ tmp[1] ] = 0;
+									}
+
+									//for delete
+									KOCFIA.gifts.infos[ request_id ] = {
+										'actions[reject]': ''
+									};
+									$request.find('input').filter('[type="hidden"]').each(function(){
+										KOCFIA.gifts.infos[ request_id ][ this.name ] = this.value;
+									});
+
+									list[ tmp[1] ] += '<li><input type="checkbox" value="'+ value +'" id="kocfia-gift-'+ j +'" checked rel="'+ request_id +'">';
 									list[ tmp[1] ] += '<label for="kocfia-gift-'+ j +'">'+ from +'</label></li>';
+									count[ tmp[1] ] += 1;
 									j += 1;
 								}
 							});
@@ -15608,11 +15624,16 @@ jQuery(document).ready(function(){
 				buttons += '<button class="button secondary none" title="Désélectionner tous ces cadeaux" rel="#"><span>Aucun</span></button>';
 
 				KOCFIA.gifts.$div[0].innerHTML = '';
-				var code = '', header = '<div class="header">';
-				for( i in list ){
-					if( list.hasOwnProperty(i) ){
-						header += '<span>'+ i + buttons.replace(/#/g, i) +'</span>';
-						code += '<div class="giftType" rel="'+ i +'"><h4>'+ i +'</h4><ol>'+ list[i] +'</ol></div>';
+				var code = '',
+					header = '<div class="header">',
+					sorted = Object.keys(list),
+					key;
+				sorted.sort();
+				for( var i = 0; i < sorted.length; i += 1 ){
+					key = sorted[i];
+					if( list.hasOwnProperty( key ) ){
+						header += '<span>'+ key +' ('+ count[ key ] +')'+ buttons.replace(/#/g, key) +'</span>';
+						code += '<div class="giftType" rel="'+ key +'"><h4>'+ key +'</h4><ol>'+ list[ key ] +'</ol></div>';
 					}
 				}
 				header += '</div>';
@@ -15620,6 +15641,8 @@ jQuery(document).ready(function(){
 				KOCFIA.gifts.$div
 					.append( header + code )
 					.find('.giftType').show();
+
+				KOCFIA.gifts.$gather.parent().append('<button class="button refresh secondary"><span>Raffraîchir la liste des cadeaux</span></button>')
 			}
 		};
 
@@ -15676,7 +15699,23 @@ jQuery(document).ready(function(){
 				}
 
 				if( action && signed ){
-					//use iframe to get the result of a <form> submit
+					$.ajax({
+						url: action,
+						type: 'post',
+						data: 'signed_request='+ signed,
+						dataType: 'html',
+						timeout: 10000
+					})
+					.done(function(data){
+						KOCFIA.gifts.secondMethodStepThree(data);
+					})
+					.fail(function(){
+						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3a</span>');
+						KOCFIA.gifts.index += 1;
+						KOCFIA.gifts.openGift();
+					});
+
+					/*//use iframe to get the result of a <form> submit
 					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
 					$form = $('<form>', {method: 'post', target: 'secondMethodStepTwo', action: action}).css('display', 'none').appendTo( $body );
 					$form.append( $('<input type="hidden" name="signed_request">').val( signed ) );
@@ -15702,7 +15741,7 @@ jQuery(document).ready(function(){
 						KOCFIA.gifts.secondMethodStepThree( content );
 					});
 
-					$form.submit();
+					$form.submit();*/
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2b</span>');
 					KOCFIA.gifts.index += 1;
@@ -15788,7 +15827,23 @@ jQuery(document).ready(function(){
 					url += 'fbIframeOn=1&standalone=0&res=1&iframe=1&lang=en&ts='+ (Date.now() / 1000) +'&page=claimgift&appBar=&cts='+ parseInt(Date.timestamp(), 10);
 					url += '&'+ params.join('&');
 
-					//use iframe to get the result of a <form> submit
+					$.ajax({
+						url: url,
+						type: 'post',
+						data: 'signed_request='+ signed,
+						dataType: 'html',
+						timeout: 10000
+					})
+					.done(function(data){
+						KOCFIA.gifts.firstMethodStepThree(data);
+					})
+					.fail(function(){
+						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2a</span>');
+						KOCFIA.gifts.index += 1;
+						KOCFIA.gifts.openGift();
+					});
+
+					/*//use iframe to get the result of a <form> submit
 					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
 					var $form = $('<form>', {method: 'post', target: 'firstMethodStepTwo', action: url}).css('display', 'none').appendTo( $body );
 					$form.append( $('<input type="hidden" name="signed_request">').val( signed ) );
@@ -15805,8 +15860,6 @@ jQuery(document).ready(function(){
 
 					$iframe.load(function(e){
 						var content = $iframe.contents().find('html').html();
-						console.log('firstMethodStepTwo');
-						console.log(content);
 
 						$form.remove();
 						$iframe.remove();
@@ -15816,7 +15869,7 @@ jQuery(document).ready(function(){
 						KOCFIA.gifts.firstMethodStepThree( content );
 					});
 
-					$form.submit();
+					$form.submit();*/
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2b</span>');
 					KOCFIA.gifts.index += 1;
@@ -15848,7 +15901,23 @@ jQuery(document).ready(function(){
 
 						var url = window.g_ajaxpath +'ajax/claimgift.php'+ window.g_ajaxsuffix;
 
-						//use iframe to get the result of a <form> submit
+						$.ajax({
+							url: url,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						})
+						.done(function(data){
+							KOCFIA.gifts.firstMethodStepThree(data);
+						})
+						.fail(function(){
+							KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3a</span>');
+							KOCFIA.gifts.index += 1;
+							KOCFIA.gifts.openGift();
+						});
+
+						/*//use iframe to get the result of a <form> submit
 						//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
 						var $form = $('<form>', {method: 'post', target: 'firstMethodStepThree', action: url}).css('display', 'none').appendTo( $body );
 						for( var p in params ){
@@ -15878,7 +15947,7 @@ jQuery(document).ready(function(){
 							KOCFIA.gifts.firstMethodStepFour( content );
 						});
 
-						$form.submit();
+						$form.submit();*/
 					} else {
 						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3b</span>');
 						KOCFIA.gifts.index += 1;
@@ -15886,12 +15955,15 @@ jQuery(document).ready(function(){
 					}
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3c</span>');
-					if( data.indexOf('apps.facebook.com/kingdomsofcamelot/?page=nogame') > -1 ){
+					if( data.indexOf('We were unable to find your gift or it has expired') > -1 ){
+						KOCFIA.gifts.deleteGift();
 
-					} else console.log(data);
-					KOCFIA.gifts.index += 1;
-					KOCFIA.gifts.openGift();
-					//KOCFIA.gifts.deleteGift();
+						KOCFIA.gifts.index += 1;
+						KOCFIA.gifts.openGift();
+					} else {
+						KOCFIA.gifts.index += 1;
+						KOCFIA.gifts.openGift();
+					}
 				}
 			} else {
 				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3d</span>');
@@ -15903,9 +15975,8 @@ jQuery(document).ready(function(){
 		KOCFIA.gifts.firstMethodStepFour = function( data ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts firstMethodStepFour function');
 			if( KOCFIA.gifts.stop ) return;
-			data = eval(data);
 			if( Object.isObject(data) && data.ok ){
-				KOCFIA.gifts.$gift.parent().append('<span> - Ok</span>').fadeOut('slow', function(){ $(this).remove(); });
+				KOCFIA.gifts.$gift.parent().append('<span class="success"> - Ok</span>');
 			} else {
 				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4</span>');
 			}
@@ -15916,10 +15987,10 @@ jQuery(document).ready(function(){
 		KOCFIA.gifts.deleteGift = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts deleteGift function');
 			if( KOCFIA.gifts.stop ) return;
-			var params = KOCFIA.gifts.$gift.attr('rel');
+			var params = KOCFIA.gifts.infos[ KOCFIA.gifts.$gift.attr('rel') ];
 
-			top.postMessage({task: 'deleteGift', param: params}, 'https://apps.facebook.com/');
-			top.postMessage({task: 'deleteGift', param: params}, 'http://apps.facebook.com/');
+			top.postMessage({task: 'deleteGift', param: $.param(params)}, 'https://apps.facebook.com/');
+			top.postMessage({task: 'deleteGift', param: $.param(params)}, 'http://apps.facebook.com/');
 		};
 
 	/* BUILD */

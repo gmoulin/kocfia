@@ -12742,7 +12742,7 @@ jQuery(document).ready(function(){
 		KOCFIA.reassign.launchAutomaticReassign = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticReassign function', KOCFIA.reassign.rules);
 
-			KOCFIA.reassign.$ongoing.find('div').appendTo( KOCFIA.reassign.$history )
+			KOCFIA.reassign.$ongoing.find('div').appendTo( KOCFIA.reassign.$history );
 			KOCFIA.reassign.$ongoing[0].innerHTML = '';
 
 			if( !$.isEmptyObject( KOCFIA.reassign.rules ) ){
@@ -15642,14 +15642,14 @@ jQuery(document).ready(function(){
 					.append( header + code )
 					.find('.giftType').show();
 
-				KOCFIA.gifts.$gather.parent().append('<button class="button refresh secondary"><span>Raffraîchir la liste des cadeaux</span></button>')
+				KOCFIA.gifts.$gather.parent().append('<button class="button refresh secondary"><span>Raffraîchir la liste des cadeaux</span></button>');
 			}
 		};
 
 		KOCFIA.gifts.openGifts = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts openGifts function');
 
-			KOCFIA.gifts.$list = KOCFIA.gifts.$div.find('.giftType').find('span').remove().end().find('input').filter(':checked'),
+			KOCFIA.gifts.$list = KOCFIA.gifts.$div.find('.giftType').find('span').remove().end().find('input').filter(':checked');
 			KOCFIA.gifts.length = KOCFIA.gifts.$list.length;
 			KOCFIA.gifts.index = 0;
 
@@ -16000,7 +16000,10 @@ jQuery(document).ready(function(){
 			},
 			stored: ['queues', 'currents'],
 			currents: {},
-			queues: {} //by citiesKey
+			queues: {}, //by citiesKey
+			buildingsLabel: {
+				1: {single: '', plural: ''}
+			}
 		};
 		//Construction :
 			//- mise en place de la ville (à détailler)
@@ -16026,6 +16029,8 @@ jQuery(document).ready(function(){
 		  obj.value = "Mode Construction = OFF";
 		  }
 		  },*/
+		//add visual info on queued level for buildings
+		//advancement for tasks (x / y, remaining time)
 
 		KOCFIA.build.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build confPanel function');
@@ -16033,8 +16038,6 @@ jQuery(document).ready(function(){
 			code += '<div>';
 			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
 			code += Shared.generateButton('build', 'deleteQueues', 'Supprimer toutes les files d\'attente  enregistrées');
-			//paying mode
-			//code += Shared.generateButton('build', 'deleteCurrents', 'Supprimer toutes les tâches de constructions courrante enregistrées');
 			code += '</div>';
 
 			$section.append( code );
@@ -16055,40 +16058,31 @@ jQuery(document).ready(function(){
 			var header = '<h3>'+ KOCFIA.modulesLabel.build +'</h3>';
 
 			var queues = '<ul>',
-				i, j, l, cityKey, city;
+				i, j, l, cityKey, city, current;
 			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
 				cityKey = KOCFIA.citiesKey[ i ];
 				city = KOCFIA.cities[ cityKey ];
 
 				queues += '<li>';
 				queues += '<div>'+ city.label +'</div>';
-				queues += '<div class="current">En cours : ';
+				queues += '<div>'+ Shared.readableDuration() +'</div>';
+				//paying mode
+				queues += '<div class="current">Tâche en cours : ';
 				if( KOCFIA.build.currents.hasOwnProperty(cityKey) ){
-					queues += KOCFIA.build.currents[ cityKey ];
+					queues += KOCFIA.build.getTaskLabel( KOCFIA.build.currents[ cityKey ] );
 					queues += '<div>';
-					queues += '<button class="button secondary requeue" title="Remettre à la fin de la liste d\'attente"><span></span></button>';
-					//paying mode
-					//queues += '<button class="button danger remove" title="Supprimer la tâche en cours"><span>Supprimer</span></button>';
+					queues += '<button class="button secondary requeue" title="Remettre à la fin de la liste d\'attente"><span>Rempiler</span></button>';
+					queues += '<button class="button danger remove" title="Supprimer la tâche en cours"><span>Supprimer</span></button>';
 					queues += '</div>';
 				} else {
-					queues += 'rien';
+					queues += 'aucune';
 				}
 				queues += '</div>';
 				queues += '<button class="button secondary queue-toggle" rel="'+ cityKey +'"><span>Liste d\'attente</span></button>';
 				queues += '<button class="button danger queue-reset" rel="'+ cityKey +'" title="Vider la liste d\'attente de cette ville"><span>Vider</span></button>';
 				queues += '<div id="kocfia-build-queue-'+ cityKey +'" class="queue-list">';
 				queues += '<ol rel="'+ cityKey +'">';
-				if( KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
-					var current = {}, queued;
-					for( j = 0, l = KOCFIA.build.queue[ cityKey ].length; i < l; i += 1 ){
-						queued = KOCFIA.build.queue[ cityKey ][ j ];
-						//format type, target, level
-						if( !$.isEmptyOject(current) && current.type != queue.type ){
-
-						}
-					}
-					queues += '<li rel="">todo</li>'; //queue item
-				}
+				queues += KOCFIA.build.generateQueueForCity( cityKey );
 				queues += '</ol></div></li>';
 			}
 			queues += '</ul>';
@@ -16121,16 +16115,53 @@ jQuery(document).ready(function(){
 						$this.parent().find('ol')[0].innerHTML = '';
 					}
 				})
+				//paying mode
 				.on('click', '.requeue', function(){
 					//requeue the current task at the end of the queue
 				})
-				//paying mode
-				/*.on('click', '.remove', function(){
+				.on('click', '.remove', function(){
 					if( confirm('Êtes-vous sûr ?') ){
 
 					}
-				})*/
+				})
 				;
+		};
+
+		KOCFIA.build.getTaskLabel = function( current ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build getTaskLabel function', current);
+
+			var label = '';
+
+			//task, target, level
+			if( current.hasOwnProperty('task') ){
+				if( current.task == 'upgrade' ){
+					label += 'Amélioration ';
+				} else {
+					label += 'Destruction ';
+				}
+
+				label += KOCFIA.build.buildingsLabel[ current.target ].plural;
+			} else {
+				label += KOCFIA.build.buildingsLabel[ current.target ].single;
+			}
+
+			label += '&rarr; ' + current.level;
+
+			return label;
+		};
+
+		KOCFIA.build.generateQueueForCity = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build generateQueueForCity function', cityKey);
+
+			var code = '';
+			if( KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
+				var queued;
+				for( var i = 0, l = KOCFIA.build.queue[ cityKey ].length; i < l; i += 1 ){
+					queued = KOCFIA.build.queue[ cityKey ][ i ];
+					//task, building type id, target, level, building position
+					code += '<li rel="'+ JSON.stringify(queued) +'">'+ KOCFIA.build.getTaskLabel( queued ) +'</li>'; //queue item
+				}
+			}
 		};
 
 		KOCFIA.build.storeQueues = function(){
@@ -17446,4 +17477,5 @@ jQuery(document).ready(function(){
 		//clever training (population optimisation)
 		//clever building
 		//occupied wilderness attack option
+		//auto plunder
 */

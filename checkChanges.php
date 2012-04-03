@@ -17,6 +17,8 @@ foreach( $response as $i => $resp ){
 	}
 }
 
+echo '<br>file last modified '.date('Y-m-d H:i:s', $lastModified);
+
 if( $lastModified > 0 ){
 	function __autoload( $class_name ){
 		if( file_exists(__DIR__."/inc/class_".$class_name.".php") ){
@@ -29,11 +31,13 @@ if( $lastModified > 0 ){
 	$oChecker = new checker(1);
 
 	$previous = $oChecker->timestamp;
+	echo '<br>previous last modified '.date('Y-m-d H:i:s', $previous);
 
 	if( $previous != $lastModified ){
 		$oChecker->timestamp = $lastModified;
 		$oChecker->save();
 
+		echo '<br>sending email';
 		mail('gmoulin.dev@gmail.com', 'kabam code change', date('Y-m-d H:i:s', $lastModified), 'From: kocfia@kapok.fr');
 	}
 }

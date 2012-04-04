@@ -2227,3 +2227,25 @@
 	#kocfia-gifts .success {
 		color: #1BCC42;
 	}
+
+/* build */
+	.kocfia-build-menu {
+		position: relative;
+		display: none;
+	}
+
+	.kocfia-build-menu .buildings {
+		display: none;
+		margin-bottom: 10px;
+	}
+
+	a.blank .kocfia-build-menu .buildings {
+		display: block;
+	}
+
+	a[id^="slot_"]:hover .kocfia-build-menu {
+		display: block;
+		top: 0;
+		left: 50px;
+	}
+

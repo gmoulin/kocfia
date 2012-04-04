@@ -8,7 +8,8 @@
 // @version			1
 // @namespace		KOCFIA
 // @description		reload kingdoms of camelot on server <?php echo $numServer; ?> when facebook display the 404 page after 10 seconds
-// @include			*facebook.com/404*
+// @include			*facebook.com/4oh4.php*
+// @include			*apps.facebook.com/kingdomsofcamelot/?ref=bookmarks&count=0&fb_source=bookmark_apps&fb_bmpos=1_0*
 // ==/UserScript==
 
 unsafeWindow.setTimeout(function(){

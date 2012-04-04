@@ -31,13 +31,12 @@
 		-->
 
 
-		<h1>Gestion de la page d'erreur Facebook</h1>
+		<h1>Gestion de la page d'erreur Facebook et de la page "nouveau serveur" de Kabam</h1>
 		<form id="fb-404" method="get" action="//<?php echo $_SERVER['SERVER_NAME']; ?>/kocfia.fb-404.user.php">
 			<label for="numServer">Numéro du serveur Kingdoms of Camelot :</label>
 			<input type="number" name="numServer" id="numServer" required pattern="[0-9]">
 			<br>
-			<button type="submit">script de rechargement du jeu au bout de 10 secondes quand facebook affiche une 'page not found'</button>
-
+			<button type="submit">script</button> de rechargement du jeu au bout de 10 secondes quand facebook affiche une 'page not found' ou la page "nouveau serveur" de Kabam
 		</form>
 
 		<h1>Gestion de la page Kabam de lancement du jeu pour les nouveaux serveurs (347, 348)</h1>

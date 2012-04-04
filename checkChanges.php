@@ -1,7 +1,7 @@
 <?php
 
 //curl the javascript file and check the last-modified header against previous one stocked in database
-$ch = curl_init('https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/js/camelotmain_fr-499.js');
+$ch = curl_init('https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/js/camelotmain_fr-526.js');
 curl_setopt($ch, CURLOPT_HEADER, 1);
 curl_setopt($ch, CURLOPT_NOBODY, 1);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

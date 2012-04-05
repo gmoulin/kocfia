@@ -2249,3 +2249,44 @@
 		left: 50px;
 	}
 
+	a[class^="bdg_"][class$="_1"] .kocfia-build-menu .levels .lt2 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_2"] .kocfia-build-menu .levels .lt3 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_3"] .kocfia-build-menu .levels .lt4 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_4"] .kocfia-build-menu .levels .lt5 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_5"] .kocfia-build-menu .levels .lt6 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_6"] .kocfia-build-menu .levels .lt7 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_7"] .kocfia-build-menu .levels .lt8 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_8"] .kocfia-build-menu .levels .lt9 {
+		display: none;
+	}
+
+	a[class^="bdg_"][class$="_9"] .kocfia-build-menu .levels,
+	a[class^="bdg_"][class$="_10"] .kocfia-build-menu .levels,
+	a[class^="bdg_"][class$="_11"] .kocfia-build-menu .levels,
+	a[class^="bdg_"][class$="_12"] .kocfia-build-menu .levels {
+		display: none;
+	}
+
+	/* hide destroy for castle ? */
+

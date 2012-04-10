@@ -2232,61 +2232,183 @@
 	.kocfia-build-menu {
 		position: relative;
 		display: none;
+		z-index: 100009;
+		padding: 4px;
+		min-width: 200px;
+		font-weight: normal;
+		font-style: normal;
+		font-family: Verdana;
+		font-size: 11px;
+		color: #222;
+		text-align: center;
 	}
 
-	.kocfia-build-menu .buildings {
+	.kocfia-build-menu h3 {
+		padding: 0;
+		margin: 0;
+		text-align: left;
+	}
+
+	.kocfia-build-menu .buttons {
+		text-align: left;
+	}
+
+	.kocfia-build-menu .delete {
+		float: right;
+	}
+
+	.kocfia-build-menu .apply,
+	.kocfia-build-menu .delete {
+		margin: 2px 3px;
+	}
+
+	.kocfia-build-menu .buildings,
+	.kocfia-build-menu .bulwarks,
+	.kocfia-build-menu .guardians,
+	.kocfia-build-menu .fields,
+	.kocfia-build-menu .levels,
+	.kocfia-build-menu .buttons {
+		margin-top: 4px;
+		padding-top: 4px;
+		border-top: 1px solid #AAA;
+	}
+
+	.kocfia-build-menu .buildings,
+	.kocfia-build-menu .bulwarks,
+	.kocfia-build-menu .guardians,
+	.kocfia-build-menu .fields {
 		display: none;
-		margin-bottom: 10px;
+	}
+
+	.kocfia-build-menu .buildings input[type="radio"] + label,
+	.kocfia-build-menu .bulwarks input[type="radio"] + label,
+	.kocfia-build-menu .guardians input[type="radio"] + label,
+	.kocfia-build-menu .fields input[type="radio"] + label {
+		margin: 2px;
+	}
+
+	.kocfia-build-menu .buildings .button,
+	.kocfia-build-menu .bulwarks .button,
+	.kocfia-build-menu .guardians .button,
+	.kocfia-build-menu .fields .button,
+	.kocfia-build-menu .levels .button {
+		position: relative;
+		top: 2px;
+	}
+
+	.kocfia-build-menu div input[type="radio"] + label {
+		margin: 0 1px;
+	}
+
+	.kocfia-build-menu div input[type="radio"] + label:first-of-type {
+		margin-left: 0;
+	}
+
+	.kocfia-build-menu div input[type="radio"] + label:last-of-type {
+		margin-right: 0;
 	}
 
 	a.blank .kocfia-build-menu .buildings {
 		display: block;
 	}
 
+	#slot_1.blank .kocfia-build-menu .buildings {
+		display: none;
+	}
+
+	#slot_1.blank .kocfia-build-menu .bulwarks {
+		display: block;
+	}
+
+	.guardianHover .kocfia-build-menu .guardians {
+		display: block;
+	}
+
+	.guardianHover:hover .kocfia-build-menu,
 	a[id^="slot_"]:hover .kocfia-build-menu {
 		display: block;
 		top: 0;
-		left: 50px;
+		left: 15px;
 	}
 
-	a[class^="bdg_"][class$="_1"] .kocfia-build-menu .levels .lt2 {
+	#maparea_city .kocfia-build-menu .fields {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_2"] .kocfia-build-menu .levels .lt3 {
+	#maparea_fields .kocfia-build-menu .buildings,
+	#maparea_fields .kocfia-build-menu .bulwarks,
+	#maparea_fields .kocfia-build-menu .guardians {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_3"] .kocfia-build-menu .levels .lt4 {
+	a[class^="bldg_"][class$="_1"] .kocfia-build-menu .levels .lt2 {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_4"] .kocfia-build-menu .levels .lt5 {
+	a[class^="bldg_"][class$="_2"] .kocfia-build-menu .levels .lt3 {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_5"] .kocfia-build-menu .levels .lt6 {
+	a[class^="bldg_"][class$="_3"] .kocfia-build-menu .levels .lt4 {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_6"] .kocfia-build-menu .levels .lt7 {
+	a[class^="bldg_"][class$="_4"] .kocfia-build-menu .levels .lt5 {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_7"] .kocfia-build-menu .levels .lt8 {
+	a[class^="bldg_"][class$="_5"] .kocfia-build-menu .levels .lt6 {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_8"] .kocfia-build-menu .levels .lt9 {
+	a[class^="bldg_"][class$="_6"] .kocfia-build-menu .levels .lt7 {
 		display: none;
 	}
 
-	a[class^="bdg_"][class$="_9"] .kocfia-build-menu .levels,
-	a[class^="bdg_"][class$="_10"] .kocfia-build-menu .levels,
-	a[class^="bdg_"][class$="_11"] .kocfia-build-menu .levels,
-	a[class^="bdg_"][class$="_12"] .kocfia-build-menu .levels {
+	a[class^="bldg_"][class$="_7"] .kocfia-build-menu .levels .lt8 {
 		display: none;
 	}
 
-	/* hide destroy for castle ? */
+	a[class^="bldg_"][class$="_8"] .kocfia-build-menu .levels .lt9 {
+		display: none;
+	}
 
+	a[class^="bldg_"][class$="_9"] .kocfia-build-menu .levels,
+	a[class^="bldg_"][class$="_10"] .kocfia-build-menu .levels,
+	a[class^="bldg_"][class$="_11"] .kocfia-build-menu .levels,
+	a[class^="bldg_"][class$="_12"] .kocfia-build-menu .levels {
+		display: none;
+	}
+
+	a[id="slot_1"].blank:hover .kocfia-build-menu .bulwarks {
+		display: block;
+	}
+
+	a[id="slot_1"].blank:hover .kocfia-build-menu .buildings {
+		display: none;
+	}
+
+	a[id="slot_0"]:hover .kocfia-build-menu .destroy {
+		display: none;
+	}
+
+	.guardianHover .kocfia-build-menu .destroy:checked ~ .levels,
+	a[id^="slot_"] .kocfia-build-menu .destroy:checked ~ .levels {
+		display: block;
+	}
+
+	#maparea_fields .kocfia-build-menu .destroy:checked ~ .fields {
+		display: block;
+	}
+
+	#maparea_city a[id^="slot_"] .kocfia-build-menu .destroy:checked ~ .buildings {
+		display: block;
+	}
+
+	#maparea_city a[id="slot_1"] .kocfia-build-menu .destroy:checked ~ .bulwarks {
+		display: block;
+	}
+
+	#maparea_city a[id="slot_1"] .kocfia-build-menu .destroy:checked ~ .buildings {
+		display: none;
+	}

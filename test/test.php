@@ -12,11 +12,135 @@
 				font-size: 11px;
 			}
 			html, body { hetight: 100%; }
+
+			.guardianHover,
+			#citymap a,
+			#fieldmap a {
+				display: block;
+				width: 50px;
+				height: 50px;
+				margin: 10px;
+				float: left;
+				background-color: #CCC;
+			}
+
+			.guardianHover {
+				background-color: #c0ffee;
+			}
+
 		</style>
 	</head>
 	<body>
 		<div id="main_engagement_tabs"></div>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+	<div class="maparea_main" id="maparea_city">
+			<div id="citymap" class="citymap cityNum1 city_12">
+				<div class="fountain"></div>
+				<a class="bldg_0_12" onclick="buildslot(this,event);return false;" id="slot_0"><span class="leveltag">12</span><span class="statues"></span></a>
+				<a class="bldg_19_11" onclick="buildslot(this,event);return false;" id="slot_1"><span class="leveltag">11</span></a>
+				<a class="bldg_17_9" onclick="buildslot(this,event);return false;" id="slot_2"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_3"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_4"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_5"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_6"><span class="leveltag">9</span></a>
+				<a class="bldg_11_11" onclick="buildslot(this,event);return false;" id="slot_7"><span class="leveltag">11</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_8"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_9"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_10"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_11"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_12"><span class="leveltag">9</span></a>
+				<a class="bldg_5_10" onclick="buildslot(this,event);return false;" id="slot_13"><span class="leveltag">10</span></a>
+				<a onclick="buildslot(this,event);return false;" id="slot_14" class="bldg_13_9"><span class="leveltag">9</span></a>
+				<a onclick="buildslot(this,event);return false;" id="slot_15" class="bldg_13_9"><span class="leveltag">9</span></a>
+				<a class="bldg_13_10" onclick="buildslot(this,event);return false;" id="slot_16"><span class="leveltag">10</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_17"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_18"><span class="leveltag">9</span></a>
+				<a class="bldg_12_12" onclick="buildslot(this,event);return false;" id="slot_19"><span class="leveltag">12</span></a>
+				<a onclick="buildslot(this,event);return false;" id="slot_20" class="bldg_13_9"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_21"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_22"><span class="leveltag">9</span></a>
+				<a class="bldg_21_9" onclick="buildslot(this,event);return false;" id="slot_23"><span class="leveltag">9</span></a>
+				<a class="bldg_18_9" onclick="buildslot(this,event);return false;" id="slot_24"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_25"><span class="leveltag">9</span></a>
+				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_26"><span class="leveltag">9</span></a>
+				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_27"><span class="leveltag">9</span></a>
+				<a class="bldg_7_1" onclick="buildslot(this,event);return false;" id="slot_28"><span class="leveltag">1</span></a>
+				<a class="bldg_20_10" onclick="buildslot(this,event);return false;" id="slot_29"><span class="leveltag">10</span></a>
+				<a class="bldg_14_9" onclick="buildslot(this,event);return false;" id="slot_30"><span class="leveltag">9</span></a>
+				<a class="bldg_16_10" onclick="buildslot(this,event);return false;" id="slot_31"><span class="leveltag">10</span></a>
+				<a class="bldg_8_9" onclick="buildslot(this,event);return false;" id="slot_32"><span class="leveltag">9</span></a>
+				<div class="mapfill_1">&nbsp;</div>
+
+			<div class="mapfill_2">&nbsp;</div>
+			<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="mapfill_2">&nbsp;</div>
+				<div class="guardianHover bldg_guardian_0" id="guardianContainer">
+					<!--<img src="https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/img/guardian/guardian04_lvl10_normal.png">-->
+				</div>
+			</div>
+		</div>
+
+		<div style="" class="maparea_main" id="maparea_fields">
+			<div class="fieldmap fieldNum1 lv12" id="fieldmap">
+				<a onclick="changeview_city(this);return false;" class="slot_castle"></a>
+				<div id="fieldmapbuildings">
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_100"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_101"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_102"><span class="leveltag">9</span></a>
+					<a class="bldg_4_10" onclick="buildslot(this,event);return false;" id="slot_103"><span class="leveltag">10</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_104"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_105"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_106"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_107"><span class="leveltag">9</span></a>
+					<a class="bldg_2_9" onclick="buildslot(this,event);return false;" id="slot_108"><span class="leveltag">9</span></a>
+					<a class="bldg_3_9" onclick="buildslot(this,event);return false;" id="slot_109"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_110"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_111"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_112"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_113"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_114"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_115"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_116"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_117"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_118"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_119"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_120"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_121"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_122"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_123"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_124"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_125"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_126"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_127"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_128"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_129"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_130"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_131"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_132"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_133"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_134"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_135"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_136"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_137"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_138"><span class="leveltag">9</span></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_139"><span class="leveltag">9</span></a>
+					<a class="blank" onclick="buildslot(this,event);return false;" id="slot_140"></a>
+					<a class="blank" onclick="buildslot(this,event);return false;" id="slot_141"></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_142"><span class="leveltag">9</span></a>
+					<a class="blank" onclick="buildslot(this,event);return false;" id="slot_143"></a>
+					<a class="blank" onclick="buildslot(this,event);return false;" id="slot_144"></a>
+					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_145"><span class="leveltag">9</span></a>
+				</div>
+			</div>
+		</div>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery.miniColors.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery.tipsy.min.js"></script>
@@ -6418,6 +6542,61 @@
 			g_ajaxparams.pg = '31e1770b3bff29dda61dc21bb10a6e1c23eabf4c95f4210ec15332bd1a812850.200';
 			fbprofileupdate = '';
 			g_ajaxparams.tvuid=tvuid;
+
+			var buildingcost = {
+				"bdg0": ["Château", 200, 3000, 2500, 100, 0, 0, 900, {"b19": [0, -2]}, [], "Le Château est au centre de ta ville. Tu peux y voir et modifier tes taux de Production, d'Imposition (en Allégeant ou en Augmentant l'Impôt). Tu peux aussi voir et modifier ta Cour. Chaque amélioration du Château te permet de conquérir une vallée de plus"],
+				"bdg1": ["Ferme", 50, 300, 200, 150, 0, 0, 30, [], [], "Les Fermes produisent de la Nourriture, importante pour former et nourrir tes unités. Des niveaux plus élevés produisent plus de Nourriture."],
+				"bdg2": ["Scierie", 100, 100, 250, 300, 0, 0, 45, [], [], "Les Scieries produisent du Bois, nécessaire pour créer et entraîner les unités."],
+				"bdg3": ["Carrière", 180, 500, 150, 400, 0, 0, 60, [], [], "Les Carrières produisent des Pierres. La Pierre est la base de tes bâtiments et leur permet de résister aux attaques et au temps"],
+				"bdg4": ["Mine", 210, 600, 500, 200, 0, 0, 90, [], [], "Les Mines produisent du Minerai, nécessaire pour créer tout métal dont ta ville a besoin, des armes aux clous."],
+				"bdg5": ["Maison", 100, 500, 100, 50, 0, 0, 30, {"b0": [0, -1]}, [], "Les Maisons offrent un lieu de vie à tes sujets. Offre de meilleures Maisons en les modernisant et augmente ta Population."],
+				"bdg6": ["Taverne", 300, 2000, 1000, 400, 0, 0, 240, {"b5": [1, 2]}, [], "La Taverne fournit à tes sujets un lieu pour se relaxer et augmente le Bonheur de ta ville, au maximum de 100%.  Plus haut est le niveau de la Taverne,  plus les bénéfices sont grands."],
+				"bdg7": ["Salle des Chevaliers", 400, 2500, 1200, 700, 0, 0, 360, [], [], "La salle des chevaliers est destinée à nommer de nouveaux chevaliers, leur assigner des devoirs et accroître leur expérience. Passe au niveau supérieur pour augmenter leur expérience acquise."],
+				"bdg8": ["Ambassade", 200, 2000, 500, 300, 0, 0, 720, [], [], "L'Ambassade te permet de créer des Alliances ou d'y adhérer et d'utiliser des unités alliées pour t'aider. Ton Ambassade doit être au niveau 2 pour créer une Alliance. Un niveau plus élevé autorise plus d'unités en garnison."],
+				"bdg9": ["Entrepôt", 100, 1500, 1000, 300, 0, 0, 600, [], [], "L'Entrepôt protège Nourriture, Bois, Pierres et Minerais des Pillages de tes ennemis. Modernise ton Entrepôt pour protéger plus de biens."],
+				"bdg10": ["Marché", 1000, 1000, 1000, 1000, 0, 0, 750, [], [], "Le Marché collecte des points pour acheter et vendre des Ressources entre les joueurs. Modernise ton Marché pour faire plusieurs transactions en même temps."],
+				"bdg11": ["Laboratoire d'Alchimie", 120, 2500, 1500, 200, 0, 0, 480, [], [], "Le Laboratoire d'alchimie est l'endroit où chercher de meilleures Technologies. En modernisant le Laboratoire tu permets à tes Alchimistes de faire des recherches plus complexes."],
+				"bdg12": ["Point de Ralliement", 100, 600, 2000, 250, 0, 0, 150, [], [], "Rassemble tes Unités au Point de Ralliement pour ordonner une Attaque, Renforce une autre ville, Envoie un éclaireur pour déjouer l'ennemi. Modernise pour envoyer plus de unités."],
+				"bdg13": ["Caserne", 250, 1200, 1500, 500, 0, 0, 300, [], [], "Entraîne tes Unités dans les Casernes. Des Unités améliorées requièrent un niveau de Caserne plus élevé."],
+				"bdg14": ["Mirador", 150, 1000, 3000, 300, 0, 0, 300, {"b13": [1, 2]}, [], "Le mirador sert à envoyer des alertes rapides d'invasions. Plus le niveau est haut, plus les informations sont détaillées."],
+				"bdg15": ["Forgeron", 125, 1000, 600, 1200, 0, 0, 180, {"b4": [1, 3]}, [], "Le Forgeron crée les armes en métal et les armures de tes unités. Du matériel de guerre plus avancé requiert un Forgeron d'un niveau plus élevé."],
+				"bdg16": ["Atelier", 150, 1500, 500, 1500, 0, 0, 540, [], [], "L'Atelier est nécessaire pour produire des armes d'assaut, comme des Balistes, des Trébuchets et des Catapultes."],
+				"bdg17": ["Ecurie", 1200, 2000, 800, 1000, 0, 0, 270, {"b1": [1, 5]}, [], "Les Ecuries sont nécessaires pour abriter les chevaux utilisés par la Cavalerie et la Cavalerie Lourde. Modernise tes Ecuries pour chercher des Alliages plus résistants pour les Fers."],
+				"bdg18": ["Station de Guérison", 1500, 5000, 4500, 500, 0, 0, 3600, {"b17": [1, 1]}, {"t12": [0, 0]}, "La Station de Guérison rend tes Unités plus rapides dans les déplacements entre tes villes et les villes alliées. Modernise-les pour aller plus vite."],
+				"bdg19": ["Rempart", 3000, 1500, 10000, 500, 0, 0, 1800, {"b16": [0, -1]}, [], "Les Remparts protègent ta ville. Tes unités Défensives y sont intégrées. Un niveau plus élevé te permet de construire de meilleures Unités Défensives et d'accroître ta protection."],
+				"bdg50": ["Gardien des bois", 0, 0, 0, 0, 0, 0, 0, [], [], ""],
+				"bdg51": ["Gardien de Minerai", 0, 0, 0, 0, 0, 0, 0, [], [], ""],
+				"bdg52": ["Station de Guérison", 0, 0, 0, 0, 0, 0, 0, [], [], "Le Marché collecte des points pour acheter et vendre des Ressources entre les joueurs. Modernise ton Marché pour faire plusieurs transactions en même temps."],
+				"bdg53": ["Scierie", 0, 0, 0, 0, 0, 0, 0, [], [], "La Station de Récupération rend plus rapides tes Troupes lorsque tu te déplaces entre tes villes et les villes alliées. Modernise-les pour plus de vitesse."],
+				"bdg20": ["Fey Spire", 100, 400, 4000, 400, 0, 0, 1800, {"b0": [1, 5]}, [], "The warlocks of the Fey Spire can combine your treasures to make new items."],
+				"bdg21": ["Caserne", 250, 1200, 1500, 500, 0, 0, 300, [], [], "Les Cottages fournissent un lieu de vie à tes sujets. Offre de meilleurs cottages en modernisant et augmente ta Population."]
+			};
+
+			var unitstats = {
+				"unt1": [200, 10, 3, 180, 10, 200],
+				"unt2": [400, 100, 13, 200, 20, 20],
+				"unt3": [20, 6, 1, 3000, 20, 5],
+				"unt4": [600, 300, 33, 300, 50, 40],
+				"unt5": [700, 200, 63, 275, 30, 30],
+				"unt6": [500, 240, 25, 250, 1200, 25],
+				"unt7": [1000, 500, 45, 1000, 100, 100],
+				"unt8": [2000, 700, 87, 750, 80, 80],
+				"unt9": [1400, 20, 15, 150, 10, 5000],
+				"unt10": [640, 900, 40, 100, 1400, 35],
+				"unt11": [10000, 500, 40, 120, 600, 45],
+				"unt12": [960, 1200, 50, 80, 1500, 75]
+			};
+
+			var maxbdglvl = {};
+
+			var buildingmulti = {
+				b1: 1,
+					b2: 1,
+					b3: 1,
+					b4: 1,
+					b5: 1,
+					b13: 1
+			};
 		</script>
 		<script src="http://kocfia.kapok.dev/kocfia.js?<?php echo filemtime(__DIR__.'/../kocfia.js'); ?>"></script>
 		<!--

@@ -34,17 +34,21 @@
 		<h1>Gestion de la page d'erreur Facebook et de la page "nouveau serveur" de Kabam</h1>
 		<form id="fb-404" method="get" action="//<?php echo $_SERVER['SERVER_NAME']; ?>/kocfia.fb-404.user.php">
 			<label for="numServer">Numéro du serveur Kingdoms of Camelot :</label>
-			<input type="number" name="numServer" id="numServer" required pattern="[0-9]">
+			<input type="number" name="numServer" id="numServer" required pattern="[0-9]+" autocomplete="off">
 			<br>
 			<button type="submit">script</button> de rechargement du jeu au bout de 10 secondes quand facebook affiche une 'page not found' ou la page "nouveau serveur" de Kabam
+			<br>Raffraîchissez la page une fois le script affiché (F5) pour que grease monkey prenne en compte le script.
 		</form>
 
 		<h1>Gestion de la page Kabam de lancement du jeu pour les nouveaux serveurs (347, 348)</h1>
-		<form id="kabam-relaunch" method="get" action="//<?php echo $_SERVER['SERVER_NAME']; ?>/kocfia.kabam-relaunch.user.js">
-			<label for="numServer">Numéro du serveur Kingdoms of Camelot :</label>
-			<input type="number" id="numServer" required pattern="[0-9]">
-			<br>
-			<button type="submit">script de rechargement du jeu au bout de 10 secondes quand kabam affiche la page de lancement</button>
-		</form>
+		<a href="//<?php echo $_SERVER['SERVER_NAME']; ?>//kocfia.kabam-page-ko.user.js">
+			script de rechargement de la page kabam pour koc si mal chargée
+		</a>
+		<br>
+		<a href="//<?php echo $_SERVER['SERVER_NAME']; ?>//kocfia.kabam-relog.user.js">
+			script de rechargement du jeu au bout de 10 secondes quand kabam affiche la page de lancement
+		</a>
+		<br>Requiert l'autorisation d'afficher les popups sur kabam.com.
+		<br>Afficher une fois la page et attendez 10 secondes, la demande d'autorisation s'affichera.
 	</body>
 </html>

@@ -140,4 +140,3 @@ var request = GM_xmlhttpRequest({
 });
 
 unsafeWindow.setTimeout(function(){ request.abort(); }, 3000);
-

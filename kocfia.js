@@ -145,8 +145,6 @@ jQuery(document).ready(function(){
 
 	var KOCFIA = {
 		version: '0.5.4',
-		jQueryVersion: '1.7.1',
-		jQueryUiVersion: '1.8.18',
 		debug: true,
 		debugWhat: {gifts: 1},
 		server: null,
@@ -356,14 +354,6 @@ jQuery(document).ready(function(){
 	KOCFIA.init = function(){
 		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('KOCFIA init function');
 
-		if( $.fn.jquery != KOCFIA.jQueryVersion || $.ui.version != KOCFIA.jQueryUiVersion ){
-			if( $.ui ){
-				$('<div>Veuillez mettre à jour le script GreaseMonkey de KOCFIA.</div>').appendTo( $body ).dialog({modal: true});
-			} else {
-				alert('Veuillez mettre à jour le script GreaseMonkey de KOCFIA.');
-			}
-		}
-
 		//get server id
 			KOCFIA.server = Shared.getServer();
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('server', KOCFIA.server);
@@ -409,6 +399,7 @@ jQuery(document).ready(function(){
 		//set message event listener
 		//used to pass data between iframes
 			window.addEventListener('message', function(event){
+				console.log('frame event', event, !Object.isObject(event.data) ? event.data : event.data.task);
 				//return the conf values for fbWallPopup module
 				if( event.origin.indexOf('facebook.com') > -1 ){
 					if( event.data == 'fbWallPopup module conf please' ){
@@ -419,8 +410,16 @@ jQuery(document).ready(function(){
 							KOCFIA.gifts.parseGiftPage(event.data.result);
 						} else if( event.data.task == 'firstMethodStepOne' ){
 							KOCFIA.gifts.firstMethodStepTwo(event.data.result);
+						} else if( event.data.task == 'firstMethodStepTwo' ){
+							KOCFIA.gifts.firstMethodStepThree(event.data.result);
+						} else if( event.data.task == 'firstMethodStepThree' ){
+							KOCFIA.gifts.firstMethodStepFour(event.data.result);
+						} else if( event.data.task == 'firstMethodStepFour' ){
+							KOCFIA.gifts.firstMethodStepFive(event.data.result);
 						} else if( event.data.task == 'secondMethodStepOne' ){
 							KOCFIA.gifts.secondMethodStepTwo(event.data.result);
+						} else if( event.data.task == 'secondMethodStepTwo' ){
+							KOCFIA.gifts.secondMethodStepThree(event.data.result);
 						}
 					}
 				}
@@ -15701,49 +15700,9 @@ jQuery(document).ready(function(){
 				}
 
 				if( action && signed ){
-					$.ajax({
-						url: action,
-						type: 'post',
-						data: 'signed_request='+ signed,
-						dataType: 'html',
-						timeout: 10000
-					})
-					.done(function(data){
-						KOCFIA.gifts.secondMethodStepThree(data);
-					})
-					.fail(function(){
-						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3a</span>');
-						KOCFIA.gifts.index += 1;
-						KOCFIA.gifts.openGift();
-					});
+					top.postMessage({task: 'secondMethodStepTwo', url: action +'&signed_request='+ signed}, 'https://apps.facebook.com/');
+					top.postMessage({task: 'secondMethodStepTwo', url: action +'&signed_request='+ signed}, 'http://apps.facebook.com/');
 
-					/*//use iframe to get the result of a <form> submit
-					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
-					$form = $('<form>', {method: 'post', target: 'secondMethodStepTwo', action: action}).css('display', 'none').appendTo( $body );
-					$form.append( $('<input type="hidden" name="signed_request">').val( signed ) );
-
-					var $iframe = $('<iframe name="secondMethodStepTwo">').hide().appendTo( $body );
-
-					var failure = window.setTimeout(function(){
-						$form.remove();
-						$iframe.remove();
-						KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2a</span>');
-						KOCFIA.gifts.index += 1;
-						KOCFIA.gifts.openGift();
-					}, 15000);
-
-					$iframe.load(function(e){
-						var content = $iframe.contents().find('html').html();
-
-						$form.remove();
-						$iframe.remove();
-
-						window.clearTimeout( failure );
-
-						KOCFIA.gifts.secondMethodStepThree( content );
-					});
-
-					$form.submit();*/
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2b</span>');
 					KOCFIA.gifts.index += 1;
@@ -15801,7 +15760,6 @@ jQuery(document).ready(function(){
 						action = $form.attr('action');
 						if( action.indexOf('kingdomsofcamelot') > -1 ){
 							signed = $form.find('input').filter('[name="signed_request"]').val();
-
 							break;
 						}
 					}
@@ -15822,56 +15780,14 @@ jQuery(document).ready(function(){
 					}
 				}
 
-				//https://www280.kingdomsofcamelot.com/fb/e2/src/claimGift_src.php?sid=14013882&gid=1461&fbIframeOn=1&standalone=0&res=1&iframe=1&lang=fr&in=14013882&si=5&ts=1332072312.2399&page=claimgift&gid=1461&sid=14013882&s=280&in=14013882&si=5&appBar=&cts=1332072322726
-
 				if( params.length == 5 ){
 					url = 'https://www'+ KOCFIA.gifts.domainId +'.kingdomsofcamelot.com/fb/e2/src/claimGift_src.php?';
 					url += 'fbIframeOn=1&standalone=0&res=1&iframe=1&lang=en&ts='+ (Date.now() / 1000) +'&page=claimgift&appBar=&cts='+ parseInt(Date.timestamp(), 10);
 					url += '&'+ params.join('&');
 
-					$.ajax({
-						url: url,
-						type: 'post',
-						data: 'signed_request='+ signed,
-						dataType: 'html',
-						timeout: 10000
-					})
-					.done(function(data){
-						KOCFIA.gifts.firstMethodStepThree(data);
-					})
-					.fail(function(){
-						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2a</span>');
-						KOCFIA.gifts.index += 1;
-						KOCFIA.gifts.openGift();
-					});
+					top.postMessage({task: 'firstMethodStepTwo', url: action, param: signed}, 'https://apps.facebook.com/');
+					top.postMessage({task: 'firstMethodStepTwo', url: action, param: signed}, 'http://apps.facebook.com/');
 
-					/*//use iframe to get the result of a <form> submit
-					//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
-					var $form = $('<form>', {method: 'post', target: 'firstMethodStepTwo', action: url}).css('display', 'none').appendTo( $body );
-					$form.append( $('<input type="hidden" name="signed_request">').val( signed ) );
-
-					var $iframe = $('<iframe name="firstMethodStepTwo">').hide().appendTo( $body );
-
-					var failure = window.setTimeout(function(){
-						$form.remove();
-						$iframe.remove();
-						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2a</span>');
-						KOCFIA.gifts.index += 1;
-						KOCFIA.gifts.openGift();
-					}, 15000);
-
-					$iframe.load(function(e){
-						var content = $iframe.contents().find('html').html();
-
-						$form.remove();
-						$iframe.remove();
-
-						window.clearTimeout( failure );
-
-						KOCFIA.gifts.firstMethodStepThree( content );
-					});
-
-					$form.submit();*/
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2b</span>');
 					KOCFIA.gifts.index += 1;
@@ -15886,6 +15802,27 @@ jQuery(document).ready(function(){
 
 		KOCFIA.gifts.firstMethodStepThree = function( data ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts firstMethodStepThree function');
+			if( KOCFIA.gifts.stop ) return;
+			if( data.length > 0 ){
+				if( data.indexOf('page=claimgift') > -1 ){
+					var url = data.substring(data.indexOf('replace(') + 9, data.indexOf('")'));
+
+					top.postMessage({task: 'firstMethodStepThree', url: url}, 'https://apps.facebook.com/');
+					top.postMessage({task: 'firstMethodStepThree', url: url}, 'http://apps.facebook.com/');
+				} else {
+					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4b</span>');
+					KOCFIA.gifts.index += 1;
+					KOCFIA.gifts.openGift();
+				}
+			} else {
+				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4c</span>');
+				KOCFIA.gifts.index += 1;
+				KOCFIA.gifts.openGift();
+			}
+		};
+
+		KOCFIA.gifts.firstMethodStepFour = function( data ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts firstMethodStepFour function');
 			if( KOCFIA.gifts.stop ) return;
 			if( data.length > 0 ){
 				if( data.indexOf('checkServer') > -1 ){
@@ -15903,60 +15840,15 @@ jQuery(document).ready(function(){
 
 						var url = window.g_ajaxpath +'ajax/claimgift.php'+ window.g_ajaxsuffix;
 
-						$.ajax({
-							url: url,
-							type: 'post',
-							data: params,
-							dataType: 'json',
-							timeout: 10000
-						})
-						.done(function(data){
-							KOCFIA.gifts.firstMethodStepThree(data);
-						})
-						.fail(function(){
-							KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3a</span>');
-							KOCFIA.gifts.index += 1;
-							KOCFIA.gifts.openGift();
-						});
-
-						/*//use iframe to get the result of a <form> submit
-						//avoid several problems of cookies not sended to the server with ajax request done here or in the grease monkey script
-						var $form = $('<form>', {method: 'post', target: 'firstMethodStepThree', action: url}).css('display', 'none').appendTo( $body );
-						for( var p in params ){
-							if( params.hasOwnProperty(p) ){
-								$form.append( $('<input type="hidden" name="'+ p +'">').val( params[p] ) );
-							}
-						}
-
-						var $iframe = $('<iframe name="firstMethodStepThree">').hide().appendTo( $body );
-
-						var failure = window.setTimeout(function(){
-							$form.remove();
-							$iframe.remove();
-							KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3a</span>');
-							KOCFIA.gifts.index += 1;
-							KOCFIA.gifts.openGift();
-						}, 15000);
-
-						$iframe.load(function(e){
-							var content = $iframe.contents().find('body').html();
-
-							$form.remove();
-							$iframe.remove();
-
-							window.clearTimeout( failure );
-
-							KOCFIA.gifts.firstMethodStepFour( content );
-						});
-
-						$form.submit();*/
+						top.postMessage({task: 'firstMethodStepFour', url: url, param: params}, 'https://apps.facebook.com/');
+						top.postMessage({task: 'firstMethodStepFour', url: url, param: params}, 'http://apps.facebook.com/');
 					} else {
-						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3b</span>');
+						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4b</span>');
 						KOCFIA.gifts.index += 1;
 						KOCFIA.gifts.openGift();
 					}
 				} else {
-					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3c</span>');
+					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4c</span>');
 					if( data.indexOf('We were unable to find your gift or it has expired') > -1 ){
 						KOCFIA.gifts.deleteGift();
 
@@ -15968,19 +15860,19 @@ jQuery(document).ready(function(){
 					}
 				}
 			} else {
-				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS3d</span>');
+				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4d</span>');
 				KOCFIA.gifts.index += 1;
 				KOCFIA.gifts.openGift();
 			}
 		};
 
-		KOCFIA.gifts.firstMethodStepFour = function( data ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts firstMethodStepFour function');
+		KOCFIA.gifts.firstMethodStepFive = function( data ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts firstMethodStepFive function');
 			if( KOCFIA.gifts.stop ) return;
 			if( Object.isObject(data) && data.ok ){
 				KOCFIA.gifts.$gift.parent().append('<span class="success"> - Ok</span>');
 			} else {
-				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4</span>');
+				KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS5</span>');
 			}
 			KOCFIA.gifts.index += 1;
 			KOCFIA.gifts.openGift();

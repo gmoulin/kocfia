@@ -16015,6 +16015,31 @@ jQuery(document).ready(function(){
 			}
 			queues += '</ul>';
 
+
+			$section.append( header + queues + help )
+				.find('.queue-list')
+				.dialog({autoOpen: false, height: 'auto', width: 400, zIndex: 100001 })
+				.find('ol').sortable({
+					zIndex: 100002,
+					update: function(event, ui){
+						var $list = $(event.target),
+							rel = $list.attr('rel'),
+							list = $list.find('li').map(function(){ return $(this).attr('rel'); }).get();
+
+						KOCFIA.build.queues[ rel ] = list;
+						KOCFIA.build.storeQueue();
+					}
+				});
+
+			KOCFIA.build.addEventListener();
+
+			KOCFIA.build.generateBuildMenu();
+
+		};
+
+		KOCFIA.build.generateBuildMenu = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build generateBuildMenu function');
+
 			var buildMenu = '<div class="kocfia-build-menu ui-widget ui-widget-content ui-corner-all buttonset">';
 
 			//kabam buildingcost fix
@@ -16098,104 +16123,9 @@ jQuery(document).ready(function(){
 			buildMenu += '</div>';
 			buildMenu += '</div>';
 
-			var $buildMenu = $(buildMenu);
+			KOCFIA.build.$buildMenu = $(buildMenu);
 
-			$section.append( header + queues + help )
-			//listener
-				.on('change', '#build-panel-automatic', function(){
-					$('#build-automatic').prop('checked', $(this).prop('checked')).change();
-				})
-				.on('change', '#plan-mode-toggle', function(){
-					if( $(this).prop('checked') ){
-						//slot listerners
-						$('#maparea_city, #maparea_fields')
-							.on('mouseenter', 'a[id^="slot_"], .guardianHover', function(){
-								$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').removeClass('required');
-
-								$buildMenu.appendTo( this );
-
-								var cityKey = 'city'+ window.currentcityid;
-								if( KOCFIA.build.queues.hasOwnProperty(cityKey)
-									&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( this.id )
-								){
-									var tasks = KOCFIA.build.queues[ cityKey ][ this.id ],
-										code = '', i;
-									for( i = 0; i < tasks.length; i += 1 ){
-										code += '<li>';
-										code += window.buildingcost[ 'bdg'+ tasks[i].buildingType ][0];
-										if( tasks[i].toLevel === 0 ){
-											code += ' destruction';
-										} else {
-											code += ' '+ tasks[i].fromLevel +' &rarr; '+ tasks[i].toLevel;
-										}
-										code += '</li>';
-									}
-
-									$buildMenu.find('.planned').find('ol').html( code );
-								}
-							})
-							.on('mouseleave', 'a[id^="slot_"], .guardianHover', function(){
-								$buildMenu.appendTo( $body )
-									.find('input').prop('checked', false).end()
-									.find('.planned').find('ol').html('');
-							})
-							;
-					} else {
-						$('#maparea_city, #maparea_fields').off('mouseenter mouseleave', 'a[id^="slot_"], .guardianHover');
-					}
-				})
-				.on('click', '.queue-toggle', function(){
-					var rel = $(this).attr('rel');
-					$('#kocfia-build-queue-'+ rel).dialog('open');
-				})
-				.on('click', '.queue-reset', function(){
-					if( confirm('Êtes-vous sûr ?') ){
-						var $this = $(this),
-							rel = $this.attr('rel');
-						KOCFIA.build.deleteQueueByCity( rel );
-						$this.parent().find('ol')[0].innerHTML = '';
-					}
-				})
-				//paying mode
-				.on('click', '.requeue', function(){
-					//requeue the current task at the end of the queue
-				})
-				.on('click', '.remove', function(){
-					if( confirm('Êtes-vous sûr ?') ){
-						//delete slot task
-						var $this = $(this),
-							cityKey = $this.attr('data-city'),
-							slotId = $this.attr('data-slot');
-
-						if( KOCFIA.build.queues.hasOwnProperty( cityKey )
-							&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId )
-						){
-							//remove queue entries for slot
-							delete KOCFIA.build.queues[ cityKey ][ slotId ];
-
-							KOCFIA.build.updateCityChronology( cityKey, slotId, true );
-							KOCFIA.build.updateCityQueueDuration( cityKey );
-						}
-					}
-				})
-				;
-
-			$section
-				.find('.queue-list')
-				.dialog({autoOpen: false, height: 'auto', width: 400, zIndex: 100001 })
-				.find('ol').sortable({
-					zIndex: 100002,
-					update: function(event, ui){
-						var $list = $(event.target),
-							rel = $list.attr('rel'),
-							list = $list.find('li').map(function(){ return $(this).attr('rel'); }).get();
-
-						KOCFIA.build.queues[ rel ] = list;
-						KOCFIA.build.storeQueue();
-					}
-				});
-
-			$buildMenu
+			KOCFIA.build.$buildMenu
 				.click(function(e){
 					e.stopPropagation();
 				})
@@ -16206,12 +16136,12 @@ jQuery(document).ready(function(){
 					var $slot = $buildMenu.closest('a'),
 						slotId = $slot.attr('id'),
 						slotClass = $slot.attr('class'),
-						$level = $buildMenu.find('.levels').find('input').filter(':checked'),
-						$building = $buildMenu.find('.buildings').find('input').filter(':checked'),
-						$bulwark = $buildMenu.find('.bulwarks').find('input').filter(':checked'),
-						$guardian = $buildMenu.find('.guardians').find('input').filter(':checked'),
-						$field = $buildMenu.find('.fields').find('input').filter(':checked'),
-						isDestroy = $buildMenu.find('.destroy').prop('checked'),
+						$level = KOCFIA.build.$buildMenu.find('.levels').find('input').filter(':checked'),
+						$building = KOCFIA.build.$buildMenu.find('.buildings').find('input').filter(':checked'),
+						$bulwark = KOCFIA.build.$buildMenu.find('.bulwarks').find('input').filter(':checked'),
+						$guardian = KOCFIA.build.$buildMenu.find('.guardians').find('input').filter(':checked'),
+						$field = KOCFIA.build.$buildMenu.find('.fields').find('input').filter(':checked'),
+						isDestroy = KOCFIA.build.$buildMenu.find('.destroy').prop('checked'),
 						cityKey = 'city'+ window.currentcityid,
 						buildingType = null,
 						fromLevel, toLevel,
@@ -16233,7 +16163,7 @@ jQuery(document).ready(function(){
 						buildingType = $field.val();
 					}
 
-					if( $buildMenu.closest('#guardianContainer').length > 0 ){
+					if( KOCFIA.build.$buildMenu.closest('#guardianContainer').length > 0 ){
 						isGuardian = true;
 					}
 
@@ -16247,7 +16177,7 @@ jQuery(document).ready(function(){
 							}
 						} else {
 							//needed building choice
-							$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
+							KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
 							errors = true;
 						}
 					} else if( isGuardian ){
@@ -16262,7 +16192,7 @@ jQuery(document).ready(function(){
 						if( isDestroy ){
 							if( $highestLevel.length && $highestLevel.val() != fromLevel && buildingType !== null ){
 								//needed building choice
-								$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
+								KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
 								errors = true;
 							}
 						}
@@ -16322,6 +16252,87 @@ jQuery(document).ready(function(){
 					KOCFIA.build.updateCityQueueDuration( cityKey );
 				})
 				;
+		};
+
+		KOCFIA.build.addSectionListeners = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build addSectionListeners function');
+			KOCFIA.$confPanel.find('#kocfia-build')
+				.on('change', '#build-panel-automatic', function(){
+					$('#build-automatic').prop('checked', $(this).prop('checked')).change();
+				})
+				.on('change', '#plan-mode-toggle', function(){
+					if( $(this).prop('checked') ){
+						//slot listerners
+						$('#maparea_city, #maparea_fields')
+							.on('mouseenter', 'a[id^="slot_"], .guardianHover', function(){
+								KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').removeClass('required');
+
+								KOCFIA.build.$buildMenu.appendTo( this );
+
+								var cityKey = 'city'+ window.currentcityid;
+								if( KOCFIA.build.queues.hasOwnProperty(cityKey)
+									&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( this.id )
+								){
+									var tasks = KOCFIA.build.queues[ cityKey ][ this.id ],
+										code = '', i;
+									for( i = 0; i < tasks.length; i += 1 ){
+										code += '<li>';
+										code += window.buildingcost[ 'bdg'+ tasks[i].buildingType ][0];
+										if( tasks[i].toLevel === 0 ){
+											code += ' destruction';
+										} else {
+											code += ' '+ tasks[i].fromLevel +' &rarr; '+ tasks[i].toLevel;
+										}
+										code += '</li>';
+									}
+
+									KOCFIA.build.$buildMenu.find('.planned').find('ol').html( code );
+								}
+							})
+							.on('mouseleave', 'a[id^="slot_"], .guardianHover', function(){
+								KOCFIA.build.$buildMenu.appendTo( $body )
+									.find('input').prop('checked', false).end()
+									.find('.planned').find('ol').html('');
+							})
+							;
+					} else {
+						$('#maparea_city, #maparea_fields').off('mouseenter mouseleave', 'a[id^="slot_"], .guardianHover');
+					}
+				})
+				.on('click', '.queue-toggle', function(){
+					var rel = $(this).attr('rel');
+					$('#kocfia-build-queue-'+ rel).dialog('open');
+				})
+				.on('click', '.queue-reset', function(){
+					if( confirm('Êtes-vous sûr ?') ){
+						var $this = $(this),
+							rel = $this.attr('rel');
+						KOCFIA.build.deleteQueueByCity( rel );
+						$this.parent().find('ol')[0].innerHTML = '';
+					}
+				})
+				//paying mode
+				.on('click', '.requeue', function(){
+					//requeue the current task at the end of the queue
+				})
+				.on('click', '.remove', function(){
+					if( confirm('Êtes-vous sûr ?') ){
+						//delete slot task
+						var $this = $(this),
+							cityKey = $this.attr('data-city'),
+							slotId = $this.attr('data-slot');
+
+						if( KOCFIA.build.queues.hasOwnProperty( cityKey )
+							&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId )
+						){
+							//remove queue entries for slot
+							delete KOCFIA.build.queues[ cityKey ][ slotId ];
+
+							KOCFIA.build.updateCityChronology( cityKey, slotId, true );
+							KOCFIA.build.updateCityQueueDuration( cityKey );
+						}
+					}
+				});
 		};
 
 		/*KOCFIA.build.getTaskLabel = function( task ){
@@ -16415,7 +16426,7 @@ jQuery(document).ready(function(){
 							} else {
 								time = baseBuildingTime * levelModifier;
 							}
-							time = parseInt(time / (1 + 0.005 * politicsModifier + 0.1 * techBonus));
+							time = parseInt(time / (1 + 0.005 * politicsModifier + 0.1 * techBonus), 10);
 
 							if( isDestruction ) time = Math.round(time / (1 + (throneBonus / 100)));
 
@@ -16459,7 +16470,7 @@ jQuery(document).ready(function(){
 				} else {
 					time = baseBuildingTime * levelModifier;
 				}
-				time = parseInt(time / (1 + 0.005 * politicsModifier + 0.1 * techBonus));
+				time = parseInt(time / (1 + 0.005 * politicsModifier + 0.1 * techBonus), 10);
 
 				return time;
 			} else {
@@ -16470,7 +16481,7 @@ jQuery(document).ready(function(){
 					} else {
 						time = baseBuildingTime * levelModifier;
 					}
-					time = parseInt(time / (1 + 0.005 * politicsModifier + 0.1 * techBonus));
+					time = parseInt(time / (1 + 0.005 * politicsModifier + 0.1 * techBonus), 10);
 					time = Math.round(time / (1 + (throneBonus / 100)));
 
 					timeByLevel[ i ] = time;
@@ -16542,7 +16553,7 @@ jQuery(document).ready(function(){
 					}
 				}
 			}
-		}
+		};
 
 		KOCFIA.build.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build getHelp function');
@@ -16583,7 +16594,13 @@ jQuery(document).ready(function(){
 
 
 			if( !$.isEmptyObject( KOCFIA.build.chronology ) && !$.isEmptyObject( KOCFIA.build.queues ) ){
-				var cityKey, city, task, pointer, slotId, taskIndex;
+				var cityKey, city,
+					task, pointer, slotId, taskIndex,
+					con, res, stats, costs,
+					i, b, t,
+					level, req, need, tech,
+					resNeeded, resAvailable, modifier,
+					enough, attempts;
 
 				//request
 				var params;
@@ -16591,6 +16608,9 @@ jQuery(document).ready(function(){
 				//loops index
 				var cityIndex = 0,
 					chronologyIndex = 0;
+
+				//informations
+				var msg = [];
 
 				//start the build sequence
 				var sequence = function(){
@@ -16611,7 +16631,7 @@ jQuery(document).ready(function(){
 
 					//is constructing ?
 					if( window.seed.queue_con.hasOwnProperty( cityKey ) ){
-						var con = window.seed.queue_con[ cityKey ];
+						con = window.seed.queue_con[ cityKey ];
 						if( Array.isArray(con) && con.length > 0 ){
 							if( con[0][4] > Date.timestamp() ){ //unfinished construction
 								cityIndex += 1;
@@ -16628,6 +16648,10 @@ jQuery(document).ready(function(){
 						cityIndex += 1;
 						return dfd.pipe( byCity(dfd) );
 					}
+
+					city = KOCFIA.cities[ cityKey ];
+					res = window.seed.resources[ cityKey ],
+					stats = window.seed.citystats[ cityKey ];
 
 					return dfd.pipe( checkTask(dfd) );
 				};
@@ -16646,11 +16670,165 @@ jQuery(document).ready(function(){
 					slotId = pointer[0];
 					taskIndex = parseInt(pointer[1], 10);
 					task = KOCFIA.build.queues[ cityKey ][ slotId ].tasks[ taskIndex ];
-					if( task ){
+					if( task && Object.isObject(task) ){
+						//format {buildingType: buildingType, fromLevel: i - 1, toLevel: i}
 
+						costs = window.buildingcost[ task.buildingType ];
+						if( costs ){
+							//["Château", 200, 3000, 2500, 100, 0, 0, 900, {"b19": [0, -2]}, [], ""]
+
+							if( Object.isObject(costs[8]) && !$.isArray(costs[8]) && !$.isEmptyObject(costs[8]) ){
+								for( b in costs[8] ){  // check building requirement
+									if( costs[8].hasOwnProperty(b) ){
+										level = Shared.buildingHighestLevel( cityKey, b.substr(1) );
+										need = costs[8][k][1];
+										if( need < 0 ) need = task.toLevel + need;
+										if( level < need ){
+											req = window.buildingcost[k];
+											msg.push(city.label +': '+ costs[0] +' '+ task.toLevel +' requiert '+ req[0] +' '+ need);
+											chronologyIndex += 1;
+											return dfd.pipe( checkTask(dfd) );
+										}
+									}
+								}
+							}
+
+							if( Object.isObject(costs[9]) && !$.isArray(costs[9]) && !$.isEmptyObject(costs[9]) ){
+								for( t in costs[9] ){  // check tech requirement
+									if( costs[9].hasOwnProperty(t) ){
+										need = costs[9][t][1];
+										if( need === 0 ) need = task.toLevel;
+										if( parseInt(window.seed.tech['tch' + t.substr(1)], 10) < need ){
+											tech = window.techcost["tch" + t.substr(1)];
+											msg.push(city.label +': '+ costs[0] +' '+ task.toLevel +' requiert '+ tech[0] +' '+ need);
+											chronologyIndex += 1;
+											return dfd.pipe( checkTask(dfd) );
+										}
+									}
+								}
+							}
+
+							//resources
+							modifier = Math.pow(2, (task.toLevel - 1));
+							for( r = 1; r < 5; r += 1 ){
+								resNeeded.push( parseInt(costs[r], 10) * 3600 * modifier );
+
+								//take into account the rule keep parameter
+								resAvailable.push( parseInt(res["rec" + r][0], 10) );
+							}
+
+							//gold
+							resNeeded.push( parseInt(costs[5], 10) * modifier );
+							resAvailable.push( parseInt(stats.gold[0], 10) );
+
+							enough = true;
+							for( i = 0; i < resNeeded.length; i += 1 ){
+								if( resNeeded[i] !== 0 && resAvailable[ i ] < resNeeded[ i ] ){
+									enough = false;
+									break;
+								}
+							}
+
+							if( !enough ){
+								msg.push(city.label +': Pas assez de ressources pour '+ costs[0] +' '+ task.toLevel);
+							}
+
+							return dfd.pipe( build(dfd) );
+						} else {
+							chronologyIndex += 1;
+							return dfd.pipe( checkTask(dfd) );
+						}
+
+					} else {
+						chronologyIndex += 1;
+						return dfd.pipe( checkTask(dfd) );
 					}
 
-					return dfd.pipe( launchTask(dfd) );
+					attempts = 3;
+					return dfd.pipe( launchTask(dfd, attempts) );
+				};
+
+				//step 3
+				var build = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred checkTask function');
+
+					var slot = parseInt(slotId.replace(/slot_/, ''), 10);
+
+					params = $.extend({}, window.g_ajaxparams);
+					params.cid = city.id;
+					params.bid = "";
+					params.pos = slot;
+					params.lv = task.toLevel;
+					if( params.lv > 1 ){
+						params.bid = window.seed.buildings[ cityKey ][ slotId ][3];
+					}
+					e.type = q;
+					params.permission = 0;
+
+					$.ajax({
+							url: window.g_ajaxpath + "ajax/construct.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						})
+						.done(function(result){
+							if( result.ok ){
+								window.seed.resources[ cityKey ].rec1[0] -= resNeeded[0];
+								window.seed.resources[ cityKey ].rec2[0] -= resNeeded[1];
+								window.seed.resources[ cityKey ].rec3[0] -= resNeeded[2];
+								window.seed.resources[ cityKey ].rec4[0] -= resNeeded[3];
+								window.seed.citystats[ cityKey ].gold[0] -= resNeeded[4];
+
+								var ts = Date.timestamp(),
+									duration = parseInt(data.timeNeeded, 10);
+								window.seed.queue_con[ cityKey ].push([q, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slot]);
+
+								if( task.fromLevel === 0 ){
+									window.seed.buildings[ cityKey ]['pos'+ slot] = [q, 0, slot, result.buildingId];
+								}
+
+								window.update_bdg();
+
+								window.build_gethelp(result.buildingId);
+
+								if( result.updateSeed ){
+									window.update_seed(result.updateSeed);
+								}
+
+								cityIndex += 1;
+								return dfd.pipe( byCity(dfd) );
+							} else {
+								if( result.msg ){
+									msg.push(city.label +': construction refusée ('+ result.msg +').');
+
+									cityIndex += 1;
+									return dfd.pipe( byCity(dfd) );
+								} else {
+									attempts -= 1;
+									if( attempts > 0 ){
+										window.setTimeout(function(){ dfd.pipe( (udfd) ); }, 10000);
+									} else {
+										msgUnit.push(city.label +': construction refusée.');
+
+										cityIndex += 1;
+										return dfd.pipe( byCity(dfd) );
+									}
+								}
+							}
+						})
+						.fail(function(){
+							//network or server error
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){ dfd.pipe( (udfd) ); }, 10000);
+							} else {
+								msg.push(city.label +': construction refusée (erreur internet).');
+
+								cityIndex += 1;
+								return dfd.pipe( byCity(dfd) );
+							}
+						});
 				};
 
 				$.when( sequence() );

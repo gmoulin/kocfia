@@ -1514,7 +1514,7 @@ jQuery(document).ready(function(){
 					speed = speed * (1 + (throneBoost * 0.01));
 				}
 
-				var multiplier = 1 + (cm.guardianModalModel.getMarchBonus() * 0.01);
+				var multiplier = 1 + (Shared.getGuardianBonus( cityKey, 'march' ) * 0.01);
 				if( !barbarian_raid && window.cm.WorldSettings.isOn("GUARDIAN_MARCH_EFFECT") ){
 					speed = speed * (1 + (multiplier * 0.01));
 				}
@@ -2318,6 +2318,129 @@ jQuery(document).ready(function(){
 				$( code )
 					.appendTo( KOCFIA.$confPanelWrapper )
 					.fadeIn(200);
+			};
+
+		/* guardians */
+			Shared.getGuardian = function( cityKey ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getGuardian function');
+
+				if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
+					var cityId = cityKey.replace(/city/, ''),
+						guardian;
+					for( var i = 0, l = window.seed.guardian.length; i < l; i += 1 ){
+						guardian = window.seed.guardian[ i ];
+						if( Object.isObject(guardian) && !$.isEmptyObject(guardian) ){
+							if( guardian.city == cityId ){
+								return guardian;
+							}
+						}
+					}
+				}
+
+				return false;
+			};
+
+			Shared.getGuardianBonus = function( cityKey, type ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getGuardianBonus function', cityKey, type);
+
+				var guardian = Shared.getGuardian( cityKey );
+
+				if( guardian === false ){
+					return 0;
+				}
+
+				var defaults = {
+					'wood': 0,
+					'ore': 0,
+					'stone': 0,
+					'food': 0
+				};
+
+				var bonusPerLevel = {
+					0  : 0,
+					1  : 1,
+					2  : 1,
+					3  : 2,
+					4  : 2,
+					5  : 3,
+					6  : 3,
+					7  : 4,
+					8  : 5,
+					9  : 7,
+					10 : 10,
+					11 : 15,
+					12 : 20
+				};
+
+				//make sure all the guardian type level are present
+				guardian.cityGuardianLevels = $.extend(defaults, guardian.cityGuardianLevels);
+
+				var isSet = guardian.guardianCount == 4;
+
+				switch( type ){
+					case 'train':
+							var base = bonusPerLevel[guardian.cityGuardianLevels.stone] / 100,
+								isStone = guardian.type == 'stone';
+
+							if( isStone && isSet ){
+								return base * 1.5;
+							} else if( isStone && !isSet ){
+								return base;
+							} else if( !isStone && isSet ){
+								return base * 0.5;
+							} else {
+								return 0;
+							}
+						break;
+					case 'march':
+							var base = bonusPerLevel[guardian.cityGuardianLevels.food] / 100,
+								isFood = guardian.type == 'food';
+
+							if( isFood && isSet ){
+								return base * 1.5;
+							} else if( isFood && !isSet ){
+								return base;
+							} else if( !isFood && isSet ){
+								return base * 0.5;
+							} else {
+								return 0;
+							}
+						break;
+					case 'resources':
+							var bonuses = {
+								'wood'  : 0,
+								'food'  : 0,
+								'stone' : 0,
+								'ore'   : 0
+							};
+
+							var food = bonusPerLevel[guardian.cityGuardianLevels.food] / 100,
+								stone = bonusPerLevel[guardian.cityGuardianLevels.stone] / 100,
+								wood = bonusPerLevel[guardian.cityGuardianLevels.wood] / 100,
+								ore = bonusPerLevel[guardian.cityGuardianLevels.ore] / 100,
+								isFood = guardian.type == 'food',
+								isStone = guardian.type == 'stone',
+								isWood = guardian.type == 'wood',
+								isOre = guardian.type == 'ore';
+
+							if( isSet ){
+								bonuses.food = isFood ? food * 1.5 : food * 0.5;
+								bonuses.stone = isStone ? stone * 1.5 : stone * 0.5;
+								bonuses.wood = isWood ? wood * 1.5 : wood * 0.5;
+								bonuses.ore = isOre ? ore * 1.5 : ore * 0.5;
+							} else {
+								bonuses.food = food;
+								bonuses.stone = stone;
+								bonuses.wood = wood;
+								bonuses.ore = ore;
+							}
+
+							return bonuses;
+						break;
+
+					default:
+						return 0;
+				}
 			};
 
 	/* FACEBOOK WALL POST POPUP */
@@ -3258,8 +3381,7 @@ jQuery(document).ready(function(){
 					timestamp = Date.timestamp();
 
 					//guardian bonus
-						guardianBonus = ( window.seed.guardian[ cityKey ] ? window.seed.guardian[ cityKey ][0] : {} );
-						if( guardianBonus.hasOwnProperty('type') && guardianBonus.type == -1 ) guardianBonus.type = 'wood';
+						guardianBonus = Shared.getGuardianBonus( cityKey, 'resources' );
 
 						bonusG = $.extend({}, guardianBase, guardianBonus);
 
@@ -9305,7 +9427,7 @@ jQuery(document).ready(function(){
 
 			modifier = modifier * (1 + (window.cm.ThroneController.effectBonus(77) / 100));
 			if( window.cm.WorldSettings.isOn("GUARDIAN_MARCH_EFFECT") ){
-				modifier = modifier * (1 + window.cm.guardianModalModel.getStoneTrainingSpeedBonus());
+				modifier = modifier * (1 + Shared.getGuardianBonus( cityKey, 'march' ));
 			}
 
 			if( speed == '0' ){
@@ -16165,6 +16287,11 @@ jQuery(document).ready(function(){
 
 					if( KOCFIA.build.$buildMenu.closest('#guardianContainer').length > 0 ){
 						isGuardian = true;
+						var guardian = Shared.getGuardian( cityKey );
+						if( guardian === false && buildingType === null ){
+							KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
+							errors = true;
+						}
 					}
 
 					if( (isGuardian && buildingType !== null) || ($slot.length && $slot.hasClass('blank')) ){
@@ -16181,9 +16308,12 @@ jQuery(document).ready(function(){
 							errors = true;
 						}
 					} else if( isGuardian ){
-						//@TODO
-						//find the current guardian type and level from seed
-						//add a form input to permit new guardian
+						fromLevel = parseInt(guardian.level, 10);
+						if( $highestLevel.length ){
+							toLevel = $highestLevel.val();
+						} else {
+							toLevel = 1;
+						}
 					} else {
 						slotClass = slotClass.split('_');
 						buildingType = parseInt(slotClass[1], 10);
@@ -16595,15 +16725,16 @@ jQuery(document).ready(function(){
 
 			if( !$.isEmptyObject( KOCFIA.build.chronology ) && !$.isEmptyObject( KOCFIA.build.queues ) ){
 				var cityKey, city,
-					task, pointer, slotId, taskIndex,
+					task, pointer, slotId, taskIndex, type,
 					con, res, stats, costs,
-					i, b, t,
+					i, l, b, t,
 					level, req, need, tech,
 					resNeeded, resAvailable, modifier,
+					neededItemKey, guardian, guardianType, isGuardian,
 					enough, attempts;
 
 				//request
-				var params;
+				var params, slot, option;
 
 				//loops index
 				var cityIndex = 0,
@@ -16623,17 +16754,27 @@ jQuery(document).ready(function(){
 				//step 1
 				var byCity = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred byCity function');
+
+					if( msg.length > 0 ){
+						//display messages
+						msg = msg.unique();
+					}
+
 					if( cityIndex >= KOCFIA.citiesKey.length ){
 						return dfd.resolve();
 					}
+
 					cityKey = KOCFIA.citiesKey[ cityIndex ];
 					city = KOCFIA.cities[ cityKey ];
+
+					msg = [];
 
 					//is constructing ?
 					if( window.seed.queue_con.hasOwnProperty( cityKey ) ){
 						con = window.seed.queue_con[ cityKey ];
 						if( Array.isArray(con) && con.length > 0 ){
 							if( con[0][4] > Date.timestamp() ){ //unfinished construction
+								msg.push(city.label +': construction en cours');
 								cityIndex += 1;
 								return dfd.pipe( byCity(dfd) );
 							}
@@ -16645,6 +16786,7 @@ jQuery(document).ready(function(){
 
 					//has tasks ?
 					if( !KOCFIA.build.chronology.hasOwnProperty( cityKey ) ){
+						msg.push(city.label +': aucunes tâches plannifiées');
 						cityIndex += 1;
 						return dfd.pipe( byCity(dfd) );
 					}
@@ -16661,10 +16803,12 @@ jQuery(document).ready(function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred checkTask function');
 
 					if( chronologyIndex >= KOCFIA.build.chronology[ cityKey ].length ){
-						chronologyIndex += 1;
-						return dfd.pipe( checkTask(dfd) );
+						msg.push(city.label +': vérification des tâches terminée');
+						cityIndex += 1;
+						return dfd.pipe( byCity(dfd) );
 					}
 
+					attempts = 3;
 					pointer = KOCFIA.build.chronology[ cityKey ][ chronologyIndex ];
 					pointer = pointer.split('_');
 					slotId = pointer[0];
@@ -16672,6 +16816,12 @@ jQuery(document).ready(function(){
 					task = KOCFIA.build.queues[ cityKey ][ slotId ].tasks[ taskIndex ];
 					if( task && Object.isObject(task) ){
 						//format {buildingType: buildingType, fromLevel: i - 1, toLevel: i}
+
+						type = task.buildingType.replace(/bdg/, '');
+						guardian = null;
+						neededItemKey = null;
+
+						isGuardian = task.slotId == 'guardianContainer';
 
 						costs = window.buildingcost[ task.buildingType ];
 						if( costs ){
@@ -16723,7 +16873,7 @@ jQuery(document).ready(function(){
 
 							enough = true;
 							for( i = 0; i < resNeeded.length; i += 1 ){
-								if( resNeeded[i] !== 0 && resAvailable[ i ] < resNeeded[ i ] ){
+								if( resNeeded[ i ] !== 0 && resAvailable[ i ] < resNeeded[ i ] ){
 									enough = false;
 									break;
 								}
@@ -16731,42 +16881,66 @@ jQuery(document).ready(function(){
 
 							if( !enough ){
 								msg.push(city.label +': Pas assez de ressources pour '+ costs[0] +' '+ task.toLevel);
+								chronologyIndex += 1;
+								return dfd.pipe( checkTask(dfd) );
 							}
 
-							return dfd.pipe( build(dfd) );
+							//guardian of different type need summoning
+							if( task.slotId == 'guardianContainer' ){
+								guardian = Shared.getGuardian( cityKey );
+
+								if( guardian === false ){
+									guardian = { type: 'none' };
+								}
+
+								//summoning or unlocking the task guardian
+								if( window.cm.guardianConst.bdgTypes[ guardian.type ] != type ){ //false when no guardian unlocked
+									if( guardian.cityGuardianLevels.hasOwnProperty( type ) ){
+										//guardian already unlocked
+										return dfd.pipe( summonGuardian(dfd, attempts) );
+									} else {
+										//need an item to unlock ?
+										if( window.cm.guardianConst.unlockItem[ type ] ){
+											neededItemKey = 'i'+ window.cm.guardianConst.unlockItem[ type ];
+
+											if( !window.seed.items.hasOwnProperty( neededItemKey ) || window.seed.items[ neededItemKey ] < 1 ){
+												msg.push(city.label +': Object manquant ('+ window.itemlist[ neededItemKey ].name +') pour débloquer le gardien');
+												chronologyIndex += 1;
+												return dfd.pipe( checkTask(dfd) );
+											}
+										}
+
+										return dfd.pipe( unlockGuardian(dfd, attempts) );
+									}
+								}
+							}
+
+							return dfd.pipe( build(dfd, attempts) );
 						} else {
+							msg.push(city.label +': Aucun coût trouvé');
 							chronologyIndex += 1;
 							return dfd.pipe( checkTask(dfd) );
 						}
-
 					} else {
+						msg.push(city.label +': tâche non trouvée');
 						chronologyIndex += 1;
 						return dfd.pipe( checkTask(dfd) );
 					}
-
-					attempts = 3;
-					return dfd.pipe( launchTask(dfd, attempts) );
 				};
 
-				//step 3
-				var build = function( dfd ){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred checkTask function');
-
-					var slot = parseInt(slotId.replace(/slot_/, ''), 10);
+				//step 2a, only for guardians
+				var summonGuardian = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred summonGuardian function');
 
 					params = $.extend({}, window.g_ajaxparams);
-					params.cid = city.id;
-					params.bid = "";
-					params.pos = slot;
-					params.lv = task.toLevel;
-					if( params.lv > 1 ){
-						params.bid = window.seed.buildings[ cityKey ][ slotId ][3];
-					}
-					e.type = q;
-					params.permission = 0;
+					params.ctrl   = 'Guardian';
+					params.action = 'summon';
+					params.cityId = city.id;
+					params.tvuid  = window.tvuid;
+					params.type   = type;
 
 					$.ajax({
-							url: window.g_ajaxpath + "ajax/construct.php" + window.g_ajaxsuffix,
+							url: window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix,
 							type: 'post',
 							data: params,
 							dataType: 'json',
@@ -16774,6 +16948,178 @@ jQuery(document).ready(function(){
 						})
 						.done(function(result){
 							if( result.ok ){
+								if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
+									for( i = 0, l = window.seed.guardian.length; i < l; i += 1 ){
+										guardian = window.seed.guardian[ i ];
+										if( Object.isObject(guardian) && !$.isEmptyObject(guardian) ){
+											if( guardian.city == city.id ){
+												guardianType = window.cm.guardianConst.numTypes[ type ];
+												window.seed.guardian[ i ].timeLeft = 0;
+												window.seed.guardian[ i ].level = guardian.cityGuardianLevels[ guardianType ];
+												window.seed.guardian[ i ].type = guardianType;
+
+												window.cm.guardianCity.rerender(true);
+											}
+										}
+									}
+								}
+
+								attempts = 3;
+								return dfd.pipe( build(dfd) );
+							} else {
+								if( result.msg ){
+									msg.push(city.label +': invocation de gardien refusée ('+ result.msg +').');
+
+									cityIndex += 1;
+									return dfd.pipe( byCity(dfd) );
+								} else {
+									attempts -= 1;
+									if( attempts > 0 ){
+										window.setTimeout(function(){ dfd.pipe( summonGuardian(udfd) ); }, 10000);
+									} else {
+										msgUnit.push(city.label +': invocation de gardien refusée.');
+
+										cityIndex += 1;
+										return dfd.pipe( byCity(dfd) );
+									}
+								}
+							}
+						})
+						.fail(function(){
+							//network or server error
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){ dfd.pipe( summonGuardian(udfd) ); }, 10000);
+							} else {
+								msg.push(city.label +': invocation de gardien refusée (erreur internet).');
+
+								cityIndex += 1;
+								return dfd.pipe( byCity(dfd) );
+							}
+						});
+				};
+
+				//step 2b, only for guardian
+				var unlockGuardian = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred summonGuardian function');
+
+					params = $.extend({}, window.g_ajaxparams);
+					params.ctrl   = 'Guardian';
+					params.action = 'unlock';
+					params.cityId = city.id;
+					params.tvuid  = window.tvuid;
+					params.type   = type;
+
+					$.ajax({
+							url: window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						})
+						.done(function(result){
+							if( result.ok ){
+								window.seed.items[ neededItemKey ] -= 1;
+								window.ksoItems[ parseInt(neededItemKey.substr(1), 10) ].subtract();
+
+								if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
+									for( i = 0, l = window.seed.guardian.length; i < l; i += 1 ){
+										guardian = window.seed.guardian[ i ];
+										if( Object.isObject(guardian) && !$.isEmptyObject(guardian) ){
+											if( guardian.city == city.id ){
+												guardianType = window.cm.guardianConst.numTypes[ type ];
+												window.seed.guardian[ i ].level = 0;
+												window.seed.guardian[ i ].type = guardianType;
+												window.seed.guardian[ i ].cityGuardianLevels[ guardianType ] = 0;
+
+												window.cm.guardianCity.rerender(true);
+											}
+										}
+									}
+								}
+
+								attempts = 3;
+								return dfd.pipe( build(dfd) );
+							} else {
+								if( result.msg ){
+									msg.push(city.label +': déblocage de gardien refusé ('+ result.msg +').');
+
+									cityIndex += 1;
+									return dfd.pipe( byCity(dfd) );
+								} else {
+									attempts -= 1;
+									if( attempts > 0 ){
+										window.setTimeout(function(){ dfd.pipe( unlockGuardian(udfd) ); }, 10000);
+									} else {
+										msgUnit.push(city.label +': déblocage de gardien refusé.');
+
+										cityIndex += 1;
+										return dfd.pipe( byCity(dfd) );
+									}
+								}
+							}
+						})
+						.fail(function(){
+							//network or server error
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){ dfd.pipe( unlockGuardian(udfd) ); }, 10000);
+							} else {
+								msg.push(city.label +': déblocage de gardien refusé (erreur internet).');
+
+								cityIndex += 1;
+								return dfd.pipe( byCity(dfd) );
+							}
+						});
+				};
+
+				//step 3
+				var build = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred checkTask function');
+
+					params = $.extend({}, window.g_ajaxparams);
+
+					if( !isGuardian ){
+						slot = parseInt(slotId.replace(/slot_/, ''), 10);
+						params.cid = city.id;
+						params.bid = "";
+						params.pos = slot;
+						params.lv = task.toLevel;
+						if( params.lv > 1 ){
+							params.bid = window.seed.buildings[ cityKey ]['pos'+ slot][3];
+						}
+						params.type = type;
+						params.permission = 0; //no automatic 10+ construction
+
+						options = {
+							url: window.g_ajaxpath + "ajax/construct.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						};
+					} else {
+						slot = 500;
+
+						params.ctrl = 'Guardian';
+						params.action = 'build';
+						params.cityId = city.id;
+						params.tvuid = window.tvuid;
+						params.type = type;
+						params.permission = 0; //no automatic 10+ construction
+
+						options = {
+							url: window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						};
+					}
+
+					$.ajax( options )
+						.done(function(result){
+							if( !isGuardian && result.ok ){
 								window.seed.resources[ cityKey ].rec1[0] -= resNeeded[0];
 								window.seed.resources[ cityKey ].rec2[0] -= resNeeded[1];
 								window.seed.resources[ cityKey ].rec3[0] -= resNeeded[2];
@@ -16781,11 +17127,11 @@ jQuery(document).ready(function(){
 								window.seed.citystats[ cityKey ].gold[0] -= resNeeded[4];
 
 								var ts = Date.timestamp(),
-									duration = parseInt(data.timeNeeded, 10);
-								window.seed.queue_con[ cityKey ].push([q, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slot]);
+									duration = parseInt(result.timeNeeded, 10);
+								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slot]);
 
 								if( task.fromLevel === 0 ){
-									window.seed.buildings[ cityKey ]['pos'+ slot] = [q, 0, slot, result.buildingId];
+									window.seed.buildings[ cityKey ]['pos'+ slot] = [type, 0, slot, result.buildingId];
 								}
 
 								window.update_bdg();
@@ -16796,8 +17142,40 @@ jQuery(document).ready(function(){
 									window.update_seed(result.updateSeed);
 								}
 
+								msg.push(city.label +': construction lancée');
+
 								cityIndex += 1;
 								return dfd.pipe( byCity(dfd) );
+							} else if( isGuardian && result.time ){
+								window.seed.resources[ cityKey ].rec1[0] -= resNeeded[0];
+								window.seed.resources[ cityKey ].rec2[0] -= resNeeded[1];
+								window.seed.resources[ cityKey ].rec3[0] -= resNeeded[2];
+								window.seed.resources[ cityKey ].rec4[0] -= resNeeded[3];
+								window.seed.citystats[ cityKey ].gold[0] -= resNeeded[4];
+
+								var ts = Date.timestamp(),
+									duration = parseInt(result.time, 10);
+								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slot]);
+
+								//set upgrading to true
+								if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
+									for( i = 0, l = window.seed.guardian.length; i < l; i += 1 ){
+										guardian = window.seed.guardian[ i ];
+										if( Object.isObject(guardian) && !$.isEmptyObject(guardian) ){
+											if( guardian.city == city.id ){
+												window.seed.guardian[ i ].updating = true;
+											}
+										}
+									}
+								}
+
+								if( city.id == window.currentcityid ){
+									if( result.guardian ){
+										window.cm.guardianModalModel.setDynamics( result.guardian );
+									}
+
+									window.cm.guardianCity.rerender(true);
+								}
 							} else {
 								if( result.msg ){
 									msg.push(city.label +': construction refusée ('+ result.msg +').');
@@ -16807,7 +17185,7 @@ jQuery(document).ready(function(){
 								} else {
 									attempts -= 1;
 									if( attempts > 0 ){
-										window.setTimeout(function(){ dfd.pipe( (udfd) ); }, 10000);
+										window.setTimeout(function(){ dfd.pipe( build(udfd) ); }, 10000);
 									} else {
 										msgUnit.push(city.label +': construction refusée.');
 
@@ -16821,7 +17199,7 @@ jQuery(document).ready(function(){
 							//network or server error
 							attempts -= 1;
 							if( attempts > 0 ){
-								window.setTimeout(function(){ dfd.pipe( (udfd) ); }, 10000);
+								window.setTimeout(function(){ dfd.pipe( build(udfd) ); }, 10000);
 							} else {
 								msg.push(city.label +': construction refusée (erreur internet).');
 

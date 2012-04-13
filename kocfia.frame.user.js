@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name			KOCFIA-MAIN
-// @version			2
+// @version			3
 // @namespace		KOCFIA
 // @description		améliorations et automatisations diverses pour KOC
 // @include			*kingdomsofcamelot.com/*main_src.php*
@@ -72,7 +72,7 @@ var load = function(){
 				if( preload[i].indexOf('jquery.min.js') > -1 ){
 					tag.onload = function(){
 						tag = unsafeWindow.document.createElement('script');
-						tag.innerHTML = "jQuery.noConflict()";
+						tag.innerHTML = "jQuery.noConflict(); var kocfiaFrameUserScriptVersion = 3; var kocfiaFrom = '"+ domain +"';";
 						anchor.parentNode.insertBefore(tag, anchor);
 					};
 				}
@@ -116,6 +116,9 @@ var domain = 'http://kocfia.kapok.dev/',
 		domain + "jquery.miniColors.min.js",
 		domain + "jquery.tipsy.css",
 		domain + "jquery.tipsy.min.js",
+		domain + "ui.jqgrid.css",
+		domain + "grid.locale-fr.js",
+		domain + "jquery.jqGrid.min.js",
 		domain + "kocfia.confPanel.css?ts=" + d.getTime(),
 		domain + "kocfia.js?ts=" + d.getTime()
 	];

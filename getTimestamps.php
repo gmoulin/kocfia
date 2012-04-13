@@ -9,6 +9,9 @@ $urls = array(
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery.miniColors.min.js',
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery.tipsy.css',
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery.tipsy.min.js',
+	'http://'.$_SERVER['SERVER_NAME'].'/ui.jqgrid.css',
+	'http://'.$_SERVER['SERVER_NAME'].'/grid.locale-fr.js',
+	'http://'.$_SERVER['SERVER_NAME'].'/jquery.jqGrid.min.js',
 	'http://'.$_SERVER['SERVER_NAME'].'/kocfia.confPanel.css?ts='.filemtime('kocfia.confPanel.css'),
 	'http://'.$_SERVER['SERVER_NAME'].'/kocfia.js?ts='.filemtime('kocfia.js')
 );

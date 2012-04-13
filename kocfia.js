@@ -145,8 +145,9 @@ jQuery(document).ready(function(){
 
 	var KOCFIA = {
 		version: '0.5.5',
+		userScriptLoaderVersion: 3,
 		debug: true,
-		debugWhat: {gifts: 1, build: 1},
+		debugWhat: {gifts: 1, build: 1, map: 1},
 		server: null,
 		modules: [
 			'dataAndStats',
@@ -354,6 +355,16 @@ jQuery(document).ready(function(){
 
 	KOCFIA.init = function(){
 		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('KOCFIA init function');
+
+		if( window.kocfiaFrameUserScriptVersion === undefined
+			|| window.kocfiaFrameUserScriptVersion != KOCFIA.userScriptLoaderVersion
+		){
+			alert('Une nouvelle version du script grease monkey utilisé pour charger KOCFIA est disponible. Veuillez le mettre à jour.');
+
+			if( window.kocfiaFrom ) window.open(window.kocfiaFrom +'kocfia.frame.user.js', 'Script utilisateur utilisé par grease monkey pour charger KOCFIA');
+
+			return false;
+		}
 
 		//get server id
 			KOCFIA.server = Shared.getServer();
@@ -1349,6 +1360,11 @@ jQuery(document).ready(function(){
 				}
 			};
 
+			Shared.gridFormat = function( cellValue, options, rowObject ){
+
+				return cellValue != '?' ? Shared.format( cellValue ) : cellValue;
+			};
+
 			Shared.numberRegExp = "[0-9]+(\.[0-9]{1,2})?([KMGkmg]){0,1}";
 			Shared.coordRegExp = "[0-9]{1,3},[0-9]{1,3}";
 
@@ -2188,6 +2204,10 @@ jQuery(document).ready(function(){
 					return 'ally';
 				}
 				return 'neutral';
+			};
+
+			Shared.userStatusLink = function( user ){
+				return user !== null ? '<span class="playerInfo" rel="'+ user +'">status</span>' : '';
 			};
 
 		/* progress bars */
@@ -4924,6 +4944,8 @@ jQuery(document).ready(function(){
 
 			builds += '<button class="button secondary" rel="6a" title="Point de ralliement 11<br>Miliciens, Piquiers, Archers, Cavalerie Lourde<br>Empennage ? - Chevalier ?<br>pertes : ~ 7k miliciens, 10k piquiers, 12k archers et 4k cavalerie lourde"><span>FO6</span></button>';
 
+			builds += '<button class="button secondary" rel="7" title="Point de ralliement 12<br>Toutes unitées sauf Ravitailleur<br>(majorité Miliciens)<br>Empennage ? - Chevalier ?<br>pertes : ~ ?"><span>FO7</span></button>';
+
 			//col 2
 			builds += '<button class="button secondary" rel="1a" title="Milicien + Archers<br>Empennage 10 - Chevalier 55<br>pertes : ~ 1 milicien"><span>FO1</span></button>';
 			builds += '<button class="button secondary" rel="1c" title="Point de ralliement 11<br>Cavalier + Scouts<br>Empennage ? - Chevalier ?<br>pertes : ~ 1 cavalier"><span>FO1</span></button>';
@@ -4937,6 +4959,8 @@ jQuery(document).ready(function(){
 			builds += '<button class="button secondary" rel="4c" title="Point de ralliement 11<br>Toutes infantries, Cavalier, Cavalier Lourd, Wagon, Baliste, Bélier<br>(majorité de Miliciens)<br>Empennage ? - Chevalier ?<br>pertes : ~ 10k miliciens et quelques autres"><span>FO4</span></button>';
 
 			builds += '<button class="button secondary" rel="5b" title="Point de ralliement 12<br>Toutes unitées sauf Ravitailleur<br>(majorité Miliciens)<br>Empennage ? - Chevalier ?<br>pertes : ~ ?"><span>FO5</span></button>';
+			builds += '<button class="button secondary" rel="6b" title="Point de ralliement 12<br>Toutes unitées sauf Ravitailleur<br>(majorité Miliciens)<br>Empennage ? - Chevalier ?<br>pertes : ~ ?"><span>FO6</span></button>';
+			builds += '<button class="button secondary" rel="8" title="Point de ralliement 12<br>Toutes unitées sauf Ravitailleur<br>(majorité Miliciens)<br>Empennage ? - Chevalier ?<br>pertes : ~ ?"><span>FO8</span></button>';
 
 			return builds;
 		};
@@ -5099,6 +5123,51 @@ jQuery(document).ready(function(){
 							.filter('[name="unt4"]').val('40k').end()
 							.filter('[name="unt6"]').val('20k').end()
 							.filter('[name="unt8"]').val('20k');
+					break;
+				case '6b':
+						$form.find('input')
+							.filter('.level').val(6).end()
+							.filter('[name="unt2"]').val('196572').end()
+							.filter('[name="unt3"]').val('1').end()
+							.filter('[name="unt4"]').val('1000').end()
+							.filter('[name="unt5"]').val('1000').end()
+							.filter('[name="unt6"]').val('1000').end()
+							.filter('[name="unt7"]').val('50').end()
+							.filter('[name="unt8"]').val('50').end()
+							.filter('[name="unt9"]').val('1').end()
+							.filter('[name="unt10"]').val('250').end()
+							.filter('[name="unt11"]').val('75').end()
+							.filter('[name="unt12"]').val('1');
+					break;
+				case '7':
+						$form.find('input')
+							.filter('.level').val(7).end()
+							.filter('[name="unt2"]').val('192498').end()
+							.filter('[name="unt3"]').val('1').end()
+							.filter('[name="unt4"]').val('2000').end()
+							.filter('[name="unt5"]').val('2000').end()
+							.filter('[name="unt6"]').val('2000').end()
+							.filter('[name="unt7"]').val('100').end()
+							.filter('[name="unt8"]').val('200').end()
+							.filter('[name="unt9"]').val('1').end()
+							.filter('[name="unt10"]').val('500').end()
+							.filter('[name="unt11"]').val('100').end()
+							.filter('[name="unt12"]').val('200');
+					break;
+				case '8':
+						$form.find('input')
+							.filter('.level').val(8).end()
+							.filter('[name="unt2"]').val('188948').end()
+							.filter('[name="unt3"]').val('1').end()
+							.filter('[name="unt4"]').val('3000').end()
+							.filter('[name="unt5"]').val('3000').end()
+							.filter('[name="unt6"]').val('3000').end()
+							.filter('[name="unt7"]').val('200').end()
+							.filter('[name="unt8"]').val('400').end()
+							.filter('[name="unt9"]').val('1').end()
+							.filter('[name="unt10"]').val('1000').end()
+							.filter('[name="unt11"]').val('150').end()
+							.filter('[name="unt12"]').val('300');
 					break;
 				default: break;
 			}
@@ -7370,10 +7439,123 @@ jQuery(document).ready(function(){
 			},
 			stored: ['search'],
 			search: {},/*{by city, tiles}*/
-			currentSearch: {},
-			loadTypeLabels: { C: 'villes', CB: 'Camps Barbares', TS: 'Terres Sauvages', FS: 'Forêts Obscures' },
-			sortList: [],
-			displayed: 0
+			selection: {
+				cities: {},
+				barbarians: {},
+				wilderness: {},
+				darkForests: {}
+			},
+			gridParams: {
+				shared: {
+					url: '',
+					datatype: 'local',
+					loadui: 'disable',
+					rowNum: 20,
+					rowList: [20, 50, 100],
+					sortname: 'range',
+					sortorder: 'asc',
+					altRows: true,
+					autowidth: true,
+					viewrecords: true, //total in pager
+					gridview: true, //speed boost
+					hiddengrid: true, //grid start folded
+					multiselect: true,
+					multiboxonly: true,
+					multikey: 'shiftKey'
+				},
+				cities: {
+					colNames: [' ', 'Distance', 'Coordonnées', 'Nom', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Brumes', 'Status'],
+					colModel: [
+						{name: 'actions', },
+						{name: 'range', index: 'r'},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'city', index: 'c'},
+						{name: 'player', index: 'p'},
+						{name: 'might', index: 'm', align: 'right', defval: 0, formatter: Shared.gridFormat},
+						{name: 'guild', index: 'g'},
+						{name: 'diplomacy', index: 'a', formatter: Shared.getDiplomacy},
+						{name: 'mist', index: 'b'},
+						{name: 'user', index: 'u', formatter: Shared.userStatusLink},
+						{name: 'x', index: 'x', hidden: true, hidedlg: true},
+						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+					],
+					caption: 'Villes',
+					pager: '#kocfia-map-pager-cities',
+					onSelectRow: function(key, checked){
+						if( checked ){
+							KOCFIA.map.selection.cities[ key ] = 1;
+						} else {
+							delete KOCFIA.map.selection.cities[ key ];
+						}
+					},
+					onCellSelect: function( key, colIndex, content, event ){
+						console.log(content);
+					}
+				},
+				barbarians: {
+					colNames: [' ', 'Distance', 'Coordonnées', 'Niveau'],
+					colModel: [
+						{name: 'actions', },
+						{name: 'range', index: 'r'},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'level', index: 'l', align: 'center'},
+						{name: 'x', index: 'x', hidden: true, hidedlg: true},
+						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+					],
+					caption: 'Camps barbares',
+					pager: '#kocfia-map-pager-barbarians',
+					onSelectRow: function(key, checked){
+						if( checked ){
+							KOCFIA.map.selection.barbarians[ key ] = 1;
+						} else {
+							delete KOCFIA.map.selection.barbarians[ key ];
+						}
+					}
+				},
+				wilderness: {
+					colNames: [' ', 'Distance', 'Coordonnées', 'Niveau', 'Type', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Status'],
+					colModel: [
+						{name: 'actions', },
+						{name: 'range', index: 'r'},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'level', index: 'l', align: 'center'},
+						{name: 'type', index: 'e'},
+						{name: 'player', index: 'p'},
+						{name: 'might', index: 'm', align: 'right', defval: 0, formatter: Shared.gridFormat},
+						{name: 'guild', index: 'g'},
+						{name: 'diplomacy', index: 'a', formatter: Shared.getDiplomacy},
+						{name: 'user', index: 'u', formatter: Shared.userStatusLink},
+						{name: 'x', index: 'x', hidden: true, hidedlg: true},
+						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+					],
+					caption: 'Terres Sauvages',
+					pager: '#kocfia-map-pager-wilderness',
+					onSelectRow: function(key, checked){
+						if( checked ){
+							KOCFIA.map.selection.wilderness[ key ] = 1;
+						} else {
+							delete KOCFIA.map.selection.wilderness[ key ];
+						}
+					},
+					onCellSelect: function( key, colIndex, content, event ){
+						console.log(content);
+					}
+
+				},
+				darkForests: {
+					colNames: ['Distance', 'Coordonnées', 'Niveau'],
+					colModel: [
+						{name: 'range', index: 'r'},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'level', index: 'l', align: 'center'},
+						{name: 'x', index: 'x', hidden: true, hidedlg: true},
+						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+					],
+					caption: 'Forêts Obscures',
+					pager: '#kocfia-map-pager-darkForests',
+					multiselect: false
+				}
+			}
 		};
 
 		KOCFIA.map.confPanel = function( $section ){
@@ -7398,17 +7580,9 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-map').html('');
 
-			var code = '<fieldset class="search"><legend>Recherche</legend>';
-			code += '<div class="category buttonset"><label>Catégorie&nbsp;:&nbsp;</label>';
-			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-C" value="C" required>';
-			code += '<label for="kocfia-map-category-C">Cités</label>';
-			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-CB" value="CB" required>';
-			code += '<label for="kocfia-map-category-CB">Camps Barbares</label>';
-			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-TS" value="TS" required>';
-			code += '<label for="kocfia-map-category-TS">Terres Sauvages</label>';
-			code += '<input type="radio" name="map-category" class="map-category" id="kocfia-map-category-FO" value="FO" required>';
-			code += '<label for="kocfia-map-category-FO">Forêts Sombres</label></div>';
+			jQuery.jgrid.no_legacy_api = true;
 
+			var code = '<fieldset class="search"><legend>Recherche</legend>';
 			code += '<div><label for="kocfia-map-near-x">Autour de&nbsp;:&nbsp;</label>';
 			code += '<input type="text" id="kocfia-map-near" class="coord" required pattern="'+ Shared.coordRegExp +'">';
 			code += '<select id="kocfia-map-city-coord"><option value="">Villes</option>';
@@ -7432,8 +7606,9 @@ jQuery(document).ready(function(){
 			code += '<label for="kocfia-map-range-max">&nbsp;et&nbsp;</label>';
 			code += '<input type="text" id="kocfia-map-range-max" class="range" value="20" required min="2" placeholder="2">';
 			code += '<button class="go button"><span>Rechercher</span></button></div>';
+			code += '</fieldset>';
 
-			code += '<div class="saved" style="'+ (loadOptions !== '' ? '' : 'display: none;') +'">';
+			/*code += '<div class="saved" style="'+ (loadOptions !== '' ? '' : 'display: none;') +'">';
 			code += '<label for="kocfia-map-load-saved">Ou charger une recherche sauvegardée&nbsp;:&nbsp;</label>';
 			code += '<select id="kocfia-map-load-saved"><option value="">Choisir</option>'+ loadOptions +'</select></div>';
 			code += '</fieldset>';
@@ -7448,8 +7623,9 @@ jQuery(document).ready(function(){
 				code += '<option value="'+ cityKey +'">'+ city.label +'</option>';
 			}
 
-			code += '</select><button class="button modify"><span>Sauvegarder</span></button></fieldset>';
+			code += '</select><button class="button modify"><span>Sauvegarder</span></button></fieldset>';*/
 
+			/*
 			code += '<fieldset class="filter"><legend>Filter les résultats</legend>';
 			code += '<textarea id="kocfia-map-coordsList"></textarea>';
 
@@ -7491,10 +7667,18 @@ jQuery(document).ready(function(){
 			code += '<input type="checkbox" id="kocfia-map-hostile" value="hostile">';
 			code += '<label for="kocfia-map-hostile">Hostile</label>';
 			code += '</div>';
+			*/
 
-			code += '</fieldset>';
 
-			code += '<div class="search-status"></div><div class="search-result"></div>';
+			code += '<div class="search-status"></div>';
+			code += '<table id="kocfia-map-results-cities"></table>';
+			code += '<div id="kocfia-map-pager-cities"></div>';
+			code += '<table id="kocfia-map-results-barbarians"></table>';
+			code += '<div id="kocfia-map-pager-barbarians"></div>';
+			code += '<table id="kocfia-map-results-wilderness"></table>';
+			code += '<div id="kocfia-map-pager-wilderness"></div>';
+			code += '<table id="kocfia-map-results-darkForests"></table>';
+			code += '<div id="kocfia-map-pager-darkForests"></div>';
 
 			$section.append( code )
 				.on('change', '#kocfia-map-city-coord', function(){
@@ -7507,8 +7691,6 @@ jQuery(document).ready(function(){
 					event.stopPropagation();
 					if( !KOCFIA.map.searching ){
 						KOCFIA.map.$save.hide();
-						KOCFIA.map.$results[0].innerHTML = '';
-						KOCFIA.map.displayed = 0;
 
 						var coord = $.trim( $('#kocfia-map-near').val() ),
 							rangeMin = $.trim( $('#kocfia-map-range-min').val() ),
@@ -7556,6 +7738,7 @@ jQuery(document).ready(function(){
 						KOCFIA.map.$status[0].innerHTML = '';
 					}
 				})
+				/*
 				.on('click', '.save button', function(event){
 					event.stopPropagation();
 					var cityKey = $('#kocfia-map-city-save').val();
@@ -7627,6 +7810,7 @@ jQuery(document).ready(function(){
 				.on('keyup', '.filter input[type="number"]', function(){
 					KOCFIA.map.filterResults();
 				})
+				*/
 				.on('click', '.search-result .playerInfo', function(){
 					Shared.getPlayerInfo( $(this) );
 				});
@@ -7636,12 +7820,32 @@ jQuery(document).ready(function(){
 			KOCFIA.map.$filter = $section.find('.filter');
 			KOCFIA.map.$category = $section.find('.map-category');
 			KOCFIA.map.$coordsList = $('#kocfia-map-coordsList');
-			KOCFIA.map.$results = $section.find('.search-result');
 			KOCFIA.map.$status = $section.find('.search-status');
+
+			//grids
+			KOCFIA.map.$resultsCities = $section.find('#kocfia-map-results-cities')
+				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.cities) )
+				.navGrid('#kocfia-map-pager-cities', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
+				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet d'éclairage", buttonicon: 'ui-icon-note', onClickButton: function(){ }, position: 'last'})
+				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet de pillage", buttonicon: 'ui-icon-cart', onClickButton: function(){ }, position: 'last'});
+
+			KOCFIA.map.$resultsBarbarians = $section.find('#kocfia-map-results-barbarians')
+				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.barbarians) )
+				.navGrid('#kocfia-map-pager-barbarians', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
+				.navButtonAdd('#kocfia-map-pager-barbarians', {title: "Exporter la sélection dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart', onClickButton: function(){ }, position: 'last'});
+
+			KOCFIA.map.$resultsWilderness = $section.find('#kocfia-map-results-wilderness')
+				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.wilderness) )
+				.navGrid('#kocfia-map-pager-wilderness', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
+				.navButtonAdd('#kocfia-map-pager-wilderness', {title: "Exporter la sélection dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart', onClickButton: function(){ }, position: 'last'});
+
+			KOCFIA.map.$resultsDarkForests = $section.find('#kocfia-map-results-darkForests')
+				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.darkForests) );
 		};
 
 		KOCFIA.map.on = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map on function');
+
 		};
 
 		KOCFIA.map.off = function(){
@@ -7677,16 +7881,8 @@ jQuery(document).ready(function(){
 				var parseResults = function( dfd, coordX, coordY, rangeMin, rangeMax, result ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map explore deferred parseResults function');
 
-					var tiles = { city: [], barbarian: [], darkForest: [], wilderness: [] },
+					var tiles = { cities: [], barbarians: [], darkForests: [], wilderness: [] },
 						coords = {};
-
-					//merge results with previous deferred partialExplore results
-					if( KOCFIA.map.currentSearch.hasOwnProperty('tiles')
-						&& KOCFIA.map.currentSearch.tiles.wilderness.length
-					){
-						tiles = KOCFIA.map.currentSearch.tiles;
-						coords = KOCFIA.map.currentSearch.coords;
-					}
 
 					var id, tile, range, user, alliance, name, label, might, userId, a, w, b;
 					for( id in result.data ){
@@ -7701,19 +7897,63 @@ jQuery(document).ready(function(){
 												user = result.userInfo['u'+ tile.tileUserId];
 												alliance = (result.allianceNames.hasOwnProperty('a' + user.a) ? result.allianceNames['a' + user.a] : '');
 												name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
-												tiles.city.push({ s: 'C', r: range, x: tile.xCoord, y: tile.yCoord, m: Shared.format(user.m), w: (user.m < 10000000 ? 'weak': ''), u: tile.tileUserId, p: name, g: alliance, a: user.a, c: tile.cityName, b: 0 });
+												tiles.cities.push({
+													s: 'C',
+													r: range,
+													x: tile.xCoord,
+													y: tile.yCoord,
+													gps: tile.xCoord + ',' + tile.yCoord,
+													m: user.m, //Shared.format(user.m)
+													u: tile.tileUserId,
+													p: name,
+													g: alliance,
+													a: user.a,
+													c: tile.cityName,
+													b: 0
+												});
+
 												coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 											} else {
 									//barbarian
-												tiles.barbarian.push({ s: 'CB', r: range, x: tile.xCoord, y: tile.yCoord, l: tile.tileLevel });
+												tiles.barbarians.push({
+													s: 'CB',
+													r: range,
+													x: tile.xCoord,
+													y: tile.yCoord,
+													gps: tile.xCoord + ',' + tile.yCoord,
+													l: tile.tileLevel
+												});
+
 												coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 											}
 										} else if( tile.tileType == 53 ){
-											tiles.city.push({ s: 'C', r: range, x: tile.xCoord, y: tile.yCoord, m: '?', w: '', u: null, p: '?', g: '?', a: null, c: '?', b: 1 });
+											tiles.cities.push({
+												s: 'C',
+												r: range,
+												x: tile.xCoord,
+												y: tile.yCoord,
+												gps: tile.xCoord + ',' + tile.yCoord,
+												m: '?',
+												u: null,
+												p: '?',
+												g: '?',
+												a: null,
+												c: '?',
+												b: 1
+											});
+
 											coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 									//dark forest
 										} else if( tile.tileType == 54 ){
-											tiles.darkForest.push({ s: 'FO', r: range, x: tile.xCoord, y: tile.yCoord, l: tile.tileLevel });
+											tiles.darkForests.push({
+												s: 'FO',
+												r: range,
+												x: tile.xCoord,
+												y: tile.yCoord,
+												gps: tile.xCoord + ',' + tile.yCoord,
+												l: tile.tileLevel
+											});
+
 											coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 									//wilderness (swamp tileType = 0)
 										} else if( tile.tileType >= 10 && tile.tileType <= 50 ){
@@ -7732,7 +7972,6 @@ jQuery(document).ready(function(){
 											might = '';
 											name = '';
 											alliance = '';
-											w = '';
 
 											if( tile.tileUserId !== null ){
 												if( tile.tileUserId == "0" || tile.misted ){
@@ -7744,7 +7983,6 @@ jQuery(document).ready(function(){
 													user = result.userInfo['u'+ tile.tileUserId];
 													name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
 													might = Shared.format(user.m);
-													w = (user.m < 10000000 ? 'weak': '');
 													if( result.allianceNames.hasOwnProperty('a' + user.a) ){
 														alliance = result.allianceNames['a' + user.a];
 														a = user.a;
@@ -7755,7 +7993,22 @@ jQuery(document).ready(function(){
 												}
 											}
 
-											tiles.wilderness.push({ s: 'TS', r: range, t: tile.tileType, e: label, x: tile.xCoord, y: tile.yCoord, m: might, w: w, u: userId, p: name, g: alliance, a: a, l: tile.tileLevel });
+											tiles.wilderness.push({
+												s: 'TS',
+												r: range,
+												t: tile.tileType,
+												e: label,
+												x: tile.xCoord,
+												y: tile.yCoord,
+												gps: tile.xCoord + ',' + tile.yCoord,
+												m: might,
+												u: userId,
+												p: name,
+												g: alliance,
+												a: a,
+												l: tile.tileLevel
+											});
+
 											coords[ tile.xCoord +','+ tile.yCoord ] = 1;
 										}
 								}
@@ -7763,22 +8016,7 @@ jQuery(document).ready(function(){
 						}
 					}
 
-					/*
-					tiles.city.sort(function(a, b){ return a.r - b.r; });
-					tiles.barbarian.sort(function(a, b){ return a.r - b.r; });
-					tiles.darkForest.sort(function(a, b){ return a.r - b.r; });
-					tiles.wilderness.sort(function(a, b){ return a.r - b.r; });
-					*/
-
-					KOCFIA.map.currentSearch = {x: coordX, y: coordY, rangeMin: rangeMin, rangeMax: rangeMax, tiles: tiles, coords: coords};
-
-					if( KOCFIA.map.$category.filter(':checked').length > 0 ){
-						KOCFIA.map.displayResultsByCategory();
-					} else {
-						KOCFIA.map.$filter.hide();
-						KOCFIA.map.$coordsList.hide();
-						KOCFIA.map.$results[0].innerHTML = '';
-					}
+					KOCFIA.map.displayResults( tiles );
 
 					if( !loop ) return dfd.resolve();
 					else {
@@ -7851,9 +8089,17 @@ jQuery(document).ready(function(){
 
 			KOCFIA.map.searching = true;
 
-			KOCFIA.map.currentSearch = {};
-
 			KOCFIA.map.$status[0].innerHTML = '';
+
+			KOCFIA.map.$resultsCities.jqGrid('clearGridData'); //.clearGridData(true) //for footer clearing
+			KOCFIA.map.$resultsBarbarians.jqGrid('clearGridData');
+			KOCFIA.map.$resultsWilderness.jqGrid('clearGridData');
+			KOCFIA.map.$resultsDarkForests.jqGrid('clearGridData');
+
+			KOCFIA.map.selection.cities = {};
+			KOCFIA.map.selection.barbarians = {};
+			KOCFIA.map.selection.wilderness = {};
+			KOCFIA.map.selection.darkForests = {};
 
 			var params = $.extend({}, window.g_ajaxparams),
 				blocks = [];
@@ -7925,14 +8171,12 @@ jQuery(document).ready(function(){
 			coords = sorted.sort(function(a, b){ return a.r - b.r; });
 
 			for( i = 0; i < coords.length; i += 1 ){
-				console.log('avant', coords[i].x, coords[i].y);
 				if( coords[ i ].x < 0 ) coords[ i ].x = 750 + coords[ i ].x;
 				else if( coords[ i ].x >= 750 ) coords[ i ].x = coords[ i ].x - 750;
 
 				if( coords[ i ].y < 0 ) coords[ i ].y = 750 + coords[ i ].y;
 				else if( coords[ i ].y >= 750 ) coords[ i ].y = coords[ i ].y - 750;
 
-				console.log('après', coords[i].x, coords[i].y);
 				blocks.push("bl_" + coords[ i ].x + "_bt_" + coords[ i ].y);
 			}
 
@@ -7951,11 +8195,20 @@ jQuery(document).ready(function(){
 				});
 		};
 
-		KOCFIA.map.displayResultsByCategory = function(){
+		KOCFIA.map.displayResults = function( tiles ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map displayResults function');
+
+			if( tiles.cities.length > 0 ) KOCFIA.map.$resultsCities.addJSONData( tiles.cities );
+			if( tiles.barbarians.length > 0 ) KOCFIA.map.$resultsBarbarians.addJSONData( tiles.barbarians );
+			if( tiles.wilderness.length > 0 ) KOCFIA.map.$resultsWilderness.addJSONData( tiles.wilderness );
+			if( tiles.darkForests.length > 0 ) KOCFIA.map.$resultsDarkForests.addJSONData( tiles.darkForests );
+		};
+
+		/*KOCFIA.map.displayResultsByCategory = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map displayResultsByCategory function');
 			var tiles = KOCFIA.map.currentSearch.tiles,
 				category = KOCFIA.map.$category.filter(':checked').val(),
-				code = '', sortHeaders,
+				code = '', headers, columns,
 				isStart = (KOCFIA.map.displayed === 0),
 				i, tile, length;
 			switch( category ){
@@ -7966,6 +8219,7 @@ jQuery(document).ready(function(){
 					length = tiles.length;
 
 					if( isStart ){
+
 						code = '<table><thead><tr>';
 						code += '<th>Distance</th>';
 						code += '<th>Coordonnée</th>';
@@ -8082,7 +8336,11 @@ jQuery(document).ready(function(){
 				code += '</tbody></table>';
 				KOCFIA.map.$coordsList.html('');
 				KOCFIA.map.$results.html( code );
-				KOCFIA.map.filterResults();
+
+				KOCFIA.map.$results.jqGrid({
+				});
+
+				//KOCFIA.map.filterResults();
 			} else {
 				var $table = KOCFIA.map.$results.find('table');
 				$table.find('tbody').append( code );
@@ -8104,9 +8362,9 @@ jQuery(document).ready(function(){
 			trs = null;
 			$tbody = null;
 			$trs = null;
-		};
+		};*/
 
-		KOCFIA.map.filterResults = function(){
+		/*KOCFIA.map.filterResults = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map filterResults function');
 			var category = KOCFIA.map.$category.filter(':checked').val(),
 				$tbody = KOCFIA.map.$results.find('tbody'),
@@ -8187,7 +8445,7 @@ jQuery(document).ready(function(){
 			});
 
 			KOCFIA.map.$coordsList.html( list.join("\n") ).show();
-		};
+		};*/
 
 	/* FORMATION */
 		KOCFIA.formation = {
@@ -16654,7 +16912,7 @@ jQuery(document).ready(function(){
 			}
 		};
 
-		KOCFIA.build.updateCityChronology = function( cityKey, slotId, needReset ){
+		KOCFIA.build.updateCityChronology = function( cityKey, slot, needReset ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build updateCityChronology function');
 
 			if( !KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
@@ -16665,21 +16923,21 @@ jQuery(document).ready(function(){
 				KOCFIA.build.chronology[ cityKey ] = [];
 			}
 
-			if( needReset || !KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId ) ){
+			if( needReset || !KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot ) ){
 				var pointer, i,
-					target = slotId +'_';
+					target = slot +'_';
 				for( i = KOCFIA.build.chronology[ cityKey ].length; i > 0; i -= 1 ){
 					pointer = KOCFIA.build.chronology[ cityKey ][ i ];
 					if( pointer.indexOf(target) > -1 ) KOCFIA.build.chronology[ cityKey ].splice(i, 1);
 				}
 			}
 
-			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId ) ){
-				var tasks = KOCFIA.build.queues[ cityKey ][ slotId ],
+			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot ) ){
+				var tasks = KOCFIA.build.queues[ cityKey ][ slot ],
 					i;
 				for( i = 0; i < tasks.length; i += 1 ){
-					if( $.inArray(slotId + '_' + i) == -1 ){
-						KOCFIA.build.chronology[ cityKey ].push(slotId + '_' + i);
+					if( $.inArray(slot + '_' + i) == -1 ){
+						KOCFIA.build.chronology[ cityKey ].push(slot + '_' + i);
 					}
 				}
 			}
@@ -16722,11 +16980,10 @@ jQuery(document).ready(function(){
 		KOCFIA.build.launchAutomaticBuild = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteCurrents function');
 
-
 			if( !$.isEmptyObject( KOCFIA.build.chronology ) && !$.isEmptyObject( KOCFIA.build.queues ) ){
 				var cityKey, city,
-					task, pointer, slotId, taskIndex, type,
-					con, res, stats, costs,
+					task, pointer, slotId, taskIndex, type, isDestruct,
+					con, res, stats, costs, current,
 					i, l, b, t,
 					level, req, need, tech,
 					resNeeded, resAvailable, modifier,
@@ -16734,7 +16991,7 @@ jQuery(document).ready(function(){
 					enough, attempts;
 
 				//request
-				var params, slot, option;
+				var params, option;
 
 				//loops index
 				var cityIndex = 0,
@@ -16822,10 +17079,38 @@ jQuery(document).ready(function(){
 						neededItemKey = null;
 
 						isGuardian = task.slotId == 'guardianContainer';
+						isDestruct = task.toLevel === 0;
 
 						costs = window.buildingcost[ task.buildingType ];
 						if( costs ){
 							//["Château", 200, 3000, 2500, 100, 0, 0, 900, {"b19": [0, -2]}, [], ""]
+
+							if( isDestruct ){
+								if( type == "20"
+									&& window.seed.queue_craft.hasOwnProperty(cityKey)
+									&& Array.isArray(window.seed.queue_craft[ cityKey ])
+									&& window.seed.queue_craft[ cityKey ].length > 0
+								){
+									msg.push(city.label +': Ne peut détruire '+ costs[0] +', fabrication en cours');
+									chronologyIndex += 1;
+									return dfd.pipe( checkTask(dfd) );
+								}
+							}
+
+							//check current level
+							/*current = window.seed.buildings[ cityKes ]['pos' + slotId];
+							if( current && current[1] != task.fromLevel && current[1] < task.toLevel ){
+
+							}*/
+
+							//new building, is slot empty ?
+							if( task.toLevel === 1
+								&& !$.isEmptyObject( window.seed.buildings[ cityKey ]['pos'+ slotId] )
+							){
+								msg.push(city.label +': Ne peut construire '+ costs[0] +', emplacement non libre');
+								chronologyIndex += 1;
+								return dfd.pipe( checkTask(dfd) );
+							}
 
 							if( Object.isObject(costs[8]) && !$.isArray(costs[8]) && !$.isEmptyObject(costs[8]) ){
 								for( b in costs[8] ){  // check building requirement
@@ -17079,14 +17364,30 @@ jQuery(document).ready(function(){
 
 					params = $.extend({}, window.g_ajaxparams);
 
-					if( !isGuardian ){
-						slot = parseInt(slotId.replace(/slot_/, ''), 10);
+					if( isDestruct ){
 						params.cid = city.id;
 						params.bid = "";
-						params.pos = slot;
+						params.pos = slotId;
+						params.lv = task.fromLevel - 1;
+						if( task.fromLevel > 0 ){
+							params.bid = window.seed.buildings[ cityKey ]['pos'+ slotId][3];
+						}
+						params.type = type;
+
+						options = {
+							url: window.g_ajaxpath + "ajax/destruct.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						};
+					} else if( !isGuardian ){
+						params.cid = city.id;
+						params.bid = "";
+						params.pos = slotId;
 						params.lv = task.toLevel;
 						if( params.lv > 1 ){
-							params.bid = window.seed.buildings[ cityKey ]['pos'+ slot][3];
+							params.bid = window.seed.buildings[ cityKey ]['pos'+ slotId][3];
 						}
 						params.type = type;
 						params.permission = 0; //no automatic 10+ construction
@@ -17099,7 +17400,7 @@ jQuery(document).ready(function(){
 							timeout: 10000
 						};
 					} else {
-						slot = 500;
+						slotId = 500;
 
 						params.ctrl = 'Guardian';
 						params.action = 'build';
@@ -17119,7 +17420,7 @@ jQuery(document).ready(function(){
 
 					$.ajax( options )
 						.done(function(result){
-							if( !isGuardian && result.ok ){
+							if( !isGuardian && !isDestruct && result.ok ){
 								window.seed.resources[ cityKey ].rec1[0] -= resNeeded[0];
 								window.seed.resources[ cityKey ].rec2[0] -= resNeeded[1];
 								window.seed.resources[ cityKey ].rec3[0] -= resNeeded[2];
@@ -17128,10 +17429,10 @@ jQuery(document).ready(function(){
 
 								var ts = Date.timestamp(),
 									duration = parseInt(result.timeNeeded, 10);
-								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slot]);
+								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slotId]);
 
 								if( task.fromLevel === 0 ){
-									window.seed.buildings[ cityKey ]['pos'+ slot] = [type, 0, slot, result.buildingId];
+									window.seed.buildings[ cityKey ]['pos'+ slotId] = [type, 0, slotId, result.buildingId];
 								}
 
 								window.update_bdg();
@@ -17142,10 +17443,35 @@ jQuery(document).ready(function(){
 									window.update_seed(result.updateSeed);
 								}
 
-								msg.push(city.label +': construction lancée');
+								msg.push(city.label +': construction lancée ('+ costs[0] +')');
+
+								KOCFIA.build.chronology[ cityKey ].splice(chronologyIndex, 1);
 
 								cityIndex += 1;
 								return dfd.pipe( byCity(dfd) );
+							} else if( isDestruct && result.ok ){
+								var ts = Date.timestamp(),
+									duration = parseInt(result.timeNeeded, 10);
+								window.seed.queue_con[ cityKey ].push([type, 0, parseInt(result.buildingId), ts, ts + duration, 0, ts, slotId]);
+
+								window.update_bdg();
+
+								if( result.updateSeed ){
+									window.update_seed(result.updateSeed);
+								}
+
+								msg.push(city.label +': destruction lancée ('+ costs[0] +')');
+
+								KOCFIA.build.chronology[ cityKey ].splice(chronologyIndex, 1);
+
+								//instant destruction for level 1 building
+								if( task.fromLevel === 1 ){
+									chronologyIndex += 1;
+									return dfd.pipe( checkTask(dfd) );
+								} else {
+									cityIndex += 1;
+									return dfd.pipe( byCity(dfd) );
+								}
 							} else if( isGuardian && result.time ){
 								window.seed.resources[ cityKey ].rec1[0] -= resNeeded[0];
 								window.seed.resources[ cityKey ].rec2[0] -= resNeeded[1];
@@ -17155,7 +17481,7 @@ jQuery(document).ready(function(){
 
 								var ts = Date.timestamp(),
 									duration = parseInt(result.time, 10);
-								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slot]);
+								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slotId]);
 
 								//set upgrading to true
 								if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
@@ -17168,6 +17494,10 @@ jQuery(document).ready(function(){
 										}
 									}
 								}
+
+								msg.push(city.label +': construction lancée (gardien)');
+
+								KOCFIA.build.chronology[ cityKey ].splice(chronologyIndex, 1);
 
 								if( city.id == window.currentcityid ){
 									if( result.guardian ){

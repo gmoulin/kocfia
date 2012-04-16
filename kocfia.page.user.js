@@ -1,8 +1,10 @@
 // ==UserScript==
-// @name			KOCFIA-FB-PAGE
+// @name			KOCFIA-PAGE
 // @version			1
 // @namespace		KOCFIA
-// @description		facebook page improvement for KOC (outside the KOC iframe)
+// @description		Page improvements for kingdoms of camelot (outside the game iframe), manage both facebook or kabam pages for kingdoms of camelot game. Also used to manage mass gifts retrieval.
+// @include			*kabam.com/kingdoms-of-camelot/play*
+// @include			*kabam.com/kingdoms-of-camelot/?entrypt*
 // @include			*apps.facebook.com/kingdomsofcamelot/?s=*
 // @include			*apps.facebook.com/kingdomsofcamelot/?ref=bookmark*
 // @include			*apps.facebook.com/kingdomsofcamelot/?g=F*
@@ -15,11 +17,22 @@ if( !Object.hasOwnProperty('isObject') ){
 	};
 }
 
-var fbCss = "body.canvas div#globalContainer { padding: 0; }"
-	+ "\nbody.canvas #rightCol { display: none; }"
-	+ "\nbody.canvas.center_fixed_width_app #pagelet_canvas_content { width: auto; margin: 0; }"
-	+ "\nbody.canvas #mainContainer { border: none; }"
-;
+if( unsafeWindow.location.href.indexOf('kabam.com') == -1 ){ //from facebook
+	var fbCss = "body.canvas div#globalContainer { padding: 0; }"
+		+ "\nbody.canvas #rightCol { display: none; }"
+		+ "\nbody.canvas.center_fixed_width_app #pagelet_canvas_content { width: auto; margin: 0; }"
+		+ "\nbody.canvas #mainContainer { border: none; }";
+} else { //from kabam
+	var fbCss = "#main-header, #main-nav { display: none; }"
+		+ "\n.play #content { margin-top: 0; height: 300%; width: 100%; }"
+		+ "\n#gameIframe { width: 100%; height: 100%; }"
+		+ "\nhtml, body, #canvas { height: 100%; }";
+}
+
+var styleElement = document.createElement("style");
+styleElement.innerHTML = fbCss;
+document.getElementsByTagName("head")[0].appendChild(styleElement);
+
 var styleElement = document.createElement("style");
 styleElement.innerHTML = fbCss;
 document.getElementsByTagName("head")[0].appendChild(styleElement);

@@ -6597,6 +6597,9 @@
 					b5: 1,
 					b13: 1
 			};
+
+			var kocfiaFrameUserScriptVersion = 3;
+			var kocfiaFrom = '"+ domain +"'
 		</script>
 		<script src="http://kocfia.kapok.dev/kocfia.js?<?php echo filemtime(__DIR__.'/../kocfia.js'); ?>"></script>
 		<!--

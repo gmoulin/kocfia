@@ -2229,6 +2229,17 @@
 	}
 
 /* build */
+	#kocfia-build > ul {
+		list-style: none;
+	}
+
+	#kocfia-build > ul li {
+		display: inline-block;
+		float: left;
+		margin-right: 10px;
+	}
+
+
 	.kocfia-build-menu {
 		position: relative;
 		display: none;

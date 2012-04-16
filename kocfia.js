@@ -134,7 +134,7 @@ jQuery(document).ready(function(){
 		reloadTimeout, reloadInterval, reloadTimer, refreshTimeout, confChoiceTimeout,
 		resetRaidInterval, autoFormationInterval, autoReassignInterval,
 		autoPileUpInterval, autoSuppleInterval, watchReportsInterval,
-	autoBuildInterval,
+		autoBuildInterval,
 		merlinBoxClick = false;
 
 	//drag handle
@@ -144,15 +144,15 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.5.5',
+		version: '0.5.6',
 		userScriptLoaderVersion: 3,
 		debug: true,
-		debugWhat: {gifts: 1, build: 1, map: 1},
+		debugWhat: {gifts: 1, build: 1, map: 1, plunder: 1},
 		server: null,
 		modules: [
 			'dataAndStats',
 			'chat', 'overview', 'map',
-			'barbarian', 'wilderness', 'darkForest', 'scout',
+			'barbarian', 'wilderness', 'darkForest', 'scout', 'plunder',
 			'formation', 'transport', 'reassign',
 			'build',
 			'fbWallPopup', 'notepad',
@@ -166,6 +166,7 @@ jQuery(document).ready(function(){
 			barbarian: 'Camps Barbares <small>(trône)</small>',
 			wilderness: 'Terres Sauvages <small>(armoiries, trône)</small>',
 			darkForest: 'Forêts Obscures <small>(éther, trône)</small>',
+			plunder: 'Pillages <small>(ressources sur frigos)</small>',
 			scout: 'Éclairages',
 			knights: 'Chevaliers',
 			estates: 'Terres Sauvages conquises',
@@ -179,6 +180,7 @@ jQuery(document).ready(function(){
 			barbarian: 'CB <small>(manuel)</small>',
 			wilderness: 'TS',
 			darkForest: 'Forêts',
+			plunder: 'Pillage',
 			scout: 'Eclairage',
 			knights: 'Chevaliers',
 			estates: 'Terres',
@@ -359,7 +361,7 @@ jQuery(document).ready(function(){
 		if( window.kocfiaFrameUserScriptVersion === undefined
 			|| window.kocfiaFrameUserScriptVersion != KOCFIA.userScriptLoaderVersion
 		){
-			alert('Une nouvelle version du script grease monkey utilisé pour charger KOCFIA est disponible. Veuillez le mettre à jour.');
+			alert('Une nouvelle version du script grease monkey utilisé pour charger KOCFIA est disponible. Veuillez le mettre à jour (supprimer et réinstaller le script principal).');
 
 			if( window.kocfiaFrom ) window.open(window.kocfiaFrom +'kocfia.frame.user.js', 'Script utilisateur utilisé par grease monkey pour charger KOCFIA');
 
@@ -387,6 +389,7 @@ jQuery(document).ready(function(){
 		//prepare the module with shared parts
 		KOCFIA.wilderness = $.extend({}, KOCFIA.autoAttack, KOCFIA.wilderness);
 		KOCFIA.barbarian = $.extend({}, KOCFIA.autoAttack, KOCFIA.barbarian);
+		KOCFIA.plunder = $.extend({}, KOCFIA.autoAttack, KOCFIA.plunder);
 		KOCFIA.darkForest = $.extend({}, KOCFIA.autoAttack, KOCFIA.darkForest);
 		KOCFIA.scout = $.extend({}, KOCFIA.autoAttack, KOCFIA.scout);
 
@@ -417,6 +420,8 @@ jQuery(document).ready(function(){
 					if( event.data == 'fbWallPopup module conf please' ){
 						event.source.postMessage(KOCFIA.conf.fbWallPopup, 'https://apps.facebook.com/');
 						event.source.postMessage(KOCFIA.conf.fbWallPopup, 'http://apps.facebook.com/');
+						event.source.postMessage(KOCFIA.conf.fbWallPopup, 'https://www.kabam.com/');
+						event.source.postMessage(KOCFIA.conf.fbWallPopup, 'http://www.kabam.com/');
 					} else if( Object.isObject(event.data) && event.data.hasOwnProperty('task') && event.data.hasOwnProperty('result') ){
 						if( event.data.task == 'giftList' ){
 							KOCFIA.gifts.parseGiftPage(event.data.result);
@@ -439,9 +444,13 @@ jQuery(document).ready(function(){
 
 			top.postMessage('loaded', 'https://apps.facebook.com/');
 			top.postMessage('loaded', 'http://apps.facebook.com/');
+			top.postMessage('loaded', 'https://www.kabam.com/');
+			top.postMessage('loaded', 'http://www.kabam.com/');
 			window.setInterval(function(){
 				top.postMessage('loaded', 'https://apps.facebook.com/');
 				top.postMessage('loaded', 'http://apps.facebook.com/');
+				top.postMessage('loaded', 'https://www.kabam.com/');
+				top.postMessage('loaded', 'http://www.kabam.com/');
 			}, 10000);
 
 		//test 30s after init it the loading screen is still visible
@@ -2022,6 +2031,15 @@ jQuery(document).ready(function(){
 				}
 
 				return Math.round(100 * Math.sqrt(x * x + y * y)) / 100;
+			};
+
+			Shared.gridRowActions = function( cellValue, options, rowObject ){
+				console.log(cellValue, options, rowObject);
+
+				var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-gps="'+ rowObject.gps +'" data-level="'+ rowObject.l +'"></span>';
+				code += '<span class="ui-icon ui-icon-cart scout-shortcut" rel="'+ rowObject.gps +'"></span>';
+
+				return code;
 			};
 
 		/* update seed */
@@ -3932,7 +3950,7 @@ jQuery(document).ready(function(){
 				}, i * 20 * 1000);
 			};
 
-			if( module == 'wilderness' || module == 'barbarian' ){
+			if( module == 'wilderness' || module == 'barbarian' || module == 'plunder' ){
 				//launching stored attacks
 				for( c in KOCFIA[ module ].attacks ){
 					if( KOCFIA[ module ].attacks.hasOwnProperty(c) ){
@@ -4041,8 +4059,13 @@ jQuery(document).ready(function(){
 			form += '<div style="clear: both;"></div>';
 			form += '<fieldset class="detail">';
 			form += '<legend>Détail</legend>';
-			form += '<label>Niveau&nbsp;:&nbsp;</label>';
-			form += '<input type="number" class="targetLevel" required min="1" max="10" />';
+			if( this.module != 'plunder' ){
+				form += '<label>Niveau&nbsp;:&nbsp;</label>';
+				form += '<input type="number" class="targetLevel" required min="1" max="10" />';
+			} else {
+				form += '<label>Nom du joueur ciblé&nbsp;:&nbsp;</label>';
+				form += '<input type="text" class="targetName" required />';
+			}
 			form += '<div><label>Laisser&nbsp;:&nbsp;</label>';
 			form += '<input type="number" class="rallypointSlot" required min="0" max="11" value="0" /> place(s) dans le point de ralliement</div>';
 			form += '</fieldset>';
@@ -4095,11 +4118,16 @@ jQuery(document).ready(function(){
 				$keep = KOCFIA[ this.module ].$form.find('.keep'),
 				$cityChoice = KOCFIA[ this.module ].$form.find('.city-choice').filter(':checked'),
 				level = $.trim( KOCFIA[ this.module ].$form.find('.targetLevel').val() ),
+				name = $.trim( KOCFIA[ this.module ].$form.find('.targetName').val() ),
 				coords = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') ),
 				errors = [],
 				regexp = /[^0-9, ]/,
 				attack = { type: 'attack', category: this.module, waves: [], coordIndex: 0, keep: {} },
-				label = (this.module == 'wilderness' ? 'terres sauvages' : 'camps barbares');
+				label;
+
+			if( this.module == 'wilderness' ) label = 'terres sauvages';
+			else if( this.module == 'barbarian' ) label = 'camps barbares';
+			else if( this.module == 'plunder' ) label = 'pillages';
 
 			//check form
 				//city
@@ -4109,15 +4137,24 @@ jQuery(document).ready(function(){
 					attack.cityKey = $cityChoice.val();
 				}
 
-				//targetLevel
-				if( level === '' ){
-					errors.push('Le niveau des '+ label +' ciblées est requis.');
-				} else if( level == Number.NaN ){
-					errors.push('Le niveau des '+ label +' ciblées est éronné, il doit être un chiffre.');
-				} else if( level < 1 || level > 10 ){
-					errors.push('Le niveau des '+ label +' ciblées est éronné, il doit être compris entre 1 et 10.');
+				if( this.module == 'plunder' ){
+					//targetName
+					if( name === '' ){
+						errors.push('Le nom du joueur ciblé est requis.');
+					} else {
+						attack.targetName = name;
+					}
 				} else {
-					attack.targetLevel = level;
+					//targetLevel
+					if( level === '' ){
+						errors.push('Le niveau des '+ label +' ciblées est requis.');
+					} else if( level == Number.NaN ){
+						errors.push('Le niveau des '+ label +' ciblées est éronné, il doit être un chiffre.');
+					} else if( level < 1 || level > 10 ){
+						errors.push('Le niveau des '+ label +' ciblées est éronné, il doit être compris entre 1 et 10.');
+					} else {
+						attack.targetLevel = level;
+					}
 				}
 
 				//coords
@@ -4221,7 +4258,7 @@ jQuery(document).ready(function(){
 				$clone.clone().insertBefore( KOCFIA[ this.module ].$form.find('.keep') );
 			}
 
-			if( this.module == 'wilderness' || this.module == 'barbarian' ){
+			if( this.module == 'wilderness' || this.module == 'barbarian' || this.module == 'plunder' ){
 				var knights = Shared.getAvailableKnights( cityKey ),
 					length = knights.length;
 				for( i = 0; i < length; i += 1 ){
@@ -4235,12 +4272,9 @@ jQuery(document).ready(function(){
 			}
 
 			choices = '';
-			for( var u in window.unitcost ){
-				if( window.unitcost.hasOwnProperty(u) ){
-					var name = window.unitcost[u][0];
-					if( name == 'Unité de Ravitaillement' ) name = 'Ravitailleur';
-					else if( name == 'Wagon de Ravitaillement' ) name = 'Wagon';
-					choices += '<option value="'+ u +'">'+ name + '</option>';
+			for( var u in KOCFIA.unitInfo ){
+				if( KOCFIA.unitInfo.hasOwnProperty(u) ){
+					choices += '<option value="'+ u +'">'+ KOCFIA.unitInfo[u].label + '</option>';
 				}
 			}
 
@@ -4255,13 +4289,19 @@ jQuery(document).ready(function(){
 
 			var code = '<tr data-city="'+ attack.cityKey +'" data-attack="'+ attack.id +'">';
 			code += '<td class="trip">'+ city.label;
-			code += '<br>Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
+			if( this.module != 'plunder' ){
+				code += '<br>Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
+			} else {
+				code += '<br>Cible : '+ attack.targetName;
+			}
 			code += '<br>'+ attack.coords.length +' coordonnée(s)';
 			code += '<br>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '');
 			code += '<div><button class="charge button"><span>Lancer</span></button>';
 			code += '<button class="delete button danger"><span>Supprimer</span></button></div>';
 			code += '<div><button class="edit button secondary"><span>Modifier</span></button>';
-			code += '<button class="duplicate button secondary" title="Créer une nouvelle configuration à partir de celle-ci"><span>Copier</span></button>';
+			if( this.module != 'plunder' ){
+				code += '<button class="duplicate button secondary" title="Créer une nouvelle configuration à partir de celle-ci"><span>Copier</span></button>';
+			}
 			code += '</div></td>';
 
 			code += '<td class="coords"><small>' + Shared.mapLink( attack.coords ) +'</small></td>';
@@ -4298,7 +4338,7 @@ jQuery(document).ready(function(){
 
 				unitsCode += Shared.format( unit.qty );
 				unitsCode += '<img src="'+ window.stimgUrl +'img/units/unit_';
-				unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ window.unitcost[ unit.id ][0] +'">';
+				unitsCode += unit.id.replace(/unt/, '') + '_50_s34.jpg" title="'+ KOCFIA.unitInfo[ unit.id ].label +'">';
 			}
 			code += unitsCode + '</div></td></tr>';
 
@@ -4334,7 +4374,11 @@ jQuery(document).ready(function(){
 				var city = KOCFIA.cities[ attack.cityKey ],
 					code = '<tr data-city="'+ attack.cityKey +'" data-attack="'+ attack.id +'" data-stop="0">';
 				code += '<td class="trip">'+ city.label;
-				code += '<br>Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
+				if( this.module == 'plunder' ){
+					code += '<br>Vers : '+ (this.module == 'wilderness' ? 'TS' : 'CB') + attack.targetLevel;
+				} else {
+					code += '<br>Cible : '+ attack.targetLevel;
+				}
 				code += '<br>Garder '+ attack.rpSlot +' place'+ (attack.rpSlot > 1 ? 's' : '');
 				code += '<div><button class="button stop danger"><span>Arrêter</span></button></div></td>';
 				code += '<td class="coords"><small>' + Shared.mapLink( attack.coords ) +'</small></td>';
@@ -4565,7 +4609,16 @@ jQuery(document).ready(function(){
 						}
 
 						KOCFIA[ module ].$form.find('.city-choice').filter('[value="'+ cityKey +'"]').prop('checked', true);
-						KOCFIA[ module ].$form.find('.targetLevel').val( attack.targetLevel );
+						if( module != 'plunder' ){
+							KOCFIA[ module ].$form.find('.targetLevel').val( attack.targetLevel );
+						} else {
+							//security
+							if( KOCFIA[ module ].attacks[ cityKey ][ attackId ].hasOwnPropety('targetUserId') ){
+								delete KOCFIA[ module ].attacks[ cityKey ][ attackId ].targetUserId;
+							}
+
+							KOCFIA[ module ].$form.find('.targetName').val( attack.targetName );
+						}
 						KOCFIA[ module ].$form.find('.rallypointSlot').val( attack.rpSlot );
 
 						if( module == 'wilderness' ){
@@ -4791,6 +4844,10 @@ jQuery(document).ready(function(){
 			help += '<h4>Informations et limitations :</h4><ul>';
 			if( this.module == 'wilderness' ){
 				help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
+			} else if( this.module == 'plunder' ){
+				help += '<li>Les villes ciblées ne seront attaquées que si le joueur n\'est pas connecté</li>';
+				help += '<li>Aucun éclairage n\'est effectué avant l\'attaque</li>';
+				help += '<li>Il est donc préférable d\'être sûr que les joueurs ciblés sont bien inactifs et que les villes ciblées ne disposent pas de défenses</li>';
 			}
 			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques</li>';
 			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
@@ -4804,7 +4861,12 @@ jQuery(document).ready(function(){
 			help += '</ul><h4>Méthode :</h4><ol>';
 			help += '<li>Sélectionner une ville</li>';
 			help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
-			help += '<li>Spécifier le niveau pour les '+ (this.module == 'wilderness' ? 'TS attaquées' : 'CB attaqués') +'</li>';
+			if( this.module != 'plunder' ){
+				help += '<li>Spécifier le niveau pour les '+ (this.module == 'wilderness' ? 'TS attaquées' : 'CB attaqués') +'</li>';
+			} else {
+				help += '<li>Spécifier le nom du joueur ciblé pour le retrouver plus facilement dans les listes des attaques sauvegardées et en cours</li>';
+				help += '<li>Ce nom est aussi utilisé pour les vérifications de présence en ligne lors des lancements, il est donc nécessaire qu\'il soit complet et sans faute</li>';
+			}
 			help += '<li>Spécifier combien de places conserver dans le point de ralliement (optionnel)</li>';
 			help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
 			help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
@@ -4815,7 +4877,7 @@ jQuery(document).ready(function(){
 			return help;
 		};
 
-	/* DARK FOREST */
+	/* DARK FOREST - extend autoAttack */
 		KOCFIA.darkForest = {
 			module: 'darkForest',
 			coords: {}, //dark forest and bogs coords by city
@@ -6084,7 +6146,7 @@ jQuery(document).ready(function(){
 			});
 		};
 
-	/* WILDERNESS */
+	/* WILDERNESS - extend autoAttack */
 		KOCFIA.wilderness = {
 			module: 'wilderness'
 		};
@@ -6321,7 +6383,7 @@ jQuery(document).ready(function(){
 			}
 		};
 
-	/* BARBARIAN */
+	/* BARBARIAN - extend autoAttack */
 		KOCFIA.barbarian = {
 			module: 'barbarian'
 		};
@@ -6423,7 +6485,47 @@ jQuery(document).ready(function(){
 			}
 		};
 
-	/* SCOUT */
+	/* PLUNDER - extend autoAttack */
+		KOCFIA.plunder = {
+			module: 'plunder'
+		};
+
+		KOCFIA.plunder.getBuildsList = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getBuilds function');
+			var builds = '<fieldset class="builds fl">';
+			builds += '<legend>Attaques types</legend>';
+			builds += '<div>';
+			builds += '<button class="build button secondary" rel="empty"><span>Vide</span></button>';
+			builds += '<button class="build button secondary" rel="1"><span>Cavalerie</span></button>';
+			builds += '<button class="build button secondary" rel="2"><span>Cavalerie Lourde</span></button>';
+			builds += '<button class="build button secondary" rel="3"><span>Wagon</span></button>';
+			builds += '</div>';
+			builds += '</fieldset>';
+
+			return builds;
+		};
+
+		KOCFIA.plunder.getBuildsConf = function($level, $uChoices, $uQuantity, rel){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getBuildsConf function');
+			switch( rel ){
+				case '1':
+						$uChoices.eq(0).val('unt7');
+						$uQuantity.eq(0).val('100k');
+					break;
+				case '2':
+						$uChoices.eq(0).val('unt8');
+						$uQuantity.eq(0).val('100k');
+					break;
+				case '3':
+						$level.val( 3 );
+						$uChoices.eq(0).val('unt9');
+						$uQuantity.eq(0).val('25k');
+					break;
+				default: break;
+			}
+		};
+
+	/* SCOUT - extend autoAttack */
 		KOCFIA.scout = {
 			module: 'scout'
 		};
@@ -7464,9 +7566,9 @@ jQuery(document).ready(function(){
 					multikey: 'shiftKey'
 				},
 				cities: {
-					colNames: [' ', 'Distance', 'Coordonnées', 'Nom', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Brumes', 'Status'],
+					colNames: ['Actions', 'Distance', 'Coordonnées', 'Nom', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Brumes', 'Status'],
 					colModel: [
-						{name: 'actions', },
+						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
 						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
 						{name: 'city', index: 'c'},
@@ -7475,9 +7577,7 @@ jQuery(document).ready(function(){
 						{name: 'guild', index: 'g'},
 						{name: 'diplomacy', index: 'a', formatter: Shared.getDiplomacy},
 						{name: 'mist', index: 'b'},
-						{name: 'user', index: 'u', formatter: Shared.userStatusLink},
-						{name: 'x', index: 'x', hidden: true, hidedlg: true},
-						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+						{name: 'user', index: 'u', formatter: Shared.userStatusLink}
 					],
 					caption: 'Villes',
 					pager: '#kocfia-map-pager-cities',
@@ -7488,19 +7588,18 @@ jQuery(document).ready(function(){
 							delete KOCFIA.map.selection.cities[ key ];
 						}
 					},
+					//for row player status
 					onCellSelect: function( key, colIndex, content, event ){
 						console.log(content);
 					}
 				},
 				barbarians: {
-					colNames: [' ', 'Distance', 'Coordonnées', 'Niveau'],
+					colNames: ['Actions', 'Distance', 'Coordonnées', 'Niveau'],
 					colModel: [
-						{name: 'actions', },
+						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
 						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
-						{name: 'level', index: 'l', align: 'center'},
-						{name: 'x', index: 'x', hidden: true, hidedlg: true},
-						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+						{name: 'level', index: 'l', align: 'center'}
 					],
 					caption: 'Camps barbares',
 					pager: '#kocfia-map-pager-barbarians',
@@ -7513,9 +7612,9 @@ jQuery(document).ready(function(){
 					}
 				},
 				wilderness: {
-					colNames: [' ', 'Distance', 'Coordonnées', 'Niveau', 'Type', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Status'],
+					colNames: ['Actions', 'Distance', 'Coordonnées', 'Niveau', 'Type', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Status'],
 					colModel: [
-						{name: 'actions', },
+						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
 						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
 						{name: 'level', index: 'l', align: 'center'},
@@ -7524,9 +7623,7 @@ jQuery(document).ready(function(){
 						{name: 'might', index: 'm', align: 'right', defval: 0, formatter: Shared.gridFormat},
 						{name: 'guild', index: 'g'},
 						{name: 'diplomacy', index: 'a', formatter: Shared.getDiplomacy},
-						{name: 'user', index: 'u', formatter: Shared.userStatusLink},
-						{name: 'x', index: 'x', hidden: true, hidedlg: true},
-						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+						{name: 'user', index: 'u', formatter: Shared.userStatusLink}
 					],
 					caption: 'Terres Sauvages',
 					pager: '#kocfia-map-pager-wilderness',
@@ -7540,16 +7637,14 @@ jQuery(document).ready(function(){
 					onCellSelect: function( key, colIndex, content, event ){
 						console.log(content);
 					}
-
 				},
 				darkForests: {
-					colNames: ['Distance', 'Coordonnées', 'Niveau'],
+					colNames: ['Actions', 'Distance', 'Coordonnées', 'Niveau'],
 					colModel: [
+						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
 						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
-						{name: 'level', index: 'l', align: 'center'},
-						{name: 'x', index: 'x', hidden: true, hidedlg: true},
-						{name: 'y', index: 'y', hidden: true, hidedlg: true}
+						{name: 'level', index: 'l', align: 'center'}
 					],
 					caption: 'Forêts Obscures',
 					pager: '#kocfia-map-pager-darkForests',
@@ -7671,14 +7766,14 @@ jQuery(document).ready(function(){
 
 
 			code += '<div class="search-status"></div>';
-			code += '<table id="kocfia-map-results-cities"></table>';
-			code += '<div id="kocfia-map-pager-cities"></div>';
-			code += '<table id="kocfia-map-results-barbarians"></table>';
-			code += '<div id="kocfia-map-pager-barbarians"></div>';
-			code += '<table id="kocfia-map-results-wilderness"></table>';
-			code += '<div id="kocfia-map-pager-wilderness"></div>';
-			code += '<table id="kocfia-map-results-darkForests"></table>';
-			code += '<div id="kocfia-map-pager-darkForests"></div>';
+			code += '<table id="kocfia-map-results-cities" class="search-results"></table>';
+			code += '<div id="kocfia-map-pager-cities" class="search-pager"></div>';
+			code += '<table id="kocfia-map-results-barbarians" class="search-results"></table>';
+			code += '<div id="kocfia-map-pager-barbarians" class="search-pager"></div>';
+			code += '<table id="kocfia-map-results-wilderness" class="search-results"></table>';
+			code += '<div id="kocfia-map-pager-wilderness" class="search-pager"></div>';
+			code += '<table id="kocfia-map-results-darkForests" class="search-results"></table>';
+			code += '<div id="kocfia-map-pager-darkForests" class="search-pager"></div>';
 
 			$section.append( code )
 				.on('change', '#kocfia-map-city-coord', function(){
@@ -7737,7 +7832,7 @@ jQuery(document).ready(function(){
 						$(this).removeClass('danger').html('Rechercher');
 						KOCFIA.map.$status[0].innerHTML = '';
 					}
-				})
+				});
 				/*
 				.on('click', '.save button', function(event){
 					event.stopPropagation();
@@ -7811,9 +7906,6 @@ jQuery(document).ready(function(){
 					KOCFIA.map.filterResults();
 				})
 				*/
-				.on('click', '.search-result .playerInfo', function(){
-					Shared.getPlayerInfo( $(this) );
-				});
 
 			KOCFIA.map.$search = $section.find('.search');
 			KOCFIA.map.$save = $section.find('.save');
@@ -7826,26 +7918,51 @@ jQuery(document).ready(function(){
 			KOCFIA.map.$resultsCities = $section.find('#kocfia-map-results-cities')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.cities) )
 				.navGrid('#kocfia-map-pager-cities', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
-				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet d'éclairage", buttonicon: 'ui-icon-note', onClickButton: function(){ }, position: 'last'})
-				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet de pillage", buttonicon: 'ui-icon-cart', onClickButton: function(){ }, position: 'last'});
+				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet d'éclairage", buttonicon: 'ui-icon-note scout-selection', onClickButton: function(){ }, position: 'last'})
+				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet de pillage", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
 
 			KOCFIA.map.$resultsBarbarians = $section.find('#kocfia-map-results-barbarians')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.barbarians) )
 				.navGrid('#kocfia-map-pager-barbarians', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
-				.navButtonAdd('#kocfia-map-pager-barbarians', {title: "Exporter la sélection dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart', onClickButton: function(){ }, position: 'last'});
+				.navButtonAdd('#kocfia-map-pager-barbarians', {title: "Exporter la sélection dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
 
 			KOCFIA.map.$resultsWilderness = $section.find('#kocfia-map-results-wilderness')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.wilderness) )
 				.navGrid('#kocfia-map-pager-wilderness', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
-				.navButtonAdd('#kocfia-map-pager-wilderness', {title: "Exporter la sélection dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart', onClickButton: function(){ }, position: 'last'});
+				.navButtonAdd('#kocfia-map-pager-wilderness', {title: "Exporter la sélection dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
 
 			KOCFIA.map.$resultsDarkForests = $section.find('#kocfia-map-results-darkForests')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.darkForests) );
+
+
+			//grid listeners
+			$section
+				.on('click', '.playerInfo', function(){
+					//Shared.getPlayerInfo( $(this) );
+				})
+				.on('click', '.attack-shortcut', function(){
+					//quick attack
+				})
+				.on('click', '.scout-shortcut', function(){
+					//quick scout
+				})
+				.on('click', '.scout-selection', function(){
+					//auto scout
+				})
+				.on('click', '#kocfia-map-pager-cities .attack-selection', function(){
+					//auto plunder
+				})
+				.on('click', '#kocfia-map-pager-barbarians .attack-selection', function(){
+					//auto barbarians
+				})
+				.on('click', '#kocfia-map-pager-wilderness .attack-selection', function(){
+					//auto wilderness
+				})
+				;
 		};
 
 		KOCFIA.map.on = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map on function');
-
 		};
 
 		KOCFIA.map.off = function(){
@@ -13379,7 +13496,9 @@ jQuery(document).ready(function(){
 		KOCFIA.canvas = {
 			options: {
 				active: 1
-			},
+			}
+		};
+
 			/*
 			provinces: [
 				{name: 'Tintagel', x: 75, y: 75},
@@ -13409,69 +13528,83 @@ jQuery(document).ready(function(){
 				{name: 'Albion', x: 625, y: 675},
 			],
 			*/
-			confPanel: function( $section ){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas confPanel function');
-				var code = '<h3>Carte</h3>';
-				code += '<div>';
-				code += Shared.generateCheckbox('canvas', 'active', 'Activer', KOCFIA.conf.canvas.active);
-				code += '</div>';
 
-				$section.append( code );
-			},
-			modPanel: function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas modPanel function');
-				var $section = KOCFIA.$confPanel.find('#kocfia-canvas').html(''),
-					code = '<canvas id="kocfia-map-canvas" width="'+ width +'" height="'+ height +'"></canvas>';
+		KOCFIA.canvas.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas confPanel function');
+			var code = '<h3>Carte</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('canvas', 'active', 'Activer', KOCFIA.conf.canvas.active);
+			code += '</div>';
 
-				$section.append( code );
+			$section.append( code );
+		};
 
-				KOCFIA.canvas.cv = $('#kocfia-map-canvas')[0];
-				KOCFIA.canvas.ctx = KOCFIA.canvas.cv.getContext('2d');
+		KOCFIA.canvas.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-canvas').html(''),
+				code = '<canvas id="kocfia-map-canvas" width="375" height="375"></canvas>';
 
-				KOCFIA.canvas.grid();
-			},
-			on: function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA formation on function');
-			},
-			off: function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA formation off function');
-			},
-			grid: function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas grid function');
-				var width = 375, height = 375, size = 75, x;
+			$section.append( code );
 
-				//clear the canvas
-				KOCFIA.canvas.ctx.setTransform(1, 0, 0, 1, 0, 0);
-				KOCFIA.canvas.ctx.clearRect(0, 0, KOCFIA.canvas.cv.width, KOCFIA.canvas.cv.height);
+			KOCFIA.canvas.cv = $('#kocfia-map-canvas')[0];
+			KOCFIA.canvas.ctx = KOCFIA.canvas.cv.getContext('2d');
 
-				for( x = 0; x <= width; x += size ){
-					KOCFIA.canvas.ctx.moveTo(0 + x, 0);
-					KOCFIA.canvas.ctx.lineTo(0 + x, height);
-				}
+			KOCFIA.canvas.grid();
+		};
 
-				for( x = 0; x <= height; x += size ){
-					KOCFIA.canvas.ctx.moveTo(0, 0 + x);
-					KOCFIA.canvas.ctx.lineTo(width, 0 + x);
-				}
+		KOCFIA.canvas.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA formation on function');
+		};
 
-				KOCFIA.canvas.ctx.strokeStyle = '#ede55a';
-				KOCFIA.canvas.ctx.stroke();
-			},
-			drawCoords: function( coords ){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas drawCoords function');
-				if( !Array.isArray( coords ) ) coords = [ coords ];
+		KOCFIA.canvas.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA formation off function');
+		};
 
-				var size = KOCFIA.canvas.cv.width,
-					scale = size / 750,
-					i, x, y, c;
-				KOCFIA.canvas.ctx.fillStyle = '#fa501a';
-				for( i = 0; i < coords.length; i += 1 ){
-					c = coords[i];
-					x = c.x * scale;
-					y = c.y * scale;
+		KOCFIA.canvas.grid = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas grid function');
+			var width = 375, height = 375, size = 75, x;
 
-					KOCFIA.canvas.ctx.fillRect(x, y, x, y);
-				}
+			//clear the canvas
+			KOCFIA.canvas.ctx.setTransform(1, 0, 0, 1, 0, 0);
+			KOCFIA.canvas.ctx.clearRect(0, 0, KOCFIA.canvas.cv.width, KOCFIA.canvas.cv.height);
+
+			for( x = 0; x <= width; x += size ){
+				KOCFIA.canvas.ctx.moveTo(0 + x, 0);
+				KOCFIA.canvas.ctx.lineTo(0 + x, height);
+			}
+
+			for( x = 0; x <= height; x += size ){
+				KOCFIA.canvas.ctx.moveTo(0, 0 + x);
+				KOCFIA.canvas.ctx.lineTo(width, 0 + x);
+			}
+
+			KOCFIA.canvas.ctx.strokeStyle = '#ede55a';
+			KOCFIA.canvas.ctx.stroke();
+
+			var coords = [], i, city;
+			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+				city = KOCFIA.cities[ KOCFIA.citiesKey[i] ];
+
+				coords.push( city.coords );
+			}
+
+			KOCFIA.canvas.drawCoords( coords );
+		};
+
+		KOCFIA.canvas.drawCoords = function( coords ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas drawCoords function');
+			if( !Array.isArray( coords ) ) coords = [ coords ];
+
+			var size = KOCFIA.canvas.cv.width,
+				scale = size / 750,
+				i, x, y, c;
+			KOCFIA.canvas.ctx.fillStyle = '#fa501a';
+			for( i = 0; i < coords.length; i += 1 ){
+				c = coords[i];
+				x = c.x * scale;
+				y = c.y * scale;
+
+				KOCFIA.canvas.ctx.fillRect(x, y, x, y);
 			}
 		};
 
@@ -15941,6 +16074,8 @@ jQuery(document).ready(function(){
 			//cross origin is blocked on facebook, ask "top" greaseMonkey script to do the request and send back the response
 			top.postMessage('giftList', 'https://apps.facebook.com/');
 			top.postMessage('giftList', 'http://apps.facebook.com/');
+			top.postMessage('giftList', 'https://www.kabam.com/');
+			top.postMessage('giftList', 'http://www.kabam.com/');
 		};
 
 		KOCFIA.gifts.parseGiftPage = function(data){
@@ -16062,6 +16197,8 @@ jQuery(document).ready(function(){
 			//avoid cross origin error, ask "top" greaseMonkey script to do the request and send back the response
 			top.postMessage({task: 'secondMethodStepOne', param: KOCFIA.gifts.$gift.val()}, 'https://apps.facebook.com/');
 			top.postMessage({task: 'secondMethodStepOne', param: KOCFIA.gifts.$gift.val()}, 'http://apps.facebook.com/');
+			top.postMessage({task: 'secondMethodStepOne', param: KOCFIA.gifts.$gift.val()}, 'https://www.kabam.com/');
+			top.postMessage({task: 'secondMethodStepOne', param: KOCFIA.gifts.$gift.val()}, 'http://www.kabamcom/');
 		};
 
 		KOCFIA.gifts.secondMethodStepTwo = function( data ){
@@ -16085,6 +16222,8 @@ jQuery(document).ready(function(){
 				if( action && signed ){
 					top.postMessage({task: 'secondMethodStepTwo', url: action +'&signed_request='+ signed}, 'https://apps.facebook.com/');
 					top.postMessage({task: 'secondMethodStepTwo', url: action +'&signed_request='+ signed}, 'http://apps.facebook.com/');
+					top.postMessage({task: 'secondMethodStepTwo', url: action +'&signed_request='+ signed}, 'https://www.kabam.com/');
+					top.postMessage({task: 'secondMethodStepTwo', url: action +'&signed_request='+ signed}, 'http://www.kabam.com/');
 
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur SMS2b</span>');
@@ -16128,6 +16267,8 @@ jQuery(document).ready(function(){
 			//avoid cross origin error, ask "top" greaseMonkey script to do the request and send back the response
 			top.postMessage({task: 'firstMethodStepOne', url: url}, 'https://apps.facebook.com/');
 			top.postMessage({task: 'firstMethodStepOne', url: url}, 'http://apps.facebook.com/');
+			top.postMessage({task: 'firstMethodStepOne', url: url}, 'https://www.kabam.com/');
+			top.postMessage({task: 'firstMethodStepOne', url: url}, 'http://www.kabam.com/');
 		};
 
 		KOCFIA.gifts.firstMethodStepTwo = function( data ){
@@ -16170,6 +16311,8 @@ jQuery(document).ready(function(){
 
 					top.postMessage({task: 'firstMethodStepTwo', url: action, param: signed}, 'https://apps.facebook.com/');
 					top.postMessage({task: 'firstMethodStepTwo', url: action, param: signed}, 'http://apps.facebook.com/');
+					top.postMessage({task: 'firstMethodStepTwo', url: action, param: signed}, 'https://www.kabam.com/');
+					top.postMessage({task: 'firstMethodStepTwo', url: action, param: signed}, 'http://www.kabam.com/');
 
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS2b</span>');
@@ -16192,6 +16335,8 @@ jQuery(document).ready(function(){
 
 					top.postMessage({task: 'firstMethodStepThree', url: url}, 'https://apps.facebook.com/');
 					top.postMessage({task: 'firstMethodStepThree', url: url}, 'http://apps.facebook.com/');
+					top.postMessage({task: 'firstMethodStepThree', url: url}, 'https://www.kabam.com/');
+					top.postMessage({task: 'firstMethodStepThree', url: url}, 'http://www.kabam.com/');
 				} else {
 					KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4b</span>');
 					KOCFIA.gifts.index += 1;
@@ -16225,6 +16370,8 @@ jQuery(document).ready(function(){
 
 						top.postMessage({task: 'firstMethodStepFour', url: url, param: params}, 'https://apps.facebook.com/');
 						top.postMessage({task: 'firstMethodStepFour', url: url, param: params}, 'http://apps.facebook.com/');
+						top.postMessage({task: 'firstMethodStepFour', url: url, param: params}, 'https://www.kabam.com/');
+						top.postMessage({task: 'firstMethodStepFour', url: url, param: params}, 'http://www.kabam.com/');
 					} else {
 						KOCFIA.gifts.$gift.parent().append('<span> - Erreur FMS4b</span>');
 						KOCFIA.gifts.index += 1;
@@ -16268,6 +16415,8 @@ jQuery(document).ready(function(){
 
 			top.postMessage({task: 'deleteGift', param: $.param(params)}, 'https://apps.facebook.com/');
 			top.postMessage({task: 'deleteGift', param: $.param(params)}, 'http://apps.facebook.com/');
+			top.postMessage({task: 'deleteGift', param: $.param(params)}, 'https://www.kabam.com/');
+			top.postMessage({task: 'deleteGift', param: $.param(params)}, 'http://www.kabam.com/');
 		};
 
 	/* BUILD */
@@ -16366,7 +16515,7 @@ jQuery(document).ready(function(){
 				city = KOCFIA.cities[ cityKey ];
 
 				queues += '<li>';
-				queues += '<div>'+ city.label +'</div>';
+				queues += '<h4>'+ city.label +'</h4>';
 				queues += '<div>';
 				if( KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
 					duration = KOCFIA.build.getCityQueueDuration( cityKey );
@@ -16414,7 +16563,6 @@ jQuery(document).ready(function(){
 			KOCFIA.build.addEventListener();
 
 			KOCFIA.build.generateBuildMenu();
-
 		};
 
 		KOCFIA.build.generateBuildMenu = function(){
@@ -17561,7 +17709,7 @@ jQuery(document).ready(function(){
 			}
 
 			var $tr = null;
-			if( mod == 'wilderness' || mod == 'barbarian' ){
+			if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
 				$tr = KOCFIA[ mod ].$ongoing.find('tbody').filter('[data-city="'+ attack.cityKey +'"]').find('tr').filter('[data-attack="'+ attack.id +'"]');
 			} else if( mod == 'darkForest' ){
 				$tr = KOCFIA[ mod ].$ongoing.find('tbody').find('tr');
@@ -17637,10 +17785,11 @@ jQuery(document).ready(function(){
 			var coordsLength, coords, waveIndex, time, city, bunch = [], bunchLength;
 
 			/** sequences
-			 * wilderness & barbarian
+			 * wilderness & barbarian & plunder
 			 *		previousMarchingCheck
 			 *		resetTracks
 			 *		checkRallyPoint
+			 *		(plunder) checkPlayerOnlineStatus
 			 *		checkCoords (recursive on coords list)
 			 *			checkCoord
 			 *		checkAndLaunchWaves
@@ -17692,7 +17841,7 @@ jQuery(document).ready(function(){
 					var checkMarch = function(dfd, i, attempts){
 						if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkMarch function');
 
-						if( mod == 'wilderness' || mod == 'barbarian' ){
+						if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
 							march = window.seed.queue_atkp[ attack.cityKey ][ 'm' + attack.marching[i] ];
 						} else {
 							march = null;
@@ -17719,7 +17868,7 @@ jQuery(document).ready(function(){
 
 						if( march ){
 							marches.push( attack.marching[i] );
-							if( mod != 'wilderness' && mod != 'barbarian' ) marchesCoord.push( march.toXCoord +','+ march.toYCoord );
+							if( mod != 'wilderness' && mod != 'barbarian' && mod != 'plunder' ) marchesCoord.push( march.toXCoord +','+ march.toYCoord );
 						}
 
 						if( march && !march.hasOwnProperty('kocfiaUpdated') ){
@@ -17760,7 +17909,7 @@ jQuery(document).ready(function(){
 									attempts = 3;
 									if( i >= mLength ){
 										attack.marching = marches;
-										if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
+										if( mod != 'wilderness' && mod != 'barbarian' && mod != 'plunder' ) attack.marchingCoords = marchesCoord;
 										return dfd.pipe( resetTracks(dfd) );
 									} else {
 										return dfd.pipe( checkMarch(dfd, i) );
@@ -17773,7 +17922,7 @@ jQuery(document).ready(function(){
 										i += 1;
 										if( i >= mLength ){
 											attack.marching = marches;
-											if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
+											if( mod != 'wilderness' && mod != 'barbarian' && mod != 'plunder' ) attack.marchingCoords = marchesCoord;
 											return dfd.pipe( resetTracks(dfd) );
 										} else {
 											return dfd.pipe( checkMarch(dfd, i) );
@@ -17790,7 +17939,7 @@ jQuery(document).ready(function(){
 									i += 1;
 									if( i >= mLength ){
 										attack.marching = marches;
-										if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
+										if( mod != 'wilderness' && mod != 'barbarian' && mod != 'plunder' ) attack.marchingCoords = marchesCoord;
 										return dfd.pipe( resetTracks(dfd) );
 									} else {
 										return dfd.pipe( checkMarch(dfd, i) );
@@ -17801,7 +17950,7 @@ jQuery(document).ready(function(){
 							i += 1;
 							if( i >= mLength ){
 								attack.marching = marches;
-								if( mod != 'wilderness' && mod != 'barbarian' ) attack.marchingCoords = marchesCoord;
+								if( mod != 'wilderness' && mod != 'barbarian' && mod != 'plunder' ) attack.marchingCoords = marchesCoord;
 								return dfd.pipe( resetTracks(dfd) );
 							} else {
 								return dfd.pipe( checkMarch(dfd, i) );
@@ -17812,7 +17961,7 @@ jQuery(document).ready(function(){
 					var mParams = $.extend({}, window.g_ajaxparams),
 						i = 0, j, march,
 						mLength = attack.marching.length;
-					if( mod == 'wilderness' || mod == 'barbarian' ){
+					if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
 						if( window.seed.queue_atkp[ attack.cityKey ] ){
 							if( mLength === 0 ){
 								return dfd.pipe( resetTracks(dfd) );
@@ -17891,7 +18040,88 @@ jQuery(document).ready(function(){
 							return dfd.reject();
 						}
 					}
-					return dfd.pipe(checkCoords(dfd));
+					if( mod == 'plunder' ){
+						return dfd.pipe(checkPlayerOnlineStatus(dfd, 3));
+					} else {
+						return dfd.pipe(checkCoords(dfd));
+					}
+				};
+
+				//plunder only - online status check for targetted player
+				var checkPlayerOnlineStatus = function(dfd, attempts){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack deferred checkPlayerOnlineStatus function');
+					if( $tr.data('stop') ){
+						stop();
+						return dfd.reject();
+					}
+
+					if( attack.hasOwnProperty('targetUserId') ){
+						//get user id for targetted player
+						var name = attack.targetName.replace(/\'/g, '_');
+						name = name;
+						var params = $.extend(true, {}, window.g_ajaxparams);
+						params.searchName = name;
+						params.subType = "ALLIANCE_INVITE";
+
+						$.ajax({
+							url: window.g_ajaxpath + "ajax/searchPlayers.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: params,
+							dataType: 'json',
+							timeout: 10000
+						})
+						.done(function(data){
+							if( data.ok ){
+								if( data.matchedUsers && !$.isEmptyObject(data.matchedUsers) && data.matchedUsers.hasOwnProperty(name) ){
+									attack.targetUserId = data.matchedUsers[ name ].userId;
+									//now get the online status
+									return dfd.pipe(checkPlayerOnlineStatus(dfd, 3));
+								}
+
+								KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Joueur '+ attack.targetName +' non trouvé ou non unique, attaque annulée.');
+								return dfd.reject();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ) return dfd.pipe( checkPlayerOnlineStatus(dfd, attempts) );
+								else dfd.reject();
+							}
+						})
+						.fail(function(){
+							attempts -= 1;
+							if( attempts > 0 ) return dfd.pipe( checkPlayerOnlineStatus(dfd, attempts) );
+							else dfd.reject();
+						});
+					}
+
+					var params = $.extend(true, {}, window.g_ajaxparams);
+					params.pid = attack.targetUserId;
+
+					$.ajax({
+						url: window.g_ajaxpath + "ajax/getOnline.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function(data){
+						if( data.ok ){
+							if( !$.isEmptyObject(data.data) && data.data[ userId ] === true ){
+								return dfd.pipe(checkCoords( dfd ));
+							} else {
+								KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Joueur '+ attack.targetName +' connecté, attaque annulée.');
+								return dfd.reject();
+							}
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ) return dfd.pipe( checkPlayerOnlineStatus(dfd, attempts) );
+							else dfd.reject();
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ) return dfd.pipe( checkPlayerOnlineStatus(dfd, attempts) );
+						else dfd.reject();
+					});
 				};
 
 				//loop function for checking each coords until one valid is found, use deferred.pipe() to iterate
@@ -17961,6 +18191,18 @@ jQuery(document).ready(function(){
 								} else if( mod == 'barbarian' ){
 									if( type != 51 || info.tileCityId !== null ){
 										KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e) n\'est pas un camp barbare.');
+										attack.coordIndex += 1;
+
+										return dfd.pipe( checkCoord(dfd, 3) );
+
+									} else {
+										baseParams.xcoord = gps[0];
+										baseParams.ycoord = gps[1];
+										return dfd.pipe( checkAndLaunchWaves(dfd) );
+									}
+								} else if( mod == 'plunder' ){
+									if( type != 51 || info.tileCityId === null ){
+										KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Coordonnées '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) +'e) n\'est pas une ville.');
 										attack.coordIndex += 1;
 
 										return dfd.pipe( checkCoord(dfd, 3) );
@@ -18430,7 +18672,7 @@ jQuery(document).ready(function(){
 										attack.marching.push( result.marchId );
 										if( mod == 'darkForest' ){
 											attack.marchingCoords.push( p.xcoord +','+ p.ycoord );
-											KOCFIA[ mod ].refreshOngoingInfo(attack, false, (mod == 'scout' ? 'Eclairage' : 'Attaque') +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +')'+ (mod != 'wilderness' && mod != 'barbarian' ? ' depuis '+ city.label : '') +'.');
+											KOCFIA[ mod ].refreshOngoingInfo(attack, false, (mod == 'scout' ? 'Eclairage' : 'Attaque') +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +')'+ (mod != 'wilderness' && mod != 'barbarian' && mod != 'plunder' ? ' depuis '+ city.label : '') +'.');
 										}
 
 										var timediff = parseInt(result.eta, 10) - parseInt(result.initTS, 10),
@@ -18508,7 +18750,7 @@ jQuery(document).ready(function(){
 							return $.Deferred(function( wdfd ){
 								//calling sequencialy findLostKnights(), checkKnight(), checkUnits(), launchWave()
 								//using deferred.pipe() to iterate
-								if( mod == 'wilderness' || mod == 'barbarian' ){
+								if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
 									return wdfd.pipe( findLostKnights(wdfd) );
 								} else if( mod == 'darkForest' ){
 									//will recheck units and filling some need variables
@@ -18567,6 +18809,11 @@ jQuery(document).ready(function(){
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
 									}, 1000);
+								} else if( mod == 'plunder' ){
+									//launch next wave in 5s
+									window.setTimeout(function(){
+										dfd.pipe( checkAndLaunchWave(dfd) );
+									}, 5000);
 								} else if( mod == 'darkForest'){
 									//launch next wave in 5s
 									window.setTimeout(function(){
@@ -18593,7 +18840,7 @@ jQuery(document).ready(function(){
 
 				var attackSequence = function(){
 					return $.Deferred(function( dfd ){
-						if( (mod == 'wilderness' || mod == 'barbarian')
+						if( (mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder')
 							&& KOCFIA.conf.alarm.active
 							&& KOCFIA.conf.alarm.stopAutoAttack
 							&& KOCFIA.alarm.underAttack.hasOwnPropery( attack.cityKey )
@@ -18611,13 +18858,13 @@ jQuery(document).ready(function(){
 					}).promise();
 				};
 
-			var baseParams = jQuery.extend(true, {}, window.g_ajaxparams);
+			var baseParams = $.extend(true, {}, window.g_ajaxparams);
 			if( $.isEmptyObject(baseParams) ){
 				alert('Paramètres ajax manquant. Raffraîchissez la page.');
 				return false;
 			}
 
-			baseParams.cid = (mod == 'wilderness' || mod == 'barbarian' ? attack.cityKey.replace(/city/, '') : null);
+			baseParams.cid = (mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ? attack.cityKey.replace(/city/, '') : null);
 			baseParams.type = (mod != 'scout' ? 4 : 3); //MARCH_TYPE_ATTACK 4, MARCH_TYPE_SCOUT 3
 			baseParams.gold = 0;
 			baseParams.r1 = 0;
@@ -18645,7 +18892,7 @@ jQuery(document).ready(function(){
 					if( stopped ) return;
 
 					//save the last coord if the attack is a stored one
-					if( mod == 'wilderness' || mod == 'barbarian' ){
+					if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
 						KOCFIA[ mod ].attacks[ attack.cityKey ][ attack.id ].coordIndex = attack.coordIndex;
 					} else if( mod == 'scout' ){
 						KOCFIA[ mod ].attacks[ attack.id ].coordIndex = attack.coordIndex;
@@ -18723,7 +18970,7 @@ jQuery(document).ready(function(){
 						}
 
 						KOCFIA[ mod ].storeAttacks();
-					} else if( mod == 'wilderness' || mod == 'barbarian' ){
+					} else if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
 						time *= 2; //round-trip
 
 						//force refresh

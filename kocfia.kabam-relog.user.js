@@ -6,16 +6,8 @@
 // @include			*www.kingdomsofcamelot.com/fb/e2/fbLoginButton.php*
 // ==/UserScript==
 
-var check = GM_getValue('timeout', false);
-unsafeWindow.console.log('timeout', check);
-unsafeWindow.console.log('login', typeof unsafeWindow.login);
-
-if( !check && typeof unsafeWindow.login == 'function' ){
-	GM_setValue('timeout', true);
-
-	unsafeWindow.setTimeout(function(){
-		unsafeWindow.console.log('in');
-		GM_deleteValue('timeout');
+if( typeof unsafeWindow.login == 'function' ){
+	unsafeWindow.setInterval(function(){
 		unsafeWindow.login();
 	}, 10000);
 }

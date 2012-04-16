@@ -6450,7 +6450,7 @@ jQuery(document).ready(function(){
 				case '6':
 						$level.val( 6 );
 						$uChoices.eq(0).val('unt6');
-						$uQuantity.eq(0).val('40k');
+						$uQuantity.eq(0).val('35k');
 					break;
 				case '7':
 						$level.val( 7 );

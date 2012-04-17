@@ -329,11 +329,6 @@
 		margin-left: 8px;
 	}
 
-	#kocfia-map .save,
-	#kocfia-map .filter {
-		display: none;
-	}
-
 	#kocfia-map .search-status {
 		padding: 3px;
 		text-align: center;
@@ -344,45 +339,26 @@
 		text-align: center;
 	}
 
-	#kocfia-map .search-result table {
-		width: 100%;
-	}
-
-	#kocfia-map .filter textarea {
-		float: right;
-		width: 80px;
-		height: 70px;
-		display: none;
-	}
-
-	#kocfia-map .status label + label {
-		margin-bottom: 5px;
-	}
-
 	#kocfia-map fieldset > div {
 		margin: 5px 0;
 	}
 
-	#kocfia-map .filter > div {
-		margin: 3px 0;
-	}
-
-	#kocfia-map .search-result .playerInfo {
+	#kocfia-map .playerInfo {
 		text-decoration: underline;
 		color: blue;
 		cursor: pointer;
 	}
 
-	#kocfia-map .search-result .friendly td {
-		background-color: #ADEDAF;
+	.ui-widget .ui-widget.ui-jqgrid {
+		font-size: 11px;
 	}
 
-	#kocfia-map .search-result .hostile td {
-		background-color: #FFC466;
+	.ui-jqgrid-titlebar {
+		cursor: pointer;
 	}
 
-	#kocfia-map .search-result .ally td {
-		background-color: #ADD5ED;
+	.ui-jqdialog {
+		z-index: 100020 !important;
 	}
 
 /* auto attack tabs form */
@@ -2422,4 +2398,36 @@
 
 	#maparea_city a[id="slot_1"] .kocfia-build-menu .destroy:checked ~ .buildings {
 		display: none;
+	}
+
+	.guardianHover.destroy:before,
+	a[id^="slot_"].destroy:before {
+		position: absolute;
+		bottom: 9px;
+		left: -9px;
+		background-color: white;
+		border: 1px solid black;
+		color: black;
+		font-size: 11px;
+		border-radius: 50%;
+		width: 16px;
+		height: 16px;
+		display: block;
+		content: 'D';
+	}
+
+	.guardianHover[data-build]:after,
+	a[id^="slot_"][data-build]:after {
+		position: absolute;
+		bottom: 9px;
+		right: -9px;
+		background-color: white;
+		border: 1px solid black;
+		border-radius: 50%;
+		color: black;
+		font-size: 11px;
+		width: 16px;
+		height: 16px;
+		display: block;
+		content: attr(data-build);
 	}

@@ -3,11 +3,9 @@
 // @version			3
 // @namespace		KOCFIA
 // @description		améliorations et automatisations diverses pour KOC
+// @include			*kingdomsofcamelot.com/fb/e2/standAlone.php*
 // @include			*kingdomsofcamelot.com/fb/e2/src/main_src.php*
-// @include			*kingdomsofcamelot.com/fb/e2/src/standAlone.php*
 // ==/UserScript==
-unsafeWindow.console.log('start');
-
 /* array isArray */
 if( !Array.hasOwnProperty('isArray') ){
 	Array.isArray = function(value){
@@ -32,13 +30,10 @@ if( !String.prototype.hasOwnProperty('trim') ){
 }
 
 if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
-	var kocFrame = unsafeWindow.parent.document.getElementByTagName('iframe');
-	//force kabam koc iframe to width 100%
-	if( kocFrame ){
-		kocFrame.style.width = '100%';
-		kocFrame.style.height = '100%';
-		kocFrame.style.overflow = 'show';
-	}
+	//force wrapping iframe to width 100%
+	var style = unsafeWindow.document.createElement('style');
+	style.innerHTML = 'iframe { margin:0; width:100% !important;}';
+	unsafeWindow.document.head.appendChild(style);
 } else {
 	try {
 		var kocFrame = unsafeWindow.parent.document.getElementById('kocIframes1');

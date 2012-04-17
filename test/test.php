@@ -6,6 +6,7 @@
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.miniColors.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.tipsy.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/ui.jqgrid.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/kocfia.confPanel.css?<?php echo filemtime(__DIR__.'/../kocfia.confPanel.css'); ?>" />
 		<style>
 			body {
@@ -144,6 +145,8 @@
 		<script src="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery.miniColors.min.js"></script>
 		<script src="http://kocfia.kapok.dev/jquery.tipsy.min.js"></script>
+		<script src="http://kocfia.kapok.dev/grid.locale-fr.js"></script>
+		<script src="http://kocfia.kapok.dev/jquery.jqGrid.min.js"></script>
 		<script>
 			var domainName = 'caval314';
 			var roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];

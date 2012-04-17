@@ -2034,12 +2034,14 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.gridRowActions = function( cellValue, options, rowObject ){
-				console.log(cellValue, options, rowObject);
-
 				var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-gps="'+ rowObject.gps +'" data-level="'+ rowObject.l +'"></span>';
 				code += '<span class="ui-icon ui-icon-cart scout-shortcut" rel="'+ rowObject.gps +'"></span>';
 
 				return code;
+			};
+
+			Shared.gridMapLink = function( cellValue, options, rowObject ){
+				return '<span class="mapLink">'+ rowObject.gps +'</span>';
 			};
 
 		/* update seed */
@@ -7459,14 +7461,17 @@ jQuery(document).ready(function(){
 				queue = window.seed.queue_unt[ cityKey ];
 				time = 0;
 				nb = 0;
-				for( b in queue ){
-					if( queue.hasOwnProperty(b) ){
-						train = queue[ b ];
-						nb += parseInt(parseInt(train[1], 10) * parseInt(window.unitcost['unt'+ train[0]][6], 10) / 2, 10);
+				if( Object.isObject(queue) && !$.isEmptyObject(queue) ){
+					for( b in queue ){
+						if( queue.hasOwnProperty(b) ){
+							train = queue[ b ];
+							nb += parseInt(parseInt(train[1], 10) * parseInt(window.unitcost['unt'+ train[0]][6], 10) / 2, 10);
+						}
 					}
+
+					time = train[3] - timestamp;
 				}
 
-				time = train[3] - timestamp;
 				if( time < 0 ) time = 0;
 
 				stone = parseInt(window.seed.resources[ cityKey ].rec3[0], 10) / 3600;
@@ -7550,7 +7555,8 @@ jQuery(document).ready(function(){
 			gridParams: {
 				shared: {
 					url: '',
-					datatype: 'local',
+					datatype: 'jsonstring',
+					contentType: "application/json; charset=utf-8",
 					loadui: 'disable',
 					rowNum: 20,
 					rowList: [20, 50, 100],
@@ -7560,7 +7566,7 @@ jQuery(document).ready(function(){
 					autowidth: true,
 					viewrecords: true, //total in pager
 					gridview: true, //speed boost
-					hiddengrid: true, //grid start folded
+					//hiddengrid: true, //grid start folded
 					multiselect: true,
 					multiboxonly: true,
 					multikey: 'shiftKey'
@@ -7570,7 +7576,7 @@ jQuery(document).ready(function(){
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
-						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.gridMapLink},
 						{name: 'city', index: 'c'},
 						{name: 'player', index: 'p'},
 						{name: 'might', index: 'm', align: 'right', defval: 0, formatter: Shared.gridFormat},
@@ -7598,7 +7604,7 @@ jQuery(document).ready(function(){
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
-						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.gridMapLink},
 						{name: 'level', index: 'l', align: 'center'}
 					],
 					caption: 'Camps barbares',
@@ -7616,7 +7622,7 @@ jQuery(document).ready(function(){
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
-						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.gridMapLink},
 						{name: 'level', index: 'l', align: 'center'},
 						{name: 'type', index: 'e'},
 						{name: 'player', index: 'p'},
@@ -7643,7 +7649,7 @@ jQuery(document).ready(function(){
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
 						{name: 'range', index: 'r'},
-						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.mapLink},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.gridMapLink},
 						{name: 'level', index: 'l', align: 'center'}
 					],
 					caption: 'Forêts Obscures',
@@ -7917,23 +7923,22 @@ jQuery(document).ready(function(){
 			//grids
 			KOCFIA.map.$resultsCities = $section.find('#kocfia-map-results-cities')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.cities) )
-				.navGrid('#kocfia-map-pager-cities', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
-				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet d'éclairage", buttonicon: 'ui-icon-note scout-selection', onClickButton: function(){ }, position: 'last'})
-				.navButtonAdd('#kocfia-map-pager-cities', {title: "Exporter la sélection dans l'onglet de pillage", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
+				.jqGrid('navGrid', '#kocfia-map-pager-cities', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter la sélection dans l'onglet d'éclairage", buttonicon: 'ui-icon-note scout-selection', onClickButton: function(){ }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter la sélection dans l'onglet de pillage", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
 
 			KOCFIA.map.$resultsBarbarians = $section.find('#kocfia-map-results-barbarians')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.barbarians) )
-				.navGrid('#kocfia-map-pager-barbarians', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
-				.navButtonAdd('#kocfia-map-pager-barbarians', {title: "Exporter la sélection dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
+				.jqGrid('navGrid', '#kocfia-map-pager-barbarians', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter la sélection dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
 
 			KOCFIA.map.$resultsWilderness = $section.find('#kocfia-map-results-wilderness')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.wilderness) )
-				.navGrid('#kocfia-map-pager-wilderness', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
-				.navButtonAdd('#kocfia-map-pager-wilderness', {title: "Exporter la sélection dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
+				.jqGrid('navGrid', '#kocfia-map-pager-wilderness', {edit: false, add: false, del: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart attack-selection', onClickButton: function(){ }, position: 'last'});
 
 			KOCFIA.map.$resultsDarkForests = $section.find('#kocfia-map-results-darkForests')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.darkForests) );
-
 
 			//grid listeners
 			$section
@@ -7957,6 +7962,12 @@ jQuery(document).ready(function(){
 				})
 				.on('click', '#kocfia-map-pager-wilderness .attack-selection', function(){
 					//auto wilderness
+				})
+				.on('click', '.ui-jqgrid-titlebar .ui-jqgrid-titlebar-close', function(e){
+					e.stopPropagation();
+				})
+				.on('click', '.ui-jqgrid-titlebar', function(){
+					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
 				})
 				;
 		};
@@ -8315,10 +8326,10 @@ jQuery(document).ready(function(){
 		KOCFIA.map.displayResults = function( tiles ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map displayResults function');
 
-			if( tiles.cities.length > 0 ) KOCFIA.map.$resultsCities.addJSONData( tiles.cities );
-			if( tiles.barbarians.length > 0 ) KOCFIA.map.$resultsBarbarians.addJSONData( tiles.barbarians );
-			if( tiles.wilderness.length > 0 ) KOCFIA.map.$resultsWilderness.addJSONData( tiles.wilderness );
-			if( tiles.darkForests.length > 0 ) KOCFIA.map.$resultsDarkForests.addJSONData( tiles.darkForests );
+			if( tiles.cities.length > 0 ) KOCFIA.map.$resultsCities[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.cities.length, rows: tiles.cities}) );
+			if( tiles.barbarians.length > 0 ) KOCFIA.map.$resultsBarbarians[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.barbarians.length, rows: tiles.barbarians}) );
+			if( tiles.wilderness.length > 0 ) KOCFIA.map.$resultsWilderness[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.wilderness.length, rows: tiles.wilderness}) );
+			if( tiles.darkForests.length > 0 ) KOCFIA.map.$resultsDarkForests[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.darkForests.length, rows: tiles.darkForests}) );
 		};
 
 		/*KOCFIA.map.displayResultsByCategory = function(){
@@ -16560,7 +16571,7 @@ jQuery(document).ready(function(){
 					}
 				});
 
-			KOCFIA.build.addEventListener();
+			KOCFIA.build.addSectionListeners();
 
 			KOCFIA.build.generateBuildMenu();
 		};
@@ -17031,18 +17042,14 @@ jQuery(document).ready(function(){
 		KOCFIA.build.addBuildingsVisualInfo = function( event ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build addVisualInfo function');
 
-			console.log('switch city event', event);
-			//var cityKey = 'city'+ window.currentcityid;
+			$('#maparea_city, #maparea_fields').filter(':visible').find('a').filter('[id^="slot_"]').each(function(){
+				KOCFIA.build.addBuildingVisualInfo( this );
+			});
 
-			/*if(  ){
-				$('#fieldmapbuildings').find('a').filter('[id^="slot_"]').each(function(){
-					KOCFIA.build.addBuildingVisualInfo( this );
-				});
-			} else {
-				$('#fieldmapbuildings').find('a').filter('[id^="slot_"]').each(function(){
-					KOCFIA.build.addBuildingVisualInfo( this );
-				});
-			}*/
+			//the guardian is not a <a>
+			$('#maparea_city, #maparea_fields').filter(':visible').find('#guardianContainer').each(function(){
+				KOCFIA.build.addBuildingVisualInfo( this );
+			});
 		};
 
 		KOCFIA.build.addBuildingVisualInfo = function( slot ){
@@ -17050,12 +17057,22 @@ jQuery(document).ready(function(){
 			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot.id ) ){
 				var tasks = KOCFIA.build.queues[ cityKey ][ slot.id ];
 				if( tasks.length > 0 ){
-					var $slot = $(slot);
+					var $slot = $(slot),
+						content = '';
 					if( tasks[0].toLevel === 0 ){
 						$slot.addClass('destroy');
+						if( tasks.length > 1 ){
+							content += window.buildingcost['bdg'+ tasks[1].buildingType][0].substr(0, 2);
+						}
 					}
 
-					$slot.addClass('toLevel'+ tasks[ tasks.length - 1 ].toLevel);
+					if( tasks.length > 1 ){
+						content += tasks[ tasks.length - 1 ].toLevel;
+					}
+
+					if( content.length > 0 ){
+						$slot.addAttr('data-build', content);
+					}
 				}
 			}
 		};

@@ -361,6 +361,10 @@
 		z-index: 100020 !important;
 	}
 
+	.zebra td {
+		background-color: #EAEAEA;
+	}
+
 /* auto attack tabs form */
 	.attack-form fieldset small {
 		display: block;

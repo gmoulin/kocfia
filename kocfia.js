@@ -1161,6 +1161,7 @@ jQuery(document).ready(function(){
 				if( KOCFIA.conf.confPanel.visible ){
 					KOCFIA.$confPanel.show();
 					KOCFIA.$confPanelWrapper.css('height', KOCFIA.calcConfPanelInnerHeight());
+					KOCFIA.$confPanel.trigger('resize');
 				}
 			}, (i + 2) * 300);
 		};
@@ -1329,7 +1330,7 @@ jQuery(document).ready(function(){
 
 		/* encode, decode number formats */
 			Shared.format = function( num ){
-				if( typeof num == 'undefined' || num === null ) return '';
+				if( num === undefined || num === null ) return '';
 				num = '' + num;
 				if( num.indexOf(',') > -1 ) num.replace(/,/, '.');
 				num = '' + parseFloat(num).toFixed(0);
@@ -1337,6 +1338,8 @@ jQuery(document).ready(function(){
 					suffix = '',
 					decimal;
 				num = parseFloat(num);
+
+				if( isNaN(num) ) return '';
 
 				if( l <= 3 ){
 					return num;
@@ -2038,10 +2041,6 @@ jQuery(document).ready(function(){
 				code += '<span class="ui-icon ui-icon-cart scout-shortcut" rel="'+ rowObject.gps +'"></span>';
 
 				return code;
-			};
-
-			Shared.gridMapLink = function( cellValue, options, rowObject ){
-				return '<span class="mapLink">'+ rowObject.gps +'</span>';
 			};
 
 		/* update seed */
@@ -3944,7 +3943,7 @@ jQuery(document).ready(function(){
 			KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', (this.module == 'darkForest' ? 1 : 2));
 
 			//using closure to have a "copy" of the attack plan
-			var i = 1, c, a;
+			var i = 1, c, a, ts;
 			var delayedLaunch = function(attack, i){
 				var delay = window.setTimeout(function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('launching automatic attack', attack.id, attack.cityKey, attack);
@@ -3952,13 +3951,35 @@ jQuery(document).ready(function(){
 				}, i * 20 * 1000);
 			};
 
-			if( module == 'wilderness' || module == 'barbarian' || module == 'plunder' ){
+			if( module == 'wilderness' || module == 'barbarian' ){
 				//launching stored attacks
 				for( c in KOCFIA[ module ].attacks ){
 					if( KOCFIA[ module ].attacks.hasOwnProperty(c) ){
 						for( a in KOCFIA[ module ].attacks[c] ){
 							if( KOCFIA[ module ].attacks[c].hasOwnProperty(a) ){
 								delayedLaunch(KOCFIA[ module ].attacks[c][a], i);
+								i += 1;
+							}
+						}
+					}
+				}
+			} else if( module == 'plunder' ){
+				//launching stored attacks
+				for( c in KOCFIA[ module ].attacks ){
+					if( KOCFIA[ module ].attacks.hasOwnProperty(c) ){
+						for( a in KOCFIA[ module ].attacks[c] ){
+							if( KOCFIA[ module ].attacks[c].hasOwnProperty(a) ){
+
+								if( KOCFIA[ module ].timestamps.hasOwnProperty(a) ){
+									ts = KOCFIA[ module ].timestamps[ a ];
+									//wait ten hours between attacks
+									if( ts + 10 * 60 * 60 > Date.timestamp() ){
+										KOCFIA[ module ].timestamps[ a ] = Date.timestamp();
+										delayedLaunch(KOCFIA[ module ].attacks[c][a], i);
+									}
+								} else {
+									delayedLaunch(KOCFIA[ module ].attacks[c][a], i);
+								}
 								i += 1;
 							}
 						}
@@ -4850,6 +4871,7 @@ jQuery(document).ready(function(){
 				help += '<li>Les villes ciblées ne seront attaquées que si le joueur n\'est pas connecté</li>';
 				help += '<li>Aucun éclairage n\'est effectué avant l\'attaque</li>';
 				help += '<li>Il est donc préférable d\'être sûr que les joueurs ciblés sont bien inactifs et que les villes ciblées ne disposent pas de défenses</li>';
+				help += '<li>En mode automatique un délai de 10 heures sépare deux séries de pillages sur les villes d\'un joueur</li>';
 			}
 			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques</li>';
 			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
@@ -6489,7 +6511,8 @@ jQuery(document).ready(function(){
 
 	/* PLUNDER - extend autoAttack */
 		KOCFIA.plunder = {
-			module: 'plunder'
+			module: 'plunder',
+			timestamps: {}
 		};
 
 		KOCFIA.plunder.getBuildsList = function(){
@@ -7552,11 +7575,15 @@ jQuery(document).ready(function(){
 				wilderness: {},
 				darkForests: {}
 			},
+			counters: {
+				cities: 0,
+				barbarians: 0,
+				wilderness: 0,
+				darkForests: 0
+			},
 			gridParams: {
 				shared: {
-					url: '',
-					datatype: 'jsonstring',
-					contentType: "application/json; charset=utf-8",
+					datatype: 'local',
 					loadui: 'disable',
 					rowNum: 20,
 					rowList: [20, 50, 100],
@@ -7574,16 +7601,16 @@ jQuery(document).ready(function(){
 				cities: {
 					colNames: ['Actions', 'Distance', 'Coordonnées', 'Nom', 'Joueur', 'Puissance', 'Alliance', 'Diplomatie', 'Brumes', 'Status'],
 					colModel: [
-						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions},
-						{name: 'range', index: 'r'},
-						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: Shared.gridMapLink},
-						{name: 'city', index: 'c'},
-						{name: 'player', index: 'p'},
-						{name: 'might', index: 'm', align: 'right', defval: 0, formatter: Shared.gridFormat},
-						{name: 'guild', index: 'g'},
-						{name: 'diplomacy', index: 'a', formatter: Shared.getDiplomacy},
-						{name: 'mist', index: 'b'},
-						{name: 'user', index: 'u', formatter: Shared.userStatusLink}
+						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
+						{name: 'range', index: 'r', formatter: function( cellValue, options, rowObject ){ return rowObject.r; }, width: 60},
+						{name: 'coords', index: 'gps', key: true, sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(rowObject.gps); }, width: 90},
+						{name: 'city', index: 'c', formatter: function( cellValue, options, rowObject ){ return rowObject.c; }},
+						{name: 'player', index: 'p', formatter: function( cellValue, options, rowObject ){ return rowObject.p; }},
+						{name: 'might', index: 'm', align: 'right', defval: 0, formatter: function( cellValue, options, rowObject ){ return Shared.format(rowObject.m); }, width: 70},
+						{name: 'guild', index: 'g', formatter: function( cellValue, options, rowObject ){ return rowObject.g; }},
+						{name: 'diplomacy', index: 'a', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(rowObject.a); }, width: 70},
+						{name: 'mist', index: 'b', align: 'center', formatter: function( cellValue, options, rowObject ){ return rowObject.b === 1 ? 'Oui' : ''; }, width: 55},
+						{name: 'user', index: 'u', formatter: function( cellValue, options, rowObject ){ return Shared.userStatusLink(rowObject.u); }}
 					],
 					caption: 'Villes',
 					pager: '#kocfia-map-pager-cities',
@@ -7970,6 +7997,10 @@ jQuery(document).ready(function(){
 					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
 				})
 				;
+
+				KOCFIA.$confPanel.bind('resize', function() {
+					$("#kocfia-map").find('.ui-jqgrid').jqGrid('setGridWidth', $('#kocfia-conf-panel-content').width() );
+				});
 		};
 
 		KOCFIA.map.on = function(){
@@ -8229,6 +8260,11 @@ jQuery(document).ready(function(){
 			KOCFIA.map.selection.wilderness = {};
 			KOCFIA.map.selection.darkForests = {};
 
+			KOCFIA.map.counters.cities = 0;
+			KOCFIA.map.counters.barbarians = 0;
+			KOCFIA.map.counters.wilderness = 0;
+			KOCFIA.map.counters.darkForests = 0;
+
 			var params = $.extend({}, window.g_ajaxparams),
 				blocks = [];
 
@@ -8326,10 +8362,15 @@ jQuery(document).ready(function(){
 		KOCFIA.map.displayResults = function( tiles ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map displayResults function');
 
-			if( tiles.cities.length > 0 ) KOCFIA.map.$resultsCities[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.cities.length, rows: tiles.cities}) );
-			if( tiles.barbarians.length > 0 ) KOCFIA.map.$resultsBarbarians[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.barbarians.length, rows: tiles.barbarians}) );
-			if( tiles.wilderness.length > 0 ) KOCFIA.map.$resultsWilderness[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.wilderness.length, rows: tiles.wilderness}) );
-			if( tiles.darkForests.length > 0 ) KOCFIA.map.$resultsDarkForests[0].addJSONData( JSON.stringify({page: 0, total: 0, records: titles.darkForests.length, rows: tiles.darkForests}) );
+			if( tiles.cities.length > 0 ){
+				for( var i = 0; i < tiles.cities.length; i += 1 ){
+					KOCFIA.map.$resultsCities.addRowData( KOCFIA.map.counters.cities, tiles.cities[i], 'last' );
+					KOCFIA.map.counters.cities += 1;
+				}
+			}
+			if( tiles.barbarians.length > 0 ) KOCFIA.map.$resultsBarbarians[0].addJSONData( {page: 0, total: 0, records: tiles.barbarians.length, rows: tiles.barbarians} );
+			if( tiles.wilderness.length > 0 ) KOCFIA.map.$resultsWilderness[0].addJSONData( {page: 0, total: 0, records: tiles.wilderness.length, rows: tiles.wilderness} );
+			if( tiles.darkForests.length > 0 ) KOCFIA.map.$resultsDarkForests[0].addJSONData( {page: 0, total: 0, records: tiles.darkForests.length, rows: tiles.darkForests} );
 		};
 
 		/*KOCFIA.map.displayResultsByCategory = function(){
@@ -18987,7 +19028,7 @@ jQuery(document).ready(function(){
 						}
 
 						KOCFIA[ mod ].storeAttacks();
-					} else if( mod == 'wilderness' || mod == 'barbarian' || mod == 'plunder' ){
+					} else if( mod == 'wilderness' || mod == 'barbarian' ){
 						time *= 2; //round-trip
 
 						//force refresh
@@ -19003,6 +19044,27 @@ jQuery(document).ready(function(){
 								KOCFIA[ mod ].refreshOngoingInfo(attack, true, 'Attaque finie.');
 								return;
 							}
+						}
+
+						//next round
+						KOCFIA[ mod ].attacks[ attack.cityKey ][ attack.id ].timeout = window.setTimeout(function(){
+							KOCFIA.checkAndLaunchAttack( attack );
+						}, time + 45000);
+
+						KOCFIA[ mod ].storeAttacks();
+					} else if( mod == 'plunder' ){
+						time *= 2; //round-trip
+
+						//force refresh
+						window.setTimeout(function(){
+							Shared.updateSeed();
+						}, time + 30000);
+
+						//no attacks loop for plunders
+						if( attack.coordIndex >= coordsLength ){
+							KOCFIA[ mod ].refreshOngoingInfo(attack, true, 'Attaque finie.');
+
+							return;
 						}
 
 						//next round

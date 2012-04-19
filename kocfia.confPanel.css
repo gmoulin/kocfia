@@ -365,6 +365,14 @@
 		background-color: #EAEAEA;
 	}
 
+	/* Headers: */
+	.ui-jqgrid .ui-jqgrid-htable th div,
+	/* Other cells: */
+	.ui-jqgrid tr.jqgrow td {
+		height:auto;
+		white-space: normal;
+	}
+
 /* auto attack tabs form */
 	.attack-form fieldset small {
 		display: block;

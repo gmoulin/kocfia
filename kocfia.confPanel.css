@@ -2217,8 +2217,9 @@
 	}
 
 /* build */
-	#kocfia-build > ul {
+	#kocfia-conf-panel #kocfia-build > ul {
 		list-style: none;
+		padding: 0;
 	}
 
 	#kocfia-build > ul li {
@@ -2234,6 +2235,7 @@
 		z-index: 100009;
 		padding: 4px;
 		min-width: 200px;
+		max-width: 400px;
 		font-weight: normal;
 		font-style: normal;
 		font-family: Verdana;
@@ -2307,108 +2309,100 @@
 		margin-right: 0;
 	}
 
-	a.blank .kocfia-build-menu .buildings {
+	#hover.blank .buildings {
 		display: block;
 	}
 
-	#slot_1.blank .kocfia-build-menu .buildings {
+	#hover.slot_1.blank .buildings {
 		display: none;
 	}
 
-	#slot_1.blank .kocfia-build-menu .bulwarks {
+	#hover.slot_1.blank .bulwarks {
 		display: block;
 	}
 
-	.guardianHover .kocfia-build-menu .guardians {
+	#hover.guardianHover .guardians {
 		display: block;
 	}
 
-	.guardianHover:hover .kocfia-build-menu,
-	a[id^="slot_"]:hover .kocfia-build-menu {
-		display: block;
-		top: 0;
-		left: 15px;
-	}
-
-	#maparea_city .kocfia-build-menu .fields {
+	#hover.maparea_city .fields {
 		display: none;
 	}
 
-	#maparea_fields .kocfia-build-menu .buildings,
-	#maparea_fields .kocfia-build-menu .bulwarks,
-	#maparea_fields .kocfia-build-menu .guardians {
+	#hover.maparea_fields .buildings,
+	#hover.maparea_fields .bulwarks,
+	#hover.maparea_fields .guardians {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_1"] .kocfia-build-menu .levels .lt2 {
+	#hover[class*="_1§"] .levels .lt2 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_2"] .kocfia-build-menu .levels .lt3 {
+	#hover[class*="_2§"] .levels .lt3 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_3"] .kocfia-build-menu .levels .lt4 {
+	#hover[class*="_3§"] .levels .lt4 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_4"] .kocfia-build-menu .levels .lt5 {
+	#hover[class*="_4§"] .levels .lt5 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_5"] .kocfia-build-menu .levels .lt6 {
+	#hover[class*="_5§"] .levels .lt6 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_6"] .kocfia-build-menu .levels .lt7 {
+	#hover[class*="_6§"] .levels .lt7 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_7"] .kocfia-build-menu .levels .lt8 {
+	#hover[class*="_7§"] .levels .lt8 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_8"] .kocfia-build-menu .levels .lt9 {
+	#hover[class*="_8§"] .levels .lt9 {
 		display: none;
 	}
 
-	a[class^="bldg_"][class$="_9"] .kocfia-build-menu .levels,
-	a[class^="bldg_"][class$="_10"] .kocfia-build-menu .levels,
-	a[class^="bldg_"][class$="_11"] .kocfia-build-menu .levels,
-	a[class^="bldg_"][class$="_12"] .kocfia-build-menu .levels {
+	#hover[class*="_9§"] .levels,
+	#hover[class*="_10§"] .levels,
+	#hover[class*="_11§"] .levels,
+	#hover[class*="_12§"] .levels {
 		display: none;
 	}
 
-	a[id="slot_1"].blank:hover .kocfia-build-menu .bulwarks {
+	#hover.slot_1.blank:hover .bulwarks {
 		display: block;
 	}
 
-	a[id="slot_1"].blank:hover .kocfia-build-menu .buildings {
+	#hover.slot_1.blank:hover .buildings {
 		display: none;
 	}
 
-	a[id="slot_0"]:hover .kocfia-build-menu .destroy {
+	#hover.slot_0:hover .destroy {
 		display: none;
 	}
 
-	.guardianHover .kocfia-build-menu .destroy:checked ~ .levels,
-	a[id^="slot_"] .kocfia-build-menu .destroy:checked ~ .levels {
+	#hover .destroy:checked ~ .levels {
 		display: block;
 	}
 
-	#maparea_fields .kocfia-build-menu .destroy:checked ~ .fields {
+	#hover.maparea_fields .destroy:checked ~ .fields {
 		display: block;
 	}
 
-	#maparea_city a[id^="slot_"] .kocfia-build-menu .destroy:checked ~ .buildings {
+	#hover.maparea_city:not(.guardianHover) .destroy:checked ~ .buildings {
 		display: block;
 	}
 
-	#maparea_city a[id="slot_1"] .kocfia-build-menu .destroy:checked ~ .bulwarks {
+	#hover.maparea_city.slot_1 .destroy:checked ~ .bulwarks {
 		display: block;
 	}
 
-	#maparea_city a[id="slot_1"] .kocfia-build-menu .destroy:checked ~ .buildings {
+	#hover.maparea_city.slot_1 .destroy:checked ~ .buildings {
 		display: none;
 	}
 

@@ -1106,7 +1106,9 @@ jQuery(document).ready(function(){
 						KOCFIA.conf.confPanel.selected = ui.index;
 						Shared.storeConf();
 
-						//Shared.refreshProgress( $(ui.panel) );
+						if( $(ui.panel).is('#kocfia-map') ){
+							KOCFIA.$confPanel.trigger('resizestop');
+						}
 					}
 				})
 				.css({
@@ -3775,6 +3777,7 @@ jQuery(document).ready(function(){
 		/* moveable */
 			KOCFIA.overview.moveableOn = function(){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview moveableOn function');
+				KOCFIA.overview.replaceOff();
 
 				KOCFIA.overview.$div
 					.prepend('<h3>État des lieux</h3>')
@@ -3867,12 +3870,13 @@ jQuery(document).ready(function(){
 		/* replace */
 			KOCFIA.overview.replaceOn = function(){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview replaceOn function');
+				KOCFIA.overview.moveableOff();
 
-				var $b = $('#kocmain_bottom'),
-					$f = $b.siblings('.panel_friendlist');
-				var p = $b.offset();
-				var h = $b.outerHeight() + $f.outerHeight(),
-					w = $b.outerWidth();
+				var $bottom = $('#kocmain_bottom'),
+					$friendPanel = $bottom.siblings('.panel_friendlist');
+				var p = $bottom.offset();
+				var h = $bottom.outerHeight() + $friendPanel.outerHeight(),
+					w = $bottom.outerWidth();
 
 				//koc not fully loaded graphicaly
 				if( p.top < 10 ){
@@ -3883,15 +3887,15 @@ jQuery(document).ready(function(){
 				}
 
 				KOCFIA.overview.$div.css({
-					height: $b.outerHeight() + $f.outerHeight(),
-					width: $b.outerWidth() - 2, /* borders */
+					height: $bottom.outerHeight() + $friendPanel.outerHeight(),
+					width: $bottom.outerWidth() - 2, /* borders */
 					top: p.top + 2, /* borders */
 					left: p.left
 				});
 
-				$f.hide();
+				$friendPanel.hide();
 				KOCFIA.overview.$div.show();
-				$b.find('.mod_comm').css('display', 'block');
+				$bottom.find('.mod_comm').css('display', 'block');
 
 				KOCFIA.overview.calcInnerSizes({height: h, width: w});
 
@@ -15848,7 +15852,7 @@ jQuery(document).ready(function(){
 			$('#build-panel-automatic').prop('checked', true);
 
 			window.setTimeout(function(){
-				KOCFIA.build.launchAutomaticbuild();
+				KOCFIA.build.launchAutomaticBuild();
 			}, 60 * 1000);
 
 			//recursive call every 5 minutes
@@ -15879,7 +15883,7 @@ jQuery(document).ready(function(){
 
 			var help = KOCFIA.build.getHelp();
 
-			var queues = '<ul>',
+			var queues = '<ul class="cf">',
 				i, j, l, cityKey, city, duration;
 			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
 				cityKey = KOCFIA.citiesKey[ i ];
@@ -15908,7 +15912,7 @@ jQuery(document).ready(function(){
 				*/
 				queues += '<button class="button secondary queue-toggle" rel="'+ cityKey +'"><span>Liste d\'attente</span></button>';
 				queues += '<button class="button danger queue-reset" rel="'+ cityKey +'" title="Vider la liste d\'attente de cette ville"><span>Vider</span></button>';
-				queues += '<div id="kocfia-build-queue-'+ cityKey +'" class="queue-list">';
+				queues += '<div id="kocfia-build-queue-'+ cityKey +'" class="queue-list" title="Liste d\'attente pour '+ city.label +'">';
 				queues += '<ol rel="'+ cityKey +'">';
 				queues += KOCFIA.build.generateQueueForCity( cityKey );
 				queues += '</ol></div></li>';
@@ -15939,7 +15943,7 @@ jQuery(document).ready(function(){
 		KOCFIA.build.generateBuildMenu = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build generateBuildMenu function');
 
-			var buildMenu = '<div class="kocfia-build-menu ui-widget ui-widget-content ui-corner-all buttonset">';
+			var buildMenu = '<div class="kocfia-build-menu ui-widget ui-widget-content ui-corner-all buttonset"><section id="hover">';
 
 			//kabam buildingcost fix
 			if( window.buildingcost.bdg52[0].indexOf('Gardien') == -1 ){
@@ -16020,19 +16024,17 @@ jQuery(document).ready(function(){
 			buildMenu += '<button class="button danger delete" title="Supprimer les tâches plannifiées pour ce bâtiment"><span>Supprimer</span></button>';
 			buildMenu += '<button class="button apply" title="Sauvegarde les tâches plannifiées pour ce bâtiment"><span>Appliquer</span></button>';
 			buildMenu += '</div>';
-			buildMenu += '</div>';
+			buildMenu += '</section></div>';
 
 			KOCFIA.build.$buildMenu = $(buildMenu);
 
 			KOCFIA.build.$buildMenu
-				.click(function(e){
-					e.stopPropagation();
-				})
+				.appendTo( $body )
 				.on('click', '.none', function(){
 					$(this).closest('div').find('input').prop('checked', false);
 				})
 				.on('click', '.apply', function(){
-					var $slot = $buildMenu.closest('a'),
+					var $slot = KOCFIA.build.hover,
 						slotId = $slot.attr('id'),
 						slotClass = $slot.attr('class'),
 						$level = KOCFIA.build.$buildMenu.find('.levels').find('input').filter(':checked'),
@@ -16141,7 +16143,7 @@ jQuery(document).ready(function(){
 						KOCFIA.build.updateCityChronology( cityKey, slotId, needReset );
 						KOCFIA.build.updateCityQueueDuration( cityKey );
 					} else {
-						//TODO display errors
+						//@TODO display errors
 					}
 				})
 				.on('click', '.delete', function(){
@@ -16171,10 +16173,14 @@ jQuery(document).ready(function(){
 					if( $(this).prop('checked') ){
 						//slot listerners
 						$('#maparea_city, #maparea_fields')
-							.on('mouseenter', 'a[id^="slot_"], .guardianHover', function(){
-								KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').removeClass('required');
+							.on('mouseenter', 'a[id^="slot_"], .guardianHover', function(e){
+								var $this = $(this);
+								KOCFIA.build.hover = $this;
+								KOCFIA.build.$buildMenu
+									.find('#hover').attr('class', $this.attr('id') +' '+ $.map($this.attr('class').split(' '), function(c){ return '§'+ c +'§'; }).join(' ') +' '+ $this.closest('.maparea_main').attr('id'))
+									.find('.buildings, .bulwarks, .guardians, .fields').removeClass('required');
 
-								KOCFIA.build.$buildMenu.appendTo( this );
+								KOCFIA.build.$buildMenu.show().position({my: 'left top', at: 'bottom right', of: $this, offset: '10 10',  collision: 'fit'});
 
 								var cityKey = 'city'+ window.currentcityid;
 								if( KOCFIA.build.queues.hasOwnProperty(cityKey)
@@ -16197,7 +16203,10 @@ jQuery(document).ready(function(){
 								}
 							})
 							.on('mouseleave', 'a[id^="slot_"], .guardianHover', function(){
-								KOCFIA.build.$buildMenu.appendTo( $body )
+								KOCFIA.build.hover = null;
+
+								KOCFIA.build.$buildMenu.hide()
+									.find('#hover').attr('class', '')
 									.find('input').prop('checked', false).end()
 									.find('.planned').find('ol').html('');
 							})
@@ -16414,7 +16423,9 @@ jQuery(document).ready(function(){
 
 		KOCFIA.build.addBuildingVisualInfo = function( slot ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build addBuildingVisualInfo function');
-			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot.id ) ){
+			if( KOCFIA.build.queues.hasOwnProperty(cityKey)
+				&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot.id )
+			){
 				var tasks = KOCFIA.build.queues[ cityKey ][ slot.id ];
 				if( tasks.length > 0 ){
 					var $slot = $(slot),
@@ -17180,7 +17191,7 @@ jQuery(document).ready(function(){
 		KOCFIA.marches.byCity = function( cityKey ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches byCity function');
 			var code = '<tbody data-city="'+ cityKey +'">',
-				marches = window.seed.queue_atk[ cityKey ],
+				marches = window.seed.queue_atkp[ cityKey ],
 				m, marches, ts, info, eta,
 				types = KOCFIA.tilesTypes,
 				nb = Shared.getRallyPointSlots( cityKey ),
@@ -17338,9 +17349,9 @@ jQuery(document).ready(function(){
 						if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_STOPPED ){
 							eta = 0;
 						} else if( ts < parseInt(march.destinationUnixTime, 10) ){
-                            eta = parseInt(r.destinationUnixTime, 10) - ts;
+                            eta = parseInt(march.destinationUnixTime, 10) - ts;
                         } else if( march.marchStatus != window.cm.MARCH_STATUS.MARCH_STATUS_DEFENDING ){
-                            eta = parseInt(r.returnUnixTime, 10) - ts;
+                            eta = parseInt(march.returnUnixTime, 10) - ts;
 						}
                     }
 
@@ -17390,14 +17401,14 @@ jQuery(document).ready(function(){
 					if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_OUTBOUND ){
 						for( i = 0; i <= 12; i += 1 ){
 							if( march['unit'+ i +'Count'] > 0 ){
-								info = KOCFIA.unitsInfo['unt'+ i];
+								info = KOCFIA.unitInfo['unt'+ i];
 								code += '<li><img src="'+ info.icon +'" title="'+ info.label +'">&nbsp;<span title="'+ Shared.readable(march['unit'+ i +'Count']) +'">'+ Shared.format(march['unit'+ i +'Count']) +'</span></li>';
 							}
 						}
 					} else { //returning troops
 						for( i = 0; i <= 12; i += 1 ){
 							if( march['unit'+ i +'Count'] > 0 ){
-								info = KOCFIA.unitsInfo['unt'+ i];
+								info = KOCFIA.unitInfo['unt'+ i];
 								code += '<li><img src="'+ info.icon +'" title="'+ info.label +'">&nbsp;<span title="'+ Shared.readable(march['unit'+ i +'Return']) +'">'+ Shared.format(march['unit'+ i +'Return']) +'</span>&nbsp;(<span title="'+ Shared.readable(march['unit'+ i +'Count']) +'">'+ Shared.format(march['unit'+ i +'Count']) +'</span>)</li>';
 							}
 						}
@@ -17714,11 +17725,13 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-hospital').html('');
 
-			var form = '<div class="infos">';
-			form += '<span class="buttonset"><input type="checkbox" id="hospital-panel-automatic" '+ (KOCFIA.conf.hospital.automatic ? 'checked' : '') +' autocomplete="off" />';
-			form += '<label for="hospital-panel-automatic">Soins automatiques</label></span>';
-			form += '<button class="button secondary help-toggle"><span>Aide</span></button>';
-			form += '</div><h3>Configurations</h3>';
+			var code = '<div class="infos">';
+			code += '<span class="buttonset"><input type="checkbox" id="hospital-panel-automatic" '+ (KOCFIA.conf.hospital.automatic ? 'checked' : '') +' autocomplete="off" />';
+			code += '<label for="hospital-panel-automatic">Soins automatiques</label></span>';
+			code += '<button class="button priority" title="Priorité des unités pour les soins"><span>Priorité</span></button>';
+			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '</div><div class="accordion">';
+			code += '<h3>Configurations</h3>';
 
 			code += '<div id="kocfia-hospital-priority" class="priority-list" title="Priorité des unités lors des soins">';
 			code += '<ol>';
@@ -17731,47 +17744,44 @@ jQuery(document).ready(function(){
 			code += '</ol></div>';
 
 			//automatic heal form
-				form += '<div class="hospice-form">';
-				form += '<div class="buttons">';
-				form += '<button class="save button modify"><span>Enregistrer</span></button>';
-				form += '<button class="reset button danger" title="Vide le formulaire"><span>Annuler</span></button>';
-				form += '<button class="reload button danger" title="Recharge le forumlaire avec les configurations enregistrées"><span>Recharger</span></button>';
-				form += '</div>';
-				form += '<div>';
-				form += 'Conserver : <input type="text" class="keep" value="0" required> <img src="'+ KOCFIA.resourceInfo.gold.icon +'" alt="'+ KOCFIA.resourceInfo.gold.label +'" title="'+ KOCFIA.resourceInfo.gold.label +'">';
-				form += '</div>';
-				form += '<table><thead><tr>';
-				form += '<th>Troupe</th><th>Configurations</th>';
-				form += '</tr></thead><tbody>';
+				code += '<div class="hospice-form">';
+				code += '<div class="buttons">';
+				code += '<button class="save button modify"><span>Enregistrer</span></button>';
+				code += '<button class="reset button danger" title="Vide le codeulaire"><span>Annuler</span></button>';
+				code += '<button class="reload button danger" title="Recharge le forumlaire avec les configurations enregistrées"><span>Recharger</span></button>';
+				code += '</div>';
+				code += '<div>';
+				code += 'Conserver : <input type="text" class="keep" value="0" required> <img src="'+ KOCFIA.resourceInfo.gold.icon +'" alt="'+ KOCFIA.resourceInfo.gold.label +'" title="'+ KOCFIA.resourceInfo.gold.label +'">';
+				code += '</div>';
+				code += '<table><thead><tr>';
+				code += '<th>Troupe</th><th>Configurations</th>';
+				code += '</tr></thead><tbody>';
 
 				var i, unit;
 				for( i = 0; i < KOCFIA.troops.length; i += 1 ){
 					unit = KOCFIA.troops[i];
-					form += '<tr data-unit="'+ unit.key +'"><td class="unit">';
-					form += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"><br>';
-					form += '<button class="button secondary addRule" title="Ajouter une configuration pour cette unité"><span>Ajouter</span></button>';
-					form += '</td><td class="rules"></td></tr>';
+					code += '<tr data-unit="'+ unit.key +'"><td class="unit">';
+					code += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"><br>';
+					code += '<button class="button secondary addRule" title="Ajouter une configuration pour cette unité"><span>Ajouter</span></button>';
+					code += '</td><td class="rules"></td></tr>';
 				}
 
-				form += '</tbody></table>';
-				form += '<div class="buttons">';
-				form += '<button class="save button modify"><span>Enregistrer</span></button>';
-				form += '<button class="reset button danger" title="Vide le formulaire"><span>Annuler</span></button>';
-				form += '<button class="reload button danger" title="Recharge le forumlaire avec les configurations enregistrées"><span>Recharger</span></button>';
-				form += '</div>';
-				form += '</div>';
+				code += '</tbody></table>';
+				code += '<div class="buttons">';
+				code += '<button class="save button modify"><span>Enregistrer</span></button>';
+				code += '<button class="reset button danger" title="Vide le codeulaire"><span>Annuler</span></button>';
+				code += '<button class="reload button danger" title="Recharge le forumlaire avec les configurations enregistrées"><span>Recharger</span></button>';
+				code += '</div>';
+				code += '</div>';
 
 			//ongoing healing list
-				var onGoing = '<h3>Soins en cours et quantités de blessés';
-				onGoing += '<button class="button priority" title="Priorité des unités pour les soins"><span>Priorité</span></button>';
-				onGoing += '</h3><div class="hospital-list ongoing">';
-				onGoing += '</div>';
+				code += '<h3>Soins en cours et quantités de blessés</h3>';
+				code += '<div class="hospital-list ongoing"></div>';
+				code += '</div>';
 
 			var help = KOCFIA.hospital.getHelp();
 
-			$section.append( form + onGoing + help );
-
-			KOCFIA.hospital.addSectionListeners();
+			$section.append( code + help );
 
 			$section
 				.find('.priority-list')
@@ -17790,19 +17800,23 @@ jQuery(document).ready(function(){
 			KOCFIA.hospital.$autoForm = $section.find('.hospital-form');
 			KOCFIA.hospital.$ongoing = $section.find('.hospital-list.ongoing');
 
-			KOCFIA.hospital.$forms.accordion({
-				collapsible: true,
-				autoHeight: false,
-				animated: false,
-				change: function(event, ui){
-					KOCFIA.$confPanelWrapper[0].scrollTop = 0;
-					KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
-				}
-			})
-			.accordion('activate', false);
+			KOCFIA.hospital.addSectionListeners();
 
-			KOCFIA.hospital.loadAutoRuleset();
-			KOCFIA.hospital.refreshOnGoing();
+			$section.find('.accordion').accordion({
+					collapsible: true,
+					autoHeight: false,
+					animated: false,
+					change: function(event, ui){
+						KOCFIA.$confPanelWrapper[0].scrollTop = 0;
+						KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
+					}
+				})
+				.accordion('activate', false);
+
+			window.setTimeout(function(){
+				KOCFIA.hospital.loadAutoRuleset();
+				KOCFIA.hospital.refreshOnGoing();
+			}, 10000);
 		};
 
 		KOCFIA.hospital.refreshOnGoing = function(){
@@ -17842,8 +17856,8 @@ jQuery(document).ready(function(){
 
 					//wounded
 					wounded = 0;
-					if( window.seed.woundedUnits && seed.woundedUnits.hasOwnProperty(cityKey) && window.seed.wondedUnits[ cityKey ].hasOwnProperty(unit.key) ){
-						wounded = parseInt(window.seed.wondedUnits[ cityKey ][ unit.key ], 10);
+					if( window.seed.hasOwnProperty('woundedUnits') && window.seed.woundedUnits.hasOwnProperty(cityKey) && window.seed.woundedUnits[ cityKey ].hasOwnProperty(unit.key) ){
+						wounded = parseInt(window.seed.woundedUnits[ cityKey ][ unit.key ], 10);
 						if( isNaN(wounded) ) wounded = 0;
 					}
 					units += '<td>'+ Shared.format( wounded ) +'</td>';
@@ -17854,7 +17868,7 @@ jQuery(document).ready(function(){
 
 			onGoing += '<table><thead><tr>'+ headers +'</tr></thead><tbody><tr>'+ healing +'</tr>'+ units +'</tbody></table>';
 
-			KOCFIA.hospital.$ongoing[0].innerHtml = onGoing;
+			KOCFIA.hospital.$ongoing[0].innerHTML = onGoing;
 		};
 
 		KOCFIA.hospital.addSectionListeners = function(){
@@ -17997,7 +18011,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital automaticOff function');
 			$('#hospital-panel-automatic').prop('checked', false);
 
-			if( autoHospitalInterval ) window.cleanInterval( autoHospitalInterval );
+			if( autoHospitalInterval ) window.clearInterval( autoHospitalInterval );
 		};
 
 		KOCFIA.hospital.getHelp = function(){

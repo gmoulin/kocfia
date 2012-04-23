@@ -144,16 +144,17 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.5.6',
+		version: '0.5.7',
 		userScriptLoaderVersion: 3,
 		debug: true,
-		debugWhat: {build: 1, map: 1, plunder: 1},
+		debugWhat: {build: 1, map: 1, plunder: 1, hospital: 1, marches: 1},
 		server: null,
 		modules: [
 			'dataAndStats',
 			'overview', 'summary',
 			'chat',
 			'map', //'canvas',
+			'marches',
 			'barbarian', 'wilderness', 'darkForest', 'scout', 'plunder',
 			'formation', 'transport', 'reassign',
 			'knights', 'estates',
@@ -173,6 +174,7 @@ jQuery(document).ready(function(){
 			chat: 'Chat',
 			map: 'Carte',
 			canvas: 'Mappemonde',
+			marches: 'Marches',
 			barbarian: 'Camps Barbares <small>(trône)</small>',
 			wilderness: 'Terres Sauvages <small>(armoiries, trône)</small>',
 			darkForest: 'Forêts Obscures <small>(éther, trône)</small>',
@@ -199,6 +201,7 @@ jQuery(document).ready(function(){
 			chat: 'Chat',
 			map: 'Carte',
 			canvas: 'Mappemonde',
+			marches: 'Marches',
 			barbarian: 'CB <small>(manuel)</small>',
 			wilderness: 'TS',
 			darkForest: 'Forêts',
@@ -241,6 +244,18 @@ jQuery(document).ready(function(){
 	/* DATA */
 		KOCFIA.cities = {}; //cityXXXX:{'id','name',coords: {x,y}}, ...]
 		KOCFIA.citiesKey = [];
+		KOCFIA.tilesTypes = {
+			 0: 'Marais',
+			10: 'Plaine',
+			11: 'Prairie',
+			20: 'Forêt',
+			30: 'Colline',
+			40: 'Montagne',
+			50: 'Plaine',
+			51: 'Ville ou CB',
+			53: 'Ville sous brumes',
+			54: 'Forêts Sombres'
+		};
 		KOCFIA.resources = [
 			{name: 'gold', label: 'Or', key: 'rec0', icon: window.stimgUrl + 'img/gold_30.png' },
 			{name: 'resource1x3600', label: 'Nourriture', key: 'rec1', icon: window.stimgUrl + 'img/food_30.png' },
@@ -15060,13 +15075,12 @@ jQuery(document).ready(function(){
 
 		KOCFIA.estates.update = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates update function');
-			var cityKey, $code;
+			var cityKey, i, l;
 
 			for( i = 0, l = KOCFIA.citiesKey.length; i < l; i += 1 ){
 				cityKey = KOCFIA.citiesKey[ i ];
 
-				$code = $( KOCFIA.estates.byCity( cityKey ) );
-				KOCFIA.estates.$tbodies.filter('[data-city="'+ cityKey +'"]').html( $code.html() );
+				KOCFIA.estates.$tbodies.filter('[data-city="'+ cityKey +'"]')[0].innerHTML = KOCFIA.estates.byCity( cityKey );
 			}
 		};
 
@@ -15075,7 +15089,7 @@ jQuery(document).ready(function(){
 			var code = '<tbody data-city="'+ cityKey +'">',
 				estates = window.seed.wilderness[ cityKey ],
 				e, estate, maxTraps, ownedTraps, mercenaryIndex, hasMaxTraps,
-				types = {10: 'Plaine', 11: 'Prairie', 20: 'Forêt', 30: 'Colline', 40: 'Montagne', 50: 'Plaine'},
+				types = KOCFIA.tilesTypes,
 				nb = 0, max = window.seed.buildings[ cityKey ]['pos0'][1];
 
 			if( max == 11 ) max = 12;
@@ -17054,7 +17068,391 @@ jQuery(document).ready(function(){
 			}
 		};
 
+	/* MARCHES */
+		KOCFIA.marches = {
+			options: {
+				active: 1
+			}
+		};
+
+		KOCFIA.marches.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.marches +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('marches', 'active', 'Activer', KOCFIA.conf.marches.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.marches.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-marches').html('');
+
+			var i, cityKey, city;
+
+			var header = '<div class="infos">';
+			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '</div><h3>'+ KOCFIA.modulesLabel.marches +'</h3>';
+			header += '<div class="buttonset city-toggles">Afficher : ';
+			header += '<input type="radio" name="kocfia-marches-city-toggles" id="kocfia-marches-all" value="all" checked>';
+			header += '<label for="kocfia-marches-all">Toutes</label>';
+
+			var code = '<table><thead><tr>';
+			code += '<th>Actions</th>';
+			code += '<th>Status</th>';
+			code += '<th>Coordonnées</th>';
+			code += '<th>Type</th>';
+			code += '<th>Troupes</th>';
+			code += '<th>Butin</th>';
+			code += '</tr></thead>';
+
+			for( i = 0, l = KOCFIA.citiesKey.length; i < l; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+				city = KOCFIA.cities[ cityKey ];
+
+				header += '<input type="radio" name="kocfia-marches-city-toggles" id="kocfia-marches-'+ cityKey +'" value="'+ cityKey +'">';
+				header += '<label for="kocfia-marches-'+ cityKey +'">'+ city.label +'</label>';
+
+				code += KOCFIA.marches.byCity( cityKey );
+			}
+
+			header += '</div>';
+			code += '</table>';
+
+			var help = KOCFIA.marches.getHelp();
+
+			$section.append( header + code + help )
+				.on('change', '.city-toggles input', function(){
+					if( this.value == 'all' ){
+						KOCFIA.marches.$tbodies.show();
+					} else {
+						KOCFIA.marches.$tbodies.hide().filter('[data-city="'+ this.value +'"]').show();
+					}
+				})
+				.on('change', '.raid-toggles', function(){
+					var isChecked = $(this).prop('checked');
+					KOCFIA.marches.$tbodies
+						.find('.raid-toggles').prop('checked', isChecked).end()
+						.find('.raid').toggle( isChecked );
+				})
+				.on('click', '.update', function(){
+					var $tbody = $(this).closest('tbody'),
+						cityKey = $tbody.data('city'),
+						$code = $( KOCFIA.marches.byCity(cityKey) );
+
+						$tbody.html( $code.html() );
+						$('.tipsy').remove();
+				})
+				;
+
+			KOCFIA.marches.$tbodies = $('#kocfia-marches').find('tbody');
+		};
+
+		KOCFIA.marches.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches on function');
+		};
+
+		KOCFIA.marches.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches off function');
+		};
+
+		KOCFIA.marches.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA marches getHelp function');
+			var help = '<div id="kocfia-marches-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.estate +'">';
+			help += '<h4>Gestion des déplacements de troupes (marches)</h4><ul>';
+			help += '</ul></div>';
+
+			return help;
+		};
+
+		KOCFIA.marches.update = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches update function');
+			var cityKey, i, l;
+
+			for( i = 0, l = KOCFIA.citiesKey.length; i < l; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+
+				KOCFIA.marches.$tbodies.filter('[data-city="'+ cityKey +'"]')[0].innerHTML = KOCFIA.marches.byCity( cityKey );
+			}
+		};
+
+		KOCFIA.marches.byCity = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches byCity function');
+			var code = '<tbody data-city="'+ cityKey +'">',
+				marches = window.seed.queue_atk[ cityKey ],
+				m, marches, ts, info, eta,
+				types = KOCFIA.tilesTypes,
+				nb = Shared.getRallyPointSlots( cityKey ),
+				max = Shared.buildingHighestLevel(cityKey, 12);
+
+			if( max == 12 ) max -= 1;
+
+			for( m in marches ){
+				if( marches.hasOwnProperty(m) ) nb += 1;
+			}
+
+			code += '<tr>';
+			code += '<th><button class="button secondary update" title="Met à jour les informations sur les marches de cette ville"><span>Raffraîchir</span></button></th>';
+			code += '<th colspan="2">'+ KOCFIA.cities[ cityKey ].label +'</th>';
+			code += '<th>'+ nb +'/'+ max +'</th>';
+			code += '<th>';
+			code += '<input type="radio" class="raid-toggles" name="kocfia-marches-raid-toggles" id="kocfia-marches-raid-'+ cityKey +'">';
+			code += '<label for="kocfia-marches-raid-'+ cityKey +'">Masquer les raids</label>';
+			code += '</th>';
+			code += '<th></th>';
+			code += '</tr>';
+
+			/*cm.BOT_STATUS = {
+				BOT_MARCH_UNDEFINED: 0,
+				BOT_MARCH_MARCHING: 1,
+				BOT_MARCH_RETURNING: 2,
+				BOT_MARCH_STOPPED: 3,
+				BOT_MARCH_INSUFFICIENT_TROOPS: 4,
+				BOT_MARCH_MAX_RAIDS_EXCEEDED: 5,
+				BOT_MARCH_TIMED_OUT: 6,
+				BOT_MARCH_RESTING: 7,
+				BOT_MARCH_UNAVAILABLE_KNIGHT: 8,
+				BOT_MARCH_RALLY_POINT_LIMIT_REACHED: 9,
+				BOT_MARCH_STOPPING: 200
+			};*/
+			/*cm.MARCH_STATUS = {
+				MARCH_STATUS_INACTIVE: 0,
+				MARCH_STATUS_OUTBOUND: 1,
+				MARCH_STATUS_DEFENDING: 2,
+				MARCH_STATUS_STOPPED: 10,
+				MARCH_STATUS_RESTING: 4,
+				MARCH_STATUS_UNKNOWN: 5,
+				MARCH_STATUS_SITUATIONCHANGED: 7,
+				MARCH_STATUS_RETURNING: 8,
+				MARCH_STATUS_ABORTING: 9
+			};*/
+			/*cm.MARCH_TYPES = {
+				MARCH_TYPE_NONE: 0,
+				MARCH_TYPE_TRANSPORT: 1,
+				MARCH_TYPE_REINFORCE: 2,
+				MARCH_TYPE_SCOUT: 3,
+				MARCH_TYPE_ATTACK: 4,
+				MARCH_TYPE_REASSIGN: 5,
+				MARCH_TYPE_BARBARIAN: 6,
+				MARCH_TYPE_MERCENARY: 7,
+				MARCH_TYPE_BARBARIAN_REINFORCE: 8,
+				MARCH_TYPE_BOT_BARBARIAN: 9,
+				MARCH_TYPE_DARK_FOREST: 10,
+				MARCH_TYPE_DARK_FOREST_SCOUT: 11
+			};*/
+
+			/*"m41191": {
+				"marchUnixTime": "1321209180",
+				"destinationUnixTime": "1321209383",
+				"returnUnixTime": "1321209586",
+				"lastUpdatedUnixTime": "1321209390",
+				"marchId": "41191",
+				"playerId": "16273562",
+				"cityId": "60115",
+				"botSettingsId": "13396",
+				"botMarchStatus": "2",
+				"botState": "1",
+				"modalState": "0",
+				"restPeriod": "3194",
+				"fromPlayerId": "16273562",
+				"fromCityId": "60115",
+				"fromAllianceId": "769",
+				"fromXCoord": "95",
+				"fromYCoord": "538",
+				"toPlayerId": "0",
+				"toCityId": "0",
+				"toTileId": "328883",
+				"toAllianceId": "0",
+				"toXCoord": "92",
+				"toYCoord": "532",
+				"toTileType": "51",
+				"toTileLevel": "5",
+				"marchType": "9",
+				"marchStatus": "8",
+				"marchTimestamp": "2011-11-13 10:33:00",
+				"destinationEta": "2011-11-13 10:36:23",
+				"returnEta": "2011-11-13 10:39:46",
+				"gold": "5000",
+				"resource1": "500000",
+				"resource2": "50000",
+				"resource3": "5000",
+				"resource4": "500",
+				"unit0Count": "0",
+				"unit1Count": "0",
+				"unit2Count": "0",
+				"unit3Count": "0",
+				"unit4Count": "0",
+				"unit5Count": "0",
+				"unit6Count": "16000",
+				"unit7Count": "0",
+				"unit8Count": "0",
+				"unit9Count": "0",
+				"unit10Count": "0",
+				"unit11Count": "0",
+				"unit12Count": "0",
+				"unit0Return": "0",
+				"unit1Return": "0",
+				"unit2Return": "0",
+				"unit3Return": "0",
+				"unit4Return": "0",
+				"unit5Return": "0",
+				"unit6Return": "16000",
+				"unit7Return": "0",
+				"unit8Return": "0",
+				"unit9Return": "0",
+				"unit10Return": "0",
+				"unit11Return": "0",
+				"unit12Return": "0",
+				"speed": "425",
+				"knightId": "189764",
+				"knightCombat": "67",
+				"knightCombatBoostExpiration": "0000-00-00 00:00:00",
+				"knightLevel": "1",
+				"knightSkillPointsApplied": "12",
+				"fromInformatics": "6",
+				"fromLoadTech": "8",
+				"lastUpdated": "2011-11-13 10:36:30"
+			},*/
+
+			ts = Date.timestamp();
+			for( m in marches ){
+				if( marches.hasOwnProperty(m) ){
+					march = marches[m];
+
+					code += '<tr data-tile="'+ m +'" class="'+ (march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN ? 'raid' : '') +'">';
+					//actions
+					code += '<td>';
+					if( (march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_OUTBOUND && ts + 60 < march.destinationUnixTime)
+						|| march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_DEFENDING
+					){
+						code += '<button class="button danger recall" rel="'+ m +'"><span>Rappel</span></button>';
+					}
+					code += '</td>';
+
+					//status
+					code += '<td>';
+					code += '<span class="atkpic ';
+					eta = 0;
+					if( march.hasOwnProperty('destinationUnixTime') ){
+						if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_STOPPED ){
+							eta = 0;
+						} else if( ts < parseInt(march.destinationUnixTime, 10) ){
+                            eta = parseInt(r.destinationUnixTime, 10) - ts;
+                        } else if( march.marchStatus != window.cm.MARCH_STATUS.MARCH_STATUS_DEFENDING ){
+                            eta = parseInt(r.returnUnixTime, 10) - ts;
+						}
+                    }
+
+                    if( eta > 0 && march.marchStatus != window.cm.MARCH_STATUS.MARCH_STATUS_UNKNOWN ){
+						if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_RETURNING ){
+							code += 'returning';
+						} else if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_UNKNOWN
+								|| march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_DEFENDING
+								|| march.marchStatus == window.cm.MARCH_STATUS.MARCH_TYPE_REINFORCE
+						){
+							code += 'reinforce';
+						} else if( march.marchStatus == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT
+								|| march.marchStatus == window.cm.MARCH_TYPES.MARCH_TYPE_DARK_FOREST_SCOUT
+						){
+							code += 'scouting';
+						} else if( march.marchStatus == window.cm.MARCH_TYPES.MARCH_TYPE_TRANSPORT
+								|| march.marchStatus == window.cm.MARCH_TYPES.MARCH_TYPE_REASSIGN
+						){
+							code += 'transporting';
+						} else {
+							code += 'attacking';
+						}
+					} else {
+						if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_STOPPED ){
+							code += 'stopped';
+						} else if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_RESTING
+								|| (
+									(march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_UNKNOWN
+									|| march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_RETURNING)
+									&& march.marchStatus == window.cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN
+									&& ts >= parseInt(march.returnUnixTime, 10)
+								)
+						){
+							code += 'resting';
+						} else {
+							code += 'reinforce';
+						}
+					}
+					code += '></span>';
+					code += '</td>';
+
+					code += '<td>'+ Shared.mapLink( march.toXCoord +','+ march.toYCoord ) +'</td>';
+					code += '<td>'+ (types[ march.toTileType ] || '?') +' '+ march.toTileLevel +'</td>';
+
+					//troops
+					code += '<td><ul>';
+					if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_OUTBOUND ){
+						for( i = 0; i <= 12; i += 1 ){
+							if( march['unit'+ i +'Count'] > 0 ){
+								info = KOCFIA.unitsInfo['unt'+ i];
+								code += '<li><img src="'+ info.icon +'" title="'+ info.label +'">&nbsp;<span title="'+ Shared.readable(march['unit'+ i +'Count']) +'">'+ Shared.format(march['unit'+ i +'Count']) +'</span></li>';
+							}
+						}
+					} else { //returning troops
+						for( i = 0; i <= 12; i += 1 ){
+							if( march['unit'+ i +'Count'] > 0 ){
+								info = KOCFIA.unitsInfo['unt'+ i];
+								code += '<li><img src="'+ info.icon +'" title="'+ info.label +'">&nbsp;<span title="'+ Shared.readable(march['unit'+ i +'Return']) +'">'+ Shared.format(march['unit'+ i +'Return']) +'</span>&nbsp;(<span title="'+ Shared.readable(march['unit'+ i +'Count']) +'">'+ Shared.format(march['unit'+ i +'Count']) +'</span>)</li>';
+							}
+						}
+					}
+					code += '</ul></td>';
+
+					//booty
+					code += '<td><ul>';
+					for( i = 0; i < KOCFIA.resources.length; i += 1 ){
+						res = KOCFIA.resources[ i ];
+						amount = march[ res.name.replace(/x3600/, '') ];
+						if( amount > 0 ){
+							code += '<li><img src="'+ res.icon +'" title="'+ res.label +'">&nbsp;<span title="'+ Shared.readable(amount) +'">'+ Shared.format(amount) +'</span></li>';
+						}
+					}
+					code += '</ul></td>';
+					code += '</tr>';
+				}
+			}
+
+			code += '</tbody>';
+
+			return code;
+		};
+
 	/* QUICK MARCH */
+		KOCFIA.quickMarch = {
+			options: {
+				active: 0
+			},
+			stored: []
+		};
+
+		KOCFIA.quickMarch.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.quickMarch +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('quickMarch', 'active', 'Activer', KOCFIA.conf.quickMarch.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.quickMarch.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-quickMarch').html('');
+		};
+
+		KOCFIA.quickMarch.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch on function');
+		};
+
+		KOCFIA.quickMarch.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch off function');
+		};
 
 	/* THRONE */
 		KOCFIA.throne = {
@@ -17938,6 +18336,35 @@ jQuery(document).ready(function(){
 		};
 
 	/* PLAYERS OR ALLIANCES SEARCH */
+		KOCFIA.search = {
+			options: {
+				active: 0
+			},
+			stored: []
+		};
+
+		KOCFIA.search.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.search +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('search', 'active', 'Activer', KOCFIA.conf.search.active);
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.search.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-search').html('');
+		};
+
+		KOCFIA.search.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search on function');
+		};
+
+		KOCFIA.search.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search off function');
+		};
 
 	/* CHECK AND LAUNCH ATTACK */
 		KOCFIA.checkAndLaunchAttack = function( attack ){
@@ -19274,155 +19701,155 @@ jQuery(document).ready(function(){
 
 /* MODULE SKELETON */
 /*
-	KOCFIA.mod = {
-		options: {
-			active: 0,			automatic: 0
-		},		stored: ['rules'],		rules: {}
-	};
+		KOCFIA.mod = {
+			options: {
+				active: 0,			automatic: 0
+			},		stored: ['rules'],		rules: {}
+		};
 
-	KOCFIA.mod.confPanel = function( $section ){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod confPanel function');
-		var code = '<h3>'+ KOCFIA.modulesLabel.mod +'</h3>';
-		code += '<div>';
-		code += Shared.generateCheckbox('mod', 'active', 'Activer', KOCFIA.conf.mod.active);
-		code += Shared.generateCheckbox('mod', 'automatic', 'Activer les mod automatiques', KOCFIA.conf.mod.automatic);
-		code += Shared.generateButton('rules', 'deleteRules', 'Supprimer toutes les configurations de mod enregistrées');
-		code += '</div>';
+		KOCFIA.mod.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.mod +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('mod', 'active', 'Activer', KOCFIA.conf.mod.active);
+			code += Shared.generateCheckbox('mod', 'automatic', 'Activer les mod automatiques', KOCFIA.conf.mod.automatic);
+			code += Shared.generateButton('rules', 'deleteRules', 'Supprimer toutes les configurations de mod enregistrées');
+			code += '</div>';
 
-		$section.append( code );
-	};
+			$section.append( code );
+		};
 
-	KOCFIA.mod.modPanel = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod modPanel function');
-		var $section = KOCFIA.$confPanel.find('#kocfia-mod').html('');
+		KOCFIA.mod.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-mod').html('');
 
-		var manualForm = KOCFIA.mod.getManualForm(),
-			automaticForm = KOCFIA.mod.getAutoForm(),
-			onGoing = KOCFIA.mod.getListsTemplate(),
-			help = KOCFIA.mod.getHelp();
+			var manualForm = KOCFIA.mod.getManualForm(),
+				automaticForm = KOCFIA.mod.getAutoForm(),
+				onGoing = KOCFIA.mod.getListsTemplate(),
+				help = KOCFIA.mod.getHelp();
 
-		var code = '<div class="infos">';
-		code += '<span class="buttonset"><input type="checkbox" id="mod-panel-automatic" '+ (KOCFIA.conf.mod.automatic ? 'checked' : '') +' autocomplete="off" />';
-		code += '<label for="mod-panel-automatic">mod automatiques</label></span>';
-		code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
-		code += '</div><h3>Configurations</h3>';
-		code += '<div class="accordion">';
-		code +=  manualForm + automaticForm;
-		code += '</div><div>'+ onGoing +'</div>';
-		code += help;
-		code += '<div id="kocfia-mod-history" class="history" title="Historique des mod"></div>';
+			var code = '<div class="infos">';
+			code += '<span class="buttonset"><input type="checkbox" id="mod-panel-automatic" '+ (KOCFIA.conf.mod.automatic ? 'checked' : '') +' autocomplete="off" />';
+			code += '<label for="mod-panel-automatic">mod automatiques</label></span>';
+			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '</div><h3>Configurations</h3>';
+			code += '<div class="accordion">';
+			code +=  manualForm + automaticForm;
+			code += '</div><div>'+ onGoing +'</div>';
+			code += help;
+			code += '<div id="kocfia-mod-history" class="history" title="Historique des mod"></div>';
 
-		$section.append( code )
-		//listener
-			.on('change', '#mod-panel-automatic', function(){
-				$('#mod-automatic').prop('checked', $(this).prop('checked')).change();
+			$section.append( code )
+			//listener
+				.on('change', '#mod-panel-automatic', function(){
+					$('#mod-automatic').prop('checked', $(this).prop('checked')).change();
+				});
+
+			KOCFIA.mod.$manualForm = $section.find('.manual-form');
+			KOCFIA.mod.$autoForm = $section.find('.mod-form');
+			KOCFIA.mod.$ongoing = $section.find('.ongoing');
+			KOCFIA.mod.$nextBar = $section.find('.nextIteration');
+			KOCFIA.mod.$history = $section.find('.history');
+
+			$section.find('.accordion').accordion({
+				collapsible: true,
+				autoHeight: false,
+				animated: false,
+				change: function(event, ui){
+					KOCFIA.$confPanelWrapper[0].scrollTop = 0;
+					KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
+				}
+			})
+			.accordion('activate', false);
+
+			KOCFIA.mod.addManualFormListeners();
+			KOCFIA.mod.addAutoFormListeners();
+
+			KOCFIA.mod.loadAutoRuleset();
+		};
+
+		KOCFIA.mod.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod on function');
+
+			if( KOCFIA.conf.mod.automatic ){
+				KOCFIA.mod.automaticOn();
+			}
+		};
+
+		KOCFIA.mod.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod off function');
+
+			KOCFIA.mod.automaticOff();
+		};
+
+		KOCFIA.mod.automaticOn = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod automaticOn function');
+			$('#mod-panel-automatic').prop('checked', true);
+
+			Shared.nextIteration( KOCFIA.mod.$nextBar, 60 );
+			window.setTimeout(function(){
+				Shared.nextIteration( KOCFIA.mod.$nextBar, 60 * 60 );
+				KOCFIA.mod.launchAutomaticmod();
+			}, 60 * 1000);
+
+			//recursive call every 60 minutes
+			autoModInterval = window.setInterval(function(){
+				Shared.nextIteration( KOCFIA.mod.$nextBar, 60 * 60 );
+				KOCFIA.mod.launchAutomaticmod();
+			}, 60 * 60 * 1000);
+		};
+
+		KOCFIA.mod.automaticOff = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod automaticOff function');
+
+			window.clearInterval(autoModInterval);
+
+			KOCFIA.mod.$nextBar.html('');
+		};
+
+		KOCFIA.mod.storeRules = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('kocfia mod storeRules function');
+			localStorage.setObject('kocfia_mod_rules_' + KOCFIA.storeUniqueId, KOCFIA.mod.rules);
+		};
+
+		KOCFIA.mod.deleteRules = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod deleteRules function');
+			localStorage.removeItem('kocfia_mod_rules_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.mod.rules = {};
+		};
+
+		KOCFIA.mod.refreshOnGoing = function(msg){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod refreshOnGoing function');
+
+			//clean old messages
+			var timestamp = Date.timestamp(),
+				obsolete = 5 * 60 * 1000,
+				msgTimestamp, $div, $m;
+
+			$div = KOCFIA.mod.$ongoing;
+
+			$div.find('div').each(function(){
+				$m = $(this);
+				msgTimestamp = $m.data('timestamp');
+				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
+					$m.appendTo( KOCFIA.mod.$history );
+				}
 			});
 
-		KOCFIA.mod.$manualForm = $section.find('.manual-form');
-		KOCFIA.mod.$autoForm = $section.find('.mod-form');
-		KOCFIA.mod.$ongoing = $section.find('.ongoing');
-		KOCFIA.mod.$nextBar = $section.find('.nextIteration');
-		KOCFIA.mod.$history = $section.find('.history');
-
-		$section.find('.accordion').accordion({
-			collapsible: true,
-			autoHeight: false,
-			animated: false,
-			change: function(event, ui){
-				KOCFIA.$confPanelWrapper[0].scrollTop = 0;
-				KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
+			if( !$.isEmptyObject(msg) ){
+				$div.append( '<div data-timestamp="'+ timestamp+'">'+ msg +'</div>' );
 			}
-		})
-		.accordion('activate', false);
+		};
 
-		KOCFIA.mod.addManualFormListeners();
-		KOCFIA.mod.addAutoFormListeners();
+		KOCFIA.mod.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod getHelp function');
+			var help = '<div id="kocfia-mod-help" class="help" title="Aide Mod">';
+			help += '<h4>Informations et limitations :</h4><ul>';
+			help += '</ul></div>';
 
-		KOCFIA.mod.loadAutoRuleset();
-	};
-
-	KOCFIA.mod.on = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod on function');
-
-		if( KOCFIA.conf.mod.automatic ){
-			KOCFIA.mod.automaticOn();
-		}
-	};
-
-	KOCFIA.mod.off = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod off function');
-
-		KOCFIA.mod.automaticOff();
-	};
-
-	KOCFIA.mod.automaticOn = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod automaticOn function');
-		$('#mod-panel-automatic').prop('checked', true);
-
-		Shared.nextIteration( KOCFIA.mod.$nextBar, 60 );
-		window.setTimeout(function(){
-			Shared.nextIteration( KOCFIA.mod.$nextBar, 60 * 60 );
-			KOCFIA.mod.launchAutomaticmod();
-		}, 60 * 1000);
-
-		//recursive call every 60 minutes
-		autoModInterval = window.setInterval(function(){
-			Shared.nextIteration( KOCFIA.mod.$nextBar, 60 * 60 );
-			KOCFIA.mod.launchAutomaticmod();
-		}, 60 * 60 * 1000);
-	};
-
-	KOCFIA.mod.automaticOff = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod automaticOff function');
-
-		window.clearInterval(autoModInterval);
-
-		KOCFIA.mod.$nextBar.html('');
-	};
-
-	KOCFIA.mod.storeRules = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('kocfia mod storeRules function');
-		localStorage.setObject('kocfia_mod_rules_' + KOCFIA.storeUniqueId, KOCFIA.mod.rules);
-	};
-
-	KOCFIA.mod.deleteRules = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod deleteRules function');
-		localStorage.removeItem('kocfia_mod_rules_' + KOCFIA.storeUniqueId);
-
-		KOCFIA.mod.rules = {};
-	};
-
-	KOCFIA.mod.refreshOnGoing = function(msg){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod refreshOnGoing function');
-
-		//clean old messages
-		var timestamp = Date.timestamp(),
-			obsolete = 5 * 60 * 1000,
-			msgTimestamp, $div, $m;
-
-		$div = KOCFIA.mod.$ongoing;
-
-		$div.find('div').each(function(){
-			$m = $(this);
-			msgTimestamp = $m.data('timestamp');
-			if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-				$m.appendTo( KOCFIA.mod.$history );
-			}
-		});
-
-		if( !$.isEmptyObject(msg) ){
-			$div.append( '<div data-timestamp="'+ timestamp+'">'+ msg +'</div>' );
-		}
-	};
-
-	KOCFIA.mod.getHelp = function(){
-		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod getHelp function');
-		var help = '<div id="kocfia-mod-help" class="help" title="Aide Mod">';
-		help += '<h4>Informations et limitations :</h4><ul>';
-		help += '</ul></div>';
-
-		return help;
-	};
+			return help;
+		};
 */
 
 /*

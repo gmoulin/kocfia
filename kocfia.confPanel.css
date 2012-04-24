@@ -2230,7 +2230,7 @@
 
 
 	.kocfia-build-menu {
-		position: relative;
+		position: absolute;
 		display: none;
 		z-index: 100009;
 		padding: 4px;
@@ -2242,6 +2242,13 @@
 		font-size: 11px;
 		color: #222;
 		text-align: center;
+	}
+
+	.kocfia-build-menu .ui-icon.ui-icon-close {
+		position: absolute;
+		right: -3px;
+		top: -3px;
+		cursor: pointer;
 	}
 
 	.kocfia-build-menu h3 {
@@ -2335,42 +2342,42 @@
 		display: none;
 	}
 
-	#hover[class*="_1§"] .levels .lt2 {
+	#hover[class*="_1-"] .levels .lt2 {
 		display: none;
 	}
 
-	#hover[class*="_2§"] .levels .lt3 {
+	#hover[class*="_2-"] .levels .lt3 {
 		display: none;
 	}
 
-	#hover[class*="_3§"] .levels .lt4 {
+	#hover[class*="_3-"] .levels .lt4 {
 		display: none;
 	}
 
-	#hover[class*="_4§"] .levels .lt5 {
+	#hover[class*="_4-"] .levels .lt5 {
 		display: none;
 	}
 
-	#hover[class*="_5§"] .levels .lt6 {
+	#hover[class*="_5-"] .levels .lt6 {
 		display: none;
 	}
 
-	#hover[class*="_6§"] .levels .lt7 {
+	#hover[class*="_6-"] .levels .lt7 {
 		display: none;
 	}
 
-	#hover[class*="_7§"] .levels .lt8 {
+	#hover[class*="_7-"] .levels .lt8 {
 		display: none;
 	}
 
-	#hover[class*="_8§"] .levels .lt9 {
+	#hover[class*="_8-"] .levels .lt9 {
 		display: none;
 	}
 
-	#hover[class*="_9§"] .levels,
-	#hover[class*="_10§"] .levels,
-	#hover[class*="_11§"] .levels,
-	#hover[class*="_12§"] .levels {
+	#hover[class*="_9-"] .levels,
+	#hover[class*="_10-"] .levels,
+	#hover[class*="_11-"] .levels,
+	#hover[class*="_12-"] .levels {
 		display: none;
 	}
 
@@ -2436,4 +2443,62 @@
 		height: 16px;
 		display: block;
 		content: attr(data-build);
+	}
+
+/* marches */
+	.selfAnimProgressBar {
+		width: 50px;
+		height: 16px;
+		background-color: #eee;
+		border: 1px solid #666;
+		margin: 5px;
+	}
+
+	.selfAnimProgressBar span {
+		display: block;
+		width: 0%;
+		height: 100%;
+		background-color: #D3FFCF;
+
+		-webkit-transition-property: width background-color;
+		   -moz-transition-property: width background-color;
+				transition-property: width background-color;
+
+		-webkit-transition-timing-function: linear;
+		   -moz-transition-timing-function: linear;
+				transition-timing-function: linear;
+
+		-webkit-transition-delay: 0s;
+		   -moz-transition-delay: 0s;
+				transition-delay: 0s;
+
+		-webkit-transition-duration: 0;
+		   -moz-transition-duration: 0;
+				transition-duration: 0;
+	}
+
+	.selfAnimProgressBar span.return {
+		width: 100%;
+	}
+
+	.selfAnimProgressBar span.anim {
+		width: 100%;
+		background-color: #3BE02D;
+	}
+
+	.selfAnimProgressBar span.anim.return {
+		width: 0%;
+	}
+
+	.selfAnimProgressBar span::after {
+		content: attr(data-label);
+		position: relative;
+		top: 0;
+		left: 2px;
+		color: #333;
+		width: 50px;
+		height: 16px;
+		font-size: 12px;
+		font-weight: bold;
+		line-height: 16px;
 	}

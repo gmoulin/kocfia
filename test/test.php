@@ -40,22 +40,22 @@
 				<a class="bldg_0_12" onclick="buildslot(this,event);return false;" id="slot_0"><span class="leveltag">12</span><span class="statues"></span></a>
 				<a class="bldg_19_11" onclick="buildslot(this,event);return false;" id="slot_1"><span class="leveltag">11</span></a>
 				<a class="bldg_17_9" onclick="buildslot(this,event);return false;" id="slot_2"><span class="leveltag">9</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_3"><span class="leveltag">9</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_4"><span class="leveltag">9</span></a>
+				<a class="bldg_13_1" onclick="buildslot(this,event);return false;" id="slot_3"><span class="leveltag">1</span></a>
+				<a class="bldg_13_2" onclick="buildslot(this,event);return false;" id="slot_4"><span class="leveltag">2</span></a>
 				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_5"><span class="leveltag">9</span></a>
 				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_6"><span class="leveltag">9</span></a>
 				<a class="bldg_11_11" onclick="buildslot(this,event);return false;" id="slot_7"><span class="leveltag">11</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_8"><span class="leveltag">9</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_9"><span class="leveltag">9</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_10"><span class="leveltag">9</span></a>
+				<a class="bldg_13_3" onclick="buildslot(this,event);return false;" id="slot_8"><span class="leveltag">3</span></a>
+				<a class="bldg_13_5" onclick="buildslot(this,event);return false;" id="slot_9"><span class="leveltag">5</span></a>
+				<a class="bldg_13_6" onclick="buildslot(this,event);return false;" id="slot_10"><span class="leveltag">6</span></a>
 				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_11"><span class="leveltag">9</span></a>
 				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_12"><span class="leveltag">9</span></a>
 				<a class="bldg_5_10" onclick="buildslot(this,event);return false;" id="slot_13"><span class="leveltag">10</span></a>
 				<a onclick="buildslot(this,event);return false;" id="slot_14" class="bldg_13_9"><span class="leveltag">9</span></a>
 				<a onclick="buildslot(this,event);return false;" id="slot_15" class="bldg_13_9"><span class="leveltag">9</span></a>
 				<a class="bldg_13_10" onclick="buildslot(this,event);return false;" id="slot_16"><span class="leveltag">10</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_17"><span class="leveltag">9</span></a>
-				<a class="bldg_13_9" onclick="buildslot(this,event);return false;" id="slot_18"><span class="leveltag">9</span></a>
+				<a class="bldg_13_7" onclick="buildslot(this,event);return false;" id="slot_17"><span class="leveltag">7</span></a>
+				<a class="bldg_13_8" onclick="buildslot(this,event);return false;" id="slot_18"><span class="leveltag">8</span></a>
 				<a class="bldg_12_12" onclick="buildslot(this,event);return false;" id="slot_19"><span class="leveltag">12</span></a>
 				<a onclick="buildslot(this,event);return false;" id="slot_20" class="bldg_13_9"><span class="leveltag">9</span></a>
 				<a class="bldg_5_9" onclick="buildslot(this,event);return false;" id="slot_21"><span class="leveltag">9</span></a>
@@ -123,14 +123,14 @@
 					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_128"><span class="leveltag">9</span></a>
 					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_129"><span class="leveltag">9</span></a>
 					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_130"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_131"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_132"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_133"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_134"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_135"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_136"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_137"><span class="leveltag">9</span></a>
-					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_138"><span class="leveltag">9</span></a>
+					<a class="bldg_1_1" onclick="buildslot(this,event);return false;" id="slot_131"><span class="leveltag">1</span></a>
+					<a class="bldg_1_2" onclick="buildslot(this,event);return false;" id="slot_132"><span class="leveltag">2</span></a>
+					<a class="bldg_1_3" onclick="buildslot(this,event);return false;" id="slot_133"><span class="leveltag">3</span></a>
+					<a class="bldg_1_4" onclick="buildslot(this,event);return false;" id="slot_134"><span class="leveltag">4</span></a>
+					<a class="bldg_1_5" onclick="buildslot(this,event);return false;" id="slot_135"><span class="leveltag">5</span></a>
+					<a class="bldg_1_6" onclick="buildslot(this,event);return false;" id="slot_136"><span class="leveltag">6</span></a>
+					<a class="bldg_1_7" onclick="buildslot(this,event);return false;" id="slot_137"><span class="leveltag">7</span></a>
+					<a class="bldg_1_8" onclick="buildslot(this,event);return false;" id="slot_138"><span class="leveltag">8</span></a>
 					<a class="bldg_1_9" onclick="buildslot(this,event);return false;" id="slot_139"><span class="leveltag">9</span></a>
 					<a class="blank" onclick="buildslot(this,event);return false;" id="slot_140"></a>
 					<a class="blank" onclick="buildslot(this,event);return false;" id="slot_141"></a>

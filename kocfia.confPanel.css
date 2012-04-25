@@ -2228,7 +2228,6 @@
 		margin-right: 10px;
 	}
 
-
 	.kocfia-build-menu {
 		position: absolute;
 		display: none;
@@ -2257,17 +2256,25 @@
 		text-align: left;
 	}
 
-	.kocfia-build-menu .buttons {
-		text-align: left;
+	.kocfia-build-menu:not(.dirty) .ui-icon.ui-icon-close,
+	.kocfia-build-menu:not(.dirty) .buttons .button {
+		visibility: hidden;
 	}
 
-	.kocfia-build-menu .delete {
-		float: right;
+	.kocfia-build-menu .buttons .button {
+		margin: 2px 10px;
 	}
 
-	.kocfia-build-menu .apply,
-	.kocfia-build-menu .delete {
-		margin: 2px 3px;
+	.kocfia-build-menu .buttons .button:first-child {
+		margin-left: 0;
+	}
+
+	.kocfia-build-menu .buttons .button:last-child {
+		margin-right: 0;
+	}
+
+	.kocfia-build-menu .planned:not(.hasTasks) ~ .buttons .delete {
+		visibility: hidden;
 	}
 
 	.kocfia-build-menu .buildings,
@@ -2301,7 +2308,7 @@
 	.kocfia-build-menu .fields .button,
 	.kocfia-build-menu .levels .button {
 		position: relative;
-		top: 2px;
+		top: 1px;
 	}
 
 	.kocfia-build-menu div input[type="radio"] + label {
@@ -2316,61 +2323,35 @@
 		margin-right: 0;
 	}
 
-	#hover.blank .buildings {
-		display: block;
+	.kocfia-build-menu div label + .button {
+		margin-left: 4px;
 	}
 
-	#hover.slot_1.blank .buildings {
+	#hover[class*="_2-"] .levels .lt2 {
 		display: none;
 	}
 
-	#hover.slot_1.blank .bulwarks {
-		display: block;
-	}
-
-	#hover.guardianHover .guardians {
-		display: block;
-	}
-
-	#hover.maparea_city .fields {
+	#hover[class*="_3-"] .levels .lt3 {
 		display: none;
 	}
 
-	#hover.maparea_fields .buildings,
-	#hover.maparea_fields .bulwarks,
-	#hover.maparea_fields .guardians {
+	#hover[class*="_4-"] .levels .lt4 {
 		display: none;
 	}
 
-	#hover[class*="_1-"] .levels .lt2 {
+	#hover[class*="_5-"] .levels .lt5 {
 		display: none;
 	}
 
-	#hover[class*="_2-"] .levels .lt3 {
+	#hover[class*="_6-"] .levels .lt6 {
 		display: none;
 	}
 
-	#hover[class*="_3-"] .levels .lt4 {
+	#hover[class*="_7-"] .levels .lt7 {
 		display: none;
 	}
 
-	#hover[class*="_4-"] .levels .lt5 {
-		display: none;
-	}
-
-	#hover[class*="_5-"] .levels .lt6 {
-		display: none;
-	}
-
-	#hover[class*="_6-"] .levels .lt7 {
-		display: none;
-	}
-
-	#hover[class*="_7-"] .levels .lt8 {
-		display: none;
-	}
-
-	#hover[class*="_8-"] .levels .lt9 {
+	#hover[class*="_8-"] .levels .lt8 {
 		display: none;
 	}
 
@@ -2381,15 +2362,24 @@
 		display: none;
 	}
 
-	#hover.slot_1.blank:hover .bulwarks {
+	#hover.maparea_city.-blank- .buildings,
+	#hover.maparea_fields.-blank- .fields {
 		display: block;
 	}
 
-	#hover.slot_1.blank:hover .buildings {
+	#hover.-guardianHover- .guardians {
+		display: block;
+	}
+
+	#hover.slot_1.-blank- .bulwarks {
+		display: block;
+	}
+
+	#hover.slot_1.-blank- .buildings {
 		display: none;
 	}
 
-	#hover.slot_0:hover .destroy {
+	#hover.slot_0 .destroy {
 		display: none;
 	}
 
@@ -2401,7 +2391,7 @@
 		display: block;
 	}
 
-	#hover.maparea_city:not(.guardianHover) .destroy:checked ~ .buildings {
+	#hover.maparea_city:not(.-guardianHover-) .destroy:checked ~ .buildings {
 		display: block;
 	}
 

@@ -427,7 +427,7 @@ jQuery(document).ready(function(){
 
 		//get server id
 			KOCFIA.server = Shared.getServer();
-			if( KOCFIA.deKOCFIA.kabamuidbug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('server', KOCFIA.server);
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('server', KOCFIA.server);
 			if( KOCFIA.server === null ){
 				alert('Wrong server id, aborting !');
 				return;
@@ -1174,16 +1174,16 @@ jQuery(document).ready(function(){
 			KOCFIA.$confPanelNav = $('#kocfia-conf-panel-tabs');
 			KOCFIA.$confPanelWrapper = KOCFIA.$confPanel.find('#kocfia-conf-panel-wrapper');
 
-			var delay = function( mod ){
+			var delay = function( mod, i ){
 				window.setTimeout(function(){
 					KOCFIA[ mod ].modPanel();
-				}, 300);
+				}, i * 5);
 			};
 
 			for( i = 0; i < modulesLength; i += 1 ){
 				mod = KOCFIA.modules[i];
 				if( KOCFIA[ mod ].hasOwnProperty('modPanel') && typeof KOCFIA[ mod ].modPanel == 'function' ){
-					delay( mod );
+					delay( mod, i );
 				}
 			}
 
@@ -1200,7 +1200,7 @@ jQuery(document).ready(function(){
 					//resize the grids in map tab
 					KOCFIA.$confPanel.trigger('resizestop');
 				}
-			}, (i + 2) * 300);
+			}, (i + 2) * 100);
 		};
 
 		KOCFIA.calcConfPanelInnerHeight = function(){
@@ -16111,29 +16111,41 @@ jQuery(document).ready(function(){
 			buildMenu += '<div class="levels"><h3>Niveau :</h3>';
 			var ltClasses = '';
 			for( i = 9; i > 0; i -= 1){
-				if( i > 1 ) ltClasses += ' lt'+ (i - 1);
-				buildMenu += '<input type="radio" id="kocfia-build-level'+ i +'" class="upgrade '+ ltClasses +'" rel="'+ i +'">';
-				buildMenu += '<label for="kocfia-build-level'+ i +'" title="Améliore jusqu\'au niveau '+ i +'">'+ i +'</label>';
+				if( i < 9 ) ltClasses += ' lt'+ (i + 1);
+				buildMenu += '<input type="radio" id="kocfia-build-level'+ i +'" class="upgrade" rel="'+ i +'">';
+				buildMenu += '<label for="kocfia-build-level'+ i +'" title="Améliore jusqu\'au niveau '+ i +'" class="'+ ltClasses +'">'+ i +'</label>';
 			}
 			buildMenu += '<button class="button secondary none"><span>Aucun</span></button>';
 			buildMenu += '</div>';
 
 			buildMenu += '<div class="planned"><ol></ol></div>';
+
+			buildMenu += '<div class="messages"></div>';
 			buildMenu += '<div class="buttons">';
-			buildMenu += '<button class="button danger delete" title="Supprimer les tâches plannifiées pour ce bâtiment"><span>Supprimer</span></button>';
 			buildMenu += '<button class="button apply" title="Sauvegarde les tâches plannifiées pour ce bâtiment"><span>Appliquer</span></button>';
+			buildMenu += '<button class="button secondary cancel" title="Annule les modifications (mais pas les tâches déjà plannifiées) pour ce bâtiment"><span>Annuler</span></button>';
+			buildMenu += '<button class="button danger delete" title="Supprimer les tâches plannifiées pour ce bâtiment"><span>Supprimer</span></button>';
 			buildMenu += '</div>';
 			buildMenu += '</section></div>';
 
 			KOCFIA.build.$buildMenu = $(buildMenu);
 
 			KOCFIA.build.$buildMenu
+				.tipsy({delegate: '[title], [original-title]', html: true})
 				.appendTo( $body )
-				.on('click', '.close', function(){
-					$(this).hide();
+				.on('click', '.close, .cancel', function(){
+					$('.tipsy').remove();
+					KOCFIA.build.$buildMenu.removeClass('dirty').hide();
 				})
 				.on('click', '.none', function(){
 					$(this).closest('div').find('input').prop('checked', false);
+
+					if( KOCFIA.build.$buildMenu.find('input').filter(':checked').length === 0 ){
+						KOCFIA.build.$buildMenu.removeClass('dirty');
+					}
+				})
+				.on('change', 'input', function(){
+					KOCFIA.build.$buildMenu.addClass('dirty');
 				})
 				.on('click', '.apply', function(){
 					var $slot = KOCFIA.build.hover,
@@ -16149,6 +16161,7 @@ jQuery(document).ready(function(){
 						buildingType = null,
 						fromLevel, toLevel,
 						isGuardian = false,
+						messages = [],
 						errors = false,
 						needReset = false;
 
@@ -16166,32 +16179,37 @@ jQuery(document).ready(function(){
 						buildingType = $field.val();
 					}
 
-					if( KOCFIA.build.$buildMenu.closest('#guardianContainer').length > 0 ){
+					if( KOCFIA.build.$buildMenu.find('#hover').hasClass('.-guardianContainer-') ){
 						isGuardian = true;
 						var guardian = Shared.getGuardian( cityKey );
 						if( guardian === false && buildingType === null ){
-							KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
+							KOCFIA.build.$buildMenu.find('.guardians').addClass('required');
+							messages.push('Type de gardien à construire manquant.')
 							errors = true;
 						}
 					}
 
-					if( (isGuardian && buildingType !== null) || ($slot.length && $slot.hasClass('blank')) ){
+					if( !errors && (
+							(isGuardian && buildingType !== null) || KOCFIA.build.$buildMenu.find('#hover').hasClass('.-blank-')
+						)
+					){
 						if( buildingType !== null ){
 							fromLevel = 1;
-							if( $highestLevel.length ){
-								toLevel = $highestLevel.val();
+							if( $level.length ){
+								toLevel = $level.val();
 							} else {
 								toLevel = 1;
 							}
 						} else {
 							//needed building choice
 							KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
+							messages.push('Bâtiment à construire manquant.')
 							errors = true;
 						}
 					} else if( isGuardian ){
 						fromLevel = parseInt(guardian.level, 10);
-						if( $highestLevel.length ){
-							toLevel = $highestLevel.val();
+						if( $level.length ){
+							toLevel = $level.val();
 						} else {
 							toLevel = 1;
 						}
@@ -16201,9 +16219,10 @@ jQuery(document).ready(function(){
 						fromLevel = parseInt(slotClass[2], 10);
 
 						if( isDestroy ){
-							if( $highestLevel.length && $highestLevel.val() != fromLevel && buildingType !== null ){
+							if( $level.length && $level.val() != fromLevel && buildingType !== null ){
 								//needed building choice
 								KOCFIA.build.$buildMenu.find('.buildings, .bulwarks, .guardians, .fields').addClass('required');
+								messages.push('Bâtiment à construire manquant.')
 								errors = true;
 							}
 						}
@@ -16230,7 +16249,7 @@ jQuery(document).ready(function(){
 								toLevel = 1;
 							}
 
-							var durations = KOCFIA.build.getDuration( cityKey, buildingType, fromLevel, toLevel );
+							//var durations = KOCFIA.build.getDuration( cityKey, buildingType, fromLevel, toLevel );
 
 							for( var i = fromLevel + 1; i <= toLevel; i += 1 ){
 								KOCFIA.build.queues[ cityKey ][ slotId ].push( {buildingType: buildingType, fromLevel: i - 1, toLevel: i} );
@@ -16242,27 +16261,27 @@ jQuery(document).ready(function(){
 							}
 						}
 
+						KOCFIA.build.$buildMenu.removeClass('dirty');
+
 						KOCFIA.build.updateCityChronology( cityKey, slotId, needReset );
 						KOCFIA.build.updateCityQueueDuration( cityKey );
 					} else {
-						//@TODO display errors
+						KOCFIA.build.$buildMenu.find('.messages').html( messages.join('<br>') );
 					}
 				})
 				.on('click', '.delete', function(){
 					var slotId = $this.closest('a').attr('id'),
 						cityKey = 'city'+ window.currentcityid;
 
-					//reset menu and planned tasks
-					$buildMenu.find('input').prop('checked', false);
-					$buildMenu.find('ol').html('');
+					//planned tasks
+					KOCFIA.build.$buildMenu.find('.planned').removeClass('hasTasks').find('ol').html('');
 
 					//remove queue entries for slot
 					delete KOCFIA.build.queues[ cityKey ][ slotId ];
 
 					KOCFIA.build.updateCityChronology( cityKey, slotId, true );
 					KOCFIA.build.updateCityQueueDuration( cityKey );
-				})
-				;
+				});
 		};
 
 		KOCFIA.build.addSectionListeners = function(){
@@ -16276,36 +16295,39 @@ jQuery(document).ready(function(){
 						//slot listerners
 						$('#maparea_city, #maparea_fields')
 							.on('mouseenter', 'a[id^="slot_"], .guardianHover', function(e){
-								var $this = $(this);
-								KOCFIA.build.hover = $this;
+								if( !KOCFIA.build.$buildMenu.hasClass('dirty') ){
+									var $this = $(this);
+									KOCFIA.build.hover = $this;
 
-								//reset menu
-								KOCFIA.build.$buildMenu
-									.find('#hover').attr('class', $this.attr('id') +' '+ $.map($this.attr('class').split(' '), function(c){ return '-'+ c +'-'; }).join(' ') +' '+ $this.closest('.maparea_main').attr('id'))
-									.find('input').prop('checked', false).end()
-									.find('.planned').find('ol').html('').end()
-									.find('.buildings, .bulwarks, .guardians, .fields').removeClass('required');
+									//reset menu
+									KOCFIA.build.$buildMenu
+										.find('#hover').attr('class', $this.attr('id') +' '+ $.map($this.attr('class').split(' '), function(c){ return '-'+ c +'-'; }).join(' ') +' '+ $this.closest('.maparea_main').attr('id'))
+										.find('input').prop('checked', false).end()
+										.find('.messages').html('').end()
+										.find('.planned').removeClass('hasTasks').find('ol').html('').end()
+										.find('.buildings, .bulwarks, .guardians, .fields').removeClass('required');
 
-								KOCFIA.build.$buildMenu.show().position({my: 'left top', at: 'bottom right', of: $this, offset: '10 10',  collision: 'fit'});
+									KOCFIA.build.$buildMenu.show().position({my: 'left top', at: 'bottom right', of: $this, offset: '10 10',  collision: 'fit'});
 
-								var cityKey = 'city'+ window.currentcityid;
-								if( KOCFIA.build.queues.hasOwnProperty(cityKey)
-									&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( this.id )
-								){
-									var tasks = KOCFIA.build.queues[ cityKey ][ this.id ],
-										code = '', i;
-									for( i = 0; i < tasks.length; i += 1 ){
-										code += '<li>';
-										code += window.buildingcost[ 'bdg'+ tasks[i].buildingType ][0];
-										if( tasks[i].toLevel === 0 ){
-											code += ' destruction';
-										} else {
-											code += ' '+ tasks[i].fromLevel +' &rarr; '+ tasks[i].toLevel;
+									var cityKey = 'city'+ window.currentcityid;
+									if( KOCFIA.build.queues.hasOwnProperty(cityKey)
+										&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( this.id )
+									){
+										var tasks = KOCFIA.build.queues[ cityKey ][ this.id ],
+											code = '', i;
+										for( i = 0; i < tasks.length; i += 1 ){
+											code += '<li>';
+											code += window.buildingcost[ 'bdg'+ tasks[i].buildingType ][0];
+											if( tasks[i].toLevel === 0 ){
+												code += ' destruction';
+											} else {
+												code += ' '+ tasks[i].fromLevel +' &rarr; '+ tasks[i].toLevel;
+											}
+											code += '</li>';
 										}
-										code += '</li>';
-									}
 
-									KOCFIA.build.$buildMenu.find('.planned').find('ol').html( code );
+										KOCFIA.build.$buildMenu.find('.planned').addClass('hasTasks').find('ol').html( code );
+									}
 								}
 							});
 					} else {
@@ -16509,14 +16531,18 @@ jQuery(document).ready(function(){
 		KOCFIA.build.addBuildingsVisualInfo = function( event ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build addVisualInfo function');
 
-			$('#maparea_city, #maparea_fields').filter(':visible').find('a').filter('[id^="slot_"]').each(function(){
-				KOCFIA.build.addBuildingVisualInfo( this );
-			});
+			if( KOCFIA.conf.build.active ){
+				$('#maparea_city, #maparea_fields').filter(':visible').find('a').filter('[id^="slot_"]').each(function(){
+					KOCFIA.build.addBuildingVisualInfo( this );
+				});
 
-			//the guardian is not a <a>
-			$('#maparea_city, #maparea_fields').filter(':visible').find('#guardianContainer').each(function(){
-				KOCFIA.build.addBuildingVisualInfo( this );
-			});
+				//the guardian is not a <a>
+				$('#maparea_city').filter(':visible').find('#guardianContainer').each(function(){
+					KOCFIA.build.addBuildingVisualInfo( this );
+				});
+
+				KOCFIA.build.$buildMenu.removeClass('dirty').hide();
+			}
 		};
 
 		KOCFIA.build.addBuildingVisualInfo = function( slot ){

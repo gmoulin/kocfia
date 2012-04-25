@@ -1073,6 +1073,9 @@ jQuery(document).ready(function(){
 				//notifications close
 				.on('click', '.kocfia-success, .kocfia-error', function(){
 					$(this).remove();
+				})
+				.on('click', '.kocfia-working .close, .kocfia-error .close', function(){
+					$(this).parent().remove();
 				});
 
 			$confPanel.tipsy({delegate: '[title], [original-title]', html: true});
@@ -2135,8 +2138,8 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.gridRowActions = function( cellValue, options, rowObject ){
-				var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-coords="'+ rowObject.coords +'" data-level="'+ rowObject.level +'"></span>';
-				code += '<span class="ui-icon ui-icon-note scout-shortcut" data-coords="'+ rowObject.coords +'"></span>';
+				var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-coords="'+ rowObject.coords +'" data-level="'+ rowObject.level +'" title="Attaquer"></span>';
+				code += '<span class="ui-icon ui-icon-note scout-shortcut" data-coords="'+ rowObject.coords +'" title="Eclairer"></span>';
 
 				return code;
 			};
@@ -2327,7 +2330,7 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.playerStatusLink = function( playerId ){
-				return user !== null ? '<span class="playerInfo" rel="'+ playerId +'">status</span>' : '? - ?';
+				return playerId !== null ? '<span class="playerInfo" rel="'+ playerId +'">status</span>' : '? - ?';
 			};
 
 		/* progress bars */
@@ -7694,6 +7697,7 @@ jQuery(document).ready(function(){
 					sortorder: 'asc',
 					altRows: true,
 					altclass: 'zebra',
+					height: 'auto',
 					autowidth: true,
 					viewrecords: true, //total in pager
 					gridview: true, //speed boost
@@ -7704,7 +7708,7 @@ jQuery(document).ready(function(){
 					shrinkToFit: true
 				},
 				cities: {
-					colNames: ['Actions', 'Distance', 'Coords', 'Nom', 'Niveau', 'Joueur', 'Puiss', 'Alliance', 'Diplomatie', 'Brumes', 'PlayerId', 'Status'],
+					colNames: ['', 'Distance', 'Coords', 'Nom', 'Niveau', 'Joueur', 'Puiss', 'Alliance', 'Diplomatie', 'Brumes', 'PlayerId', 'Status'],
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
 						{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
@@ -7717,7 +7721,7 @@ jQuery(document).ready(function(){
 						{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
 						{name: 'mist', index: 'mist', align: 'center', formatter: function( cellValue, options, rowObject ){ return cellValue === 1 ? 'Oui' : ''; }, width: 55},
 						{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
-						{name: 'playerStatus', index: 'playerStatus', width: 100}
+						{name: 'playerStatus', index: 'playerStatus', search: false, width: 100}
 					],
 					caption: 'Villes',
 					pager: '#kocfia-map-pager-cities',
@@ -7732,7 +7736,7 @@ jQuery(document).ready(function(){
 					}
 				},
 				barbarians: {
-					colNames: ['Actions', 'Distance', 'Coordonnées', 'Niveau'],
+					colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
 						{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
@@ -7752,7 +7756,7 @@ jQuery(document).ready(function(){
 					}
 				},
 				wilderness: {
-					colNames: ['Actions', 'Distance', 'Coords', 'Niveau', 'Type', 'Joueur', 'Puiss', 'Alliance', 'Diplomatie', 'PlayerId', 'Status'],
+					colNames: ['', 'Distance', 'Coords', 'Niveau', 'Type', 'Joueur', 'Puiss', 'Alliance', 'Diplomatie', 'PlayerId', 'Status'],
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
 						{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
@@ -7764,7 +7768,7 @@ jQuery(document).ready(function(){
 						{name: 'guild', index: 'guild', width: 100},
 						{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
 						{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
-						{name: 'playerStatus', index: 'playerStatus', width: 100}
+						{name: 'playerStatus', index: 'playerStatus', search: false, width: 100}
 					],
 					caption: 'Terres Sauvages',
 					pager: '#kocfia-map-pager-wilderness',
@@ -7779,7 +7783,7 @@ jQuery(document).ready(function(){
 					}
 				},
 				darkForests: {
-					colNames: ['Actions', 'Distance', 'Coordonnées', 'Niveau'],
+					colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
 					colModel: [
 						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
 						{name: 'range', index: 'range', align: 'right', width: 60, sorttype: 'float'},
@@ -7924,31 +7928,43 @@ jQuery(document).ready(function(){
 			KOCFIA.map.$resultsCities = $section.find('#kocfia-map-results-cities')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.cities) )
 				.jqGrid('navGrid', '#kocfia-map-pager-cities', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: 'Eclairage', title: "Exporter les coordonnées sélectionnées dans l'onglet d'éclairage", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'scout'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: 'Pillage', title: "Exporter les coordonnées sélectionnées dans l'onglet de pillage", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'plunder'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: 'Note', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'notepad'); }, position: 'last'});
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsCities[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-cities', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsCities[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet d'éclairage", buttonicon: 'ui-icon-contact', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'scout'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet de pillage", buttonicon: 'ui-icon-cart', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'plunder'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'notepad'); }, position: 'last'})
+				.jqGrid('filterToolbar');
 
 			KOCFIA.map.$resultsBarbarians = $section.find('#kocfia-map-results-barbarians')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.barbarians) )
 				.jqGrid('navGrid', '#kocfia-map-pager-barbarians', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: 'CB', title: "Exporter les coordonnées sélectionnées dans l'onglet des camps barbares", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'barbarian'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: 'Note', title: "Exporter la sélection dans le bloc note", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'notepad'); }, position: 'last'});
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsBarbarians[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-barbarians', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsBarbarians[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'barbarian'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'notepad'); }, position: 'last'})
+				.jqGrid('filterToolbar');
 
 			KOCFIA.map.$resultsWilderness = $section.find('#kocfia-map-results-wilderness')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.wilderness) )
 				.jqGrid('navGrid', '#kocfia-map-pager-wilderness', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: 'TS', title: "Exporter les coordonnées sélectionnées dans l'onglet des terres sauvages", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'wilderness'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: 'Note', title: "Exporter la sélection dans le bloc note", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'});
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsWilderness[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-wilderness', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsWilderness[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'wilderness'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'})
+				.jqGrid('filterToolbar');
 
 			KOCFIA.map.$resultsDarkForests = $section.find('#kocfia-map-results-darkForests')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.darkForests) )
 				.jqGrid('navGrid', '#kocfia-map-pager-darkForests', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: 'Note', title: "Exporter la sélection dans le bloc note", buttonicon: '', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'});
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-darkForests', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsDarkForests[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-darkForests', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsDarkForests[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'})
+				.jqGrid('filterToolbar');
 
 			//grid listeners
 			$section
 				.on('click', '.playerInfo', function(){
-					Shared.getPlayerInfo( $(this).attr(rel) );
+					Shared.getPlayerInfo( $(this).attr('rel') );
 				})
 				.on('click', '.attack-shortcut', function(){
 					//quick attack
@@ -7956,15 +7972,22 @@ jQuery(document).ready(function(){
 				.on('click', '.scout-shortcut', function(){
 					//quick scout
 				})
-				.on('click', '.ui-jqgrid-titlebar .ui-jqgrid-titlebar-close', function(e){
-					e.stopPropagation();
-				})
 				.on('click', '.ui-jqgrid-titlebar', function(){
 					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
 				})
+				.find('.ui-jqgrid-titlebar-close').click(function(e){
+					e.stopPropagation();
+
+					console.log(this, $(this));
+
+					$(this)
+						.filter('.ui-icon-circle-triangle-s') //grid was closed ?
+						.closest('.ui-jqgrid-view').siblings('.ui-jqgrid-view') //get other grids
+						.find('.ui-icon-circle-triangle-n').parent().trigger('click'); //close them
+				})
 				;
 
-			KOCFIA.$confPanel.bind('resizestop', function() {
+			KOCFIA.$confPanel.bind('resizestop', function(){
 				var size = $("#kocfia-map").find('.search').outerWidth();
 				KOCFIA.map.$resultsCities.jqGrid('setGridWidth', size);
 				KOCFIA.map.$resultsBarbarians.jqGrid('setGridWidth', size);
@@ -15161,7 +15184,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.estates.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA estates getHelp function');
-			var help = '<div id="kocfia-estates-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.estate +'">';
+			var help = '<div id="kocfia-estates-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.estates +'">';
 			help += '<h4>Ajouter des défenses à une terre sauvage conquise</h4><ul>';
 			help += '<li>Les terres conquises ne sont pas mises à jour automatiquement lors d\'une conquête ou toute autre action externe à l\'onglet</li>';
 			help += '<li>Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville</li>';
@@ -15569,7 +15592,7 @@ jQuery(document).ready(function(){
 			data += '<th>&nbsp;</th>';
 			data += '<th title="'+ KOCFIA.resourceInfo.rec0.label +'"><img src="'+ KOCFIA.resourceInfo.rec0.icon +'"></th>';
 			data += '<th>Puissance</th>';
-			data += '<th title="en secondes">Durée</th>';
+			data += '<th title="Temps pour former en secondes">Durée</th>';
 			data += '<th>Puissance / h</th>';
 			data += '</tr><thead><tbody>';
 			for( i = 0; i < KOCFIA.troops.length; i += 1 ){
@@ -15616,7 +15639,7 @@ jQuery(document).ready(function(){
 			stats += '<tr><th title="'+ KOCFIA.unitInfo.unt10.label +'"><img src="'+ KOCFIA.unitInfo.unt10.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.unitInfo.unt11.label +'"><img src="'+ KOCFIA.unitInfo.unt11.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.unitInfo.unt12.label +'"><img src="'+ KOCFIA.unitInfo.unt12.icon +'"></th>'+ cels +'</tr>';
-			stats += '</tbody><thead><th colspan="'+ (KOCFIA.citiesKey.length + 2) +'">Construisable par heure</th></thead><tbody>';
+			stats += '</tbody><thead><th colspan="'+ (KOCFIA.citiesKey.length + 2) +'">Construisible par heure</th></thead><tbody>';
 			stats += '<tr><th title="'+ KOCFIA.fortInfo.frt53.label +'"><img src="'+ KOCFIA.fortInfo.frt53.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.fortInfo.frt55.label +'"><img src="'+ KOCFIA.fortInfo.frt55.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.fortInfo.frt60.label +'"><img src="'+ KOCFIA.fortInfo.frt60.icon +'"></th>'+ cels +'</tr>';
@@ -16087,7 +16110,7 @@ jQuery(document).ready(function(){
 
 			//guardians list
 			buildMenu += '<div class="guardians"><h3>Gardiens :</h3>';
-			for( i = 50; i < 25; i+= 1 ){
+			for( i = 50; i < 55; i+= 1 ){
 				if( window.buildingcost['bdg'+ i] ){
 					buildMenu += '<input type="radio" name="kocfia-build-buildings" id="kocfia-build-buildings-bdg'+ i +'" value="bdg'+ i +'">';
 					buildMenu += '<label for="kocfia-build-buildings-bdg'+ i +'">'+ window.buildingcost['bdg'+ i][0] +'</label>';
@@ -17231,8 +17254,8 @@ jQuery(document).ready(function(){
 			var header = '<div class="infos">';
 			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.marches +'</h3>';
-			header += '<div class="buttonset city-toggles">Afficher : ';
-			header += '<input type="radio" name="kocfia-marches-city-toggles" id="kocfia-marches-all" value="all" checked>';
+			header += '<div class="buttonset">Afficher : ';
+			header += '<input type="radio" name="kocfia-marches-city-toggles" class="city-toggle" id="kocfia-marches-all" value="all" checked>';
 			header += '<label for="kocfia-marches-all">Toutes</label>';
 
 			var code = '<table><thead><tr>';
@@ -17248,13 +17271,13 @@ jQuery(document).ready(function(){
 				cityKey = KOCFIA.citiesKey[ i ];
 				city = KOCFIA.cities[ cityKey ];
 
-				header += '<input type="radio" name="kocfia-marches-city-toggles" id="kocfia-marches-'+ cityKey +'" value="'+ cityKey +'">';
+				header += '<input type="radio" name="kocfia-marches-city-toggles" id="kocfia-marches-'+ cityKey +'" class="city-toggle" value="'+ cityKey +'">';
 				header += '<label for="kocfia-marches-'+ cityKey +'">'+ city.label +'</label>';
 
 				code += KOCFIA.marches.refreshByCity( cityKey );
 			}
 
-			header += '<input type="radio" class="raid-toggle" name="kocfia-marches-raid-toggle" id="kocfia-marches-raid-toggle">';
+			header += '<input type="checkbox" class="raid-toggle" name="kocfia-marches-raid-toggle" id="kocfia-marches-raid-toggle">';
 			header += '<label for="kocfia-marches-raid-toggle">Masquer les raids</label>';
 			header += '</div>';
 
@@ -17263,7 +17286,7 @@ jQuery(document).ready(function(){
 			var help = KOCFIA.marches.getHelp();
 
 			$section.append( header + code + help )
-				.on('change', '.city-toggles input', function(){
+				.on('change', '.city-toggle', function(){
 					if( this.value == 'all' ){
 						KOCFIA.marches.$tbodies.show();
 					} else {
@@ -17302,7 +17325,7 @@ jQuery(document).ready(function(){
 					var $tbody = $(this).closest('tbody'),
 						cityKey = $tbody.data('city');
 
-						$tbody.html( KOCFIA.marches.resfreshByCity(cityKey) );
+						$tbody.html( KOCFIA.marches.refreshByCity(cityKey) );
 						$('.tipsy').remove();
 				})
 				.on('click', '.recall, .undefend', function(){
@@ -17359,7 +17382,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.marches.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA marches getHelp function');
-			var help = '<div id="kocfia-marches-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.estate +'">';
+			var help = '<div id="kocfia-marches-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.marches +'">';
 			help += '<h4>Gestion des déplacements de troupes (marches)</h4><ul>';
 			help += '</ul></div>';
 
@@ -17460,7 +17483,7 @@ jQuery(document).ready(function(){
 				marches = window.seed.queue_atkp[ cityKey ],
 				m, marches, ts, info, eta, type, city, player,
 				timeDestination, timeReturn, duration, tmp,
-				nb = Shared.getRallyPointSlots( cityKey ),
+				nb,
 				max = Shared.buildingHighestLevel(cityKey, 12),
 				regexp = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/g;
 
@@ -17471,10 +17494,10 @@ jQuery(document).ready(function(){
 			}
 
 			code += '<tr class="header">';
-			code += '<th><button class="button secondary update" title="Met à jour les informations sur les marches de cette ville"><span>Met à jour</span></button></th>';
-			code += '<th><button class="button secondary refresh" title="Raffraîchit la liste des marches de cette ville"><span>Raffraîchir</span></button></th>';
 			code += '<th colspan="3">'+ KOCFIA.cities[ cityKey ].label +'</th>';
-			code += '<th colspan="2">'+ nb +'/'+ max +'</th>';
+			code += '<th>'+ nb +'/'+ max +'</th>';
+			code += '<th colspan="2"><button class="button secondary update" title="Met à jour les informations sur les marches de cette ville"><span>Met à jour</span></button>';
+			code += '<button class="button secondary refresh" title="Raffraîchit la liste des marches de cette ville"><span>Raffraîchir</span></button></th>';
 			code += '</tr>';
 
 			/*cm.BOT_STATUS = {
@@ -17653,7 +17676,7 @@ jQuery(document).ready(function(){
 						}
 					} else {
 						if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_STOPPED ){
-							code += 'raid_stopped_desat.png';
+							code += 'autoAttack/raid_stopped_desat.png';
 						} else if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_RESTING
 								|| (
 									(march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_UNKNOWN
@@ -17662,7 +17685,7 @@ jQuery(document).ready(function(){
 									&& ts >= parseInt(march.returnUnixTime, 10)
 								)
 						){
-							code += 'raid_resting.png';
+							code += 'autoAttack/raid_resting.png';
 						} else {
 							code += 'reinforce.jpg';
 						}
@@ -18079,16 +18102,6 @@ jQuery(document).ready(function(){
 			code += '</div><div class="accordion">';
 			code += '<h3>Configurations</h3>';
 
-			code += '<div id="kocfia-hospital-priority" class="priority-list" title="Priorité des unités lors des soins">';
-			code += '<ol>';
-			var unitKey, unitInfo, i, l;
-			for( i = 0, l = KOCFIA.conf.transport.priority.length; i < l; i += 1 ){
-				unitKey = KOCFIA.conf.transport.priority[ i ];
-				unitInfo = KOCFIA.unitInfo[ unitKey ];
-				code += '<li rel="'+ unitKey +'"><img src="'+ unitInfo.icon +'">'+ unitInfo.label +'</li>';
-			}
-			code += '</ol></div>';
-
 			//automatic heal form
 				code += '<div class="hospice-form">';
 				code += '<div class="buttons">';
@@ -18124,6 +18137,17 @@ jQuery(document).ready(function(){
 				code += '<h3>Soins en cours et quantités de blessés</h3>';
 				code += '<div class="hospital-list ongoing"></div>';
 				code += '</div>';
+
+			//priority list
+				code += '<div id="kocfia-hospital-priority" class="priority-list" title="Priorité des unités lors des soins">';
+				code += '<ol>';
+				var unitKey, unitInfo, i, l;
+				for( i = 0, l = KOCFIA.conf.transport.priority.length; i < l; i += 1 ){
+					unitKey = KOCFIA.conf.transport.priority[ i ];
+					unitInfo = KOCFIA.unitInfo[ unitKey ];
+					code += '<li rel="'+ unitKey +'"><img src="'+ unitInfo.icon +'">'+ unitInfo.label +'</li>';
+				}
+				code += '</ol></div>';
 
 			var help = KOCFIA.hospital.getHelp();
 

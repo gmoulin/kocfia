@@ -334,13 +334,13 @@
 		text-align: center;
 	}
 
+	#kocfia-map .search-results .ui-icon {
+		display: inline-block;
+	}
+
 	#kocfia-map .range {
 		width: 40px;
 		text-align: center;
-	}
-
-	#kocfia-map fieldset > div {
-		margin: 5px 0;
 	}
 
 	#kocfia-map .playerInfo {
@@ -371,6 +371,10 @@
 	.ui-jqgrid tr.jqgrow td {
 		height:auto;
 		white-space: normal;
+	}
+
+	.ui-jqgrid tr.jqgrow td {
+		padding: 2px;
 	}
 
 /* auto attack tabs form */
@@ -2170,6 +2174,11 @@
 		padding: 2px 5px 2px 2px;
 	}
 
+	#kocfia-dataAndStats .might th {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+
 /* gifts */
 	#kocfia-gifts > div {
 		margin: 2px 0;
@@ -2492,3 +2501,23 @@
 		font-weight: bold;
 		line-height: 16px;
 	}
+
+	#kocfia-marches table {
+		width: 100%;
+	}
+
+	#kocfia-marches table ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	#kocfia-marches li img {
+		width: 20px;
+	}
+
+	#kocfia-marches tr td:nth-child(3) {
+		text-align: center;
+	}
+
+

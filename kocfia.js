@@ -189,7 +189,7 @@ jQuery(document).ready(function(){
 			fbWallPopup: 'Post sur mur Facebook',
 			notepad: 'Bloc-note',
 			alarm: 'Alertes',
-			hospital: 'Hospice',
+			hospital: 'Hôpital',
 			throne: 'Salle du trône',
 			quickMarch: 'Marches simplifiées',
 			reports: 'Rapports',
@@ -213,7 +213,7 @@ jQuery(document).ready(function(){
 			estates: 'Terres',
 			reassign: 'Réassignements',
 			build: 'Constructions',
-			hospital: 'Hospice',
+			hospital: 'Hôpital',
 			throne: 'Trône',
 			reports: 'Rapports',
 			search: 'Recherche'
@@ -16078,7 +16078,7 @@ jQuery(document).ready(function(){
 			}
 
 			if( window.buildingcost.bdg21[0] == 'Caserne' ){
-				window.buildingcost.bdg21[0] = 'Hospice';
+				window.buildingcost.bdg21[0] = 'Hôpital';
 				window.buildingcost.bdg21[10] = 'Lieu où sont soignés les blessés des batailles.';
 			}
 
@@ -17714,11 +17714,11 @@ jQuery(document).ready(function(){
 
 					duration = 0;
 					tmp = '';
-					if( timeReturn && timeReturn.getTime() < ts ){
-						duration =  ts - timeReturn.getTime();
+					if( timeReturn && timeReturn.getTime() > ts ){
+						duration = timeReturn.getTime() - ts;
 						tmp = 'return';
-					} else if( timeDestination && timeDestination.getTime() < ts ){
-						duration =  ts - timeDestination.getTime();
+					} else if( timeDestination && timeDestination.getTime() > ts ){
+						duration = timeDestination.getTime() - ts;
 
 						if( duration > 0 ){
 							if( !KOCFIA.marches.returnTimeouts.hasOwnProperty(cityKey) ) KOCFIA.marches.returnTimeouts[ cityKey ] = {};
@@ -17728,6 +17728,9 @@ jQuery(document).ready(function(){
 							if( duration > 60 ) KOCFIA.marches.recallTimeouts[ cityKey ][ m ] = window.setTimeout(function(){ KOCFIA.marches.removeRecall(cityKey, m); }, (duration - 60) * 1000);
 						}
 					}
+					console.log(timeReturn);
+					console.log(timeDestination);
+					console.log(duration);
 
 					if( duration > 0 ){
 						code += '<div class="selfAnimProgressBar">';
@@ -18071,7 +18074,7 @@ jQuery(document).ready(function(){
 			options: {
 				active: 1,
 				automatic: 0,
-				priority: [],
+				priority: ['unt1', 'unt2', 'unt3', 'unt4', 'unt5', 'unt6', 'unt7', 'unt8', 'unt9', 'unt10', 'unt11', 'unt12'],
 				keep: 0
 			},
 			stored: ['rules'],
@@ -18103,7 +18106,7 @@ jQuery(document).ready(function(){
 			code += '<h3>Configurations</h3>';
 
 			//automatic heal form
-				code += '<div class="hospice-form">';
+				code += '<div class="hospital-form">';
 				code += '<div class="buttons">';
 				code += '<button class="save button modify"><span>Enregistrer</span></button>';
 				code += '<button class="reset button danger" title="Vide le codeulaire"><span>Annuler</span></button>';
@@ -18142,8 +18145,8 @@ jQuery(document).ready(function(){
 				code += '<div id="kocfia-hospital-priority" class="priority-list" title="Priorité des unités lors des soins">';
 				code += '<ol>';
 				var unitKey, unitInfo, i, l;
-				for( i = 0, l = KOCFIA.conf.transport.priority.length; i < l; i += 1 ){
-					unitKey = KOCFIA.conf.transport.priority[ i ];
+				for( i = 0, l = KOCFIA.conf.hospital.priority.length; i < l; i += 1 ){
+					unitKey = KOCFIA.conf.hospital.priority[ i ];
 					unitInfo = KOCFIA.unitInfo[ unitKey ];
 					code += '<li rel="'+ unitKey +'"><img src="'+ unitInfo.icon +'">'+ unitInfo.label +'</li>';
 				}
@@ -18162,7 +18165,7 @@ jQuery(document).ready(function(){
 						var $list = $(event.target),
 							list = $list.find('li').map(function(){ return $(this).attr('rel'); }).get();
 
-						KOCFIA.conf.hospice.priority = list;
+						KOCFIA.conf.hospital.priority = list;
 						Shared.storeConf();
 					}
 				});
@@ -18248,7 +18251,7 @@ jQuery(document).ready(function(){
 					$('#hospital-automatic').prop('checked', $(this).prop('checked')).change();
 				})
 				.on('click', '.priority', function(){
-					$('#kocfia-hospice-priority').dialog('open');
+					$('#kocfia-hospital-priority').dialog('open');
 				});
 
 			//form
@@ -18270,7 +18273,7 @@ jQuery(document).ready(function(){
 					code += 'Ville&nbsp;:&nbsp;'+ citiesSelect;
 					code += 'À&nbsp;partir&nbsp;de&nbsp;<input type="text" class="quantity-min" value="0">';
 					code += 'Par&nbsp;paquet&nbsp;de&nbsp;maximum&nbsp;<input type="text" class="quantity-pack" value="1">';
-					code += '&nbsp;<ouput class="duration"></output>';
+					code += '&nbsp;<output class="duration"></output>';
 					code += '<button class="remove button danger"><span>Supprimer</span></button>';
 					code += '<button class="duplicate button secondary" title="Copie ou applique dans cette unité cette configuration pour vos autres villes"><span>Copier</span></button>';
 					code += '</div></div>';
@@ -18283,7 +18286,7 @@ jQuery(document).ready(function(){
 				.on('click', '.reload', function(){
 					$(this).closest('.hospital-form').find('.rule').remove();
 
-					KOCFIA.hospice.reloadRuleset();
+					KOCFIA.hospital.loadAutoRuleset();
 				})
 				.on('click', '.remove', function(){
 					$(this).closest('.rule').remove();
@@ -18299,7 +18302,7 @@ jQuery(document).ready(function(){
 						min = $rule.find('.quantity-min').val(),
 						pack = $rule.find('.quantity-pack').val(),
 						active = $rule.find('.active').prop('checked'),
-						citiess = {}, i, $clone, cityKey, $div;
+						cities = {}, i, $clone, cityKey, $div;
 
 					if( city !== '' ) cities[ city ] = 1;
 
@@ -18319,6 +18322,16 @@ jQuery(document).ready(function(){
 							$clone.css('display', 'none');
 
 							$rules.append( $clone );
+						} else if( city != cityKey ){
+							$sib.find('.city').each(function(){
+								if( this.value == cityKey ){
+									$div = $(this).closest('.rule');
+									$div.find('.quantity-min').val( min );
+									$div.find('.quantity-pack').val( pack );
+									$div.find('.active').prop('checked', active);
+									return false; //break
+								}
+							});
 						}
 					}
 
@@ -18327,11 +18340,11 @@ jQuery(document).ready(function(){
 				.on('keyup, change', '.quantity-pack', function(){
 					var $this = $(this),
 						$duration = $this.siblings('.duration'),
-						quantity = Shared.decode( $.trim(this.value) ),
+						quantity = Shared.decodeFormat( $.trim(this.value) ),
 						cityKey = $this.siblings('.city').val(),
 						unitKey = $this.closest('tr').attr('data-unit');
 
-					$duration.html( Shared.readableDuration( KOCFIA.hospice.getDuration( cityKey, unitKey, quantity ) ) );
+					$duration.html( Shared.readableDuration( KOCFIA.hospital.getDuration( cityKey, unitKey, quantity ) ) );
 				})
 				.on('click', '.save', function(){
 					var result = KOCFIA.hospital.planAutomaticRules();
@@ -18386,7 +18399,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.hospital.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital getHelp function');
-			var help = '<div id="kocfia-hospital-help" class="help" title="Aide hospice">';
+			var help = '<div id="kocfia-hospital-help" class="help" title="Aide Hôpital">';
 			help += '<h4>Informations et limitations</h4><ul>';
 			help += '</ul></div>';
 
@@ -18408,7 +18421,8 @@ jQuery(document).ready(function(){
 		KOCFIA.hospital.getDuration = function( cityKey, unitKey, quantity ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital getDuration function');
 
-			var factor = parseFloat(cm.WorldSettings.getSetting("APOTHECARY_TIME_FACTOR")),				time = '';
+			var factor = parseFloat(cm.WorldSettings.getSetting("APOTHECARY_TIME_FACTOR")),
+				time = '';
 
 			if( !isNaN(factor) && quantity !== false ){
 				time = parseInt(window.unitcost[ unitKey ][7], 10) * quantity / factor;
@@ -18444,7 +18458,7 @@ jQuery(document).ready(function(){
 									$rule.find('.active').prop('checked', rule.active);
 									$rule.find('.city').val( cityKey );
 									$rule.find('.quantity-min').val( Shared.format(rule.min) );
-									$rule.find('.quantity-pack').val( Shared.format(rule.pack) );
+									$rule.find('.quantity-pack').val( Shared.format(rule.pack) ).trigger('change');
 								}
 							}
 						}

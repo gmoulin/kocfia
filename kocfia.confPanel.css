@@ -1219,7 +1219,7 @@
 			margin: 0 0 0 5px;
 		}
 
-/* transport tab */
+/* reassign tab */
 	#kocfia-reassign .accordion + div {
 		margin-top: 15px;
 	}
@@ -1357,8 +1357,8 @@
 			margin-right: 15px;
 		}
 
-		#kocfia-reassign .reassign-form .button + .button {
-			margin: 0 0 0 5px;
+		#kocfia-reassign .reassign-form button {
+			margin-left: 10px;
 		}
 
 /* knights tab */
@@ -2179,52 +2179,6 @@
 		padding-right: 5px;
 	}
 
-/* gifts */
-	#kocfia-gifts > div {
-		margin: 2px 0;
-		text-align: center;
-	}
-
-	#kocfia-gifts .header {
-		margin: 2px 0;
-	}
-
-	#kocfia-gifts .header > span {
-		margin: 5px;
-		display: inline-block;
-	}
-
-
-	#kocfia-gifts .giftType {
-		border-top: 1px solid #ccc;
-		padding: 2px;
-		margin: 2px;
-		display: none;
-	}
-
-	#kocfia-gifts h4 {
-		margin: 2px;
-		text-align: center;
-	}
-
-	#kocfia-gifts ol {
-		-moz-column-count: 3;
-		-moz-column-gap: 50px;
-		margin: 0;
-	}
-
-	#kocfia-gifts li {
-		text-align: left;
-	}
-
-	#kocfia-gifts .button {
-		margin: 0 3px;
-	}
-
-	#kocfia-gifts .success {
-		color: #1BCC42;
-	}
-
 /* build */
 	#kocfia-conf-panel #kocfia-build > ul {
 		list-style: none;
@@ -2520,4 +2474,68 @@
 		text-align: center;
 	}
 
+/* hospital */
+	#kocfia-hospital .buttons {
+		text-align: right;
+		float: right;
+	}
+
+	#kocfia-hospital .buttons button {
+		margin-left: 10px;
+	}
+
+	#kocfia-hospital .keep {
+		width: 40px;
+	}
+
+	#kocfia-hospital .keep + img {
+		width: 50px;
+		text-align: center;
+	}
+
+	#kocfia-hospital table {
+		width: 100%;
+	}
+
+	#kocfia-hospital .unit {
+		text-align: center;
+	}
+
+	#kocfia-hospital .unit img {
+		margin-bottom: 10px;
+	}
+
+	#kocfia-hospital .rule select {
+		max-width: 100px;
+		margin-right: 5px;
+	}
+
+	#kocfia-hospital .rule .quantity-min,
+	#kocfia-hospital .rule .quantity-pack {
+		width: 50px;
+		text-align: center;
+	}
+
+	#kocfia-hospital .rule .quantity-min {
+		margin-right: 5px;
+	}
+
+	#kocfia-hospital .rule button {
+		margin-left: 10px;
+	}
+
+	#kocfia-hospital .hospital-form td {
+		padding: 5px;
+		vertical-align: top;
+	}
+
+	#kocfia-hospital .hospital-form td .rule:not(:last-child) {
+		padding-bottom: 5px;
+		border-bottom: 1px solid #ccc;
+		margin-bottom: 5px;
+	}
+
+	#kocfia-hospital .hospital-form .rule > div + div {
+		margin-top: 3px;
+	}
 

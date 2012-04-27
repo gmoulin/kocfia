@@ -149,6 +149,7 @@ jQuery(document).ready(function(){
 		debug: true,
 		debugWhat: {build: 1, map: 1, plunder: 1, hospital: 1, marches: 1},
 		server: null,
+		captchaDetected: false,
 		modules: [
 			'dataAndStats',
 			'overview', 'summary',
@@ -1223,7 +1224,9 @@ jQuery(document).ready(function(){
 				code += Shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin', KOCFIA.conf.general.hideMagicalBoxPreview);
 				code += Shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOCFIA.conf.general.hideOtherPlayersCourtInvitation);
 				code += Shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fêtes foraines (avec envoie)', KOCFIA.conf.general.hideFairPopup);
-				code += '<br>' + Shared.generateCheckbox('general', 'resetRaidTimer', 'Remise à zéro du compteur des attaques de camps barbares', KOCFIA.conf.general.resetRaidTimer);
+				code += '<br>' + Shared.generateCheckbox('general', 'resetRaidTimer', 'Remise à zéro automatique du compteur des attaques de camps barbares (raid)', KOCFIA.conf.general.resetRaidTimer);
+				code += Shared.generateButton('shared', 'resetRaidTimer', 'Remettre à zéro le compteur des attaques de camps barbares (raid)', null);
+				code += '<br>' + Shared.generateButton('shared', 'resetCatpchaDetect', 'Annuler la pause pour cause de captcha', null);
 				code += '</div>';
 			$optionsSection.append( code );
 
@@ -2584,6 +2587,23 @@ jQuery(document).ready(function(){
 					default:
 						return 0;
 				}
+			};
+
+		/* captcha */
+			Shared.manageCaptcha = function( from ){
+				KOCFIA.captchaDetected = true;
+				window.setTimeout(function(){
+					KOCFIA.captchaDetected = false;
+				}, 30 * 60 * 1000);
+
+				$('<div>')
+					.attr('title', 'Alerte Captcha')
+					.html('Une tentative de marche a déclenché une demande de validation via captcha. Toutes les marches automatiques sont mise en pause pour 30 minutes.<br>Sont concernées les marches via les onglets CB, FO, TS, Transport, Réassignement, Éclairages et Pillages.<br>Vous pouvez annuler cette pause via le bouton "Annuler la pause pour cause de captcha" dans les options.')
+					.dialog({ modal: true, height: 'auto', width: 'auto', zIndex: 100100 });
+			};
+
+			Shared.resetCatpchaDetect = function(){
+				KOCFIA.captchaDetected = false;
 			};
 
 	/* FACEBOOK WALL POST POPUP */
@@ -4216,6 +4236,13 @@ jQuery(document).ready(function(){
 			skel += '</fieldset>';
 			KOCFIA[ this.module ].$waveSkeleton = $(skel);
 
+			//clone last wave x times at most
+			form += '<fieldset class="keep">';
+			form += '<legend>Option</legend>';
+			form += '<p>Pour les objets de trône (CB / TS / Pillage) et les objets pour les villes (TS).</p>';
+			form += 'Duppliquer la dernière vague au maximum <input type="number" class="clone" min="0" max ="10"> fois';
+			form += '</fieldset>';
+
 			//unit keep
 			form += '<fieldset class="keep">';
 			form += '<legend>Conserver</legend>';
@@ -4249,6 +4276,7 @@ jQuery(document).ready(function(){
 				level = $.trim( KOCFIA[ this.module ].$form.find('.targetLevel').val() ),
 				name = $.trim( KOCFIA[ this.module ].$form.find('.targetName').val() ),
 				coords = $.trim( KOCFIA[ this.module ].$form.find('textarea').val().replace(/\n/g, ' ') ),
+				$clone = KOCFIA[ this.module ].$form.find('.clone'),
 				errors = [],
 				regexp = /[^0-9, ]/,
 				attack = { type: 'attack', category: this.module, waves: [], coordIndex: 0, keep: {} },
@@ -4344,6 +4372,14 @@ jQuery(document).ready(function(){
 				if( !attack.waves.length ){
 					errors.push('Au moins une unité de l\'attaque doit être spécifiée.');
 					errors.push('Au moins une unité de l\'attaque doit avoir une quantité valide.');
+				}
+
+				//clone last wave at most
+				if( $clone.length > 0 ){
+					attack.cloneLastWaveAtMost = parseInt($.trim( $clone.val() ), 10);
+					if( isNaN(attack.cloneLastWaveAtMost) ){
+						attack.cloneLastWaveAtMost = 0;
+					}
 				}
 
 				//keep
@@ -4750,11 +4786,13 @@ jQuery(document).ready(function(){
 						}
 						KOCFIA[ module ].$form.find('.rallypointSlot').val( attack.rpSlot );
 
-						if( module == 'wilderness' ){
-							KOCFIA[ module ].$form.find('textarea').val(attack.coords.join("\n"));
-						}
+						KOCFIA[ module ].$form.find('textarea').val(attack.coords.join("\n"));
 
 						KOCFIA[ module ].addWaves( attack.waves.length, attack.cityKey );
+
+						if( attack.hasOwnProperty('cloneLastWaveAtMost') ){
+							KOCFIA[ module ].$form.find('.clone').val( attack.cloneLastWaveAtMost );
+						}
 
 						var $waves = KOCFIA[ module ].$form.find('.wave');
 						var i, j, wavesLength = attack.waves.length,
@@ -4804,6 +4842,8 @@ jQuery(document).ready(function(){
 								i += 1;
 							}
 						}
+
+
 
 						//open form accordion
 						KOCFIA[ module ].$accordion.accordion('activate', false).accordion('activate', 0);
@@ -4983,6 +5023,11 @@ jQuery(document).ready(function(){
 			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
 			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
 			help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant supérieur à 1 minute)</li>';
+			if( this.module != 'scout' && this.module != 'darkForest' ){
+				help += '<li>La dernière vague peut être duppliquée au maximum 10 fois lors du lancement de l\'attaque (permet de par exemple de lancer x fois 1 milicien pour récupérer plus d\'objets de trône)</li>';
+				help += '<li>Chaque dupplication vérifie les places dans le point de ralliement, les chevaliers et les troupes disponibles</li>';
+				help += '<li>Ces dupplication de vague sont optionnelles, elles ne bloquent pas le lancement de l\'attaque</li>';
+			}
 			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardée</li>';
 			help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
 			help += '<li>Dix secondes après impact sur la cible, une mise à jour des données de la marche est effectuée (survivants, status)</li>';
@@ -5001,6 +5046,9 @@ jQuery(document).ready(function(){
 			help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
 			help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
 			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
+			if( this.module != 'scout' && this.module != 'darkForest' ){
+				help += '<li>Spécifier le nombre de fois que la dernière vague sera lancée (optionnel)</li>';
+			}
 			help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
 			help += '</ol></div>';
 
@@ -11411,6 +11459,7 @@ jQuery(document).ready(function(){
 							launch();
 						} else if( data.user_action == 'marchCaptcha' ){
 							Shared.notify('Transport échoué (captcha)');
+							Shared.manageCaptcha('Transport manuel');
 						} else {
 							Shared.notify('Transport échoué (action)');
 						}
@@ -11843,6 +11892,11 @@ jQuery(document).ready(function(){
 				KOCFIA.transport.$ongoingSupply[0].innerHTML = '';
 			}
 
+			if( KOCFIA.captchaDetected ){
+				KOCFIA.transport.refreshOnGoing((type == 'pileUp' ? 'Stockage' : 'Approvisionnement') +' en pause pour cause de captcha.', type);
+				return false;
+			}
+
 			if( !$.isEmptyObject( KOCFIA.transport[ type ] ) ){
 				var i, j, d, timestamp, r, u;
 
@@ -12232,6 +12286,7 @@ jQuery(document).ready(function(){
 									}, 5000);
 								} else if( data.user_action == 'marchCaptcha' ){
 									KOCFIA.transport.refreshOnGoing('Captcha détecté, transport annulé.', type);
+									Shared.manageCaptcha('Transport automatique');
 									dfd.reject();
 								} else {
 									attempts -= 1;
@@ -12898,6 +12953,7 @@ jQuery(document).ready(function(){
 							launch();
 						} else if( data.user_action == 'marchCaptcha' ){
 							Shared.notify('Réassignement échoué (captcha)');
+							Shared.manageCaptcha('Réassignement manuel');
 						} else {
 							Shared.notify('Réassignement échoué (action)');
 						}
@@ -13174,6 +13230,11 @@ jQuery(document).ready(function(){
 			KOCFIA.reassign.$ongoing.find('div').appendTo( KOCFIA.reassign.$history );
 			KOCFIA.reassign.$ongoing[0].innerHTML = '';
 
+			if( KOCFIA.captchaDetected ){
+				KOCFIA.reassign.refreshOnGoing('Réassignement en pause pour cause de captcha.');
+				return false;
+			}
+
 			if( !$.isEmptyObject( KOCFIA.reassign.rules ) ){
 				//from
 				var cityKey, city;
@@ -13380,6 +13441,7 @@ jQuery(document).ready(function(){
 									return dfd.pipe( launch(dfd, tParams, 3) );
 								} else if( data.user_action == 'marchCaptcha' ){
 									KOCFIA.reassign.refreshOnGoing('Captcha détecté, réassignement annulé.');
+									Shared.manageCaptcha('Réassignement automatique');
 									dfd.reject();
 								} else {
 									attempts -= 1;
@@ -18777,7 +18839,12 @@ jQuery(document).ready(function(){
 				status,
 				check = KOCFIA.conf[ mod ] && KOCFIA.conf[ mod ].hasOwnProperty('active') && KOCFIA.conf[ mod ].active;
 			if( !check ){
-				KOCFIA[ mod ].refreshOngoingInfo(attack, true, (mod == 'scout' ? 'Eclairages automatiques stoppés' : 'Attaque automatiques stoppées.'));
+				KOCFIA[ mod ].refreshOngoingInfo(attack, true, (mod == 'scout' ? 'Eclairages automatiques stoppés' : 'Attaques automatiques stoppées.'));
+				return false;
+			}
+
+			if( KOCFIA.captchaDetected ){
+				KOCFIA[ mod ].refreshOngoingInfo(attack, true, (mod == 'scout' ? 'Eclairages automatiques ' : 'Attaques automatiques ') +' en pause pour cause de captcha.');
 				return false;
 			}
 
@@ -18855,7 +18922,7 @@ jQuery(document).ready(function(){
 			if( !attack.hasOwnProperty('coordIndex') ) attack.coordIndex = 0;
 			if( attack.hasOwnProperty('timeout') ) delete attack.timeout;
 
-			var coordsLength, coords, waveIndex, time, city, bunch = [], bunchLength;
+			var coordsLength, coords, waveIndex, cloneIndex, time, city, bunch = [], bunchLength;
 
 			/** sequences
 			 * wilderness & barbarian & plunder
@@ -18870,6 +18937,7 @@ jQuery(document).ready(function(){
 			 *			checkKnight
 			 *			checkUnits
 			 *			launchWave
+			 *			clone last wave if setted
 			 *
 			 * scout
 			 *		previousMarchingCheck
@@ -19113,6 +19181,7 @@ jQuery(document).ready(function(){
 							return dfd.reject();
 						}
 					}
+
 					if( mod == 'plunder' ){
 						return dfd.pipe(checkPlayerOnlineStatus(dfd, 3));
 					} else {
@@ -19655,12 +19724,12 @@ jQuery(document).ready(function(){
 							var knights = Shared.getAvailableKnights( attack.cityKey ),
 								k;
 
-							if( waveIndex === 0 && knights.length < attack.waves.length ){
+							if( waveIndex === 0 && attack.waves.length > 1 && knights.length < attack.waves.length ){
 								KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Pas assez de chevalier disponible pour lancer les '+ attack.waves.length +' vagues.');
 								return wdfd.reject();
 							}
 
-							if( !knights.length ){
+							if( knights.length === 0 ){
 								KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Aucun chevalier disponible.');
 								return wdfd.reject();
 							}
@@ -19797,6 +19866,7 @@ jQuery(document).ready(function(){
 											return wdfd.reject();
 										} else if( result.user_action == 'marchCaptcha' ){
 											KOCFIA[ mod ].refreshOngoingInfo(attack, false, (mod == 'scout' ? city.label + ' ' : '') +'Plan d\''+ label +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +') refusé (captcha !).');
+											Shared.manageCaptcha(KOCFIA.modulesLabel[ mod ] +' automatique');
 											return wdfd.reject();
 										} else if( result.user_action == 'marchWarning' ){
 											wParams.marchWarning = 1;
@@ -19870,6 +19940,7 @@ jQuery(document).ready(function(){
 
 					wave = attack.waves[ waveIndex ];
 					kLength = attack.keep.length;
+					cloneIndex = (attack.hasOwnProperty('cloneLastWaveAtMost') && attack.cloneLastWaveAtMost > 0 ? attack.cloneLastWaveAtMost : 0);
 
 					$.when( waveSequence() )
 						.done(function(){
@@ -19884,20 +19955,20 @@ jQuery(document).ready(function(){
 							waveIndex += 1;
 							if( waveIndex < attack.waves.length ){
 								if( mod == 'wilderness' ){
-									//launch next wave in 5s
+									//launch next wave in 3s
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
-									}, 5000);
+									}, 3000);
 								} else if( mod == 'barbarian' ){
-									//launch next wave in 1s
+									//launch next wave in 3s
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
-									}, 1000);
+									}, 3000);
 								} else if( mod == 'plunder' ){
-									//launch next wave in 5s
+									//launch next wave in 3s
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
-									}, 5000);
+									}, 3000);
 								} else if( mod == 'darkForest'){
 									//launch next wave in 5s
 									window.setTimeout(function(){
@@ -19908,6 +19979,17 @@ jQuery(document).ready(function(){
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );
 									}, 5000);
+								}
+							} else if( cloneIndex > 0 ){
+								slots = Shared.getRallyPointSlots( attack.cityKey );
+								if( slots - keepFree > 0 ){
+									//launch a clone of the last wave in 3s
+									waveIndex -= 1;
+									cloneIndex -= 1;
+
+									window.setTimeout(function(){
+										dfd.pipe( checkAndLaunchWave(dfd) );
+									}, 3000);
 								}
 							}
 
@@ -19965,7 +20047,7 @@ jQuery(document).ready(function(){
 
 					attack.coordIndex += 1;
 				})
-				.fail(function(){
+				.fail(function(reason){
 					time = 0;
 					//if( mod == 'darkForest' ) time = 10 * 60;
 					if( attack.marching.length ){

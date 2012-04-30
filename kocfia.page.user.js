@@ -24,8 +24,8 @@ if( unsafeWindow.location.href.indexOf('kabam.com') == -1 ){ //from facebook
 		+ "\nbody.canvas #mainContainer { border: none; }";
 } else { //from kabam
 	var fbCss = "#main-header, #main-nav { display: none; }"
-		+ "\n.play #content { margin-top: 0; height: 300%; width: 100%; }"
-		+ "\n#game_frame, #gameIframe { width: 100%; height: 100%; display: block !important; }"
+		+ "\n.play #content { margin-top: 0; height: 300%; width: 150%; }"
+		+ "\n#game_frame, #gameIframe { width: 100%; height: 100%; display: block !important; overflow: auto; }"
 		+ "\nhtml, body, #canvas { height: 100%; }";
 }
 

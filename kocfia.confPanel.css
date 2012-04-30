@@ -1,3 +1,7 @@
+html, body {
+	height: 100%;
+}
+
 /* popup management */
 	body.noModal .modalCurtain:not(.previous),
 	body.noModal .modalBox:not(.previous) {
@@ -1650,9 +1654,8 @@
 		background-color: #DADADA;
 	}
 
-/* progress bar */
-	.nextIteration,
-	.selfAnimProgressBar {
+/* next iteration */
+	.nextIteration {
 		width: 50px;
 		height: 14px;
 		background-color: #eee;
@@ -1672,41 +1675,9 @@
 		line-height: 14px;
 	}
 
-	.ui-tabs-panel h3 .nextIteration,
-	.ui-tabs-panel h3 .selfAnimProgressBar,
-	.ui-tabs-panel h3 .selfAnimProgressBar span {
+	.ui-tabs-panel h3 .nextIteration {
 		float: none;
 		padding: 0;
-	}
-
-	.ui-tabs-panel h3 .selfAnimProgressBar span { margin: 0; }
-
-	.selfAnimProgressBar span {
-		display: block;
-		width: 0%;
-		height: 100%;
-		background-color: #D3FFCF;
-		float: none;
-		margin: 0;
-		padding: 0;
-
-		-webkit-transition-property: width background-color;
-		-webkit-transition-timing-function: linear;
-		-webkit-transition-delay: 0s;
-		-moz-transition-property: width background-color;
-		-moz-transition-timing-function: linear;
-		-moz-transition-delay: 0s;
-		transition-property: width background-color;
-		transition-timing-function: linear;
-		transition-delay: 0s;
-		-webkit-transition-duration: 0;
-		-moz-transition-duration: 0;
-		transition-duration: 0;
-	}
-
-	.selfAnimProgressBar span.anim {
-		width: 100%;
-		background-color: #3BE02D;
 	}
 
 /* buttons */
@@ -2290,31 +2261,31 @@
 		margin-left: 4px;
 	}
 
-	#hover[class*="_2-"] .levels .lt2 {
+	#hover[class*="_2-"] .levels .lt3 {
 		display: none;
 	}
 
-	#hover[class*="_3-"] .levels .lt3 {
+	#hover[class*="_3-"] .levels .lt4 {
 		display: none;
 	}
 
-	#hover[class*="_4-"] .levels .lt4 {
+	#hover[class*="_4-"] .levels .lt5 {
 		display: none;
 	}
 
-	#hover[class*="_5-"] .levels .lt5 {
+	#hover[class*="_5-"] .levels .lt6 {
 		display: none;
 	}
 
-	#hover[class*="_6-"] .levels .lt6 {
+	#hover[class*="_6-"] .levels .lt7 {
 		display: none;
 	}
 
-	#hover[class*="_7-"] .levels .lt7 {
+	#hover[class*="_7-"] .levels .lt8 {
 		display: none;
 	}
 
-	#hover[class*="_8-"] .levels .lt8 {
+	#hover[class*="_8-"] .levels .lt9 {
 		display: none;
 	}
 
@@ -2342,8 +2313,10 @@
 		display: none;
 	}
 
-	#hover.slot_0 .destroy {
-		display: none;
+	#hover.-blank- .destroy + label,
+	#hover.-blank- .destroy + label,
+	#hover.slot_0 .destroy + label {
+		visibility: hidden;
 	}
 
 	#hover .destroy:checked ~ .levels {
@@ -2398,13 +2371,18 @@
 		content: attr(data-build);
 	}
 
-/* marches */
+/* selfAnimProgressBar */
 	.selfAnimProgressBar {
 		width: 50px;
 		height: 16px;
 		background-color: #eee;
 		border: 1px solid #666;
-		margin: 5px;
+		margin: 0;
+		display: inline-block;
+	}
+
+	img + .selfAnimProgressBar {
+		border-left: 0;
 	}
 
 	.selfAnimProgressBar span {
@@ -2451,11 +2429,12 @@
 		color: #333;
 		width: 50px;
 		height: 16px;
-		font-size: 12px;
-		font-weight: bold;
+		font-size: 10px;
+		font-weight: normal;
 		line-height: 16px;
 	}
 
+/* marches */
 	#kocfia-marches table {
 		width: 100%;
 	}
@@ -2472,6 +2451,24 @@
 
 	#kocfia-marches tr td:nth-child(3) {
 		text-align: center;
+	}
+
+	#kocfia-marches tr ul {
+		margin: 0;
+	}
+
+	#kocfia-marches td li {
+		display: inline-block;
+		float: left;
+		white-space: nowrap;
+	}
+
+	#kocfia-marches td li + li {
+		margin: 2px;
+	}
+
+	#kocfia-marches th button + button {
+		margin-left: 5px;
 	}
 
 /* hospital */

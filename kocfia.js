@@ -16105,7 +16105,7 @@ jQuery(document).ready(function(){
 
 			$section.append( header + queues + help )
 				.find('.queue-list')
-				.dialog({autoOpen: false, height: 'auto', width: 400, zIndex: 100001 })
+				.dialog({autoOpen: false, height: 'auto', width: 400, zIndex: 100001, position: ['center', 'top'] })
 				.find('ol').sortable({
 					zIndex: 100002,
 					update: function(event, ui){
@@ -16145,7 +16145,7 @@ jQuery(document).ready(function(){
 			}
 
 			//destroy
-			buildMenu += '<span class="ui-icon ui-icon-close"></span>';
+			buildMenu += '<span class="ui-icon ui-icon-close close"></span>';
 			buildMenu += '<input type="checkbox" class="destroy" id="kocfia-build-destroy"><label for="kocfia-build-destroy">Détruire</label>';
 
 			//building list
@@ -16233,7 +16233,7 @@ jQuery(document).ready(function(){
 					KOCFIA.build.$buildMenu.addClass('dirty');
 				})
 				.on('click', '.apply', function(){
-					var $slot = KOCFIA.build.hover,
+					var $slot = KOCFIA.build.$hover,
 						slotId = $slot.attr('id'),
 						slotClass = $slot.attr('class'),
 						$level = KOCFIA.build.$buildMenu.find('.levels').find('input').filter(':checked'),
@@ -16244,11 +16244,22 @@ jQuery(document).ready(function(){
 						isDestroy = KOCFIA.build.$buildMenu.find('.destroy').prop('checked'),
 						cityKey = 'city'+ window.currentcityid,
 						buildingType = null,
+						currentBuildingType, buildingInfo,
 						fromLevel, toLevel,
 						isGuardian = false,
+						isNew = KOCFIA.build.$buildMenu.find('#hover').hasClass('.-blank-'),
 						messages = [],
 						errors = false,
 						needReset = false;
+
+					console.log('$slot ', $slot);
+					console.log('slotId ',slotId, ' slotClass ', slotClass);
+					console.log('$level ', $level);
+					console.log('$building ', $building);
+					console.log('$bulwark ', $bulwark);
+					console.log('$guardian ', $guardian);
+					console.log('$field ', $field);
+					console.log('isDestroy ', isDestroy);
 
 					if( !KOCFIA.build.queues.hasOwnProperty(cityKey) ){
 						KOCFIA.build.queues[ cityKey ] = {};
@@ -16263,6 +16274,7 @@ jQuery(document).ready(function(){
 					} else if( $field.length ){
 						buildingType = $field.val();
 					}
+					console.log('buildingType ', buildingType);
 
 					if( KOCFIA.build.$buildMenu.find('#hover').hasClass('.-guardianContainer-') ){
 						isGuardian = true;
@@ -16272,10 +16284,11 @@ jQuery(document).ready(function(){
 							messages.push('Type de gardien à construire manquant.')
 							errors = true;
 						}
+						slotId = 'slot_500';
 					}
 
 					if( !errors && (
-							(isGuardian && buildingType !== null) || KOCFIA.build.$buildMenu.find('#hover').hasClass('.-blank-')
+							(isGuardian && buildingType !== null) || isNew
 						)
 					){
 						if( buildingType !== null ){
@@ -16312,6 +16325,17 @@ jQuery(document).ready(function(){
 							}
 						}
 					}
+					console.log('fromLevel ', fromLevel, ' toLevel ', toLevel);
+
+					if( !errors && !isNew ){
+						buildingInfo = window.seed.buildings[ cityKey ]['pos'+ slotId.replace(/slot_/, '')];
+						if( buildingInfo ) currentBuildingType = buildingInfo[0];
+						else {
+							messages.push('Type du bâtiment actuel introuvable.')
+							errors = true;
+						}
+					}
+					console.log('currentBuildingType ', currentBuildingType);
 
 					if( !errors ){
 						if( !KOCFIA.build.queues[ cityKey ].hasOwnProperty(slotId) ){
@@ -16320,7 +16344,7 @@ jQuery(document).ready(function(){
 
 						if( isDestroy ){
 							//reset tasks
-							KOCFIA.build.queues[ cityKey ][ slotId ] = [{buildingType: buildingType, fromLevel: fromLevel, toLevel: 0}];
+							KOCFIA.build.queues[ cityKey ][ slotId ] = [{buildingType: currentBuildingType, fromLevel: fromLevel, toLevel: 0}];
 							needReset = true;
 						}
 
@@ -16340,13 +16364,19 @@ jQuery(document).ready(function(){
 								KOCFIA.build.queues[ cityKey ][ slotId ].push( {buildingType: buildingType, fromLevel: i - 1, toLevel: i} );
 							}
 						} else {
+							toLevel = $level.val();
+
 							//update the task
 							for( var i = fromLevel + 1; i <= toLevel; i += 1 ){
-								KOCFIA.build.queues[ cityKey ][ slotId ].push( {buildingType: buildingType, fromLevel: i - 1, toLevel: i} );
+								KOCFIA.build.queues[ cityKey ][ slotId ].push( {buildingType: currentBuildingType, fromLevel: i - 1, toLevel: i} );
 							}
 						}
 
 						KOCFIA.build.$buildMenu.removeClass('dirty');
+
+						KOCFIA.build.$buildMenu.trigger('updateTasksList');
+
+						console.log(KOCFIA.build.queues[ cityKey ][ slotId ]);
 
 						KOCFIA.build.updateCityChronology( cityKey, slotId, needReset );
 						KOCFIA.build.updateCityQueueDuration( cityKey );
@@ -16366,6 +16396,29 @@ jQuery(document).ready(function(){
 
 					KOCFIA.build.updateCityChronology( cityKey, slotId, true );
 					KOCFIA.build.updateCityQueueDuration( cityKey );
+				})
+				.bind('updateTasksList', function(){
+					var cityKey = 'city'+ window.currentcityid;
+					if( KOCFIA.build.queues.hasOwnProperty(cityKey)
+						&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( KOCFIA.build.$hover.attr('id') )
+					){
+						var tasks = KOCFIA.build.queues[ cityKey ][ KOCFIA.build.$hover.attr('id') ],
+							code = '', i;
+						for( i = 0; i < tasks.length; i += 1 ){
+							code += '<li>';
+							code += window.buildingcost[ 'bdg'+ tasks[i].buildingType ][0];
+							if( tasks[i].toLevel === 0 ){
+								code += ' destruction';
+							} else {
+								code += ' '+ tasks[i].fromLevel +' &rarr; '+ tasks[i].toLevel;
+							}
+							code += '</li>';
+						}
+
+						KOCFIA.build.$buildMenu.find('.planned').addClass('hasTasks').find('ol').html( code );
+					} else {
+						KOCFIA.build.$buildMenu.find('.planned').removeClass('hasTasks').find('ol').html('');
+					}
 				});
 		};
 
@@ -16382,7 +16435,7 @@ jQuery(document).ready(function(){
 							.on('mouseenter', 'a[id^="slot_"], .guardianHover', function(e){
 								if( !KOCFIA.build.$buildMenu.hasClass('dirty') ){
 									var $this = $(this);
-									KOCFIA.build.hover = $this;
+									KOCFIA.build.$hover = $this;
 
 									//reset menu
 									KOCFIA.build.$buildMenu
@@ -16398,20 +16451,7 @@ jQuery(document).ready(function(){
 									if( KOCFIA.build.queues.hasOwnProperty(cityKey)
 										&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( this.id )
 									){
-										var tasks = KOCFIA.build.queues[ cityKey ][ this.id ],
-											code = '', i;
-										for( i = 0; i < tasks.length; i += 1 ){
-											code += '<li>';
-											code += window.buildingcost[ 'bdg'+ tasks[i].buildingType ][0];
-											if( tasks[i].toLevel === 0 ){
-												code += ' destruction';
-											} else {
-												code += ' '+ tasks[i].fromLevel +' &rarr; '+ tasks[i].toLevel;
-											}
-											code += '</li>';
-										}
-
-										KOCFIA.build.$buildMenu.find('.planned').addClass('hasTasks').find('ol').html( code );
+										KOCFIA.build.$buildMenu.trigger('updateTasksList');
 									}
 								}
 							});
@@ -16657,8 +16697,8 @@ jQuery(document).ready(function(){
 			}
 		};
 
-		KOCFIA.build.updateCityChronology = function( cityKey, slot, needReset ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build updateCityChronology function');
+		KOCFIA.build.updateCityChronology = function( cityKey, slotId, needReset ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build updateCityChronology function', cityKey, slotId, needReset);
 
 			if( !KOCFIA.build.queues.hasOwnProperty( cityKey ) ){
 				KOCFIA.build.queues[ cityKey ] = {};
@@ -16668,21 +16708,21 @@ jQuery(document).ready(function(){
 				KOCFIA.build.chronology[ cityKey ] = [];
 			}
 
-			if( needReset || !KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot ) ){
+			if( needReset || !KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId ) ){
 				var pointer, i,
-					target = slot +'_';
+					target = slotId +'_';
 				for( i = KOCFIA.build.chronology[ cityKey ].length; i > 0; i -= 1 ){
 					pointer = KOCFIA.build.chronology[ cityKey ][ i ];
 					if( pointer.indexOf(target) > -1 ) KOCFIA.build.chronology[ cityKey ].splice(i, 1);
 				}
 			}
 
-			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slot ) ){
-				var tasks = KOCFIA.build.queues[ cityKey ][ slot ],
+			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId ) ){
+				var tasks = KOCFIA.build.queues[ cityKey ][ slotId ],
 					i;
 				for( i = 0; i < tasks.length; i += 1 ){
-					if( $.inArray(slot + '_' + i) == -1 ){
-						KOCFIA.build.chronology[ cityKey ].push(slot + '_' + i);
+					if( $.inArray(slotId + '_' + i) == -1 ){
+						KOCFIA.build.chronology[ cityKey ].push(slotId + '_' + i);
 					}
 				}
 			}
@@ -17545,7 +17585,7 @@ jQuery(document).ready(function(){
 				marches = window.seed.queue_atkp[ cityKey ],
 				m, marches, ts, info, eta, type, city, player,
 				timeDestination, timeReturn, duration, tmp,
-				nb,
+				nb = 0,
 				max = Shared.buildingHighestLevel(cityKey, 12),
 				regexp = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/g;
 
@@ -17695,10 +17735,14 @@ jQuery(document).ready(function(){
 					code += '">';
 					//actions
 					code += '<td>';
-					if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_OUTBOUND && ts + 60 < march.destinationUnixTime ){
-						code += '<button class="button danger recall"><span>Rappel</span></button>';
-					} else if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_DEFENDING ){
-						code += '<button class="button danger undefend"><span>Rappel</span></button>';
+					if( march.marchType != window.cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN ){
+						if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_OUTBOUND && ts + 60 < march.destinationUnixTime ){
+							code += '<button class="button danger recall"><span>Rappel</span></button>';
+						} else if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_DEFENDING ){
+							code += '<button class="button danger undefend"><span>Rappel</span></button>';
+						}
+					} else {
+						//barbarian automatic raid
 					}
 					code += '</td>';
 
@@ -17757,8 +17801,9 @@ jQuery(document).ready(function(){
 					//timers
 					timeReturn = null;
 					timeDestination = null;
+					console.log(march);
 					if( march.marchStatus == window.cm.MARCH_STATUS.MARCH_STATUS_RETURNING ){
-						if( march.hasOwnProperty('returnUnixTime') && march.returnUnixTime !== '' ) timeReturn = new Date( march.returnUnixTime );
+						if( march.hasOwnProperty('returnUnixTime') && march.returnUnixTime !== '' ) timeReturn = new Date( parseInt(march.returnUnixTime, 10) * 1000 );
 						else if( march.hasOwnProperty('returnEta') && march.returnEta !== '' ){
 							tmp = reggie.exec(march.returnEta);
 							timeReturn = new Date(parseInt(tmp[1], 10), parseInt(tmp[2], 10) - 1, parseInt(tmp[3], 10), parseInt(tmp[4], 10), parseInt(tmp[5], 10), parseInt(tmp[6], 10));
@@ -17767,7 +17812,7 @@ jQuery(document).ready(function(){
 						&& march.marchStatus != window.cm.MARCH_STATUS.MARCH_STATUS_UNKNOWN
 						&& march.marchStatus != window.cm.MARCH_STATUS.MARCH_STATUS_RESTING
 					){
-						if( march.hasOwnProperty('destinationUnixTime') && march.destinationUnixTime !== '' ) timeDestination = new Date( march.destinationUnixTime );
+						if( march.hasOwnProperty('destinationUnixTime') && march.destinationUnixTime !== '' ) timeDestination = new Date( parseInt(march.destinationUnixTime, 10) * 1000 );
 						else if( march.hasOwnProperty('destinationEta') && march.destinationEta !== '' ){
 							tmp = reggie.exec(march.destinationEta);
 							timeDestination = new Date(parseInt(tmp[1], 10), parseInt(tmp[2], 10) - 1, parseInt(tmp[3], 10), parseInt(tmp[4], 10), parseInt(tmp[5], 10), parseInt(tmp[6], 10));
@@ -17777,10 +17822,10 @@ jQuery(document).ready(function(){
 					duration = 0;
 					tmp = '';
 					if( timeReturn && timeReturn.getTime() > ts ){
-						duration = timeReturn.getTime() - ts;
+						duration = timeReturn.getTime() / 1000 - ts;
 						tmp = 'return';
 					} else if( timeDestination && timeDestination.getTime() > ts ){
-						duration = timeDestination.getTime() - ts;
+						duration = timeDestination.getTime() / 1000 - ts;
 
 						if( duration > 0 ){
 							if( !KOCFIA.marches.returnTimeouts.hasOwnProperty(cityKey) ) KOCFIA.marches.returnTimeouts[ cityKey ] = {};
@@ -17796,7 +17841,7 @@ jQuery(document).ready(function(){
 
 					if( duration > 0 ){
 						code += '<div class="selfAnimProgressBar">';
-						code += '<span class="'+ tmp +'" data-march="'+ m +'" data-label="'+ Shared.readableDuration(trip) +'" style="-webkit-transition-duration: '+ duration +'s; -moz-transition-duration: '+ duration +'s; transition-duration: '+ duration +'s"></span>';
+						code += '<span class="'+ tmp +'" data-march="'+ m +'" data-label="'+ Shared.readableDuration(duration) +'" style="-webkit-transition-duration: '+ duration +'s; -moz-transition-duration: '+ duration +'s; transition-duration: '+ duration +'s"></span>';
 						code += '</div>';
 					}
 					code += '</td>';

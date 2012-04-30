@@ -32,13 +32,17 @@ if( !String.prototype.hasOwnProperty('trim') ){
 if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 	//force wrapping iframe to width 100%
 	var style = unsafeWindow.document.createElement('style');
-	style.innerHTML = 'iframe { margin:0; width:100% !important;}';
+	style.innerHTML = 'html, body { height: 100%; } iframe { margin:0; width:100% !important; }';
 	unsafeWindow.document.head.appendChild(style);
 } else {
 	try {
 		var kocFrame = unsafeWindow.parent.document.getElementById('kocIframes1');
 		//force facebook koc iframe to width 100%
-		if( kocFrame ) kocFrame.style.width = '100%';
+		if( kocFrame ){
+			kocFrame.style.width = '100%';
+			kocFrame.style.height = '100%';
+			kocFrame.style.overflow = 'auto';
+		}
 
 		var kocForm = unsafeWindow.parent.document.getElementById('kocIframesForm1');
 		if( kocForm ){
@@ -51,7 +55,7 @@ if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 
 	//force wrapping iframe to width 100%
 	var style = unsafeWindow.document.createElement('style');
-	style.innerHTML = 'body { margin:0; width:100% !important;}';
+	style.innerHTML = 'html, body { height: 100%; } body { margin:0; width:100% !important; }';
 	if( kocFrame ) kocFrame.parentNode.appendChild(style);
 
 	var kocCss = unsafeWindow.document.createElement('style');

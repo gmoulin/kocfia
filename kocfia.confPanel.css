@@ -69,6 +69,10 @@ html, body {
 		overflow: visible;
 	}
 
+	#kocfia-conf-panel-tabs {
+		cursor: move;
+	}
+
 	.kocfia-conf-panel-tab.on.auto {
 		background-image: -webkit-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
 		background-image: -moz-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
@@ -351,6 +355,10 @@ html, body {
 		text-decoration: underline;
 		color: blue;
 		cursor: pointer;
+	}
+
+	#kocfia-map fieldset {
+		margin: 0;
 	}
 
 	.ui-widget .ui-widget.ui-jqgrid {
@@ -1168,6 +1176,13 @@ html, body {
 			margin: 5px 0 0 5px;
 		}
 
+		#kocfia-transport .manual-form .refresh {
+			display: inline-block;
+			position: relative;
+			top: 3px;
+			margin-right: 3px;
+		}
+
 	/* auto form */
 		#kocfia-transport .transport-form .buttons {
 			text-align: right;
@@ -1311,6 +1326,17 @@ html, body {
 			margin: 5px 0 0 5px;
 		}
 
+		#kocfia-reassign .sums.warning {
+			color: #790619;
+		}
+
+		#kocfia-reassign .manual-form .refresh {
+			display: inline-block;
+			position: relative;
+			top: 3px;
+			margin-right: 3px;
+		}
+
 	/* auto form */
 		#kocfia-reassign .reassign-form .buttons {
 			text-align: right;
@@ -1359,6 +1385,10 @@ html, body {
 
 		#kocfia-reassign .reassign-form .from {
 			margin-right: 15px;
+		}
+
+		#kocfia-reassign .reassign-form .transport {
+			margin-left: 15px;
 		}
 
 		#kocfia-reassign .reassign-form button {
@@ -1823,6 +1853,7 @@ html, body {
 	#kocfia-summary .title {
 		margin: 2px 0;
 		text-indent: 10px;
+		cursor: move;
 	}
 
 	#kocfia-summary {
@@ -1912,6 +1943,7 @@ html, body {
 	#kocfia-overview > h3 {
 		margin: 2px 0;
 		text-indent: 10px;
+		cursor: move;
 	}
 
 	#kocfia-overview .wrap {
@@ -2021,7 +2053,9 @@ html, body {
 	}
 
 	#kocfia-notepad .title {
-		margin: 0
+		margin: 0;
+		text-indent: 10px;
+		cursor: move;
 	}
 
 	#kocfia-notepad .ui-icon-close {
@@ -2261,6 +2295,10 @@ html, body {
 		margin-left: 4px;
 	}
 
+	#hover[class*="_1-"] .levels .lt2 {
+		display: none;
+	}
+
 	#hover[class*="_2-"] .levels .lt3 {
 		display: none;
 	}
@@ -2486,7 +2524,7 @@ html, body {
 	}
 
 	#kocfia-hospital .keep + img {
-		width: 50px;
+		width: 20px;
 		text-align: center;
 	}
 

@@ -144,10 +144,39 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.5.7',
+		version: '0.5.8',
 		userScriptLoaderVersion: 3,
 		debug: true,
-		debugWhat: {build: 1, map: 1, plunder: 1, hospital: 1, marches: 1},
+		debugWhat: { //comment module line for no debug
+			shared: 1,
+			dataAndStats : 1,
+			overview : 1,
+			summary : 1,
+			chat: 1,
+			map: 1,
+			//canvas: 1,
+			marches: 1,
+			barbarian: 1,
+			wilderness: 1,
+			darkForest: 1,
+			scout: 1,
+			plunder: 1,
+			formation: 1,
+			transport: 1,
+			reassign: 1,
+			knights: 1,
+			estates: 1,
+			build: 1,
+			fbWallPopup: 1,
+			notepad: 1,
+			alarm: 1,
+			hospital: 1,
+			throne: 1,
+			quickMarch: 1,
+			reports: 1,
+			search: 1,
+			gifts: 1
+		},
 		server: null,
 		captchaDetected: false,
 		modules: [
@@ -166,7 +195,8 @@ jQuery(document).ready(function(){
 			'throne',
 			'quickMarch',
 			'reports',
-			'search'
+			'search',
+			'gifts'
 		],
 		modulesLabel: {
 			dataAndStats: 'Informations et Statistiques',
@@ -194,7 +224,8 @@ jQuery(document).ready(function(){
 			throne: 'Salle du trône',
 			quickMarch: 'Marches simplifiées',
 			reports: 'Rapports',
-			search: 'Recherche de joueurs et alliances'
+			search: 'Recherche de joueurs et alliances',
+			gifts: 'Cadeaux'
 		},
 		tabLabel: {
 			dataAndStats: 'Infos & Stats',
@@ -217,7 +248,8 @@ jQuery(document).ready(function(){
 			hospital: 'Hôpital',
 			throne: 'Trône',
 			reports: 'Rapports',
-			search: 'Recherche'
+			search: 'Recherche',
+			gifts: 'Cadeaux'
 		},
 		stored: ['conf'],
 		/* default configuration */
@@ -831,6 +863,7 @@ jQuery(document).ready(function(){
 						break;
 					case 'march.php':
 						this.addEventListener("load", function(){
+							console.log(this);
 							var r = JSON.parse(this.responseText);
 							if( r.ok ){
 								window.setTimeout(function(){
@@ -843,16 +876,21 @@ jQuery(document).ready(function(){
 						break;
 					case 'cancelMarch.php':
 						this.addEventListener("load", function(){
+							console.log(this);
 							window.setTimeout(function(){
 								if( $('#modalBox1').is(':visible') && $('#modalBox1').find('.kofcalert').length ){
 									window.Modal.hideModal();
 								}
 							}, 300);
-							window.setTimeout(function(){
-								KOCFIA.overview.updateFromSeed();
-								KOCFIA.dataAndStats.update();
-								KOCFIA.summary.update();
-							}, 500);
+
+							var r = JSON.parse(this.responseText);
+							if( r.ok ){
+								window.setTimeout(function(){
+									KOCFIA.overview.updateFromSeed();
+									KOCFIA.dataAndStats.update();
+									KOCFIA.summary.update();
+								}, 500);
+							}
 						}, false);
 						break;
 					case 'magicalboxPreview.php':
@@ -910,12 +948,24 @@ jQuery(document).ready(function(){
 						break;
 					case '_dispatch.php':
 						this.addEventListener("load", function(){
+							console.log(this);
 							window.setTimeout(function(){
 								KOCFIA.chat.cleanHelp(0); //to clean self construction help messages
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
 							}, 500);
+						}, false);
+						break;
+					case '_dispatch53.php':
+						this.addEventListener("load", function(){
+							console.log(this);
+							if( this.params ){
+								window.setTimeout(function(){
+									KOCFIA.gifts.selectPlayers();
+									//KOCFIA.throne.update();
+								}, 500);
+							}
 						}, false);
 						break;
 					default: break;
@@ -1246,7 +1296,7 @@ jQuery(document).ready(function(){
 
 		/* conf */
 			Shared.storeConf = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA storeConf function', KOCFIA.conf);
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared storeConf function', KOCFIA.conf);
 				localStorage.setObject('kocfia_conf_' + KOCFIA.storeUniqueId, KOCFIA.conf);
 			};
 
@@ -1283,6 +1333,7 @@ jQuery(document).ready(function(){
 
 		/* reload and refresh */
 			Shared.reloadGame = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared reloadGame function');
 				$('#kocfia-reload').submit();
 			};
 
@@ -1343,6 +1394,7 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.resetRaidTimerByCity = function( cityKey, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared resetRaidTimerByCity function', cityKey, attempts);
 				var params = $.extend({}, window.g_ajaxparams);
 
 				params.pf = 0;
@@ -19004,6 +19056,70 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search off function');
 		};
 
+	/* GIFTS */
+		KOCFIA.gifts = {
+			options: {
+				active: 1
+			},
+			stored: ['players'],
+			players: []
+		};
+
+		KOCFIA.gifts.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.gifts +'</h3>';
+			code += '<div>';
+			code += '<p>Séléctionne automatiquement les joueurs précédemment sélectionnés pour l\'envoie de cadeaux</p>';
+			code += Shared.generateCheckbox('gifts', 'active', 'Activer', KOCFIA.conf.gifts.active);
+			code += Shared.generateButton('gifts', 'deletePlayers', 'Supprimer la liste des joueurs');
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.gifts.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts on function');
+
+			$body.delegate('click', '#chooseFriendContainer #sendAllianceGift', function(){
+				var list = $('#chooseFriendContainer').find('input').filter(':checked').map(function(){ return this.id; }).get();
+
+				if( Array.isArray(list) && list.length > 0 ){
+					KOCFIA.gifts.players = list;
+					KOCFIA.gifts.storePlayers();
+				}
+			});
+		};
+
+		KOCFIA.gifts.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts off function');
+
+			$body.undelegate('click', '#chooseFriendContainer #sendAllianceGift');
+		};
+
+		KOCFIA.gifts.selectPlayers = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts selectPlayers function');
+
+			if( KOCFIA.conf.gifts.active && KOCFIA.gifts.players.length > 0 ){
+				$('#chooseFriendContainer').find('input').prop('checked', false).each(function(){
+					if( $.inArray(this.id, KOCFIA.gifts.players) > -1 ){
+						$(this).prop('checked', true);
+					}
+				});
+			}
+		};
+
+		KOCFIA.gifts.storePlayers = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts storePlayers function');
+
+			localStorage.setObject('kocfia_gifts_players_' + KOCFIA.storeUniqueId, KOCIFA.gifts.players);
+		};
+
+		KOCFIA.gifts.deletePlayers = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts deletePlayers function');
+
+			localStorage.setObject('kocfia_gifts_players_' + KOCFIA.storeUniqueId, '');
+		};
+
 	/* CHECK AND LAUNCH ATTACK */
 		KOCFIA.checkAndLaunchAttack = function( attack ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('checkAndLaunchAttack') ) console.info('KOCFIA checkAndLaunchAttack function', attack);
@@ -20029,9 +20145,9 @@ jQuery(document).ready(function(){
 											//sometimes the checkCoord find a dark forest that is in fact a swamp with an incorrect tileType
 											if( mod == 'darkForest' && result.msg.indexOf('marais') > -1 ){
 												attack.coordIndex += 1;
-											} else if( result.msg.indexOf('Point de Ralliement') > -1 ){
+											} else if( result.msg.indexOf('Point de Ralliement') > -1 || result.msg.indexOf('Rally') > -1 ){
 												window.setTimeout(function(){
-													Shared.refreshMarchByCity( attack.cityKey, false, dfd ) );
+													Shared.refreshMarchByCity( attack.cityKey, false, null );
 												}, 300);
 
 												//cloned waves are optionnal, so no recall of previous waves if one fail

@@ -6569,10 +6569,10 @@
 				"bdg19": ["Rempart", 3000, 1500, 10000, 500, 0, 0, 1800, {"b16": [0, -1]}, [], "Les Remparts protègent ta ville. Tes unités Défensives y sont intégrées. Un niveau plus élevé te permet de construire de meilleures Unités Défensives et d'accroître ta protection."],
 				"bdg50": ["Gardien des bois", 0, 0, 0, 0, 0, 0, 0, [], [], ""],
 				"bdg51": ["Gardien de Minerai", 0, 0, 0, 0, 0, 0, 0, [], [], ""],
-				"bdg52": ["Station de Guérison", 0, 0, 0, 0, 0, 0, 0, [], [], "Le Marché collecte des points pour acheter et vendre des Ressources entre les joueurs. Modernise ton Marché pour faire plusieurs transactions en même temps."],
-				"bdg53": ["Scierie", 0, 0, 0, 0, 0, 0, 0, [], [], "La Station de Récupération rend plus rapides tes Troupes lorsque tu te déplaces entre tes villes et les villes alliées. Modernise-les pour plus de vitesse."],
+				"bdg52": ["Gardien de Nourriture", 0, 0, 0, 0, 0, 0, 0, [], [], "Le Marché collecte des points pour acheter et vendre des Ressources entre les joueurs. Modernise ton Marché pour faire plusieurs transactions en même temps."],
+				"bdg53": ["Gardien de Pierres", 0, 0, 0, 0, 0, 0, 0, [], [], "La Station de Récupération rend plus rapides tes Troupes lorsque tu te déplaces entre tes villes et les villes alliées. Modernise-les pour plus de vitesse."],
 				"bdg20": ["Fey Spire", 100, 400, 4000, 400, 0, 0, 1800, {"b0": [1, 5]}, [], "The warlocks of the Fey Spire can combine your treasures to make new items."],
-				"bdg21": ["Caserne", 250, 1200, 1500, 500, 0, 0, 300, [], [], "Les Cottages fournissent un lieu de vie à tes sujets. Offre de meilleurs cottages en modernisant et augmente ta Population."]
+				"bdg21": ["Apothecary", 250, 1200, 1500, 500, 0, 0, 300, [], [], "Heal your troops in the Apothecary. Stronger troops require a higher level of Apothecary."],
 			};
 
 			var unitstats = {

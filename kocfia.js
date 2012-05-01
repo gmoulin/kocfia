@@ -19100,7 +19100,10 @@ jQuery(document).ready(function(){
 			if( !attack.hasOwnProperty('coordIndex') ) attack.coordIndex = 0;
 			if( attack.hasOwnProperty('timeout') ) delete attack.timeout;
 
-			var coordsLength, coords, waveIndex, cloneIndex, time, city, bunch = [], bunchLength;
+			var coordsLength, coords, waveIndex,
+				cloneIndex, time, city,
+				cloning = false,
+				bunch = [], bunchLength;
 
 			/** sequences
 			 * wilderness & barbarian & plunder
@@ -20024,20 +20027,17 @@ jQuery(document).ready(function(){
 										if( result.msg ){
 											KOCFIA[ mod ].refreshOngoingInfo(attack, false, (mod == 'scout' ? city.label + ' ' : '') +'Plan d\''+ label +' sur '+ Shared.mapLink( coords[ attack.coordIndex ] ) +' ('+ (attack.coordIndex + 1) + 'e / ' + coords.length +') refusé ('+ result.msg + (result.msg.indexOf('marais') > -1 ? ' (le serveur a retourné un type de coordonnées pas à jour)' : '') +').');
 											//sometimes the checkCoord find a dark forest that is in fact a swamp with an incorrect tileType
-											if( mod == 'darkForest' && result.msg.indexOf('marais') > -1 ) attack.coordIndex += 1;
-											else if( result.msg.indexOf('Point de Ralliement') > -1 ){
-												var update = function(){
-													return $.Deferred(function(dfd){
-														return dfd.pipe( Shared.refreshMarchByCity( attack.cityKey, false, dfd ) );
-													}).promise();
-												};
+											if( mod == 'darkForest' && result.msg.indexOf('marais') > -1 ){
+												attack.coordIndex += 1;
+											} else if( result.msg.indexOf('Point de Ralliement') > -1 ){
+												window.setTimeout(function(){
+													Shared.refreshMarchByCity( attack.cityKey, false, dfd ) );
+												}, 300);
 
-												$.when( update() )
-													.always(function(){
-														if( KOCFIA.conf.marches.active ){
-															KOCFIA.marches.refreshByCity( attack.cityKey );
-														}
-													});
+												//cloned waves are optionnal, so no recall of previous waves if one fail
+												if( cloning ){
+													return wdfd.resolve();
+												}
 											} else if( result.error_code == 206 ){
 												attack.coordIndex += 1;
 											}
@@ -20164,6 +20164,7 @@ jQuery(document).ready(function(){
 									//launch a clone of the last wave in 3s
 									waveIndex -= 1;
 									cloneIndex -= 1;
+									cloning = true;
 
 									window.setTimeout(function(){
 										dfd.pipe( checkAndLaunchWave(dfd) );

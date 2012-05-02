@@ -19,9 +19,15 @@ if( !Object.hasOwnProperty('isObject') ){
 
 if( unsafeWindow.location.href.indexOf('kabam.com') == -1 ){ //from facebook
 	var fbCss = "body.canvas div#globalContainer { padding: 0; }"
-		+ "\nbody.canvas #rightCol { display: none; }"
+		+ "\nbody.canvas { width: 150%; overflow: auto; height: 3000px; }"
+		+ "\nbody.canvas #rightCol, #pagelet_canvas_footer_content { display: none; }"
 		+ "\nbody.canvas.center_fixed_width_app #pagelet_canvas_content { width: auto; margin: 0; }"
-		+ "\nbody.canvas #mainContainer { border: none; }";
+		+ "\nbody.canvas #mainContainer { border: none; }"
+		+ "\nbody.canvas.ego_wide .hasRightCol #contentArea { width: 100% !important; display: block !important; height: 100% !important; }"
+		+ "\nbody.canvas .canvas_rel_positioning { overflow: visible; height: 100% !important; }"
+		+ "\n#pagelet_iframe_canvas_content > div { position: relative; }"
+		+ "\n#iframe_canvas { position: absolute; top: 0; height: 2500px !important; overflow: hidden; }"
+		+ "\nhtml, #globalContainer, #canvas, #content, #content > div, #mainContainer, #contentCol, #pagelet_canvas_content, #pagelet_iframe_canvas_content, #pagelet_iframe_canvas_content > div { height: 100% !important; }";
 } else { //from kabam
 	var fbCss = "#main-header, #main-nav { display: none; }"
 		+ "\n.play #content { margin-top: 0; height: 300%; width: 150%; }"

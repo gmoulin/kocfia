@@ -41,7 +41,7 @@ if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 		if( kocFrame ){
 			kocFrame.style.width = '100%';
 			kocFrame.style.height = '100%';
-			kocFrame.style.overflow = 'auto';
+			kocFrame.style.overflow = 'hidden';
 		}
 
 		var kocForm = unsafeWindow.parent.document.getElementById('kocIframesForm1');

@@ -2,6 +2,12 @@ html, body {
 	height: 100%;
 }
 
+.modalCurtain {
+	width: 760px !important;
+	height: 1184px !important;
+	top: 23px !important;
+}
+
 /* popup management */
 	body.noModal .modalCurtain:not(.previous),
 	body.noModal .modalBox:not(.previous) {
@@ -304,6 +310,11 @@ html, body {
 		margin: 3px 0;
 	}
 
+	#general-reloadFrequency {
+		margin-left: 5px;
+	}
+
+
 /* chat tab */
 	#kocfia-chat ul {
 		padding-left: 0;
@@ -410,6 +421,7 @@ html, body {
 	.attack-form .coords,
 	.attack-form .detail,
 	.attack-form .keep,
+	.attack-form .option,
 	.attack-form .launch,
 	.attack-form .save,
 	.attack-form .saveAndLaunch {
@@ -477,7 +489,8 @@ html, body {
 		margin-left: 5px;
 	}
 
-	.attack-form .unit-qty {
+	.attack-form .unit-qty,
+	.attack-form .clone {
 		width: 50px;
 		text-align: center;
 	}
@@ -1047,9 +1060,17 @@ html, body {
 		white-space: nowrap;
 	}
 
-	.formation-list ol li span,
-	.formation-list ol li img {
+	#kocfia-formation .formation-list ol li span,
+	#kocfia-formation .formation-list ol li img {
 		left: -5px;
+	}
+
+	#kocfia-formation .formation-list ol li img {
+		margin: 0;
+	}
+
+	#kocfia-formation .formation-list ol li span:last-child {
+		margin-left: -5px;
 	}
 
 	.formation-list .global {
@@ -1391,7 +1412,7 @@ html, body {
 			margin-left: 15px;
 		}
 
-		#kocfia-reassign .reassign-form button {
+		#kocfia-reassign .reassign-form td:not(.unit) button {
 			margin-left: 10px;
 		}
 

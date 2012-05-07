@@ -314,6 +314,9 @@ html, body {
 		margin-left: 5px;
 	}
 
+	#kocfia-options .button + .button {
+		margin-left: 6px;
+	}
 
 /* chat tab */
 	#kocfia-chat ul {
@@ -398,6 +401,11 @@ html, body {
 
 	.ui-jqgrid tr.jqgrow td {
 		padding: 2px;
+	}
+
+/* map tiles additionnal infos */
+	#maparea_map {
+
 	}
 
 /* auto attack tabs form */
@@ -678,7 +686,7 @@ html, body {
 		}
 
 		.darkForest-form .summary .rule img {
-			margin-left: 2px;
+			margin-right: 2px;
 		}
 
 		.darkForest-form .summary .rule span + .button {
@@ -1540,7 +1548,7 @@ html, body {
 		top: 0;
 	}
 
-	#kocfia-conf-panel #kocfia-estates th img {
+	#kocfia-estates th img {
 		top: -2px;
 		vertical-align: middle;
 		width: 20px;
@@ -1560,7 +1568,7 @@ html, body {
 	#kocfia-summary {
 		position:absolute;
 		font: 10px/20px Verdana, sans serif;
-		font-width: normal;
+		font-weight: normal;
 		z-index: 100005;
 		display: none;
 	}
@@ -1586,8 +1594,6 @@ html, body {
 		-moz-box-sizing: border-box;
 		-webkit-box-sizing: border-box;
 		padding: 0;
-		*width: 13px;
-		*height: 13px;
 	}
 
 /* form validation */
@@ -1880,7 +1886,7 @@ html, body {
 	#kocfia-summary {
 		position:absolute;
 		font: 10px/20px Verdana, sans serif;
-		font-width: normal;
+		font-weight: normal;
 		z-index: 100000;
 		display: none;
 		padding: 0;
@@ -1943,7 +1949,7 @@ html, body {
 	#kocfia-overview {
 		position:absolute;
 		font: 13px/20px Verdana, sans serif;
-		font-width: normal;
+		font-weight: normal;
 		z-index: 100000;
 		display: none;
 	}
@@ -2067,7 +2073,7 @@ html, body {
 	#kocfia-notepad {
 		position: absolute;
 		font: 10px/20px Verdana, sans serif;
-		font-width: normal;
+		font-weight: normal;
 		z-index: 100000;
 		display: none;
 		padding: 2px 3px;
@@ -2145,7 +2151,7 @@ html, body {
 	#kocfia-alarm-alliance-warning {
 		position: absolute;
 		font: 10px/20px Verdana, sans serif;
-		font-width: normal;
+		font-weight: normal;
 		z-index: 100000;
 		display: none;
 		padding: 2px 3px;
@@ -2206,13 +2212,13 @@ html, body {
 	}
 
 /* build */
-	#kocfia-conf-panel #kocfia-build > ul {
+	#kocfia-build > ul {
 		list-style: none;
 		padding: 0;
 	}
 
 	#kocfia-build > ul li {
-		display: inline-block;
+		display: block;
 		float: left;
 		margin-right: 10px;
 	}
@@ -2446,7 +2452,7 @@ html, body {
 
 	.selfAnimProgressBar span {
 		display: block;
-		width: 0%;
+		width: 0;
 		height: 100%;
 		background-color: #D3FFCF;
 
@@ -2477,7 +2483,7 @@ html, body {
 	}
 
 	.selfAnimProgressBar span.anim.return {
-		width: 0%;
+		width: 0;
 	}
 
 	.selfAnimProgressBar span::after {
@@ -2517,7 +2523,7 @@ html, body {
 	}
 
 	#kocfia-marches td li {
-		display: inline-block;
+		display: block;
 		float: left;
 		white-space: nowrap;
 	}
@@ -2593,5 +2599,9 @@ html, body {
 
 	#kocfia-hospital .hospital-form .rule > div + div {
 		margin-top: 3px;
+	}
+
+	#kocfia-hospital .ongoing tr td:not(:first-child) {
+		text-align: right;
 	}
 

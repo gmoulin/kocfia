@@ -404,8 +404,29 @@ html, body {
 	}
 
 /* map tiles additionnal infos */
-	#maparea_map {
+	#maparea_map .mod_coord.improved {
+		top: -50px !important;
+	}
 
+	#maparea_map .mod_coord.improved .mapXYCoor input {
+		width: 50px;
+	}
+
+	#maparea_map .mod_coord.improved .button20 {
+		position: relative;
+		top: 10px;
+	}
+
+	#mapwindow .slot .friendly {
+		color: #12e02f;
+	}
+
+	#mapwindow .slot .ally {
+		color: #090cef;
+	}
+
+	#mapwindow .slot .hostile {
+		color: #e5271e;
 	}
 
 /* auto attack tabs form */
@@ -1271,100 +1292,6 @@ html, body {
 	#kocfia-reassign .accordion + div {
 		margin-top: 15px;
 	}
-
-	/* manual form */
-		#kocfia-reassign .manual-form .chosen {
-			margin-top: 2px;
-		}
-
-		#kocfia-reassign .manual-form .chosen input {
-			width: 80px;
-		}
-
-		#kocfia-reassign .manual-form .knight,
-		#kocfia-reassign .manual-form .troop {
-			margin: 22px 0;
-		}
-
-		#kocfia-reassign .manual-form input[type=number],
-		#kocfia-reassign .manual-form input[type=text] {
-			text-align: center;
-		}
-
-		#kocfia-reassign .manual-form .items {
-			margin-bottom: 6px;
-		}
-
-		#kocfia-reassign .manual-form .buttons {
-			margin-top: 6px; display: none;
-		}
-
-		#kocfia-reassign .manual-form .available {
-			display: inline-block;
-		}
-
-		#kocfia-reassign .manual-form .available img {
-			margin: 0 3px 0 0;
-			top: 0;
-			padding: 0;
-		}
-
-		#kocfia-reassign .manual-form select.available {
-			display: none;
-		}
-
-		#kocfia-reassign .manual-form .from,
-		#kocfia-reassign .manual-form .to,
-		#kocfia-reassign .manual-form .items {
-			display: inline-block;
-		}
-
-		#kocfia-reassign .manual-form .items img,
-		#kocfia-reassign .manual-form .troop img {
-			width: 20px;
-		}
-
-		#kocfia-reassign .manual-form .buttonset label img {
-			top: 1px;
-		}
-
-		#kocfia-reassign .manual-form .items.buttonset label {
-			position: relative;
-			top: 4px;
-		}
-
-		#kocfia-reassign .manual-form .items.buttonset label:after {
-			content: attr(data-count);
-			position: absolute;
-			font-size: 9px;
-			line-height: 9px;
-			bottom: 1px;
-			right: 2px;
-			background-color: rgba(0, 0, 0, 0.5);
-			color: #fff;
-			display: inline-block;
-			padding: 0 1px 1px;
-		}
-
-		#kocfia-reassign .available .button {
-			height: 26px;
-			padding: 2px;
-		}
-
-		#kocfia-reassign .button + .button {
-			margin: 5px 0 0 5px;
-		}
-
-		#kocfia-reassign .sums.warning {
-			color: #790619;
-		}
-
-		#kocfia-reassign .manual-form .refresh {
-			display: inline-block;
-			position: relative;
-			top: 3px;
-			margin-right: 3px;
-		}
 
 	/* auto form */
 		#kocfia-reassign .reassign-form .buttons {
@@ -2604,4 +2531,109 @@ html, body {
 	#kocfia-hospital .ongoing tr td:not(:first-child) {
 		text-align: right;
 	}
+
+/* quick march */
+	#kocfia-quickMarch > h3 {
+		margin-bottom: 10px;
+	}
+
+	#kocfia-quickMarch .closest {
+		font-weight: bold;
+		color: #2F468B;
+	}
+
+	#kocfia-quickMarch .form .chosen input {
+		width: 80px;
+	}
+
+	#kocfia-quickMarch .form .knight,
+	#kocfia-quickMarch .form .troop {
+		margin: 22px 0;
+	}
+
+	#kocfia-quickMarch .form input[type=number],
+	#kocfia-quickMarch .form input[type=text] {
+		text-align: center;
+	}
+
+	#kocfia-quickMarch .form .items {
+		margin-bottom: 6px;
+	}
+
+	#kocfia-quickMarch .form .buttons {
+		margin-top: 6px; display: none;
+	}
+
+	#kocfia-quickMarch .form .available {
+		display: inline-block;
+	}
+
+	#kocfia-quickMarch .form .available img {
+		margin: 0 3px 0 0;
+		top: 0;
+		padding: 0;
+	}
+
+	#kocfia-quickMarch .form select.available {
+		display: none;
+	}
+
+	#kocfia-quickMarch .form .type,
+	#kocfia-quickMarch .form .from,
+	#kocfia-quickMarch .form .to,
+	#kocfia-quickMarch .form .items {
+		display: inline-block;
+	}
+
+	#kocfia-quickMarch .form .items img,
+	#kocfia-quickMarch .form .troop img {
+		width: 20px;
+	}
+
+	#kocfia-quickMarch .form .buttonset label img {
+		top: 1px;
+	}
+
+	#kocfia-quickMarch .form .items.buttonset label {
+		position: relative;
+		top: 4px;
+	}
+
+	#kocfia-quickMarch .form .items.buttonset label:after {
+		content: attr(data-count);
+		position: absolute;
+		font-size: 9px;
+		line-height: 9px;
+		bottom: 1px;
+		right: 2px;
+		background-color: rgba(0, 0, 0, 0.5);
+		color: #fff;
+		display: inline-block;
+		padding: 0 1px 1px;
+	}
+
+	#kocfia-quickMarch .available .button {
+		height: 26px;
+		padding: 2px;
+	}
+
+	#kocfia-quickMarch .button + .button {
+		margin: 5px 0 0 5px;
+	}
+
+	#kocfia-quickMarch .sums {
+		visibility: hidden;
+	}
+
+	#kocfia-quickMarch .sums.warning {
+		color: #790619;
+	}
+
+	#kocfia-quickMarch .form .refresh {
+		display: inline-block;
+		position: relative;
+		top: 3px;
+		margin-right: 3px;
+	}
+
 

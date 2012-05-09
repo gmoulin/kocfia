@@ -1494,7 +1494,6 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.numberRegExp = "[0-9]+(\.[0-9]{1,2})?([KMGkmg]){0,1}";
-			Shared.coordRegExp = "[0-9]{1,3},[0-9]{1,3}";
 
 			Shared.decodeFormat = function( num ){
 				num = num.toString().replace(/'/, ''); //reset readable() format
@@ -2042,15 +2041,11 @@ jQuery(document).ready(function(){
 					coordXTo = city.coords.x;
 					coordYTo = city.coords.y;
 				} else if( coord !== '' ){
-					coord = coord.split(',');
-					if( coord.length != 2 ) return '';
-					coord[0] = parseInt(coord[0], 10);
-					coord[1] = parseInt(coord[1], 10);
-					if( isNaN(coord[0]) || coord[0] < 0 || coord[0] > 750 ) return '';
-					if( isNaN(coord[1]) || coord[1] < 0 || coord[1] > 750 ) return '';
-
-					coordXTo = coord[0];
-					coordYTo = coord[1];
+					coord = Shared.checkCoord( coord );
+					if( coord !== false ){
+						coordXTo = coord.x;
+						coordYTo = coord.y;
+					} else return '';
 				}
 
 				if( coordXTo === null ) return '';
@@ -2190,11 +2185,20 @@ jQuery(document).ready(function(){
 				return Math.round(100 * Math.sqrt(x * x + y * y)) / 100;
 			};
 
-			Shared.gridRowActions = function( cellValue, options, rowObject ){
-				var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-coords="'+ rowObject.coords +'" data-level="'+ rowObject.level +'" title="Attaquer"></span>';
-				code += '<span class="ui-icon ui-icon-note scout-shortcut" data-coords="'+ rowObject.coords +'" title="Eclairer"></span>';
+			Shared.coordRegExp = "[0-9]{1,3},[0-9]{1,3}";
 
-				return code;
+			Shared.checkCoord = function( coord ){
+				if( coord !== null && coord !== '' ){
+					coord = $.trim( coord );
+					coord = coord.split(',');
+					if( coord.length != 2 ) return false;
+					coord[0] = parseInt(coord[0], 10);
+					coord[1] = parseInt(coord[1], 10);
+					if( isNaN(coord[0]) || coord[0] < 0 || coord[0] > 750 ) return false;
+					if( isNaN(coord[1]) || coord[1] < 0 || coord[1] > 750 ) return false;
+
+					return {x: coord[0], y: coord[1]};
+				} else return false;
 			};
 
 		/* update seed */
@@ -2282,7 +2286,7 @@ jQuery(document).ready(function(){
 			};
 
 		/* players */
-			Shared.getPlayerInfo = function( playerId ){
+			Shared.getPlayerInfo = function( playerId, from ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getPlayerInfo function');
 
 				var params = $.extend({}, window.g_ajaxparams),
@@ -2356,10 +2360,11 @@ jQuery(document).ready(function(){
 						var status = (online === null ? '?' : (online === true ? 'Connecté' : 'Déconnecté'));
 						status += ' - '+ (lastLogin === null ? '?' : (lastLogin ? lastLogin : '?'));
 
-						//allow user to refresh for player status
-						status = '<span class="playerInfo" rel="'+ playerId +'">'+ status +'</span>';
-
-						KOCFIA.map.setPlayerStatus(playerId, status);
+						if( from == 'map' ){
+							KOCFIA.map.setPlayerStatus(playerId, '<span class="playerInfo" rel="'+ playerId +'">'+ status +'</span>');
+						} else {
+							$(from).html( status );
+						}
 					});
 			};
 
@@ -4271,7 +4276,7 @@ jQuery(document).ready(function(){
 				errors = [],
 				regexp = /[^0-9, ]/,
 				attack = { type: 'attack', category: this.module, waves: [], coordIndex: 0, keep: {} },
-				label;
+				label, coord;
 
 			if( this.module == 'wilderness' ) label = 'terres sauvages';
 			else if( this.module == 'barbarian' ) label = 'camps barbares';
@@ -4314,10 +4319,8 @@ jQuery(document).ready(function(){
 					coords = coords.split(' ');
 					var wrongGPS = false, i, length = coords.length;
 					for( i = 0; i < length; i += 1 ){
-						var coord = coords[i].split(',');
-						if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
-							wrongGPS = true;
-						}
+						wrongGPS = Shared.checkCoord( coords[i] ) === false;
+						if( wrongGPS ) break;
 					}
 					if( wrongGPS ){
 						errors.push('Au moins une des coordonnées est erronée.');
@@ -7179,10 +7182,8 @@ jQuery(document).ready(function(){
 					coords = coords.split(' ');
 					var wrongGPS = false, i, length = coords.length;
 					for( i = 0; i < length; i += 1 ){
-						coord = coords[i].split(',');
-						if( coord[0] < 0 || coord[0] > 750 || coord[0] < 0 || coord[0] > 750 ){
-							wrongGPS = true;
-						}
+						wrongGPS = Shared.checkCoord( coords[i] ) === false;
+						if( wrongGPS ) break;
 					}
 					if( wrongGPS ){
 						errors.push('Au moins une des coordonnées est erronée.');
@@ -7723,125 +7724,137 @@ jQuery(document).ready(function(){
 				improveCoordsForm: 0
 			},
 			stored: ['search'],
-			search: {},/*{by city, tiles}*/
-			data: {
-				cities: [],
-				barbarians: [],
-				wilderness: [],
-				darkForests: []
+			search: {}/*{by city, tiles}*/
+		};
+
+		/* grid related */
+		KOCFIA.map.gridRowActions = function( cellValue, options, rowObject ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map gridRowActions function', cellValue, options, rowObject);
+			var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-coords="'+ rowObject.coords +'" data-type="attack" title="Attaquer"></span>';
+			code += '<span class="ui-icon ui-icon-note scout-shortcut" data-coords="'+ rowObject.coords +'" data-type="scout" title="Eclairer"></span>';
+
+			return code;
+		};
+
+		KOCFIA.map.data = {
+			cities: [],
+			barbarians: [],
+			wilderness: [],
+			darkForests: []
+		};
+
+		KOCFIA.map.selection = {
+			cities: {},
+			barbarians: {},
+			wilderness: {},
+			darkForests: {}
+		};
+
+		KOCFIA.map.gridParams = {
+			shared: {
+				datatype: 'local',
+				loadui: 'disable',
+				rowNum: 20,
+				rowList: [20, 50, 100],
+				sortname: 'range',
+				sortorder: 'asc',
+				altRows: true,
+				altclass: 'zebra',
+				height: 'auto',
+				autowidth: true,
+				viewrecords: true, //total in pager
+				gridview: true, //speed boost
+				hiddengrid: true,
+				multiselect: true,
+				multiboxonly: true,
+				multikey: 'shiftKey',
+				shrinkToFit: true
 			},
-			selection: {
-				cities: {},
-				barbarians: {},
-				wilderness: {},
-				darkForests: {}
-			},
-			gridParams: {
-				shared: {
-					datatype: 'local',
-					loadui: 'disable',
-					rowNum: 20,
-					rowList: [20, 50, 100],
-					sortname: 'range',
-					sortorder: 'asc',
-					altRows: true,
-					altclass: 'zebra',
-					height: 'auto',
-					autowidth: true,
-					viewrecords: true, //total in pager
-					gridview: true, //speed boost
-					hiddengrid: true,
-					multiselect: true,
-					multiboxonly: true,
-					multikey: 'shiftKey',
-					shrinkToFit: true
-				},
-				cities: {
-					colNames: ['', 'Dist', 'Coord', 'Nom', 'Niv', 'Joueur', 'Puis', 'Alliance', 'Diplo', 'Brume', 'PlayerId', 'Status'],
-					colModel: [
-						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 40},
-						{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
-						{name: 'coords', index: 'coords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
-						{name: 'city', index: 'city', width: 100},
-						{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60},
-						{name: 'player', index: 'player', width: 100},
-						{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
-						{name: 'guild', index: 'guild', width: 100},
-						{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
-						{name: 'mist', index: 'mist', align: 'center', formatter: function( cellValue, options, rowObject ){ return cellValue === 1 ? 'Oui' : ''; }, width: 55},
-						{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
-						{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
-					],
-					caption: 'Villes',
-					pager: '#kocfia-map-pager-cities',
-					onSelectRow: function(key, checked){
-						//xxxyyy -> xxx,yyy with padded 0 cleaned
-						var coord = parseInt(key.toString().substr(0, 3), 10) +','+ parseInt(key.toString().substr(3, 3), 10);
-						if( checked ){
-							KOCFIA.map.selection.cities[ coord ] = KOCFIA.map.$resultsCities.jqGrid('getRowData', key);
-						} else {
-							delete KOCFIA.map.selection.cities[ coord ];
-						}
+			cities: {
+				colNames: ['', 'Dist', 'Coord', 'Nom', 'Niv', 'Joueur', 'Puis', 'Alliance', 'Diplo', 'Brume', 'PlayerId', 'Status'],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
+					{name: 'coords', index: 'coords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
+					{name: 'city', index: 'city', width: 100},
+					{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60},
+					{name: 'player', index: 'player', width: 100},
+					{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
+					{name: 'guild', index: 'guild', width: 100},
+					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
+					{name: 'mist', index: 'mist', align: 'center', formatter: function( cellValue, options, rowObject ){ return cellValue === 1 ? 'Oui' : ''; }, width: 55},
+					{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
+				],
+				caption: 'Villes',
+				pager: '#kocfia-map-pager-cities',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					var coord = parseInt(key.toString().substr(0, 3), 10) +','+ parseInt(key.toString().substr(3, 3), 10);
+					if( checked ){
+						KOCFIA.map.selection.cities[ coord ] = KOCFIA.map.$resultsCities.jqGrid('getRowData', key);
+					} else {
+						delete KOCFIA.map.selection.cities[ coord ];
 					}
-				},
-				barbarians: {
-					colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
-					colModel: [
-						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
-						{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
-						{name: 'coords', index: 'coords', align:'center', key: true, sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 80},
-						{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60}
-					],
-					caption: 'Camps barbares',
-					pager: '#kocfia-map-pager-barbarians',
-					onSelectRow: function(key, checked){
-						//xxxyyy -> xxx,yyy with padded 0 cleaned
-						var coord = parseInt(key.toString().substr(0, 3), 10) +','+ parseInt(key.toString().substr(3, 3), 10);
-						if( checked ){
-							KOCFIA.map.selection.barbarians[ coord ] = KOCFIA.map.$resultsBarbarians.jqGrid('getRowData', key);
-						} else {
-							delete KOCFIA.map.selection.barbarians[ coord ];
-						}
-					}
-				},
-				wilderness: {
-					colNames: ['', 'Dist', 'Coord', 'Niv', 'Type', 'Joueur', 'Puis', 'Alliance', 'Diplo', 'PlayerId', 'Status'],
-					colModel: [
-						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 40},
-						{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
-						{name: 'coords', index: 'coords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
-						{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60},
-						{name: 'type', index: 'type', width: 90},
-						{name: 'player', index: 'player', width: 100},
-						{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
-						{name: 'guild', index: 'guild', width: 100},
-						{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
-						{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
-						{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
-					],
-					caption: 'Terres Sauvages',
-					pager: '#kocfia-map-pager-wilderness',
-					onSelectRow: function(key, checked){
-						//xxxyyy -> xxx,yyy with padded 0 cleaned
-						var coord = parseInt(key.toString().substr(0, 3), 10) +','+ parseInt(key.toString().substr(3, 3), 10);
-						if( checked ){
-							KOCFIA.map.selection.wilderness[ coord ] = KOCFIA.map.$resultsWilderness.jqGrid('getRowData', key);
-						} else {
-							delete KOCFIA.map.selection.wilderness[ coord ];
-						}
-					}
-				},
-				darkForests: {
-					colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
-					colModel: [
-						{name: 'actions', sortable: false, search: false, formatter: Shared.gridRowActions, width: 50},
-						{name: 'range', index: 'range', align: 'right', width: 60, sorttype: 'float'},
-						{name: 'coords', index: 'coords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 80},
-						{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60}
-					],
-					caption: 'Forêts Obscures',
-					pager: '#kocfia-map-pager-darkForests'
 				}
+			},
+			barbarians: {
+				colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 50},
+					{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
+					{name: 'coords', index: 'coords', align:'center', key: true, sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 80},
+					{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60}
+				],
+				caption: 'Camps barbares',
+				pager: '#kocfia-map-pager-barbarians',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					var coord = parseInt(key.toString().substr(0, 3), 10) +','+ parseInt(key.toString().substr(3, 3), 10);
+					if( checked ){
+						KOCFIA.map.selection.barbarians[ coord ] = KOCFIA.map.$resultsBarbarians.jqGrid('getRowData', key);
+					} else {
+						delete KOCFIA.map.selection.barbarians[ coord ];
+					}
+				}
+			},
+			wilderness: {
+				colNames: ['', 'Dist', 'Coord', 'Niv', 'Type', 'Joueur', 'Puis', 'Alliance', 'Diplo', 'PlayerId', 'Status'],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'range', index: 'range', align: 'right', sorttype: 'float', width: 60},
+					{name: 'coords', index: 'coords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
+					{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60},
+					{name: 'type', index: 'type', width: 90},
+					{name: 'player', index: 'player', width: 100},
+					{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
+					{name: 'guild', index: 'guild', width: 100},
+					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
+					{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
+				],
+				caption: 'Terres Sauvages',
+				pager: '#kocfia-map-pager-wilderness',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					var coord = parseInt(key.toString().substr(0, 3), 10) +','+ parseInt(key.toString().substr(3, 3), 10);
+					if( checked ){
+						KOCFIA.map.selection.wilderness[ coord ] = KOCFIA.map.$resultsWilderness.jqGrid('getRowData', key);
+					} else {
+						delete KOCFIA.map.selection.wilderness[ coord ];
+					}
+				}
+			},
+			darkForests: {
+				colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 50},
+					{name: 'range', index: 'range', align: 'right', width: 60, sorttype: 'float'},
+					{name: 'coords', index: 'coords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 80},
+					{name: 'level', index: 'level', align: 'center', sorttype: 'int', width: 60}
+				],
+				caption: 'Forêts Obscures',
+				pager: '#kocfia-map-pager-darkForests'
 			}
 		};
 
@@ -7932,10 +7945,11 @@ jQuery(document).ready(function(){
 						} else if( regexp.test( coord ) ){
 							errors.push('Pour les coordonnées, veuillez respecter le format x,y.');
 						} else {
-							coord = coord.split(',');
-							coordX = parseInt(coord[0], 10);
-							coordY = parseInt(coord[1], 10);
-							if( coordX < 0 || coordX > 750 || coordY < 0 || coordY > 750 ){
+							coord = Shared.getCoord( coord );
+							if( coord !== false ){
+								coordX = coord.x;
+								coordY = coord.y;
+							} else {
 								errors.push('Coordonnée invalide.');
 							}
 						}
@@ -8015,7 +8029,7 @@ jQuery(document).ready(function(){
 			//grid listeners
 			$section
 				.on('click', '.playerInfo', function(){
-					Shared.getPlayerInfo( $(this).attr('rel') );
+					Shared.getPlayerInfo($(this).attr('rel'), 'map');
 				})
 				.on('click', '.attack-shortcut', function(){
 					//quick attack
@@ -8038,7 +8052,7 @@ jQuery(document).ready(function(){
 				})
 				;
 
-			KOCFIA.$confPanel.bind('resizestop', function(){
+			KOCFIA.$confPanel.on('resizestop', function(){
 				var size = $("#kocfia-map").find('.search').innerWidth() + 1;
 				KOCFIA.map.$resultsCities.jqGrid('setGridWidth', size);
 				KOCFIA.map.$resultsBarbarians.jqGrid('setGridWidth', size);
@@ -8089,18 +8103,11 @@ jQuery(document).ready(function(){
 								window.reCenterMapWithCoor();
 							} else {
 								var coord = $.trim( $(this).val() );
-								if( coord !== '' ){
-									coord = coord.split(',');
-									if( coord.length == 2 ){
-										coord[0] = parseInt(coord[0], 10);
-										coord[1] = parseInt(coord[1], 10);
-										if( isNaN(coord[0]) || coord[0] < 0 || coord[0] > 750 ) return false;
-										if( isNaN(coord[1]) || coord[1] < 0 || coord[1] > 750 ) return false;
-
-										$('#mapXCoor').val( coord[0] );
-										$('#mapYCoor').val( coord[1] );
-										window.reCenterMapWithCoor();
-									}
+								coord = Shared.checkCoord( coord );
+								if( coord !== false ){
+									$('#mapXCoor').val( coord.x );
+									$('#mapYCoor').val( coord.y );
+									window.reCenterMapWithCoor();
 								}
 							}
 						}
@@ -8540,8 +8547,18 @@ jQuery(document).ready(function(){
 			}
 		};
 
+		KOCFIA.map.setQuickMarch = function( type, coord ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map setQuickMarch function', type, coord);
+
+			KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$='+ to +']').trigger('click');
+
+			KOCFIA.quickMarch.$form
+				.find('.type').find('kocfia-quickMarch-type-'+ type).prop('checked', true).end()
+				.find('.coord').val( coord ).trigger('change');
+		};
+
 		KOCFIA.map.exportSelection = function( from, to ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map exportSelection function');
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map exportSelection function', from, to);
 			KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$='+ to +']').trigger('click');
 
 			var valid = true, message, coord, info;
@@ -11180,11 +11197,9 @@ jQuery(document).ready(function(){
 						if( regexp.test( coord ) ){
 							errors.push('Pour les coordonnées, veuillez respecter le format x,y '+ label);
 						} else {
-							coord = coord.split(',');
-							if( coord[0] < 0 || coord[0] > 750 || coord[1] < 0 || coord[1] > 750 ){
-								errors.push('Mauvais format de coordonnée pour la destination (x,y) '+ label);
-							} else {
-								receiverCoord = coord[0] +','+ coord[1];
+							coord = Shared.checkCoord( coord );
+							if( coord !== false ){
+								receiverCoord = coord.x +','+ coord.y;
 								if( isPileUp ){
 									plan[ r ][ from ].to = null;
 									plan[ r ][ from ].coord = coord;
@@ -11192,6 +11207,8 @@ jQuery(document).ready(function(){
 									receiver = receiverCoord;
 									plan[ r ][ from ][ receiver ] = {};
 								}
+							} else {
+								errors.push('Mauvais format de coordonnée pour la destination (x,y) '+ label);
 							}
 						}
 					} else {
@@ -11244,7 +11261,7 @@ jQuery(document).ready(function(){
 							if( !finalPlan.hasOwnProperty( from ) ) finalPlan[ from ] = {};
 
 							if( isPileUp ){
-								to = (plan[ r ][from].to === null ? plan[ r ][from].coord.join(',') : plan[ r ][ from ].to);
+								to = (plan[ r ][from].to === null ? plan[ r ][from].coord.x +','+ plan[ r ][from].coord.y : plan[ r ][ from ].to);
 								if( !finalPlan[ from ].hasOwnProperty( to ) ) finalPlan[ from ][ to ] = {};
 
 								finalPlan[ from ][ to ][ r ] = {
@@ -15404,7 +15421,7 @@ jQuery(document).ready(function(){
 					KOCFIA.build.updateCityChronology( cityKey, slotId, true );
 					KOCFIA.build.updateCityQueueDuration( cityKey );
 				})
-				.bind('updateTasksList', function(){
+				.on('updateTasksList', function(){
 					var cityKey = 'city'+ window.currentcityid;
 					if( KOCFIA.build.queues.hasOwnProperty(cityKey)
 						&& KOCFIA.build.queues[ cityKey ].hasOwnProperty( KOCFIA.build.$hover.attr('id') )
@@ -17130,6 +17147,82 @@ jQuery(document).ready(function(){
 			return maxLoad;
 		};
 
+		KOCFIA.quickMarch.checkTarget = function(coord, attempts){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch checkTarget function', coord);
+			var cParams = jQuery.extend(true, {}, window.g_ajaxparams);
+
+			KOCFIA.quickMarch.$form.find('.info').css('visibility', 'hidden').html('');
+
+			//check if quickMarch level has changed
+			cParams.blocks = "bl_" + coord.x + "_bt_" + coord.y;
+			$.ajax({
+				url: window.g_ajaxpath + "ajax/fetchMapTiles.php" + window.g_ajaxsuffix,
+				type: 'post',
+				data: cParams,
+				dataType: 'json',
+				timeout: 10000
+			})
+			.done(function(result){
+				if( result.data ){
+					var tile = result.data['l_'+ coord[0] +'_t_'+ coord[1]],
+						user, info = {};
+					if( tile ){
+						//city
+							if( tile.tileType == 51 ){
+								if( tile.tileCityId !== null ){
+									user = result.userInfo['u'+ tile.tileUserId];
+
+									info.id = tile.tileUserId;
+									info.name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
+									info.label = 'Cité '+ tile.tileLevel;
+
+								} else {
+						//barbarian
+									info.label = 'Camp barbare '+ tile.tileLevel;
+								}
+						//city
+							} else if( tile.tileType == 53 ){
+								info.label = 'Cité sous brumes';
+						//dark forest
+							} else if( tile.tileType == 54 ){
+								info.label = 'Forêt obscure '+ tile.tileLevel;
+						//bog
+							} else if( tile.tileType == 0 ){
+								info.label = 'Marais '+ tile.tileLevel;
+						//wilderness
+							} else if( tile.tileType >= 10 && tile.tileType <= 50 ){
+								info.label = 'Terre sauvage '+ tile.tileLevel;
+
+								if( tile.tileUserId !== null ){
+									if( tile.tileUserId != "0" ){
+										user = result.userInfo['u'+ tile.tileUserId];
+										info.id = tile.tileUserId;
+										info.name = (user.s == 'M' ? 'Lord' : 'Lady') + ' ' + user.n;
+									}
+								}
+							}
+
+						var code = info.label;
+						if( info.hasOwnProperty(id) ){
+							code += ' - '+ info.name +' <span class="status" rel="'+ info.id +'"></span>';
+						}
+						KOCFIA.quickMarch.$form.find('.info').show().html( code ).find('.status').trigger('click');
+					}
+				} else {
+					attempts -= 1;
+					if( attempts > 0 ){
+						KOCFIA.quickMarch.checkTarget(coord, attempts);
+					}
+				}
+			})
+			.fail(function(){
+				attempts -= 1;
+				if( attempts > 0 ){
+					KOCFIA.quickMarch.checkTarget(coord, attempts);
+				}
+			});
+		};
+
 		KOCFIA.quickMarch.getForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch getForm function');
 			var c, city;
@@ -17138,15 +17231,15 @@ jQuery(document).ready(function(){
 			form += '<div class="form">';
 
 			form += '<label>Type&nbsp;:&nbsp;</label><div class="buttonset type">';
-			form += '<input type="radio" name="type" value="4" id="kocfia-quickMarch-type-attack">';
+			form += '<input type="radio" name="type" value="4" id="kocfia-quickMarch-type-attack" required>';
 			form += '<label for="kocfia-quickMarch-type-attack">Attaque</label>';
-			form += '<input type="radio" name="type" value="3" id="kocfia-quickMarch-type-scout">';
+			form += '<input type="radio" name="type" value="3" id="kocfia-quickMarch-type-scout" required>';
 			form += '<label for="kocfia-quickMarch-type-scout">Éclairage</label>';
-			form += '<input type="radio" name="type" value="2" id="kocfia-quickMarch-type-reinforce" checked>';
+			form += '<input type="radio" name="type" value="2" id="kocfia-quickMarch-type-reinforce" checked required>';
 			form += '<label for="kocfia-quickMarch-type-reinforce">Renfort</label>';
-			form += '<input type="radio" name="type" value="1" id="kocfia-quickMarch-type-transport">';
+			form += '<input type="radio" name="type" value="1" id="kocfia-quickMarch-type-transport" required>';
 			form += '<label for="kocfia-quickMarch-type-transport">Transport</label>';
-			form += '<input type="radio" name="type" value="5" id="kocfia-quickMarch-type-reassign">';
+			form += '<input type="radio" name="type" value="5" id="kocfia-quickMarch-type-reassign" required>';
 			form += '<label for="kocfia-quickMarch-type-reassign">Réassignement</label>';
 			form += '</div>';
 
@@ -17171,6 +17264,8 @@ jQuery(document).ready(function(){
 				}
 			}
 			form += '</div>';
+
+			form += '<div class="info"></div>'; //for target info when using coordinates
 
 			form += '<div class="troop">';
 			form += '<span class="ui-icon ui-icon-refresh refresh" title="Recharge les troupes disponible"></span>';
@@ -17246,8 +17341,15 @@ jQuery(document).ready(function(){
 						KOCFIA.quickMarch.$form.trigger('getAndSetTroops');
 					}
 					KOCFIA.quickMarch.$form.trigger('getAndSetClosestFrom');
+
+					var coord = Shared.checkCoord( $(this).val() );
+					if( coord !== false ){
+						//get the tile info
+
+						//get the player online status
+					}
 				})
-				.bind('getAndSetKnights', function(){
+				.on('getAndSetKnights', function(){
 					var cityKey = $from.filter(':checked').val(),
 						knights = Shared.getAvailableKnights( cityKey ),
 						$available = $knight.find('.available').show();
@@ -17277,15 +17379,15 @@ jQuery(document).ready(function(){
 						$available.attr('disabled', 'disabled').html('<option value="">Aucun chevalier disponible</option>');
 					}
 				})
-				.bind('getAndSetTroops', function(){
+				.on('getAndSetTroops', function(){
 					$troop.find('.available').html( KOCFIA.quickMarch.getUnits() );
 				})
-				.bind('getAndSetResources', function(){
+				.on('getAndSetResources', function(){
 					$resource.find('.available').html( KOCFIA.quickMarch.getResources() );
 
 					KOCFIA.quickMarch.$form.trigger('updateResourcesMaxAndSum');
 				})
-				.bind('updateResourcesMaxAndSum', function(){
+				.on('updateResourcesMaxAndSum', function(){
 					var sum = KOCFIA.quickMarch.getResourcesSum(),
 						max = KOCFIA.quickMarch.getResourcesMax();
 
@@ -17293,7 +17395,7 @@ jQuery(document).ready(function(){
 							.find('.sum').html( Shared.format( sum ) ).attr('title', Shared.readable( sum )).end()
 							.find('.max').html( Shared.format( max ) ).attr('title', Shared.readable( max ));
 				})
-				.bind('getAndSetClosestFrom', function(){
+				.on('getAndSetClosestFrom', function(){
 					var toCityKey = $to.filter(':checked').val(),
 						coord = $.trim( $coord.val() );
 						toX, toY, city, i, min, closest, distance;
@@ -17305,12 +17407,10 @@ jQuery(document).ready(function(){
 						toY = city.coords.y;
 
 					} else if( coord !== '' ){
-						coord = coord.split(',');
-						if( coord.length == 2 ){
-							if( coord[0] >= 0 && coord[0] <= 750 && coord[1] >= 0 && coord[1] <= 750 ){
-								toX = coord[0];
-								toY = coord[1];
-							}
+						coord = Shared.checkCoord( coord );
+						if( coord !== false ){
+							toX = coord.x;
+							toY = coord.y;
 						}
 					}
 
@@ -17329,7 +17429,7 @@ jQuery(document).ready(function(){
 						if( closest !== null ) $('#kocfia-quickMarch-manual-from-'+ closest).addClass('closest');
 					}
 				})
-				.bind('updateLimit', function(){
+				.on('updateLimit', function(){
 					var hasAuraBoost = $('#kocfia-quickMarch-item-285').prop('checked') || false,
 						hasAura2Boost = $('#kocfia-quickMarch-item-286').prop('checked') || false,
 						hasMarchBoost = $('#kocfia-quickMarch-item-931').prop('checked') || false,
@@ -17337,7 +17437,7 @@ jQuery(document).ready(function(){
 
 					unitLimit = Shared.getUnitLimit( $from.filter(':checked').val(), hasAuraBoost, hasAura2Boost, hasMarchBoost, hasMarch2Boost );
 				})
-				.bind('getItems', function(){
+				.on('getItems', function(){
 					var items = [55, 57, 931, 932, 276, 277, 278, 285, 286], //speed, load, unit number limit boosts
 						info, key, i, code = '', nb;
 					for( i = 0; i < items.length; i += 1 ){
@@ -17649,16 +17749,21 @@ jQuery(document).ready(function(){
 
 					KOCFIA.quickMarch.$form.trigger('updateResourcesMaxAndSum');
 				})
+				//target user online status
+				.on('click', '.status', function(){
+					Shared.getPlayerInfo( $(this).attr('rel'), this );
+				})
 				//form reset
 				.on('click', '.reset', function(){
-					KOCFIA.quickMarch.$form.find('.troop, .resource').find('.available, .chosen').html('');
-					KOCFIA.quickMarch.$form.find('.knight').find('.available').html('').hide();
-					KOCFIA.quickMarch.$form.find('.items').hide().html('');
-					KOCFIA.quickMarch.$form.find('.buttons').hide();
-
-					KOCFIA.quickMarch.$form.find('.type, .from, .to').find('input')
-						.filter('[type="radio"]').prop('checked', false).end()
-						.filter('.coord').val('');
+					KOCFIA.quickMarch.$form
+						.find('.troop, .resource').find('.available, .chosen').html('').end()
+						.find('.knight').find('.available').html('').hide().end()
+						.find('.items').hide().html('').end()
+						.find('.buttons').hide().end()
+						.find('.info').css('visibility', 'hidden').html('').end()
+						.find('.type, .from, .to').find('input')
+							.filter('[type="radio"]').prop('checked', false).end()
+							.filter('.coord').val('');
 				})
 				//form submit
 				.on('click', '.launch', function(){
@@ -17713,13 +17818,13 @@ jQuery(document).ready(function(){
 				if( regexp.test( coord ) ){
 					errors.push('Pour les coordonnées, veuillez respecter le format x,y');
 				} else {
-					coord = coord.split(',');
-					if( coord[0] < 0 || coord[0] > 750 || coord[1] < 0 || coord[1] > 750 ){
-						errors.push('Mauvais format de coordonnée pour la destination (x,y)');
-					} else {
-						plan.to.x = coord[0];
-						plan.to.y = coord[1];
+					coord = Shared.checkCoord( coord );
+					if( coord !== false ){
+						plan.to.x = coord.x;
+						plan.to.y = coord.y;
 						gpsTo = plan.to.x +','+ plan.to.y;
+					} else {
+						errors.push('Mauvais format de coordonnée pour la destination (x,y)');
 					}
 				}
 			} else {
@@ -18037,14 +18142,17 @@ jQuery(document).ready(function(){
 			options: {
 				active: 0,
 				automatic: 0,
+				autoMarches: 0,
 				autoBarbarian: 0,
 				autoDarkForest: 0,
 				autoPlunder: 0,
 				autoScout: 0,
 				autoPileUp: 0,
 				autoSupply: 0,
-				reinforcement: 0,
-				scout: 0,
+				reinforceMe: 0,
+				reinforceOther: 0,
+				scoutMe: 0,
+				scoutOther: 0,
 				barbarian: 0,
 				darkForest: 0,
 				transport: 0
@@ -18062,7 +18170,28 @@ jQuery(document).ready(function(){
 			var code = '<h3>'+ KOCFIA.modulesLabel.reports +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('reports', 'active', 'Activer', KOCFIA.conf.reports.active);
-			code += Shared.generateCheckbox('reports', 'automatic', 'Activer les suppressions de rapport automatiques', KOCFIA.conf.reports.automatic);
+			code += Shared.generateCheckbox('reports', 'automatic', 'Activer la suppression automatique de rapport', KOCFIA.conf.reports.automatic);
+			code += '<p class="indent">';
+			code += 'Supprimera les rapports suivant :';
+			code += '<br><small>La détection est basée sur les coordonnées configurées dans les différents onglets</small>';
+			code += Shared.generateCheckbox('reports', 'autoBarbarian', 'Rapports des camps barbares automatiques', KOCFIA.conf.reports.autoBarbarian);
+			code += Shared.generateCheckbox('reports', 'autoDarkForest', 'Rapports des forêts obscures automatiques', KOCFIA.conf.reports.autoDarkForest);
+			code += Shared.generateCheckbox('reports', 'autoPlunder', 'Rapports des pillages automatiques', KOCFIA.conf.reports.autoPlunder);
+			code += Shared.generateCheckbox('reports', 'autoScout', 'Rapports des éclairages automatiques', KOCFIA.conf.reports.autoScout);
+			code += Shared.generateCheckbox('reports', 'autoPileUp', 'Rapports des stockages automatiques', KOCFIA.conf.reports.autoPileUp);
+			code += Shared.generateCheckbox('reports', 'autoSupply', 'Rapports des approvisionnements automatiques', KOCFIA.conf.reports.autoSupply);
+			code += '</p>';
+			code += '<p class="indent">';
+			code += 'Supprimera les rapports suivant :';
+			code += '<br><small>La détection est basée sur le type de marche, l\'expéditeur et le destinataire</small>';
+			code += Shared.generateCheckbox('reports', 'reinforceMe', 'Renforts d\'une de mes cités par un autre joueur', KOCFIA.conf.reports.reinforceMe);
+			code += Shared.generateCheckbox('reports', 'reinforceOther', 'Renforts d\'une cité d\'un autre joueur', KOCFIA.conf.reports.reinforceOther);
+			code += Shared.generateCheckbox('reports', 'scoutMe', 'Éclairage d\'une de mes cités par un autre joueur', KOCFIA.conf.reports.scoutMe);
+			code += Shared.generateCheckbox('reports', 'scoutOther', 'Éclairage d\'une cité d\'un autre joueur', KOCFIA.conf.reports.scoutOther);
+			code += Shared.generateCheckbox('reports', 'barbarian', 'Camps barbares', KOCFIA.conf.reports.barbarian);
+			code += Shared.generateCheckbox('reports', 'darkForest', 'Forêts obscures', KOCFIA.conf.reports.darkForest);
+			code += Shared.generateCheckbox('reports', 'transport', 'Transport', KOCFIA.conf.reports.transport);
+			code += '</p>';
 			code += '</div>';
 
 			$section.append( code );
@@ -18079,7 +18208,7 @@ jQuery(document).ready(function(){
 			code += '<span class="buttonset"><input type="checkbox" id="reports-panel-automatic" '+ (KOCFIA.conf.reports.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="reports-panel-automatic">Suppressions automatiques</label></span>';
 			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
-			code += '</div><h3>Configurations</h3>';
+			code += '</div>';
 			code += '<div class="accordion">';
 			code += reports;
 			code += '</div>';
@@ -18124,8 +18253,6 @@ jQuery(document).ready(function(){
 		KOCFIA.reports.automaticOn = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports automaticOn function');
 			$('#reports-panel-automatic').prop('checked', true);
-
-			KOCFIA.reports.launchAutomaticImprovements();
 		};
 
 		KOCFIA.reports.automaticOff = function(){
@@ -19243,7 +19370,7 @@ jQuery(document).ready(function(){
 								slots = Shared.getRallyPointSlots( attack.cities[i] );
 								keepFree = attack.hasOwnProperty('rpSlot') ? parseInt(attack.rpSlot, 10) : 0;
 								if( slots - keepFree > 0 ){
-									return dfd.pipe(checkCoords(dfd));
+									return dfd.pipe( checkCoords(dfd) );
 								}
 							}
 						}
@@ -19256,7 +19383,7 @@ jQuery(document).ready(function(){
 							slots = Shared.getRallyPointSlots( attack.cities[i] );
 							keepFree = attack.hasOwnProperty('rpSlot') ? parseInt(attack.rpSlot, 10) : 0;
 							if( slots - keepFree > 0 ){
-								return dfd.pipe(checkCoords(dfd));
+								return dfd.pipe( checkCoords(dfd) );
 							}
 						}
 
@@ -19272,9 +19399,9 @@ jQuery(document).ready(function(){
 					}
 
 					if( mod == 'plunder' ){
-						return dfd.pipe(checkPlayerOnlineStatus(dfd, 3));
+						return dfd.pipe( checkPlayerOnlineStatus(dfd, 3) );
 					} else {
-						return dfd.pipe(checkCoords(dfd));
+						return dfd.pipe( checkCoords(dfd) );
 					}
 				};
 
@@ -19337,7 +19464,7 @@ jQuery(document).ready(function(){
 					.done(function(data){
 						if( data.ok ){
 							if( !$.isEmptyObject(data.data) && data.data[ userId ] === true ){
-								return dfd.pipe(checkCoords( dfd ));
+								return dfd.pipe( checkCoords(dfd) );
 							} else {
 								KOCFIA[ mod ].refreshOngoingInfo(attack, false, 'Joueur '+ attack.targetName +' connecté, attaque annulée.');
 								return dfd.reject();
@@ -19364,9 +19491,9 @@ jQuery(document).ready(function(){
 					}
 
 					if( mod != 'darkForest' ){
-						return dfd.pipe(checkCoord(dfd, 3));
+						return dfd.pipe( checkCoord(dfd, 3) );
 					} else {
-						return dfd.pipe(checkCoordByGroup(dfd, 3));
+						return dfd.pipe( checkCoordByGroup(dfd, 3) );
 					}
 				};
 

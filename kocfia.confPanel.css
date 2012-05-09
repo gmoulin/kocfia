@@ -2561,7 +2561,8 @@ html, body {
 	}
 
 	#kocfia-quickMarch .form .buttons {
-		margin-top: 6px; display: none;
+		margin-top: 6px;
+		display: none;
 	}
 
 	#kocfia-quickMarch .form .available {
@@ -2621,6 +2622,7 @@ html, body {
 		margin: 5px 0 0 5px;
 	}
 
+	#kocfia-quickMarch .info,
 	#kocfia-quickMarch .sums {
 		visibility: hidden;
 	}

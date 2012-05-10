@@ -318,6 +318,11 @@ html, body {
 		margin-left: 6px;
 	}
 
+	#kocfia-options .indent {
+		padding-left: 35px;
+		margin: 5px 0;
+	}
+
 /* chat tab */
 	#kocfia-chat ul {
 		padding-left: 0;

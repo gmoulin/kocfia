@@ -1,0 +1,276 @@
+ __kraken_network	facebook
+fb_sig
+fb_sig_added
+fb_sig_api_key
+fb_sig_expires
+fb_sig_in_iframe
+fb_sig_profile_update_tim...
+fb_sig_session_key
+fb_sig_time
+fb_sig_user	100001515717848
+kabamuid	1807516
+lang	fr
+pageNo
+pf	0
+pg	a9f71fde4802b6d5eddc22e6c308995ca34699f6b5436d7a852c375207a76465.3215
+signed_request	JbwQyk-B0oCbkcV6FsP09Dff-ZziRrQRgXGAQ7PEU2k.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEzMzY2NTEyMDAsImlzc3VlZF9hdCI6MTMzNjY0NTEzMCwib2F1dGhfdG9rZW4iOiJBQUFBQUhseVpBcjlzQkFLNVpDVEFwenNNdXg1eG1RMHBLNjZjWFFjN0tiRXRHNVpBZE15bkRJS25RcVNGMVpBbTJKQW43VldzUVJ4V29aQVpDSnh5RGswS0JhaXoxaFlaQmZKcmZaQmRjc1hmSXBFOUYycXFBNDEwIiwidXNlciI6eyJjb3VudHJ5IjoiY2giLCJsb2NhbGUiOiJmcl9GUiIsImFnZSI6eyJtaW4iOjIxfX0sInVzZXJfaWQiOiIxMDAwMDE1MTU3MTc4NDgifQ
+standalone	0
+tpuid	s3DWC7rNIJ_4guyWkzCO546bNmk
+tvuid	13262860
+
+
+
+{
+   "ok":true,
+   "totalPages":1,
+   "arReports":{
+      "0r37281141":{
+         "reportType":"0",
+         "reportId":"37281141",
+         "reportUnixTime":"1336645459",
+         "side0XCoord":"554",
+         "side0YCoord":"350",
+         "side0TileType":"54",
+         "side0TileLevel":"1",
+         "side0CityId":"0",
+         "side0PlayerId":"0",
+         "side0AllianceId":"0",
+         "side1XCoord":"521",
+         "side1YCoord":"363",
+         "side1CityId":"75103",
+         "side1PlayerId":"13262860",
+         "side1AllianceId":"2979",
+         "marchType":"10",
+         "marchTypeState":"1",
+         "userId":"13262860",
+         "eventType":"0",
+         "subType":"0",
+         "reportStatus":"2",
+         "reportDetailId":"0"
+      },
+      "0r37266791":{
+         "reportType":"0",
+         "reportId":"37266791",
+         "reportUnixTime":"1336645433",
+         "side0XCoord":"509",
+         "side0YCoord":"331",
+         "side0TileType":"54",
+         "side0TileLevel":"1",
+         "side0CityId":"0",
+         "side0PlayerId":"0",
+         "side0AllianceId":"0",
+         "side1XCoord":"530",
+         "side1YCoord":"322",
+         "side1CityId":"75153",
+         "side1PlayerId":"13262860",
+         "side1AllianceId":"2979",
+         "marchType":"10",
+         "marchTypeState":"1",
+         "userId":"13262860",
+         "eventType":"0",
+         "subType":"0",
+         "reportStatus":"2",
+         "reportDetailId":"0"
+      }
+   },
+   "arPlayerNames":{
+      "p13262860":"Kapok",
+      "g13262860":"F"
+   },
+   "arCityNames":{
+      "c75103":"Caledor",
+      "c75153":"Saphery"
+   },
+   "arAllianceNames":{
+      "a2979":"Envol du Phoenix"
+   }
+}
+
+
+
+POST /fb/e2/src/ajax/fetchReport.php HTTP/1.1
+Host: www280.kingdomsofcamelot.com
+User-Agent: Mozilla/5.0 (X11; Linux i686; rv:13.0) Gecko/20100101 Firefox/13.0
+Accept: text/javascript, text/html, application/xml, text/xml, */*
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+X-Requested-With: XMLHttpRequest
+X-Prototype-Version: 1.6.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+Referer: https://www280.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=&y=0&n=&l=fr_FR&messagebox=&sp=MTMzNjY0MzAwNgyWq0_.L.ghnFc-&popInvite=17&standalone=0&fbIframeOn=1&res=1&iframe=1&lang=fr&ts=1336645132.4919&s=280&appBar=&cts=1336645132662
+Content-Length: 825
+Cookie: appEntry=kabamGameInfo; daySession=1; userDayLogins=0; __unam=4fe9162-134813184cf-31b844b9-618; __utma=161071458.307691423.1333105821.1336558663.1336645137.33; __utmz=161071458.1336645137.33.33.utmcsr=kingdomsofcamelot.com|utmccn=(referral)|utmcmd=referral|utmcct=/fb/e2/; announcementRead_100001515717848_1645=true; announcementRead_100001515717848_1653=true; announcementRead_100001515717848_1671=true; base_domain_0ab5e11ff842ddbdbf51ed7938650b3f=kingdomsofcamelot.com; 0ab5e11ff842ddbdbf51ed7938650b3f=f6e53ea4fdceb4fe56e4d99f9343966a; 0ab5e11ff842ddbdbf51ed7938650b3f_user=100001515717848; 0ab5e11ff842ddbdbf51ed7938650b3f_ss=4_dgTKVCG9JaZ5IWEgjBmA__; 0ab5e11ff842ddbdbf51ed7938650b3f_session_key=2.AQC4SFiA9AS3xnP6.3600.1325584800.1-100001515717848; 0ab5e11ff842ddbdbf51ed7938650b3f_expires=1325584800; buildWithHelp13262860=false; upgradeWithHelp13262860=false; PLAYER_ID=000-1807516; __utmc=161071458; NREUM=s=1336561064255&r=1906263&p=91694; __utmb=161071458.2.9.1336645142078
+Pragma: no-cache
+Cache-Control: no-cache
+
+{
+   "s0Kid":"74539",
+   "s1Kid":"86163",
+   "s1KLv":"1",
+   "s0KCombatLv":"None",
+   "s1KCombatLv":"255",
+   "fght":{
+      "s1":{
+         "u12":[
+            "1",
+            1,
+            0
+         ]
+      }
+   },
+   "rnds":100,
+   "winner":2,
+   "bonus":{
+      "mod":{
+         "s0":{
+            "b19":{
+               "hp":[
+                  56250000,
+                  56250000
+               ],
+               "atk":[
+                  0,
+                  0
+               ],
+               "def":[
+                  0,
+                  0
+               ],
+               "spd":[
+                  0,
+                  0
+               ],
+               "rng":[
+                  0,
+                  0
+               ]
+            }
+         },
+         "s1":{
+            "u12":{
+               "hp":[
+                  960,
+                  1324.8
+               ],
+               "atk":[
+                  1200,
+                  5653.2
+               ],
+               "def":[
+                  50,
+                  158.25
+               ],
+               "spd":[
+                  80,
+                  124
+               ],
+               "rng":[
+                  1500,
+                  2325
+               ],
+               "ld":[
+                  75,
+                  157.5
+               ]
+            }
+         }
+      },
+      "tch":{
+         "s0":{
+            "hp":0.55,
+            "atk":0.55,
+            "def":0.55,
+            "spd":0.55,
+            "rng":0.55
+         },
+         "s1":{
+            "hp":0.55,
+            "atk":0.55,
+            "def":0.55,
+            "spd":0.55,
+            "rng":0.55,
+            "ld":1.1
+         }
+      }
+   },
+   "wall":0,
+   "s0atkBoost":0,
+   "s0defBoost":0,
+   "s0lifeBoost":0,
+   "s1atkBoost":0.2,
+   "s1defBoost":0.2,
+   "s1lifeBoost":0,
+   "s1guardianAtkBoost":0.4,
+   "s0guardianDefBoost":0.16,
+   "throneRoomDrop":{
+      "id":1492849,
+      "faction":"briton",
+      "type":"window",
+      "quality":1,
+      "level":0,
+      "status":0,
+      "effects":{
+         "slot1":{
+            "id":"17",
+            "tier":"1"
+         },
+         "slot2":{
+            "id":"85",
+            "tier":"2"
+         },
+         "slot3":{
+            "id":"18",
+            "tier":"3"
+         },
+         "slot4":{
+            "id":"22",
+            "tier":"4"
+         },
+         "slot5":{
+            "id":"90",
+            "tier":"3"
+         }
+      }
+   },
+   "s1ThroneRoomBoosts":{
+      "71":7,
+      "77":6,
+      "69":7,
+      "83":106,
+      "89":20,
+      "13":25,
+      "86":190,
+      "21":-28,
+      "39":-8,
+      "45":22,
+      "46":17,
+      "9":17
+   },
+   "s0ThroneRoomBoosts":{
+      "2":185,
+      "1":25,
+      "77":101,
+      "86":40,
+      "16":25,
+      "19":-17,
+      "27":2,
+      "45":10,
+      "17":-3,
+      "18":-23,
+      "23":0.02
+   },
+   "loot":[
+      0,
+      121,
+      33,
+      1,
+      0,
+      [
+
+      ],
+      0
+   ],
+   "glory":0,
+   "displayGlory":true
+}

@@ -80,6 +80,10 @@
 		delete Boolean.prototype.toJSON;
 	}
 
+//localized
+var MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre", "Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+var DAY_NAMES = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+
 jQuery(document).ready(function(){
 //CSS rules declarations
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
@@ -127,6 +131,8 @@ jQuery(document).ready(function(){
 	var chatHighlightAlarmCss = ".kocmain .mod_comm .comm_global .chatlist .chatwrap.attack { background-color: %attackColor%; }";
 		chatHighlightAlarmCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.scout { background-color: %scoutColor%; }";
 		chatHighlightAlarmCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.autonomy { background-color: %autonomyColor%; }";
+
+	jQuery.jgrid.no_legacy_api = true;
 
 (function(window, document, $, undefined){
 	var $head = $('head'),
@@ -688,7 +694,6 @@ jQuery(document).ready(function(){
 			KOCFIA.ajaxSniffer();
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.timeEnd('sniffer');
 
-
 		KOCFIA.chat.$chatAlliance
 			.on('click', '.reinforce', function(){
 				if( KOCFIA.conf.quickMarch.on ){
@@ -831,6 +836,7 @@ jQuery(document).ready(function(){
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
+								KOCFIA.throne.updateCounter();
 							}, 500);
 						}, false);
 						break;
@@ -840,6 +846,7 @@ jQuery(document).ready(function(){
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
+								KOCFIA.throne.updateCounter();
 							}, 500);
 							window.setTimeout(function(){ KOCFIA.alarm.checkIncoming(); }, 550);
 						}, false);
@@ -862,6 +869,7 @@ jQuery(document).ready(function(){
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
+								KOCFIA.throne.updateCounter();
 							}, 500);
 						}, false);
 						break;
@@ -872,6 +880,7 @@ jQuery(document).ready(function(){
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
+								KOCFIA.throne.updateCounter();
 							}, 500);
 						}, false);
 						break;
@@ -887,6 +896,7 @@ jQuery(document).ready(function(){
 									KOCFIA.overview.updateFromSeed();
 									KOCFIA.dataAndStats.update();
 									KOCFIA.summary.update();
+									KOCFIA.throne.updateCounter();
 								}, 500);
 							}
 						}, false);
@@ -900,6 +910,7 @@ jQuery(document).ready(function(){
 									KOCFIA.overview.updateFromSeed();
 									KOCFIA.dataAndStats.update();
 									KOCFIA.summary.update();
+									KOCFIA.throne.updateCounter();
 								}, 500);
 							}
 						}, false);
@@ -919,6 +930,7 @@ jQuery(document).ready(function(){
 									KOCFIA.overview.updateFromSeed();
 									KOCFIA.dataAndStats.update();
 									KOCFIA.summary.update();
+									KOCFIA.throne.updateCounter();
 								}, 500);
 							}
 						}, false);
@@ -984,6 +996,7 @@ jQuery(document).ready(function(){
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
+								KOCFIA.throne.updateCount();
 							}, 500);
 						}, false);
 						break;
@@ -7908,7 +7921,6 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-map').html('');
 
-			jQuery.jgrid.no_legacy_api = true;
 
 			var code = '<fieldset class="search"><legend>Exploration</legend>';
 			code += '<div><label for="kocfia-map-near-x">Autour de&nbsp;:&nbsp;</label>';
@@ -8062,7 +8074,7 @@ jQuery(document).ready(function(){
 						var $this = $(this),
 							type = $this.hasClass('attack-shortcut') ? 'attack' : 'scout';
 
-						KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$=quickMarch]').trigger('click');
+						KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$="quickMarch"]').trigger('click');
 
 						$('#kocfia-quickMarch')
 							.find('.type').find('#kocfia-quickMarch-type-'+ type).prop('checked').end()
@@ -18161,6 +18173,7 @@ jQuery(document).ready(function(){
 				active: 0,
 				automatic: 0
 			},
+			maxItems: 60,
 			stored: ['improvements'],
 			improvements: {}
 		};
@@ -18222,6 +18235,8 @@ jQuery(document).ready(function(){
 			.accordion('activate', false);
 
 			KOCFIA.throne.addListeners();
+
+			KOCFIA.throne.setCounter();
 		};
 
 		KOCFIA.throne.on = function(){
@@ -18259,6 +18274,22 @@ jQuery(document).ready(function(){
 			localStorage.removeItem('kocfia_throne_improvements_' + KOCFIA.storeUniqueId);
 
 			KOCFIA.throne.improvements = {};
+		};
+
+		KOCFIA.throne.setCounter = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne setCounter function');
+
+			KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs')
+				.find('a').filter('[href$="throne"]')
+				.append('<output id="kocfia-throne-counter">'+ window.seed.throne.totalItems +'</output> / '+ KOCFIA.throne.maxItems);
+
+			KOCFIA.throne.$counter = $('#kocfia-throne-counter');
+		};
+
+		KOCFIA.throne.updateCounter = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne updateCount function');
+
+			KOCFIA.throne.$counter.val( window.seed.throne.totalItems );
 		};
 
 		KOCFIA.throne.getHelp = function(){
@@ -18341,6 +18372,122 @@ jQuery(document).ready(function(){
 			stored: []
 		};
 
+		/* grid related */
+		KOCFIA.reports.gridRowActions = function( cellValue, options, rowObject ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports gridRowActions function', cellValue, options, rowObject);
+			var code = '<span class="ui-icon ui-icon-trash delete" data-id="'+ rowObject.reportId +'" title="Supprimer ce rapport"></span>';
+
+			if( rowObject.isMine ){
+				code += '<span class="ui-icon ui-icon-mail-open open" data-id="'+ rowObject.reportId +'" title="Afficher ce rapport"></span>';
+			}
+
+			if( rowObject.isPvP ){
+				if( rowObject.guildMateDefending ){
+					code += '<span class="ui-icon ui-icon-cart attack" data-coords="'+ rowObject.attackerCoords +'" title="Attaquer"></span>';
+					code += '<span class="ui-icon ui-icon-note scout" data-coords="'+ rowObject.attackerCoords +'" title="Eclairer"></span>';
+					code += '<span class="ui-icon ui-icon-wrench reinforce" data-coords="'+ rowObject.defenderCoords +'" title="Renforcer"></span>';
+				} else {
+					code += '<span class="ui-icon ui-icon-cart attack" data-coords="'+ rowObject.defenderCoords +'" title="Attaquer"></span>';
+					code += '<span class="ui-icon ui-icon-note scout" data-coords="'+ rowObject.defenderCoords +'" title="Eclairer"></span>';
+				}
+			} else if( rowObject.isAttack ) {
+				code += '<span class="ui-icon ui-icon-cart attack" data-coords="'+ rowObject.defenderCoords +'" title="Attaquer"></span>';
+				code += '<span class="ui-icon ui-icon-note scout" data-coords="'+ rowObject.defenderCoords +'" title="Eclairer"></span>';
+			}
+
+			return code;
+		};
+
+		KOCFIA.reports.data = {
+			mine: [],
+			alliance: []
+		};
+
+		KOCFIA.map.selection = {
+			mine: {},
+			alliance: {}
+		};
+
+		KOCFIA.reports.gridParams = {
+			shared: {
+				datatype: 'local',
+				loadui: 'disable',
+				rowNum: 20,
+				rowList: [20, 50, 100],
+				sortname: 'date',
+				sortorder: 'desc',
+				altRows: true,
+				altclass: 'zebra',
+				height: 'auto',
+				autowidth: true,
+				viewrecords: true, //total in pager
+				gridview: true, //speed boost
+				hiddengrid: true,
+				multiselect: true,
+				multiboxonly: true,
+				multikey: 'shiftKey',
+				shrinkToFit: true
+			},
+			mine: {
+				colNames: ['', 'Date', 'Type', 'Attacker', 'Alliance', 'From', 'Defender', 'Alliance', 'To', 'Target', '', '', '', ''],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'date', index: 'date', formatter: function( cellValue, options, rowObject ){ return window.formatDateByUnixTime( cellValue ); }, width: 100},
+					{name: 'type', index: 'type', width: 100},
+					{name: 'attacker', index: 'attacker', width: 100},
+					{name: 'attackerGuild', index: 'attackerGuild', width: 100},
+					{name: 'attackerCoords', index: 'attackerCoords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
+					{name: 'defender', index: 'defender', width: 100},
+					{name: 'defenderGuild', index: 'defenderGuild', width: 100},
+					{name: 'defenderCoords', index: 'defenderCoords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
+					{name: 'target', index: 'target', width: 100},
+					{name: 'isMine', index: 'isMine', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'isAttack', index: 'isAttack', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'isPvP', index: 'isPvP', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'isGuildMateDefending', index: 'isGuildMateDefending', hidedlg: true, hidden: true, search: false, sortable: false}
+				],
+				caption: 'Rapports du Joueur',
+				pager: '#kocfia-reports-pager-mine',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					if( checked ){
+						KOCFIA.reports.selection.mine[ key ] = key;
+					} else {
+						delete KOCFIA.reports.selection.mine[ key ];
+					}
+				}
+			},
+			alliance: {
+				colNames: ['', 'Date', 'Type', 'Attacker', 'Alliance', 'From', 'Defender', 'Alliance', 'To', 'Target', '', '', '', ''],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'date', index: 'date', formatter: function( cellValue, options, rowObject ){ return window.formatDateByUnixTime( cellValue ); }, width: 100},
+					{name: 'type', index: 'type', width: 100},
+					{name: 'attacker', index: 'attacker', width: 100},
+					{name: 'attackerGuild', index: 'attackerGuild', width: 100},
+					{name: 'attackerCoords', index: 'attackerCoords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
+					{name: 'defender', index: 'defender', width: 100},
+					{name: 'defenderGuild', index: 'defenderGuild', width: 100},
+					{name: 'defenderCoords', index: 'defenderCoords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
+					{name: 'target', index: 'target', width: 100},
+					{name: 'isMine', index: 'isMine', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'isAttack', index: 'isAttack', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'isPvP', index: 'isPvP', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'isGuildMateDefending', index: 'isGuildMateDefending', hidedlg: true, hidden: true, search: false, sortable: false}
+				],
+				caption: 'Rapports de l\'Alliance',
+				pager: '#kocfia-reports-pager-mine',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					if( checked ){
+						KOCFIA.reports.selection.mine[ key ] = key;
+					} else {
+						delete KOCFIA.reports.selection.mine[ key ];
+					}
+				}
+			},
+		};
+
 		KOCFIA.reports.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports confPanel function');
 			var code = '<h3>'+ KOCFIA.modulesLabel.reports +'</h3>';
@@ -18378,18 +18525,17 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-reports').html('');
 
-			var reports = '',
-				help = KOCFIA.reports.getHelp();
-
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="reports-panel-automatic" '+ (KOCFIA.conf.reports.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="reports-panel-automatic">Suppressions automatiques</label></span>';
 			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
 			code += '</div>';
-			code += '<div class="accordion">';
-			code += reports;
-			code += '</div>';
-			code += help;
+			code += KOCFIA.reports.getHelp();
+
+			//grids
+			code += '<table id="kocfia-reports-mine" class="reports-results"></table>';
+			code += '<div id="kocfia-reporsts-alliance" class="reports-pager"></div>';
+
 
 			$section.append( code )
 			//listener
@@ -18397,18 +18543,56 @@ jQuery(document).ready(function(){
 					$('#reports-automatic').prop('checked', $(this).prop('checked')).change();
 				});
 
-			KOCFIA.reports.$reports = $section.find('.reports');
+			//grids
+			KOCFIA.map.$resultsMine = $section.find('#kocfia-reports-mine')
+				.jqGrid( $.extend({}, KOCFIA.reports.gridParams.shared, KOCFIA.map.gridParams.mine) )
+				.jqGrid('navGrid', '#kocfia-reports-pager-mine', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-mine', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.reports.$resultsMine[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-reports-pager-mine', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.reports.$resultsMine[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-mine', {caption: '', title: "Supprimer les rapports sélectionnés", buttonicon: 'ui-icon-trash', onClickButton: function(){ KOCFIA.reports.removeSelection('mine'); }, position: 'last'})
+				.jqGrid('filterToolbar');
 
-			$section.find('.accordion').accordion({
-				collapsible: true,
-				autoHeight: false,
-				animated: false,
-				change: function(event, ui){
-					KOCFIA.$confPanelWrapper[0].scrollTop = 0;
-					KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
-				}
-			})
-			.accordion('activate', false);
+
+			//grid listeners
+			$section
+				.on('click', '.attack, .scout, .reinforce', function(){
+					if( KOCFIA.conf.quickMarch.on ){
+						var $this = $(this),
+							type = 'attack';
+
+						if( $this.hasClass('attack') ) type = 'attack';
+						else if( $this.hasClass('scout')) type = 'scout';
+						else if( $this.hasClass('reinforce')) type = 'reinforce';
+
+						KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$="quickMarch"]').trigger('click');
+
+						$('#kocfia-quickMarch')
+							.find('.type').find('#kocfia-quickMarch-type-'+ type).prop('checked').end()
+							.find('.coord').val( $this.attr('data-coord') ).trigger('change');
+					} else {
+						alert('L\'onglet marche simplifées n\'est pas actif.');
+					}
+				})
+				.on('click', '.ui-jqgrid-titlebar', function(){
+					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
+				})
+				.find('.ui-jqgrid-titlebar-close').click(function(e){
+					e.stopPropagation();
+
+					console.log(this, $(this));
+
+					$(this)
+						.filter('.ui-icon-circle-triangle-s') //grid was closed ?
+						.closest('.ui-jqgrid-view').siblings('.ui-jqgrid-view') //get other grids
+						.find('.ui-icon-circle-triangle-n').parent().trigger('click'); //close them
+				})
+				;
+
+			KOCFIA.$confPanel.on('resizestop', function(){
+				var size = $("#kocfia-reports").find('.boundary.mine').innerWidth() + 1;
+				KOCFIA.reports.$resultsMine.jqGrid('setGridWidth', size);
+				KOCFIA.reports.$resultsAlliance.jqGrid('setGridWidth', size);
+			});
 		};
 
 		KOCFIA.reports.on = function(){

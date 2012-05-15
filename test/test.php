@@ -4706,24 +4706,24 @@
 								"q999010":"1"
 						},
 						"cities":[
-						["48546", "Chrace", "545", "444", "13", "284395"],
-						["50027", "Cothique", "505", "356", "13", "278307"],
-						["74755", "Ellyrion", "572", "390", "13", "288391"],
-						["75006", "Tiranoc", "486", "401", "13", "275502"],
-						["75103", "Caledor", "521", "363", "13", "280714"],
-						["75153", "Saphery", "530", "322", "13", "282023"],
-						["75160", "Yvresse", "577", "383", "13", "289134"],
-						["75461", "Avelorn", "531", "436", "13", "282287"]
+							["48546", "Chrace", "545", "444", "13", "284395"],
+							["50027", "Cothique", "505", "356", "13", "278307"],
+							["74755", "Ellyrion", "572", "390", "13", "288391"],
+							["75006", "Tiranoc", "486", "401", "13", "275502"],
+							["75103", "Caledor", "521", "363", "13", "280714"],
+							["75153", "Saphery", "530", "322", "13", "282023"],
+							["75160", "Yvresse", "577", "383", "13", "289134"],
+							["75461", "Avelorn", "531", "436", "13", "282287"]
 						],
 						"guardian":[
-						{"cityId": "48546", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 9}},
-						{"cityId": "50027", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 9}},
-						{"cityId": "74755", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 9}},
-						{"cityId": "75006", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 9}},
-						{"cityId": "75103", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 9}},
-						{"cityId": "75153", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 9}},
-						{"cityId": "75160", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 6}},
-						{"cityId": "75461", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 0}}
+							{"cityId": "48546", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 9}},
+							{"cityId": "50027", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 9}},
+							{"cityId": "74755", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 9}},
+							{"cityId": "75006", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 9}},
+							{"cityId": "75103", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 9}},
+							{"cityId": "75153", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 9}},
+							{"cityId": "75160", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 3, "cityGuardianLevels": {"stone": 10, "wood": 9, "ore": 6}},
+							{"cityId": "75461", "level": "10", "upgrading": false, "timeLeft": 0, "type": "stone", "guardianCount": 2, "cityGuardianLevels": {"stone": 10, "wood": 0}}
 						],
 						"wildDef":{
 							"t281826":{

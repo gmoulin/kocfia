@@ -150,7 +150,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.6.1',
+		version: '0.7.0',
 		userScriptLoaderVersion: 3,
 		debug: true,
 		debugWhat: { //comment module line for no debug
@@ -706,7 +706,7 @@ jQuery(document).ready(function(){
 					else if( $this.hasClass('food') ) type = 'transport';
 
 					//quick attack
-					KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$=quickMarch]').trigger('click');
+					KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$="quickMarch"]').trigger('click');
 
 					$('#kocfia-quickMarch')
 						.find('.type').find('#kocfia-quickMarch-type-'+ type).prop('checked').end()
@@ -18369,7 +18369,11 @@ jQuery(document).ready(function(){
 				transportForMe: 0,
 				transportForOther: 0
 			},
-			stored: []
+			stored: [],
+			fetching: {
+				mine: false,
+				alliance: false
+			}
 		};
 
 		/* grid related */
@@ -18485,7 +18489,7 @@ jQuery(document).ready(function(){
 						delete KOCFIA.reports.selection.mine[ key ];
 					}
 				}
-			},
+			}
 		};
 
 		KOCFIA.reports.confPanel = function( $section ){
@@ -18533,8 +18537,22 @@ jQuery(document).ready(function(){
 			code += KOCFIA.reports.getHelp();
 
 			//grids
+			code += '<fieldset class="boundary mine">';
+			code += '<legend>Vos rappors</legend>';
+			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
+			code += '<label>&nbsp;à&nbsp;:&nbsp;</label><input type="number" class="max" value="2" min="1" required>';
+			code += '<button class="button secondary load"><span>Charger</span></button>';
+			code += '</fieldset>';
 			code += '<table id="kocfia-reports-mine" class="reports-results"></table>';
-			code += '<div id="kocfia-reporsts-alliance" class="reports-pager"></div>';
+			code += '<div id="kocfia-reports-pager-mine" class="reports-pager"></div>';
+			code += '<fieldset class="boundary alliance">';
+			code += '<legend>Rappors d\'Alliance</legend>';
+			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
+			code += '<label>&nbsp;à&nbsp;:&nbsp;</label><input type="number" class="max" value="2" min="1" required>';
+			code += '<button class="button secondary load"><span>Charger</span></button>';
+			code += '</fieldset>';
+			code += '<table id="kocfia-reports-alliance" class="reports-results"></table>';
+			code += '<div id="kocfia-reports-pager-alliance" class="reports-pager"></div>';
 
 
 			$section.append( code )
@@ -18573,6 +18591,45 @@ jQuery(document).ready(function(){
 						alert('L\'onglet marche simplifées n\'est pas actif.');
 					}
 				})
+				.on('click', '.load', function(){
+					var $this = $(this),
+						$fieldset = $this.closest('.boundary'),
+						min = $.trim($fieldset.find('.min')),
+						max = $.trim($fieldset.find('.max')),
+						type = $fieldset.hasClass('mine') ? 'mine' : 'alliance';
+
+					if( min === '' || max === '' ){
+						Shared.notify('Besoin des pages minimum et maximum à afficher.');
+						return false;
+					}
+
+					min = parseInt(min, 10);
+					max = parseInt(max, 10);
+
+					if( isNaN(min) || isNaN(max) ){
+						Shared.notify('Au moins une des bornes des pages à afficher est incorrecte.');
+						return false;
+					}
+
+					if( min >= 1 && max >= 1 ){
+						Shared.notify('Les numéros des pages à afficher doivent être supérieurs ou égaux à 1.');
+						return false;
+					}
+
+					$this.removeClass('load secondary').addClass('stop danger').find('span').html('Arrêter');
+
+					KOCFIA.reports.fetching[ type ] = true;
+
+					KOCFIA.reports.load(min, max, type);
+				})
+				.on('click', '.stop', function(){
+					var $this = $(this),
+						type = $this.closest('.boundary').hasClass('mine') ? 'mine' : 'alliance';
+
+					$this.removeClass('stop danger').addClass('load secondary').find('span').html('Charger');
+
+					KOCFIA.reports.fetching[ type ] = false;
+				})
 				.on('click', '.ui-jqgrid-titlebar', function(){
 					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
 				})
@@ -18593,6 +18650,8 @@ jQuery(document).ready(function(){
 				KOCFIA.reports.$resultsMine.jqGrid('setGridWidth', size);
 				KOCFIA.reports.$resultsAlliance.jqGrid('setGridWidth', size);
 			});
+
+			KOCFIA.reports.$div = KOCFIA.$confPanel.find('#kocfia-reports');
 		};
 
 		KOCFIA.reports.on = function(){
@@ -18647,8 +18706,8 @@ jQuery(document).ready(function(){
 					idsToDelete1 = {},
 					autoAttackCoords = { wilderness: null, barbarian: null, plunder: null, darkForest: null };
 
-				var checkPlayerId = function( id ){
-					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports automaticCleanUp checkPlayerId function', id);
+				var isSelf = function( id ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports automaticCleanUp isSelf function', id);
 					return window.tvuid == id;
 				};
 
@@ -18726,8 +18785,8 @@ jQuery(document).ready(function(){
 												//transport
 												} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_TRANSPORT ){
 													if( KOCFIA.conf.reports.transportSelf
-														&& report.hasOwnProperty(side0PlayerId) && isSelf( report.side0PlayerId )
-														&& report.hasOwnProperty(side1PlayerId) && isSelf( report.side1PlayerId )
+														&& report.hasOwnProperty('side0PlayerId') && isSelf( report.side0PlayerId )
+														&& report.hasOwnProperty('side1PlayerId') && isSelf( report.side1PlayerId )
 													){
 														idsToDelete1[ report.reportId ] = 1;
 														if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
@@ -18736,8 +18795,8 @@ jQuery(document).ready(function(){
 													}
 
 													if( KOCFIA.conf.reports.transportForMe
-														&& report.hasOwnProperty(side0PlayerId) && isSelf( report.side0PlayerId )
-														&& report.hasOwnProperty(side1PlayerId) && !isSelf( report.side1PlayerId )
+														&& report.hasOwnProperty('side0PlayerId') && isSelf( report.side0PlayerId )
+														&& report.hasOwnProperty('side1PlayerId') && !isSelf( report.side1PlayerId )
 													){
 														idsToDelete0[ report.reportId ] = 1;
 														if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
@@ -18746,17 +18805,19 @@ jQuery(document).ready(function(){
 													}
 
 													if( KOCFIA.conf.reports.transportForOther
-														&& report.hasOwnProperty(side0PlayerId) && !isSelf( report.side0PlayerId )
-														&& report.hasOwnProperty(side1PlayerId) && isSelf( report.side1PlayerId )
+														&& report.hasOwnProperty('side0PlayerId') && !isSelf( report.side0PlayerId )
+														&& report.hasOwnProperty('side1PlayerId') && isSelf( report.side1PlayerId )
 													){
 														idsToDelete1[ report.reportId ] = 1;
 														if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
 														toDelete++;
 														continue;
 													}
+
+												//reinforce
 												} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE ){
 													if( KOCFIA.conf.reports.reinforceMe
-														&& report.hasOwnProperty(side0PlayerId) && isSelf( report.side0PlayerId )
+														&& report.hasOwnProperty('side0PlayerId') && isSelf( report.side0PlayerId )
 														//&& report.hasOwnProperty(side1PlayerId) && !isSelf( report.side1PlayerId )
 													){
 														idsToDelete1[ report.reportId ] = 1;
@@ -18765,18 +18826,10 @@ jQuery(document).ready(function(){
 														continue;
 													}
 
-													if( KOCFIA.conf.reports.transportForOther
-														&& report.hasOwnProperty(side0PlayerId) && !isSelf( report.side0PlayerId )
-														&& report.hasOwnProperty(side1PlayerId) && isSelf( report.side1PlayerId )
-													){
-														idsToDelete1[ report.reportId ] = 1;
-														if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
-														toDelete++;
-														continue;
-													}
+												//scout
 												} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT ){
 													if( KOCFIA.conf.reports.scoutMe
-														&& report.hasOwnProperty(side0PlayerId) && isSelf( report.side0PlayerId )
+														&& report.hasOwnProperty('side0PlayerId') && isSelf( report.side0PlayerId )
 													){
 														idsToDelete1[ report.reportId ] = 1;
 														if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
@@ -18785,13 +18838,15 @@ jQuery(document).ready(function(){
 													}
 
 													if( KOCFIA.conf.reports.scoutOther
-														&& report.hasOwnProperty(side1PlayerId) && isSelf( report.side1PlayerId )
+														&& report.hasOwnProperty('side1PlayerId') && isSelf( report.side1PlayerId )
 													){
 														idsToDelete1[ report.reportId ] = 1;
 														if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
 														toDelete++;
 														continue;
 													}
+
+												//reassign
 												} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_REASSIGN ){
 													if( KOCFIA.conf.reports.reassign ){
 														idsToDelete1[ report.reportId ] = 1;
@@ -18799,6 +18854,8 @@ jQuery(document).ready(function(){
 														toDelete++;
 														continue;
 													}
+
+												//barbarian raid
 												} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN ){
 													if( KOCFIA.conf.reports.barbarian ){
 														idsToDelete1[ report.reportId ] = 1;
@@ -18806,12 +18863,14 @@ jQuery(document).ready(function(){
 														toDelete++;
 														continue;
 													}
+
+												//attack
 												} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK ){
-													if( report.hasOwnProperty(side0PlayerId) && !isSelf( report.side0PlayerId ) ){ //not a defense
+													if( report.hasOwnProperty('side0PlayerId') && !isSelf( report.side0PlayerId ) ){ //not a defense
 														coord = report.side0XCoord +','+ report.side0YCoord;
 
 														//dark forest
-														if( (report.side0TileType == 54 || report.side0TileType == 0) ){
+														if( (report.side0TileType == 54 || report.side0TileType === 0) ){
 															if( KOCFIA.conf.reports.darkForest ){
 																idsToDelete1[ report.reportId ] = 1;
 																if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
@@ -18823,10 +18882,9 @@ jQuery(document).ready(function(){
 																toDelete++;
 																continue;
 															}
-														}
 
 														//barbarian
-														if( report.side0TileType == 51 && (report.side0CityId === null || report.side0CityId === '' || report.side0CityId == '0') ){
+														} else if( report.side0TileType == 51 && (report.side0CityId === null || report.side0CityId === '' || report.side0CityId == '0') ){
 															if( KOCFIA.conf.reports.barbarian ){
 																idsToDelete1[ report.reportId ] = 1;
 																if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
@@ -18838,10 +18896,9 @@ jQuery(document).ready(function(){
 																toDelete++;
 																continue;
 															}
-														}
 
 														//wilderness
-														if( report.side0TileType >= 10 && report.side0CityId <= 50 ){
+														} else if( report.side0TileType >= 10 && report.side0CityId <= 50 ){
 															if( KOCFIA.conf.reports.wilderness ){
 																idsToDelete1[ report.reportId ] = 1;
 																if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
@@ -18853,16 +18910,10 @@ jQuery(document).ready(function(){
 																toDelete++;
 																continue;
 															}
-														}
 
 														//plunder
-														if( report.side0TileType >= 10 && report.side0CityId <= 50 ){
-															if( KOCFIA.conf.reports.wilderness ){
-																idsToDelete1[ report.reportId ] = 1;
-																if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
-																toDelete++;
-																continue;
-															} else if( KOCFIA.conf.reports.autoWilderness && isAutoAttackCoord(coord, 'plunder') ){
+														} else if( report.side0TileType >= 10 && report.side0CityId <= 50 ){
+															if( KOCFIA.conf.reports.autoPlunder && isAutoAttackCoord(coord, 'plunder') ){
 																idsToDelete1[ report.reportId ] = 1;
 																if( report.reportStatus == 2 ) unread[ report.reportId ] = 1;
 																toDelete++;
@@ -18974,6 +19025,417 @@ jQuery(document).ready(function(){
 					});
 			}
 		};
+
+		KOCFIA.reports.load = function( min, max, type ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports load function', min, max, type);
+
+			var isSelf = function( id ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports load isSelf function', id);
+				return window.tvuid == id;
+			};
+
+			var isAutoAttackCoord = function( coord, type ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports load isAutoAttackCoord function', coord, type);
+				if( autoAttackCoords[ type ] !== null ){
+					return autoAttackCoords[ type ].hasOwnProperty(coord);
+				} else {
+					if( $.isEmptyObject(KOCFIA[ type ].attacks) ){
+						return false;
+					} else if( type != 'darkForest' ){
+						var cityKey, attackId, i;
+						for( cityKey in KOCFIA[ type ].attacks ){
+							if( KOCFIA[ type ].attacks.hasOwnProperty(cityKey) ){
+								for( attackId in KOCFIA[ type ].attacks[ cityKey ] ){
+									if( KOCFIA[ type ].attacks[ cityKey ].hasOwnProperty(attackId) ){
+										for( i = 0; i < KOCFIA[ type ].attacks[ cityKey ][ attackId ].coords.length; i += 1 ){
+											autoAttackCoords[ type ][ KOCFIA[ type ].attacks[ cityKey ][ attackId ].coords[i] ] = 1;
+										}
+									}
+								}
+							}
+						}
+						return autoAttackCoords[ type ].hasOwnProperty(coord);
+					} else {
+						if( $.isEmptyObject(KOCFIA.darkForest.coords) || !KOCFIA.darkForest.coords.hasOwnProperty('list') || $.isEmptyObject(KOCFIA.darkForest.coords.list) ){
+							return false;
+						} else {
+							return $.inArray(coord, KOCFIA.darkForest.coords.list) > -1;
+						}
+					}
+				}
+
+				return false;
+			};
+
+			var displayResults = function( dfd, info ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports load deferred displayResults function');
+				if( !KOCFIA.reports.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				$('.tipsy').remove();
+
+				if( info.length > 0 ){
+					KOCFIA.reports.data[ type ] = KOCFIA.reports.data[ type ].concat(tiles.cities);
+					if( type == 'mine' ){
+						KOCFIA.map.$resultsMine.jqGrid('setGridParam', {data: KOCFIA.report.data.mine}).trigger('reloadGrid');
+					} else {
+						KOCFIA.map.$resultsalliance.jqGrid('setGridParam', {data: KOCFIA.report.data.alliance}).trigger('reloadGrid');
+					}
+				}
+			};
+
+			var fetchPage = function( dfd, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports load deferred checkPages function');
+				if( !KOCFIA.reports.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				if( page > max ){
+					return dfd.resolve();
+				}
+
+				params.pageNo = page;
+
+				$.ajax({
+						url: window.g_ajaxpath + "ajax/listReports.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function( data ){
+						if( !KOCFIA.reports.fetching[ type ] ){
+							return dfd.resolve();
+						}
+
+						if( data.ok ){
+							total = data.totalPages;
+							if( total < max ) max = total; //prevent useless server requests
+
+							var reports = data.arReports,
+								computed,
+								info = [];
+							if( Object.isObject(reports) && !$.isEmptyObject(reports) ){
+								var key, report, coord;
+								for( key in reports ){
+									if( !KOCFIA.reports.fetching[ type ] ){
+										return dfd.resolve();
+									}
+
+									if( reports.hasOwnProperty(key) ){
+										report = reports[ key ];
+										if( Object.isObject(report) && !$.isEmptyObject(report) ){
+											/*"reportType":"0",
+											  "reportId":"37281141",
+											  "reportUnixTime":"1336645459",
+											  "side0XCoord":"554",
+											  "side0YCoord":"350",
+											  "side0TileType":"54",
+											  "side0TileLevel":"1",
+											  "side0CityId":"0",
+											  "side0PlayerId":"0",
+											  "side0AllianceId":"0",
+											  "side1XCoord":"521",
+											  "side1YCoord":"363",
+											  "side1CityId":"75103",
+											  "side1PlayerId":"13262860",
+											  "side1AllianceId":"2979",
+											  "marchType":"10",
+											  "marchTypeState":"1",
+											  "userId":"13262860",
+											  "eventType":"0",
+											  "subType":"0",
+											  "reportStatus":"2",
+											  "reportDetailId":"0"*/
+
+											computed = {
+												id: report.reportId,
+												date: new Date(report.reportUnixTime * 1000),
+												type: null,
+												attacker: null,
+												attackerGuild: null,
+												attackerCoords: report.side1XCoord +','+ report.side1YCoord,
+												defender: null,
+												defenderGuild: null,
+												defenderCoords: report.side0XCoord +','+ report.side0YCoord,
+												target: null,
+												isMine: false,
+												isAttack: false,
+												isPvP: 0,
+												isGuildMateDefending: false
+											};
+
+											//attacker
+												if( report.side1PlayerId != '' && parseInt(report.side1PlayerId, 10) > 0 ){
+													computed.attacker = data.arPlayerNames['p'+ report.side1PlayerId];
+
+													if( report.side1AllianceId != '' && parseInt(report.side1AllianceId, 10) > 0 ){
+														computed.attackerGuild = data.arAllianceNames['a'+ report.side1AllianceId];
+													}
+
+													if( isSelf(report.side1PlayerId) ){
+														computed.isMine = true;
+													}
+
+													computed.isPvP += 1;
+												}
+
+											//defender
+												if( report.side0PlayerId != '' && parseInt(report.side0PlayerId, 10) > 0 ){
+													computed.defender = data.arPlayerNames['p'+ report.side0PlayerId];
+
+													if( report.side0AllianceId != '' && parseInt(report.side0AllianceId, 10) > 0 ){
+														computed.defenderGuild = data.arAllianceNames['a'+ report.side0AllianceId];
+													}
+
+													if( isSelf(report.side0PlayerId) ){
+														computed.isMine = true;
+													}
+
+													computed.isPvP += 1;
+												}
+
+											//PvP ?
+											if( computed.isPvP == 2 ){
+												computed.isPvP = true;
+
+												if( isSelf(report.side0PlayerId) || Shared.getDiplomacy(report.side0AllianceId) == 'allié' ){
+													computed.isGuildMateDefending = true;
+												}
+											}
+
+											//dark forest
+											if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_DARK_FOREST ){
+												computed.type = 'Attaque';
+												computed.target= 'FO'+ report.side0TileLevel;
+
+											//transport
+											} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_TRANSPORT ){
+												computed.type = 'Transport';
+												computed.target = '';
+
+												if( isSelf( report.side1PlayerId ) && KOCFIA.cities.hasOwnProperty('city'+ report.side1CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side1CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side1TileLevel;
+												}
+
+												computed.target += ' &rArr; ';
+
+												if( isSelf( report.side0PlayerId ) && KOCFIA.cities.hasOwnProperty('city'+ report.side0CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side0CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side0TileLevel;
+												}
+
+											//reinforce
+											} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE ){
+												computed.type = 'Renfort';
+												computed.target = '';
+
+												if( isSelf( report.side1PlayerId ) && KOCFIA.cities.hasOwnProperty('city'+ report.side1CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side1CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side1TileLevel;
+												}
+
+												computed.target += ' &rArr; ';
+
+												if( isSelf( report.side0PlayerId ) && KOCFIA.cities.hasOwnProperty('city'+ report.side0CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side0CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side0TileLevel;
+												}
+
+											//scout
+											} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT ){
+												computed.type = 'Eclairage';
+												computed.target = '';
+
+												if( isSelf( report.side1PlayerId ) && KOCFIA.cities.hasOwnProperty('city'+ report.side1CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side1CityId].label;
+													computed.isAttack = true;
+												} else {
+													computed.target += 'Ville'+ report.side1TileLevel;
+												}
+
+												computed.target += ' &rArr; ';
+
+												if( isSelf( report.side0PlayerId ) && KOCFIA.cities.hasOwnProperty('city'+ report.side0CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side0CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side0TileLevel;
+												}
+
+											//reassign
+											} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_REASSIGN ){
+												computed.type = 'Réassignement';
+												computed.target = '';
+
+												if( KOCFIA.cities.hasOwnProperty('city'+ report.side1CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side1CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side1TileLevel;
+												}
+
+												computed.target += ' &rArr; ';
+
+												if( KOCFIA.cities.hasOwnProperty('city'+ report.side0CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side0CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side0TileLevel;
+												}
+
+											//barbarian raids
+											} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN ){
+												computed.type = 'Raid Barbare';
+												computed.target = '';
+
+												if( KOCFIA.cities.hasOwnProperty('city'+ report.side1CityId) ){
+													computed.target += KOCFIA.cities['city'+ report.side1CityId].label;
+												} else {
+													computed.target += 'Ville'+ report.side1TileLevel;
+												}
+
+												computed.target += ' &rArr; ';
+
+												computed.target += 'CB'+ report.side0TileLevel;
+
+											//attacks
+											} else if( report.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK ){
+												if( report.hasOwnProperty('side0PlayerId') && !isSelf( report.side0PlayerId ) ){ //not a defense
+													computed.target = '';
+
+													if( KOCFIA.cities.hasOwnProperty('city'+ report.side1CityId) ){
+														computed.target += KOCFIA.cities['city'+ report.side1CityId].label;
+													} else {
+														computed.target += 'Ville'+ report.side1TileLevel;
+													}
+
+													computed.target += ' &rArr; ';
+
+													//dark forest
+													if( (report.side0TileType == 54 || report.side0TileType == 0) ){
+														if( isAutoAttackCoord(computed.defenderCoords, 'darkForest') ){
+															computed.type = 'FO auto';
+														} else {
+															computed.type = 'Attaque';
+														}
+
+														computed.target += 'FO'+ report.side0TileLevel;
+
+													//barbarian
+													} else if( report.side0TileType == 51 && (report.side0CityId === null || report.side0CityId === '' || report.side0CityId == '0') ){
+														if( isAutoAttackCoord(computed.defenderCoords, 'barbarian') ){
+															computed.type = 'CB auto';
+														} else {
+															computed.type = 'Attaque';
+														}
+
+														computed.target += 'CB'+ report.side0TileLevel;
+
+													//wilderness
+													} else if( report.side0TileType >= 10 && report.side0CityId <= 50 ){
+														if( isAutoAttackCoord(computed.defenderCoords, 'wilderness') ){
+															computed.type = 'TS auto';
+														} else {
+															computed.type = 'Attaque';
+														}
+
+														if( KOCFIA.tilesTypes.hasOwnProperty(report.side0TileType) ){
+															computed.target += KOCFIA.tilesTypes[ report.side0TileType ] + report.side0TileLevel;
+														} else {
+															computed.target += 'TS'+ report.side0TileLevel;
+														}
+
+													//plunder
+													} else if( report.side0TileType >= 10 && report.side0CityId <= 50 ){
+														if( isAutoAttackCoord(computed.defenderCoords, 'plunder') ){
+															computed.type = 'Pillage';
+														} else {
+															computed.type = 'Attaque';
+														}
+
+														computed.target += 'Ville'+ report.side0TileLevel;
+													}
+												}
+											}
+										}
+									}
+
+									info.push( computed );
+								}
+
+								return dfd.pipe( displayResults(dfd, info) );
+							} else {
+								//empty page
+								return dfd.resolve();
+							}
+
+							page += 1;
+
+							return dfd.pipe( displayResults(dfd) );
+						} else {
+							if( data.msg ){
+								console.log( data.msg );
+								return dfd.fail();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									window.setTimeout(function(){ return dfd.pipe( fetchPage(dfd, attempts) ); }, 5000);
+								} else {
+									return dfd.fail();
+								}
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){ return dfd.pipe( fetchPage(dfd, attempts) ); }, 5000);
+						} else {
+							return dfd.fail();
+						}
+					});
+			};
+
+			var sequence = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports load deferred sequence function');
+				return $.Deferred(function( dfd ){
+					return dfd.pipe( fetchPage(dfd) );
+				}).promise();
+			};
+
+			var params = $.extend({}, window.g_ajaxparams),
+				autoAttackCoords = { wilderness: null, barbarian: null, plunder: null, darkForest: null };
+
+			if( type == 'alliance' ){
+				params.group = 'a';
+			}
+
+			if( min > max ){
+				var tmp = min;
+				min = max;
+				max = tmp;
+			}
+
+			page = min;
+
+			$.when( sequence() )
+				.fail(function(){
+					Shared.notify('Erreur durant le chargement des pages '+ (type == 'mine' ? 'de vos rapports' : 'des rapports de l\'alliance'));
+				})
+				.always(function(){
+					KOCFIA.reports.$div
+						.find('.boundary').filter('.'+ type)
+						.find('.button').removeClass('danger stop').addClass('secondary load')
+						.find('span').html('Charger');
+
+					KOCFIA.reports.fetching[ type ] = false;
+				});
+
+		}
 
 	/* HOSPITAL */
 		KOCFIA.hospital = {
@@ -19594,13 +20056,13 @@ jQuery(document).ready(function(){
 				var launch = function( dfd, tParams, attempts ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital launchAutomaticRules deferred launch function', tParams, attempts);
 					$.ajax({
-						url: window.g_ajaxpath + "ajax/train.php" + window.g_ajaxsuffix,
-						type: 'post',
-						data: tParams,
-						dataType: 'json',
-						timeout: 10000
-					})
-					.done(function(data){
+							url: window.g_ajaxpath + "ajax/train.php" + window.g_ajaxsuffix,
+							type: 'post',
+							data: tParams,
+							dataType: 'json',
+							timeout: 10000
+						})
+						.done(function(data){
 							if( data.ok ){
 								if( window.seed.queue_revive ){
 									if( !window.seed.queue_revive.hasOwnProperty(cityKey) ) window.seed.queue_revive[ cityKey ] = [];

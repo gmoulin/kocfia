@@ -323,6 +323,28 @@ html, body {
 		margin: 5px 0;
 	}
 
+	#alarm-minTroopOnHQ,
+	#alarm-minTroopOnOther {
+		width: 50px;
+		text-align: center;
+	}
+
+	#kocfia-options .audio input {
+		width: 300px;
+		margin-right: 5px;
+	}
+
+	#kocfia-options .audio .ui-icon {
+		display: inline-block;
+		cursor: pointer;
+		position: relative;
+		top: 2px;
+	}
+
+	#kocfia-options .audio .ui-icon-pause {
+		display: none;
+	}
+
 /* chat tab */
 	#kocfia-chat ul {
 		padding-left: 0;

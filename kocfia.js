@@ -195,7 +195,8 @@ jQuery(document).ready(function(){
 			'barbarian', 'wilderness', 'darkForest', 'scout', 'plunder',
 			'formation', 'transport', 'reassign',
 			'knights', 'estates',
-			'build', 'fbWallPopup',
+			'build',
+			//'fbWallPopup',
 			'notepad',
 			'alarm',
 			'hospital',
@@ -225,7 +226,7 @@ jQuery(document).ready(function(){
 			estates: 'Terres Sauvages conquises',
 			reassign: 'Réassignements de troupes',
 			build: 'Construction',
-			fbWallPopup: 'Post sur mur Facebook',
+			//fbWallPopup: 'Post sur mur Facebook',
 			notepad: 'Bloc-note',
 			alarm: 'Alertes',
 			hospital: 'Hôpital',
@@ -455,6 +456,12 @@ jQuery(document).ready(function(){
 				resource4: {index: 3, type: 'rec4'}
 			}
 		};
+		KOCFIA.train = [
+			{name: 'unit', label: 'Formation', icon: window.stimgUrl + 'img/gold_30.png'}
+		];
+		KOCFIA.revive = [
+			{name: 'unit', label: 'Hôpital', icon: window.stimgUrl + 'img/gold_30.png'}
+		];
 
 	KOCFIA.init = function(){
 		if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('KOCFIA init function');
@@ -3249,6 +3256,8 @@ jQuery(document).ready(function(){
 				parts_visible: {
 					population: 1,
 					troops: 1,
+					train: 1,
+					revive: 1,
 					defenses: 1,
 					resources: 1,
 					resources_cap: 0,
@@ -3263,6 +3272,8 @@ jQuery(document).ready(function(){
 			parts: {
 				population: 'population',
 				troops: 'unités',
+				train: 'formation',
+				revive: 'hôpital',
 				defenses: 'fortifications',
 				resources: 'ressources',
 				resources_cap: 'limite de capacité',
@@ -3325,7 +3336,12 @@ jQuery(document).ready(function(){
 					dataTable += '<span class="ui-icon ui-icon-triangle-1-'+ (KOCFIA.conf.overview.parts_visible[ part ] ? 'se' : 'e') +'"></span>';
 					dataTable += KOCFIA.overview.parts[ part ].capitalize();
 					dataTable += '</th></tr>';
-					kocfia_part = KOCFIA[ part ];
+					if( part == 'train' ){
+						kocfia_part = $.extend({}, KOCFIA[ part ], KOCFIA.troops);
+					} else {
+						kocfia_part = KOCFIA[ part ];
+					}
+
 					length = kocfia_part.length;
 					for( i = 0; i < length; i += 1 ){
 						if( !kocfia_part[i].hasOwnProperty('label') && kocfia_part[i].hasOwnProperty('key') ){
@@ -3462,22 +3478,25 @@ jQuery(document).ready(function(){
 
 			if( !KOCFIA.overview.hasOwnProperty('$tbodyTrs') ) return; //overview panel not initialized
 
-			var $popTrs = KOCFIA.overview.$tbodyTrs.filter('.population').filter(':not(:first)'),
-				$resTrs = KOCFIA.overview.$tbodyTrs.filter('.resources').filter(':not(:first)'),
-				$resCapTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_cap').filter(':not(:first)'),
-				$resProdDetailTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_detail').filter(':not(:first)'),
-				$resProdBarbarianTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_barbarian').filter(':not(:first)'),
-				$resConsoTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_consumption').filter(':not(:first)'),
-				$resProdTotalTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_total').filter(':not(:first)'),
-				$resAutonomyTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_autonomy').filter(':not(:first)'),
-				$troopsTrs = KOCFIA.overview.$tbodyTrs.filter('.troops').filter(':not(:first)'),
-				$defensesTrs = KOCFIA.overview.$tbodyTrs.filter('.defenses').filter(':not(:first)'),
+			var $popTrs = KOCFIA.overview.$tbodyTrs.filter('.population').filter(':gt(0)'),
+				$resTrs = KOCFIA.overview.$tbodyTrs.filter('.resources').filter(':gt(0)'),
+				$resCapTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_cap').filter(':gt(0)'),
+				$resProdDetailTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_detail').filter(':gt(0)'),
+				$resProdBarbarianTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_barbarian').filter(':gt(0)'),
+				$resConsoTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_consumption').filter(':gt(0)'),
+				$resProdTotalTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_production_total').filter(':gt(0)'),
+				$resAutonomyTrs = KOCFIA.overview.$tbodyTrs.filter('.resources_autonomy').filter(':gt(0)'),
+				$troopsTrs = KOCFIA.overview.$tbodyTrs.filter('.troops').filter(':gt(0)'),
+				$defensesTrs = KOCFIA.overview.$tbodyTrs.filter('.defenses').filter(':gt(0)'),
+				$trainsTrs = KOCFIA.overview.$tbodyTrs.filter('.train').filter(':gt(0)'),
+				$reviveTrs = KOCFIA.overview.$tbodyTrs.filter('.revive').filter(':gt(0)'),
 				length = KOCFIA.citiesKey.length,
 				keys = ['gold', 'food', 'wood', 'stone', 'ore'],
 				guardianBase = {gold: 0, food: 0, wood: 0, stone: 0, ore: 0},
-				throneSlot = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ];
-			var i, j, k, m, b, r, n, s, e, d,
+				throneSlot = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
+				i, j, k, m, b, r, n, s, e, d,
 				subLength, population, hapiness, cityKey, rowsLength,
+				queue, queuedUnits, duration, formation,
 				barbariansRes, barbariansTroops, marches, march, populationModifier,
 				time, factor, bonusG, bonusW, fort, line, type, $tds, $td, stock,
 				stockInSeed, take, substract, bonusK, brLength, bonusT, item,
@@ -3928,6 +3947,75 @@ jQuery(document).ready(function(){
 									.data('ori', 0);
 							}
 						}
+
+					//revive
+						queue = window.seed.queue_revive[ cityKey ];
+						if( queue && Array.isArray(queue) && queue.length > 0 ){
+							unit = KOCFIA.unitInfo['unt'+ queue[0][0]];
+							wounded = queue[0][1];
+
+							text = '<span title="'+ unit.label +' - '+ Shared.readable(wounded) +'"><img src="'+ unit.icon +'" alt="'+ unit.label +'">'+ Shared.format(wounded) +'</span>';
+
+							finish = parseInt(queue[0][3], 10);
+							if( finish > timestamp ){
+								text += '<br>'+ Shared.readable( finish - timestamp );
+							}
+						} else text = '&nbsp;';
+
+						$tds = $reviveTrs.eq(0).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+
+						$td.html( text );
+
+					//train
+						queuedUnits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+						duration = 0;
+						//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
+						queue = window.seed.queue_unt[ cityKey ];
+						if( queue.length > 0 ){
+							for( i = 0; i < queue.length; i += 1 ){
+								if( parseFloat(formation[3]) > timestamp ){
+									formation = queue[i];
+									j = parseInt(formation[0], 10) - 1;
+
+									duration += parseFloat(formation[3]) - timestamp;
+
+									queuedUnits[ j ] += parseInt(formation[1], 10);
+								}
+							}
+						}
+
+						//duration
+						$tds = $troopsTrs.eq(0).find('td');
+						$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+						n = duration;
+
+						if( n !== null ){
+							$td.html( Shared.duration( n ) )
+								.data('ori', n);
+						} else {
+							$td.html('&nbsp;')
+								.data('ori', 0);
+						}
+
+						//troops
+						subLength = KOCFIA.troops.length;
+						for( j = 0; j < subLength; j += 1 ){
+							type = KOCFIA.troops[j];
+							$tds = $troopsTrs.eq(j + 1).find('td');
+							$td = $tds.eq( $tds.index( $tds.filter('.sum') ) + 1 + i );
+							n = queuedUnits[j];
+
+							if( n !== null ){
+								$td.html( Shared.format( n ) )
+									.attr('title', Shared.readable(n) )
+									.data('ori', n);
+							} else {
+								$td.html('&nbsp;')
+									.attr('title', '')
+									.data('ori', 0);
+							}
+						}
 				}
 			}
 
@@ -3939,7 +4027,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview sums function');
 			KOCFIA.overview.$tbodyTrs.each(function(){
 				var $tr = $(this);
-				if( !$tr.hasClass('resources_autonomy') ){
+				if( !$tr.hasClass('resources_autonomy') && !$tr.hasClass('revive') ){
 					var sum = 0,
 						inCamp = 0,
 						$tds = $tr.find('td');
@@ -12790,7 +12878,7 @@ jQuery(document).ready(function(){
 		};
 
 	/* ALARM */
-		/* &Psi; = kocfia code | &alpha; = attaque | &epsilon; = éclairage | &omega; = canceled | &rho; = renfort | &phi; = nourriture */
+		/* &Psi; = kocfia code | &alpha; = attack | &epsilon; = scout | &omega; = canceled | &rho; = reinforcement | &phi; = food */
 		KOCFIA.alarm = {
 			options: {
 				active: 1,

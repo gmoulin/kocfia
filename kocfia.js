@@ -13367,6 +13367,32 @@ jQuery(document).ready(function(){
 								//generic bonus
 								//@TODO
 
+								/*if( throneBonus[3] ) lifePct += throneBonus[3].percent; //life
+								if( throneBonus[1] ) attackPct += throneBonus[1].percent; //attack
+								if( throneBonus[5] ) speedPct += throneBonus[5].percent; //speed
+								if( throneBonus[4] ) rangePct += throneBonus[4].percent; //range
+
+								if( window.cm.unitFrontendType[ unitKey ] == 'infantry' ){
+									if( throneBonus[26] ) lifePct += throneBonus[26].percent; //infantry life
+									if( throneBonus[24] ) attackPct += throneBonus[24].percent; //infantry attack
+									if( throneBonus[28] ) speedPct += throneBonus[28].percent; //infantry speed
+									if( throneBonus[29] ) loadPct += throneBonus[29].percent; //infantry load
+								} else if( window.cm.unitFrontendType[ unitKey ] == 'ranged' ){
+									if( throneBonus[36] ) lifePct += throneBonus[36].percent; //ranged life
+									if( throneBonus[34] ) attackPct += throneBonus[34].percent; //ranged attack
+									if( throneBonus[38] ) speedPct += throneBonus[38].percent; //ranged speed
+									if( throneBonus[37] ) rangePct += throneBonus[37].percent; //ranged range
+								} else if( window.cm.unitFrontendType[ unitKey ] == 'siege' ){
+									if( throneBonus[56] ) lifePct += throneBonus[56].percent; //siege life
+									if( throneBonus[54] ) attackPct += throneBonus[54].percent; //siege attack
+									if( throneBonus[58] ) speedPct += throneBonus[58].percent; //siege speed
+									if( throneBonus[57] ) rangePct += throneBonus[57].percent; //siege range
+								} else if( window.cm.unitFrontendType[ unitKey ] == 'horsed' ){
+									if( throneBonus[36] ) lifePct += throneBonus[36].percent; //horsed life
+									if( throneBonus[34] ) attackPct += throneBonus[34].percent; //horsed attack
+									if( throneBonus[38] ) speedPct += throneBonus[38].percent; //horsed speed
+								}*/
+
 								//keep only interesting bonuses
 								if( hasInfantry ){
 
@@ -14962,14 +14988,14 @@ jQuery(document).ready(function(){
 
 		KOCFIA.dataAndStats.modPanel = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats modPanel function');
-			var $section = KOCFIA.$confPanel.find('#kocfia-dataAndStats').html('');
+			var $section = KOCFIA.$confPanel.find('#kocfia-dataAndStats').html('').off('click', '.update');
 
 			var header = '<h3>'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
 
 			var data = '<table class="costsAndAbilities"><thead><tr>';
 			data += '<th rowspan="2">&nbsp;</th>';
 			data += '<th colspan="6">Coûts</th>';
-			data += '<th colspan="6">Compétences</th>';
+			data += '<th colspan="6">Compétences (*)</th>';
 			data += '</tr><tr>';
 			data += '<th title="'+ KOCFIA.resourceInfo.rec0.label +'"><img src="'+ KOCFIA.resourceInfo.rec0.icon +'"></th>';
 			data += '<th title="'+ KOCFIA.resourceInfo.rec1.label +'"><img src="'+ KOCFIA.resourceInfo.rec1.icon +'"></th>';
@@ -14997,7 +15023,7 @@ jQuery(document).ready(function(){
 				unit = KOCFIA.troops[i];
 				unitKey = unit.name;
 
-				data += '<tr>';
+				data += '<tr data-unit="'+ unitKey +'">';
 				data += '<td title="'+ unit.label +'"><img src="'+ unit.icon +'"></td>';
 				data += '<td>'+ Shared.readable(window.unitcost[ unitKey ][5]) +'</td>';
 				data += '<td>'+ Shared.readable(window.unitcost[ unitKey ][1]) +'</td>';
@@ -15005,12 +15031,12 @@ jQuery(document).ready(function(){
 				data += '<td>'+ Shared.readable(window.unitcost[ unitKey ][3]) +'</td>';
 				data += '<td>'+ Shared.readable(window.unitcost[ unitKey ][4]) +'</td>';
 				data += '<td>'+ Shared.readable(window.unitcost[ unitKey ][6]) +'</td>';
-				data += '<td>'+ Shared.readable(window.unitstats[ unitKey ][0]) +'</td>';
-				data += '<td>'+ Shared.readable(window.unitstats[ unitKey ][1]) +'</td>';
-				data += '<td>'+ Shared.readable(window.unitstats[ unitKey ][2]) +'</td>';
-				data += '<td>'+ Shared.readable(window.unitstats[ unitKey ][3]) +'</td>';
-				data += '<td>'+ Shared.readable(window.unitstats[ unitKey ][4]) +'</td>';
-				data += '<td>'+ Shared.readable(window.unitstats[ unitKey ][5]) +'</td>';
+				data += '<td class="stat"></td>';
+				data += '<td class="stat"></td>';
+				data += '<td class="stat"></td>';
+				data += '<td class="stat"></td>';
+				data += '<td class="stat"></td>';
+				data += '<td class="stat"></td>';
 				data += '</tr>';
 			}
 
@@ -15036,6 +15062,7 @@ jQuery(document).ready(function(){
 				data += '</tr>';
 			}
 			data += '</tbody></table>';
+			data += '<p>* <u>estimations</u> avec bonus de trône et technologie, ne prend pas en compte les bonus de gardien, ni les bonus de sorts, ni le chevalier</p>';
 
 			data += '<table class="might"><thead><tr><th colspan="5">Entretien et Puissance</th>';
 			data += '</tr><tr>';
@@ -15054,8 +15081,8 @@ jQuery(document).ready(function(){
 				data += '<th title="'+ unit.label +'"><img src="'+ unit.icon +'"></th>';
 				data += '<td>'+ window.unitupkeeps[ u ] +'</td>';
 				data += '<td>'+ window.unitmight[ unitKey ] +'</td>';
-				data += '<td>'+ window.unitcost[ unitKey ][7] +'</td>';
-				data += '<td>'+ Shared.readable(3600 / window.unitcost[ unitKey ][7] * window.unitmight[ unitKey ]) +'</td>';
+				data += '<td class="stat">'+ window.unitcost[ unitKey ][7] +'</td>';
+				data += '<td class="stat">'+ Shared.readable(3600 / window.unitcost[ unitKey ][7] * window.unitmight[ unitKey ]) +'</td>';
 				data += '</tr>';
 			}
 			data += '</tbody></table>';
@@ -15071,6 +15098,7 @@ jQuery(document).ready(function(){
 			}
 			cels += '<td class="sum"></td>';
 			stats += '<th>Total</th></tr></thead><tbody>';
+			stats += '<tr><th>Population</th>'+ cels +'</tr>';
 			stats += '<tr><th>Caserne</th>'+ cels +'</tr>';
 			stats += '<tr><th title="Somme du niveau des casernes">Total</th>'+ cels +'</tr>';
 			stats += '<tr><th>Contremaître</th>'+ cels +'</tr>';
@@ -15078,7 +15106,7 @@ jQuery(document).ready(function(){
 			stats += '<tr><th>Écurie</th>'+ cels +'</tr>';
 			stats += '<tr><th>Atelier</th>'+ cels +'</tr>';
 			stats += '<tr><th>Forgeron</th>'+ cels +'</tr>';
-			stats += '</tbody><thead><th colspan="'+ (KOCFIA.citiesKey.length + 2) +'">Entraînable par heure</th></thead><tbody>';
+			stats += '</tbody><thead><th colspan="'+ (KOCFIA.citiesKey.length + 2) +'">Entraînable par heure (*)</th></thead><tbody>';
 			stats += '<tr><th title="'+ KOCFIA.unitInfo.unt1.label +'"><img src="'+ KOCFIA.unitInfo.unt1.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.unitInfo.unt2.label +'"><img src="'+ KOCFIA.unitInfo.unt2.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.unitInfo.unt3.label +'"><img src="'+ KOCFIA.unitInfo.unt3.icon +'"></th>'+ cels +'</tr>';
@@ -15098,11 +15126,14 @@ jQuery(document).ready(function(){
 			stats += '<tr><th title="'+ KOCFIA.fortInfo.frt61.label +'"><img src="'+ KOCFIA.fortInfo.frt61.icon +'"></th>'+ cels +'</tr>';
 			stats += '<tr><th title="'+ KOCFIA.fortInfo.frt62.label +'"><img src="'+ KOCFIA.fortInfo.frt62.icon +'"></th>'+ cels +'</tr>';
 			stats += '</tbody></table>';
+			stats += '<p>* Ne prend pas en compte la population</p>';
 
 			$section.append( header + data + stats )
 				.on('click', '.update', function(){
-					KOCFIA.dataAndStats.update();
+					KOCFIA.dataAndStats.modPanel(); //reset the whole panel
 				});
+
+			KOCFIA.dataAndStats.$abilitiesTrs = $section.find('.costsAndAbilities').find('tbody').find('tr');
 
 			KOCFIA.dataAndStats.$tds = $section.find('.stats').find('tbody').find('td').filter(':not(.sum)');
 			KOCFIA.dataAndStats.$sums = $section.find('.stats').find('tbody').find('.sum');
@@ -15113,66 +15144,152 @@ jQuery(document).ready(function(){
 		KOCFIA.dataAndStats.update = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats update function');
 
+			//thone bonuses
+			var thoneBonus = KOCFIA.throne.getSetBonus( window.seed.throne.activeSlot ),
+				i, unit, unitKey, $unitStatsTds, stats,
+				lifeBase, attackBase, defenseBase, speedBase, rangeBase, loadBase,
+				life, attack, defense, speed, range, load,
+				lifePct, attackPct, defensePct, speedPct, rangePct, loadPct;
+
+			for( i = 0; i < KOCFIA.troops.length; i += 1 ){
+				unit = KOCFIA.troops[i];
+				unitKey = unit.name;
+
+				lifePct = 0;
+				attackPct = 0;
+				defensePct = 0;
+				speedPct = 0;
+				rangePct = 0;
+				loadPct = 0;
+				durationPct = 0;
+
+				stats = window.unitstats[ unitKey ];
+
+				if( throneBonus[3] ) lifePct += throneBonus[3].percent; //life
+				if( throneBonus[1] ) attackPct += throneBonus[1].percent; //attack
+				if( throneBonus[2] ) defensePct += throneBonus[2].percent; //defense
+				if( throneBonus[5] ) speedPct += throneBonus[5].percent; //speed
+				if( throneBonus[4] ) rangePct += throneBonus[4].percent; //range
+				if( throneBonus[6] ) loadPct += throneBonus[6].percent; //load
+
+				if( window.cm.unitFrontendType[ unitKey ] == 'infantry' ){
+					if( throneBonus[26] ) lifePct += throneBonus[26].percent; //infantry life
+					if( throneBonus[24] ) attackPct += throneBonus[24].percent; //infantry attack
+					if( throneBonus[25] ) defensePct += throneBonus[25].percent; //infantry defense
+					if( throneBonus[28] ) speedPct += throneBonus[28].percent; //infantry speed
+					if( throneBonus[29] ) loadPct += throneBonus[29].percent; //infantry load
+				} else if( window.cm.unitFrontendType[ unitKey ] == 'ranged' ){
+					if( throneBonus[36] ) lifePct += throneBonus[36].percent; //ranged life
+					if( throneBonus[34] ) attackPct += throneBonus[34].percent; //ranged attack
+					if( throneBonus[35] ) defensePct += throneBonus[35].percent; //ranged defense
+					if( throneBonus[38] ) speedPct += throneBonus[38].percent; //ranged speed
+					if( throneBonus[37] ) rangePct += throneBonus[37].percent; //ranged range
+					if( throneBonus[39] ) loadPct += throneBonus[39].percent; //ranged load
+				} else if( window.cm.unitFrontendType[ unitKey ] == 'siege' ){
+					if( throneBonus[56] ) lifePct += throneBonus[56].percent; //siege life
+					if( throneBonus[54] ) attackPct += throneBonus[54].percent; //siege attack
+					if( throneBonus[55] ) defensePct += throneBonus[55].percent; //siege defense
+					if( throneBonus[58] ) speedPct += throneBonus[58].percent; //siege speed
+					if( throneBonus[57] ) rangePct += throneBonus[57].percent; //siege range
+					if( throneBonus[59] ) loadPct += throneBonus[59].percent; //siege load
+				} else if( window.cm.unitFrontendType[ unitKey ] == 'horsed' ){
+					if( throneBonus[36] ) lifePct += throneBonus[36].percent; //horsed life
+					if( throneBonus[34] ) attackPct += throneBonus[34].percent; //horsed attack
+					if( throneBonus[35] ) defensePct += throneBonus[35].percent; //horsed defense
+					if( throneBonus[38] ) speedPct += throneBonus[38].percent; //horsed speed
+					if( throneBonus[39] ) loadPct += throneBonus[39].percent; //horsed load
+				}
+
+				lifeBase = parseInt(stats[0], 10);
+				life = lifeBase + lifeBase * (parseInt(window.seed.tech.tch15, 10) * 5) / 100 + lifeBase * lifePct / 100;
+
+				attackBase = parseInt(stats[1], 10);
+				attack = attackBase + attackBase * (parseInt(window.seed.tech.tch8, 10) * 5) / 100 + attackBase * (parseInt(window.seed.tech.tch15, 10) * 5 / 100) + attackBase * attackPct / 100;
+
+				defenseBase = parseInt(stats[2], 10);
+				defense = defenseBase + defenseBase * (parseInt(window.seed.tech.tch9, 10) * 5) / 100 + defenseBase * defensePct / 100;
+
+				speedBase = parseInt(stats[2], 10);
+				speed = speedBase * speedPct / 100;
+
+				rangeBase = parseInt(stats[4], 10);
+				range = rangeBase + rangeBase * (parseInt(window.seed.tech.tch13, 10) * 10) / 100 + rangeBase * rangePct / 100;
+
+				loadBase = parseInt(stats[2], 10);
+				load = loadBase + loadBase * (parseInt(window.seed.tech.tch10, 10) * 10) / 100 + loadBase * loadPct / 100;
+
+				$unitStatsTds = KOCFIA.dataAndStats.$abilitiesTrs.filter('[data-unit="'+ unitKey +'"]').find('.stat');
+				$unitStatsTds.eq(0).html( Shared.readable(lifeBase) +' ('+ Shared.readable(life) +')' );
+				$unitStatsTds.eq(1).html( Shared.readable(attackBase) +' ('+ Shared.readable(attack) +')' );
+				$unitStatsTds.eq(2).html( Shared.readable(defenseBase) +' ('+ Shared.readable(defense) +')' );
+				$unitStatsTds.eq(3).html( Shared.readable(speedBase) +' ('+ Shared.readable(speed) +')' );
+				$unitStatsTds.eq(4).html( Shared.readable(rangeBase) +' ('+ Shared.readable(range) +')' );
+				$unitStatsTds.eq(5).html( Shared.readable(loadBase) +' ('+ Shared.readable(load) +')' );
+			}
+
+			//cities and troops data
 			KOCFIA.dataAndStats.compute();
 
-			var i, cityKey, city, stat, length = KOCFIA.citiesKey.length;
+			var cityKey, city, stat, length = KOCFIA.citiesKey.length;
 			for( i = 0; i < length; i += 1 ){
 				cityKey = KOCFIA.citiesKey[ i ];
 				if( KOCFIA.cities.hasOwnProperty(cityKey) ){
 					city = KOCFIA.cities[ cityKey ];
 					stat = KOCFIA.dataAndStats.stats[ cityKey ];
 
-					KOCFIA.dataAndStats.$tds.eq(i + length * 0).html( stat.nbBarracks );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 1).html( stat.sumLvlBarracks );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 2).html( stat.politic );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 3).html( stat.combat );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 4).html( stat.stable );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 5).html( stat.workshop );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 6).html( stat.blacksmith );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 7).html( Shared.readable(stat.unit1PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 8).html( Shared.readable(stat.unit2PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 9).html( Shared.readable(stat.unit3PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 10).html( Shared.readable(stat.unit4PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 11).html( Shared.readable(stat.unit5PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 12).html( Shared.readable(stat.unit6PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 13).html( Shared.readable(stat.unit7PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 14).html( Shared.readable(stat.unit8PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 15).html( Shared.readable(stat.unit9PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 16).html( Shared.readable(stat.unit10PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 17).html( Shared.readable(stat.unit11PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 18).html( Shared.readable(stat.unit12PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 19).html( Shared.readable(stat.fort53PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 20).html( Shared.readable(stat.fort55PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 21).html( Shared.readable(stat.fort60PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 22).html( Shared.readable(stat.fort61PerHour) );
-					KOCFIA.dataAndStats.$tds.eq(i + length * 23).html( Shared.readable(stat.fort62PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 0).html( stat.population );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 1).html( stat.nbBarracks );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 2).html( stat.sumLvlBarracks );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 3).html( stat.politic );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 4).html( stat.combat );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 5).html( stat.stable );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 6).html( stat.workshop );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 7).html( stat.blacksmith );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 8).html( Shared.readable(stat.unit1PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 9).html( Shared.readable(stat.unit2PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 10).html( Shared.readable(stat.unit3PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 11).html( Shared.readable(stat.unit4PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 12).html( Shared.readable(stat.unit5PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 13).html( Shared.readable(stat.unit6PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 14).html( Shared.readable(stat.unit7PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 15).html( Shared.readable(stat.unit8PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 16).html( Shared.readable(stat.unit9PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 17).html( Shared.readable(stat.unit10PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 18).html( Shared.readable(stat.unit11PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 19).html( Shared.readable(stat.unit12PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 20).html( Shared.readable(stat.fort53PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 21).html( Shared.readable(stat.fort55PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 22).html( Shared.readable(stat.fort60PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 23).html( Shared.readable(stat.fort61PerHour) );
+					KOCFIA.dataAndStats.$tds.eq(i + length * 24).html( Shared.readable(stat.fort62PerHour) );
 				}
 			}
 
-			KOCFIA.dataAndStats.$sums.eq(0).html( Shared.readable(KOCFIA.dataAndStats.sums.nbBarracks) );
-			KOCFIA.dataAndStats.$sums.eq(1).html( Shared.readable(KOCFIA.dataAndStats.sums.sumLvlBarracks) );
-			KOCFIA.dataAndStats.$sums.eq(2).html( Shared.readable(KOCFIA.dataAndStats.sums.politic) );
-			KOCFIA.dataAndStats.$sums.eq(3).html( Shared.readable(KOCFIA.dataAndStats.sums.combat) );
-			KOCFIA.dataAndStats.$sums.eq(4).html( Shared.readable(KOCFIA.dataAndStats.sums.stable) );
-			KOCFIA.dataAndStats.$sums.eq(5).html( Shared.readable(KOCFIA.dataAndStats.sums.workshop) );
-			KOCFIA.dataAndStats.$sums.eq(6).html( Shared.readable(KOCFIA.dataAndStats.sums.blacksmith) );
-			KOCFIA.dataAndStats.$sums.eq(7).html( Shared.readable(KOCFIA.dataAndStats.sums.unit1PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(8).html( Shared.readable(KOCFIA.dataAndStats.sums.unit2PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(9).html( Shared.readable(KOCFIA.dataAndStats.sums.unit3PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(10).html( Shared.readable(KOCFIA.dataAndStats.sums.unit4PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(11).html( Shared.readable(KOCFIA.dataAndStats.sums.unit5PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(12).html( Shared.readable(KOCFIA.dataAndStats.sums.unit6PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(13).html( Shared.readable(KOCFIA.dataAndStats.sums.unit7PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(14).html( Shared.readable(KOCFIA.dataAndStats.sums.unit8PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(15).html( Shared.readable(KOCFIA.dataAndStats.sums.unit9PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(16).html( Shared.readable(KOCFIA.dataAndStats.sums.unit10PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(17).html( Shared.readable(KOCFIA.dataAndStats.sums.unit11PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(18).html( Shared.readable(KOCFIA.dataAndStats.sums.unit12PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(19).html( Shared.readable(KOCFIA.dataAndStats.sums.fort53PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(20).html( Shared.readable(KOCFIA.dataAndStats.sums.fort55PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(21).html( Shared.readable(KOCFIA.dataAndStats.sums.fort60PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(22).html( Shared.readable(KOCFIA.dataAndStats.sums.fort61PerHour) );
-			KOCFIA.dataAndStats.$sums.eq(23).html( Shared.readable(KOCFIA.dataAndStats.sums.fort62PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(0).html( Shared.readable(KOCFIA.dataAndStats.sums.population) );
+			KOCFIA.dataAndStats.$sums.eq(1).html( Shared.readable(KOCFIA.dataAndStats.sums.nbBarracks) );
+			KOCFIA.dataAndStats.$sums.eq(2).html( Shared.readable(KOCFIA.dataAndStats.sums.sumLvlBarracks) );
+			KOCFIA.dataAndStats.$sums.eq(3).html( Shared.readable(KOCFIA.dataAndStats.sums.politic) );
+			KOCFIA.dataAndStats.$sums.eq(4).html( Shared.readable(KOCFIA.dataAndStats.sums.combat) );
+			KOCFIA.dataAndStats.$sums.eq(5).html( Shared.readable(KOCFIA.dataAndStats.sums.stable) );
+			KOCFIA.dataAndStats.$sums.eq(6).html( Shared.readable(KOCFIA.dataAndStats.sums.workshop) );
+			KOCFIA.dataAndStats.$sums.eq(7).html( Shared.readable(KOCFIA.dataAndStats.sums.blacksmith) );
+			KOCFIA.dataAndStats.$sums.eq(8).html( Shared.readable(KOCFIA.dataAndStats.sums.unit1PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(9).html( Shared.readable(KOCFIA.dataAndStats.sums.unit2PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(10).html( Shared.readable(KOCFIA.dataAndStats.sums.unit3PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(11).html( Shared.readable(KOCFIA.dataAndStats.sums.unit4PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(12).html( Shared.readable(KOCFIA.dataAndStats.sums.unit5PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(13).html( Shared.readable(KOCFIA.dataAndStats.sums.unit6PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(14).html( Shared.readable(KOCFIA.dataAndStats.sums.unit7PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(15).html( Shared.readable(KOCFIA.dataAndStats.sums.unit8PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(16).html( Shared.readable(KOCFIA.dataAndStats.sums.unit9PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(17).html( Shared.readable(KOCFIA.dataAndStats.sums.unit10PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(18).html( Shared.readable(KOCFIA.dataAndStats.sums.unit11PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(19).html( Shared.readable(KOCFIA.dataAndStats.sums.unit12PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(20).html( Shared.readable(KOCFIA.dataAndStats.sums.fort53PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(21).html( Shared.readable(KOCFIA.dataAndStats.sums.fort55PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(22).html( Shared.readable(KOCFIA.dataAndStats.sums.fort60PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(23).html( Shared.readable(KOCFIA.dataAndStats.sums.fort61PerHour) );
+			KOCFIA.dataAndStats.$sums.eq(24).html( Shared.readable(KOCFIA.dataAndStats.sums.fort62PerHour) );
 		};
 
 		KOCFIA.dataAndStats.compute = function(){
@@ -15183,6 +15300,7 @@ jQuery(document).ready(function(){
 				marshall, foreman, boost;
 
 			var sums = {
+				population: 0,
 				combat: 0,
 				politic: 0,
 				nbBarracks: 0,
@@ -15215,6 +15333,7 @@ jQuery(document).ready(function(){
 					city = KOCFIA.cities[ cityKey ];
 
 					stat = {
+						population: parseInt(window.seed.citystats[ cityKey ].pop[0], 10),
 						nbBarracks: 0,
 						barrack: 0,
 						sumLvlBarracks: 0,
@@ -15250,6 +15369,7 @@ jQuery(document).ready(function(){
 						}
 					}
 
+					sums.population += stat.population;
 					sums.nbBarracks += stat.nbBarracks;
 					sums.sumLvlBarracks += stat.sumLvlBarracks;
 					sums.workshop += stat.workshop;
@@ -18744,6 +18864,11 @@ jQuery(document).ready(function(){
 			code += KOCFIA.reports.getHelp();
 
 			//grids
+			code += '<div>';
+			code += '<label for="kocfia-reports-reportId">Rapport numéro&nbsp;:&nbsp;</label>';
+			code += '<input type="number" id="kocfia-reports-reportId">';
+			code += '<button class="button secondary detail"><span>Ouvrir</span></button>';
+			code += '</div>';
 			code += '<fieldset class="boundary mine">';
 			code += '<legend>Vos rappors</legend>';
 			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
@@ -18766,6 +18891,12 @@ jQuery(document).ready(function(){
 			//listener
 				.on('change', '#reports-panel-automatic', function(){
 					$('#reports-automatic').prop('checked', $(this).prop('checked')).change();
+				})
+				.on('click', '.detail', function(){
+					var id = $.trim( $('#kocfia-reports-repordId').val() );
+					if( id !== '' && parseInt(id, 10) > 0 ){
+						KOCFIA.reports.getReport(id);
+					}
 				});
 
 			//grids
@@ -18783,6 +18914,7 @@ jQuery(document).ready(function(){
 				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.reports.$resultsAlliance[0].toggleToolbar(); }, position: 'last'})
 				.jqGrid('navButtonAdd','#kocfia-reports-pager-alliance', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.reports.$resultsAlliance[0].clearToolbar(); }, position: 'last'})
 				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: "Supprimer les rapports sélectionnés", buttonicon: 'ui-icon-trash', onClickButton: function(){ KOCFIA.reports.removeSelection('alliance'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: "Compilation des rapports sélectionnés", buttonicon: 'ui-icon-script', onClickButton: function(){ KOCFIA.reports.summarize('alliance'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 
@@ -19649,8 +19781,28 @@ jQuery(document).ready(function(){
 
 					KOCFIA.reports.fetching[ type ] = false;
 				});
-
 		}
+
+		KOCFIA.reports.summarize = function( type ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports summarize function', type);
+
+			if( !$.isEmptyObject(KOCFIA.selection[ type ]) ){
+
+			}
+		};
+
+		KOCFIA.reports.getReport = function( id ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports getReport function', ids);
+
+		};
+
+		KOCFIA.reports.removeSelection = function( type ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports removeSelection function', type);
+
+			if( !$.isEmptyObject(KOCFIA.selection[ type ]) ){
+
+			}
+		};
 
 	/* HOSPITAL */
 		KOCFIA.hospital = {

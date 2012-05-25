@@ -226,12 +226,6 @@ html, body {
 		cursor: pointer;
 	}
 
-	.navTab .ui-icon {
-		height: 10px;
-		display: inline-block;
-		background-position: -32px -82px;
-	}
-
 	#general-refreshFrequency,
 	#general-reloadFrequency {
 		width: 30px;
@@ -2664,5 +2658,4 @@ html, body {
 		top: 3px;
 		margin-right: 3px;
 	}
-
 

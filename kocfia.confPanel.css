@@ -2692,3 +2692,17 @@ html, body {
 		margin-right: 3px;
 	}
 
+/* reports */
+	#kocfia-reports fieldset {
+		margin: 0;
+	}
+
+	#kocfia-reports .boundary.alliance {
+		margin-top: 40px;
+	}
+
+	#kocfia-reports .boundary input {
+		width: 50px;
+		text-align: center;
+		margin-right: 10px;
+	}

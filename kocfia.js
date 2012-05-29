@@ -13880,7 +13880,7 @@ jQuery(document).ready(function(){
 			window.seed.queue_atkinc[ marchId ] = march;
 		};
 
-		KOCFIA.alarms.generateSummaryForAttack = function( message, player ){
+		KOCFIA.alarm.generateSummaryForAttack = function( message, player ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('kocfia alarm generateSummaryForAttack function', message, player);
 			var infos = message[0].split(' | '),
 				toX, toY, tmp, i, city, unitInfo, d, distance, min,
@@ -19252,7 +19252,7 @@ jQuery(document).ready(function(){
 			code += '<button class="button secondary detail"><span>Ouvrir</span></button>';
 			code += '</div>';
 			code += '<fieldset class="boundary mine">';
-			code += '<legend>Vos rappors</legend>';
+			code += '<legend>Vos rapports</legend>';
 			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
 			code += '<label>&nbsp;à&nbsp;:&nbsp;</label><input type="number" class="max" value="2" min="1" required>';
 			code += '<button class="button secondary load"><span>Charger</span></button>';
@@ -19260,7 +19260,7 @@ jQuery(document).ready(function(){
 			code += '<table id="kocfia-reports-mine" class="reports-results"></table>';
 			code += '<div id="kocfia-reports-pager-mine" class="reports-pager"></div>';
 			code += '<fieldset class="boundary alliance">';
-			code += '<legend>Rappors d\'Alliance</legend>';
+			code += '<legend>Rapports d\'Alliance</legend>';
 			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
 			code += '<label>&nbsp;à&nbsp;:&nbsp;</label><input type="number" class="max" value="2" min="1" required>';
 			code += '<button class="button secondary load"><span>Charger</span></button>';
@@ -19375,7 +19375,7 @@ jQuery(document).ready(function(){
 				;
 
 			KOCFIA.$confPanel.on('resizestop', function(){
-				var size = $("#kocfia-reports").find('.boundary.mine').innerWidth() + 1;
+				var size = KOCFIA.reports.$div.find('.boundary.mine').innerWidth() + 1;
 				KOCFIA.reports.$resultsMine.jqGrid('setGridWidth', size);
 				KOCFIA.reports.$resultsAlliance.jqGrid('setGridWidth', size);
 			});

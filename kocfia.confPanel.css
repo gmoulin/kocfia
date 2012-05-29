@@ -367,6 +367,11 @@ html, body {
 		margin-left: 5px;
 	}
 
+	.chatwrap .reduceToggle {
+		margin-left: 10px;
+		cursor: pointer;
+	}
+
 /* map search tab */
 	#kocfia-map .go {
 		margin-left: 8px;
@@ -2157,6 +2162,34 @@ html, body {
 	#kocfia-dataAndStats .might th {
 		padding-left: 5px;
 		padding-right: 5px;
+	}
+
+	#kocfia-dataAndStats .calculator {
+		margin: 20px 0;
+	}
+
+	#kocfia-dataAndStats .calculator ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+		-webkit-column-count: 3;
+		-webkit-column-gap: 10px;
+		-moz-column-count: 3;
+		-moz-column-gap: 10px;
+		column-count: 3;
+		column-gap: 10px;
+
+		display: none;
+	}
+
+	#kocfia-dataAndStats .calculator input {
+		width: 50px;
+		text-align: center;
+	}
+
+	#kocfia-dataAndStats .calculator legend {
+		cursor: pointer;
 	}
 
 /* build */

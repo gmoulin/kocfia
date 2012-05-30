@@ -321,6 +321,7 @@ html, body {
 	#alarm-minTroopOnOther {
 		width: 50px;
 		text-align: center;
+		margin-left: 5px;
 	}
 
 	#kocfia-options .audio input {
@@ -2135,12 +2136,12 @@ html, body {
 /* data and stats */
 	#kocfia-dataAndStats table {
 		width: 100%;
-		margin-bottom: 20px;
+		margin-top: 20px;
 	}
 
 	#kocfia-dataAndStats .might {
 		width: auto;
-		margin: 0 auto 20px;
+		margin: 20px auto 0;
 	}
 
 	#kocfia-dataAndStats .stats {
@@ -2186,10 +2187,17 @@ html, body {
 	#kocfia-dataAndStats .calculator input {
 		width: 50px;
 		text-align: center;
+		margin-left: 10px;
 	}
 
 	#kocfia-dataAndStats .calculator legend {
 		cursor: pointer;
+	}
+
+	#kocfia-dataAndStats .calculator legend ui-icon {
+		display: inline-block;
+		position: relative;
+		top: 2px;
 	}
 
 /* build */
@@ -2705,4 +2713,10 @@ html, body {
 		width: 50px;
 		text-align: center;
 		margin-right: 10px;
+	}
+
+	#kocfia-reports-reportId {
+		width: 70px;
+		text-align: center;
+		margin-right: 5px;
 	}

@@ -422,7 +422,7 @@ html, body {
 	.ui-jqgrid .ui-jqgrid-htable th div,
 	/* Other cells: */
 	.ui-jqgrid tr.jqgrow td {
-		height:auto;
+		height: auto;
 		white-space: normal;
 	}
 
@@ -432,16 +432,34 @@ html, body {
 
 /* map tiles additionnal infos */
 	#maparea_map .mod_coord.improved {
-		top: -50px !important;
+		top: -76px !important;
+		left: 1px !important;
 	}
 
 	#maparea_map .mod_coord.improved .mapXYCoor input {
-		width: 50px;
+		width: 84px;
+		margin-left: 2px;
+		text-align: center;
 	}
 
 	#maparea_map .mod_coord.improved .button20 {
 		position: relative;
 		top: 10px;
+	}
+
+	#mapwindow .slot .kocfia-map-tile-info {
+		color: #000;
+		display: block;
+		width: 100%;
+		text-shadow: 0 0 2px #fff;
+	}
+
+	#mapwindow .slot .kocfia-map-tile-info:hover {
+		text-decoration: none;
+	}
+
+	#mapwindow .slot {
+		overflow: hidden;
 	}
 
 	#mapwindow .slot .friendly {
@@ -454,6 +472,21 @@ html, body {
 
 	#mapwindow .slot .hostile {
 		color: #e5271e;
+	}
+
+	.map1 .slot.flag span.kocfia-map-tile-info,
+	.map1 .slot.sword span.kocfia-map-tile-info,
+	.map1 .slot.shield span.kocfia-map-tile-info,
+	.map1 .slot.mapcastle span.kocfia-map-tile-info {
+		background-position: center center;
+		font-weight: normal;
+		height: 100%;
+		left: 0;
+		padding-top: 0;
+		position: absolute;
+		text-align: left;
+		top: 0;
+		width: 100%;
 	}
 
 /* auto attack tabs form */
@@ -2023,6 +2056,12 @@ html, body {
 		width: 50px; /* right padding of tds */
 	}
 
+	#kocfia-overview .revive img {
+		position: relative;
+		top: 2px;
+		margin-right: 3px;
+	}
+
 /* notepad */
 	#kocfia-notepad {
 		position: absolute;
@@ -2199,7 +2238,7 @@ html, body {
 		cursor: pointer;
 	}
 
-	#kocfia-dataAndStats .calculator legend ui-icon {
+	#kocfia-dataAndStats .calculator legend .ui-icon {
 		display: inline-block;
 		position: relative;
 		top: 2px;
@@ -2498,7 +2537,7 @@ html, body {
 		width: 100%;
 	}
 
-	#kocfia-marches table ul {
+	#kocfia-conf-panel #kocfia-marches table ul {
 		list-style: none;
 		padding: 0;
 		margin: 0;
@@ -2512,10 +2551,6 @@ html, body {
 		text-align: center;
 	}
 
-	#kocfia-marches tr ul {
-		margin: 0;
-	}
-
 	#kocfia-marches td li {
 		display: block;
 		float: left;
@@ -2523,7 +2558,7 @@ html, body {
 	}
 
 	#kocfia-marches td li + li {
-		margin: 2px;
+		margin: 0 0 0 2px;
 	}
 
 	#kocfia-marches th button + button {

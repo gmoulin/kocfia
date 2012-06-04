@@ -1036,7 +1036,7 @@ jQuery(document).ready(function(){
 						break;
 					case '_dispatch.php':
 						this.addEventListener("load", function(){
-							console.log(this);
+							console.log('_dispatch', this);
 							window.setTimeout(function(){
 								KOCFIA.chat.cleanHelp(0); //to clean self construction help messages
 								KOCFIA.overview.updateFromSeed();
@@ -3322,7 +3322,8 @@ jQuery(document).ready(function(){
 				resources_production_total: 'total production',
 				resources_autonomy: 'autonomie'
 			},
-			barbarian_resources: {} //by marchId and resources
+			barbarian_resources: {}, //by cityKey and marchId, contains resources []
+			stored: ['barbarian_resources']
 		};
 
 		KOCFIA.overview.confPanel = function( $section ){
@@ -3371,7 +3372,11 @@ jQuery(document).ready(function(){
 			var left = 0, j, part, kocfia_part, rowspan;
 			for( part in KOCFIA.overview.parts ){
 				if( KOCFIA.overview.parts.hasOwnProperty( part ) ){
-					dataTable += '<tr class="'+ part +' toggle"><th colspan="'+ cols +'">';
+					dataTable += '<tr class="'+ part +' toggle"><th colspan="'+ cols +'"';
+					if( part == 'resources_production_barbarian' ){
+						dataTable += ' title="Estimé pour chaque raid barbare revenant en ville, donc total non complet tant que tous les raids n\'ont pas été vu en train de rentrer"';
+					}
+					dataTable += '>';
 					dataTable += '<span class="ui-icon ui-icon-triangle-1-'+ (KOCFIA.conf.overview.parts_visible[ part ] ? 'se' : 'e') +'"></span>';
 					dataTable += KOCFIA.overview.parts[ part ].capitalize();
 					dataTable += '</th></tr>';
@@ -3548,12 +3553,8 @@ jQuery(document).ready(function(){
 							for( m in marches ){
 								if( marches.hasOwnProperty(m) ){
 									march = marches[m];
-									//cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN: 9
-									//cm.BOT_STATUS.BOT_MARCH_MARCHING: 1,
-									//cm.BOT_STATUS.BOT_MARCH_RETURNING: 2,
-									//cm.BOT_STATUS.BOT_MARCH_RESTING: 7,
-									if( march.marchType == 9 ){
-										if( march.botMarchStatus == 2 ){
+									if( march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_BOT_BARBARIAN ){
+										if( march.botMarchStatus == window.cm.BOT_STATUS.BOT_MARCH_RETURNING ){
 											//get attack duration (go, fight, return, unload, repeat)
 											time = parseFloat(march.returnUnixTime) - parseFloat(march.marchUnixTime) + (parseFloat(march.restPeriod) / 60);
 
@@ -3562,9 +3563,24 @@ jQuery(document).ready(function(){
 											//get resources in one hour
 											barbarianRes = [ factor * parseFloat(march.gold), factor * parseFloat(march.resource1), factor * parseFloat(march.resource2), factor * parseFloat(march.resource3), factor * parseFloat(march.resource4) ];
 
-											KOCFIA.overview.barbarian_resources[ m ] = barbarianRes;
-										} else if( (march.botMarchStatus == 1 || march.botMarchStatus == 7) && KOCFIA.overview.barbarian_resources.hasOwnProperty(m) ){
-											barbarianRes = KOCFIA.overview.barbarian_resources[ m ];
+											if( !KOCFIA.overview.barbarian_resources.hasOwnProperty(cityKey) ){
+												KOCFIA.overview.barbarian_resources[ cityKey ] = {};
+											}
+
+											KOCFIA.overview.barbarian_resources[ cityKey ][ m ] = barbarianRes;
+
+											//cleaning
+											for( b in KOCFIA.overview.barbarian_resources[ cityKey ] ){
+												if( KOCFIA.overview.barbarian_resources[ cityKey ].hasOwnProperty(b) && !marches.hasOwnProperty(b) ){
+													delete KOCFIA.overview.barbarian_resources[ cityKey ][ b ];
+												}
+											}
+											KOCFIA.overview.storeBarbarianResources();
+
+										} else if( (march.botMarchStatus == window.cm.BOT_STATUS.BOT_MARCH_MARCHING || march.botMarchStatus == window.cm.BOT_STATUS.BOT_MARCH_RESTING)
+											&& KOCFIA.overview.barbarian_resources.hasOwnProperty(m)
+										){
+											barbarianRes = KOCFIA.overview.barbarian_resources[ cityKey ][ m ];
 										} else {
 											barbarianRes = [ 0, 0, 0, 0, 0 ];
 										}
@@ -4111,6 +4127,11 @@ jQuery(document).ready(function(){
 			KOCFIA.overview.$wrap.css('height', tableH);
 		};
 
+		KOCFIA.overview.storeBarbarianResources = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview storeBarbarianResources function');
+			localStorage.setObject('kocfia_overview_barbarian_resources_' + KOCFIA.storeUniqueId, KOCFIA.overview.barbarian_resources);
+		};
+
 		/* moveable */
 			KOCFIA.overview.moveableOn = function(){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview moveableOn function');
@@ -4336,8 +4357,8 @@ jQuery(document).ready(function(){
 
 								if( KOCFIA[ module ].timestamps.hasOwnProperty(a) ){
 									ts = KOCFIA[ module ].timestamps[ a ];
-									//wait ten hours between attacks
-									if( ts + 10 * 60 * 60 > Date.timestamp() ){
+									//wait one hour between attacks
+									if( ts + 1 * 60 * 60 > Date.timestamp() ){
 										KOCFIA[ module ].timestamps[ a ] = Date.timestamp();
 										delayedLaunch(KOCFIA[ module ].attacks[c][a], i);
 									}
@@ -4480,7 +4501,7 @@ jQuery(document).ready(function(){
 			//clone last wave x times at most
 			form += '<fieldset class="option">';
 			form += '<legend>Option</legend>';
-			form += '<p>Pour les objets de trône (CB / TS / Pillage) et les objets pour les villes (TS).</p>';
+			form += '<p>Pour les objets de trône (CB / TS / Pillage) et les armoiries (TS).</p>';
 			form += 'Duppliquer la dernière vague au maximum <input type="number" class="clone" min="0" max ="10"> fois';
 			form += '</fieldset>';
 
@@ -5262,19 +5283,18 @@ jQuery(document).ready(function(){
 				help += '<li>Les villes ciblées ne seront attaquées que si le joueur n\'est pas connecté</li>';
 				help += '<li>Aucun éclairage n\'est effectué avant l\'attaque</li>';
 				help += '<li>Il est donc préférable d\'être sûr que les joueurs ciblés sont bien inactifs et que les villes ciblées ne disposent pas de défenses</li>';
-				help += '<li>En mode automatique un délai de 10 heures sépare deux séries de pillages sur les villes d\'un joueur</li>';
+				help += '<li>En mode automatique un délai de 1 heure sépare deux séries de pillages sur les villes d\'un joueur</li>';
 			}
 			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques</li>';
-			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
+			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer toutes les vagues de l\'attaque</li>';
 			help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant supérieur à 1 minute)</li>';
 			if( this.module != 'scout' && this.module != 'darkForest' ){
 				help += '<li>La dernière vague peut être duppliquée au maximum 10 fois lors du lancement de l\'attaque (permet de par exemple de lancer x fois 1 milicien pour récupérer plus d\'objets de trône)</li>';
-				help += '<li>Chaque dupplication vérifie les places dans le point de ralliement, les chevaliers et les troupes disponible</li>';
-				help += '<li>Ces dupplication de vague sont optionnelles, elles ne bloquent pas le lancement de l\'attaque</li>';
+				help += '<li>Chaque dupplication vérifie les places dans le point de ralliement, les chevaliers et les troupes disponibles</li>';
+				help += '<li>Ces dupplications de vague sont optionnelles, elles ne bloquent pas le lancement de l\'attaque</li>';
 			}
 			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardée</li>';
-			help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
+			help += '<li>Entre 3 et 5 secondes s\'écoulent entre chaque lancement de vague</li>';
 			help += '<li>Dix secondes après impact sur la cible, une mise à jour des données de la marche est effectuée (survivants, status)</li>';
 			help += '<li>Les campeurs sont automatiquement rappelés</li>';
 			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
@@ -8118,6 +8138,10 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-map').html('');
 
+			var header = '<div class="infos">';
+			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '</div>';
+
 			var code = '<fieldset class="search"><legend>Exploration</legend>';
 			code += '<div><label for="kocfia-map-near-x">Autour de&nbsp;:&nbsp;</label>';
 			code += '<input type="text" id="kocfia-map-near" class="coord" required pattern="'+ Shared.coordRegExp +'">';
@@ -8158,7 +8182,7 @@ jQuery(document).ready(function(){
 			code += '<table id="kocfia-map-results-darkForests" class="search-results"></table>';
 			code += '<div id="kocfia-map-pager-darkForests" class="search-pager"></div>';
 
-			$section.append( code )
+			$section.append( header + code + KOCFIA.map.getHelp() )
 				.on('change', '#kocfia-map-city-coord', function(){
 					var v = $(this).val();
 					if( v !== '' ){
@@ -8334,6 +8358,37 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map storeSearch function');
 			localStorage.setObject('kocfia_map_search_' + KOCFIA.storeUniqueId, KOCFIA.map.search);
 		};
+
+		KOCFIA.map.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map getHelp function');
+			var help = '<div id="kocfia-map-help" class="help" title="Aide '+ KOCFIA.modulesLabel.map +'">';
+			help += '<h4>Informations et limitations :</h4><ul>';
+			help += '<li>Par défaut les résultats sont triés par distance croissante</li>';
+			help += '<li>Les requêtes au serveur sont optmisées pour limiter l\'impact</li>';
+			help += '<li>Le status en ligne et sa date de dernière connection sont à faire manuellement (requêtes serveur différentes), cependant pour chaque vérification tous les résultats du même joueur sont mis à jour</li>';
+			help += '</ul><h4>Méthode :</h4><ol>';
+			help += '<li>Spécifier une coordonnée</li>';
+			help += '<li>Spécifier une distance de recherche autour de la coordonnée</li>';
+			help += '<li>Lancer la recherche</li>';
+			help += '<li>Déployer une des 4 grilles de résultats (Ville, Terres sauvages, Fôrets sombres et camps barbares) pour visionner les résultats</li>';
+			help += '</ol><h4>Filtres rapides :</h4><ul>';
+			help += '<li>Dans chaque grille, l\'icône <span class="ui-icon ui-icon-pin-s"></span> permet d\'afficher ou masquer sous l\'entête des colonnes des champs de filtrage rapide</li>';
+			help += '<li>Saisir du texte dans l\'un de ces champs permet de filtrer les résultats</li>';
+			help += '<li>L\'icône <span class="ui-icon ui-icon-refresh"></span> permet de vider les champs de filtrage rapide</li>';
+			help += '</ul><h4>Filtrage poussé :</h4><ul>';
+			help += '<li>Dans chaque grille, l\'icône <span class="ui-icon ui-icon-zoomin"></span> permet d\'afficher une popup où un filtrage plus poussé des résultats est possible</li>';
+			help += '<li>Par exemple vous pouvez choisir d\'afficher uniquement les niveaux supérieur à 5</li>';
+			help += '<li>Vous pouvez aussi coupler plusieurs valeurs pour une colonne mais aussi enchaîner les filtres sur plusieurs colonnes</li>';
+			help += '<li>Cette méthode se rapproche grandement du requêttage de base de données</li>';
+			help += '</ul><h4>Actions par ligne :</h4><ul>';
+			help += '<li>Pour chaque ligne, dans la colonne action, peuvent se trouver plusieurs icônes permettant par exemple d\'attaquer, de transporter, ... vers la coordonnées correspondante. L\'onglet "Marche" est alors sélectionné, le type de marche et la coordonnée ciblée préremplis.</li>';
+			help += '</ul><h4>Actions sur sélection :</h4><ul>';
+			help += '<li>La première colonne comporte des cases à cocher, une pour chaque résultat.</li>';
+			help += '<li>Plusieurs icônes sont présentes en bas à gauche de chaque grille pour exporter les résultats sélectionnés (coordonnées) vers par exemple les ongles CB, TS, Fôret, Pillage, ... et le bloc-note.</li>';
+			help += '</ul></div>';
+
+			return help;
+		}
 
 		KOCFIA.map.improveCoordsForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map improveCoordsForm function');
@@ -9610,7 +9665,7 @@ jQuery(document).ready(function(){
 				if( withWrapper ){
 					form += '<span class="buttonset">';
 					form += '<input type="checkbox" id="kocfia-formation-auto-'+ cityKey +'-recalc" class="train-recalc" "'+ (rule && rule.recalc ? 'checked' : '') +'">';
-					form += '<label for="kocfia-formation-auto-'+ cityKey +'-recalc">Recalcul</label> <small>du minimum et maximum à chaque tentative</small>';
+					form += '<label for="kocfia-formation-auto-'+ cityKey +'-recalc" title="Recalcul du minimum et maximum à chaque tentative">Recalcul</label>';
 					form += '</span>';
 				}
 
@@ -9687,7 +9742,7 @@ jQuery(document).ready(function(){
 			form += '</p>';
 			if( withWrapper ){
 				form += '<div class="cf">';
-				form += 'Appliquer ces réglages dans les autres villes : ';
+				form += 'Appliquer les réglages suivant dans les autres villes : ';
 				form += '<button class="copy button secondary" rel="unit"><span>Unités</span></button>';
 				form += '<button class="copy button secondary" rel="defense"><span>Défenses</span></button>';
 				form += '<button class="copy button secondary" rel="keep"><span>Conservation</span></button>';
@@ -22647,166 +22702,6 @@ jQuery(document).ready(function(){
 })(window, document, jQuery);
 
 });
-
-/* MODULE SKELETON */
-/*
-		KOCFIA.mod = {
-			options: {
-				active: 0,			automatic: 0
-			},		stored: ['rules'],		rules: {}
-		};
-
-		KOCFIA.mod.confPanel = function( $section ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.mod +'</h3>';
-			code += '<div>';
-			code += Shared.generateCheckbox('mod', 'active', 'Activer', KOCFIA.conf.mod.active);
-			code += Shared.generateCheckbox('mod', 'automatic', 'Activer les mod automatiques', KOCFIA.conf.mod.automatic);
-			code += Shared.generateButton('rules', 'deleteRules', 'Supprimer toutes les configurations de mod enregistrées');
-			code += '</div>';
-
-			$section.append( code );
-		};
-
-		KOCFIA.mod.modPanel = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod modPanel function');
-			var $section = KOCFIA.$confPanel.find('#kocfia-mod').html('');
-
-			var manualForm = KOCFIA.mod.getManualForm(),
-				automaticForm = KOCFIA.mod.getAutoForm(),
-				onGoing = KOCFIA.mod.getListsTemplate(),
-				help = KOCFIA.mod.getHelp();
-
-			var code = '<div class="infos">';
-			code += '<span class="buttonset"><input type="checkbox" id="mod-panel-automatic" '+ (KOCFIA.conf.mod.automatic ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="mod-panel-automatic">mod automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
-			code += '</div><h3>Configurations</h3>';
-			code += '<div class="accordion">';
-			code +=  manualForm + automaticForm;
-			code += '</div><div>'+ onGoing +'</div>';
-			code += help;
-			code += '<div id="kocfia-mod-history" class="history" title="Historique des mod"></div>';
-
-			$section.append( code )
-			//listener
-				.on('change', '#mod-panel-automatic', function(){
-					$('#mod-automatic').prop('checked', $(this).prop('checked')).change();
-				});
-
-			KOCFIA.mod.$manualForm = $section.find('.manual-form');
-			KOCFIA.mod.$autoForm = $section.find('.mod-form');
-			KOCFIA.mod.$ongoing = $section.find('.ongoing');
-			KOCFIA.mod.$nextBar = $section.find('.nextIteration');
-			KOCFIA.mod.$history = $section.find('.history');
-
-			$section.find('.accordion').accordion({
-				collapsible: true,
-				autoHeight: false,
-				animated: false,
-				change: function(event, ui){
-					KOCFIA.$confPanelWrapper[0].scrollTop = 0;
-					KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
-				}
-			})
-			.accordion('activate', false);
-
-			KOCFIA.mod.addManualFormListeners();
-			KOCFIA.mod.addAutoFormListeners();
-
-			KOCFIA.mod.loadAutoRuleset();
-		};
-
-		KOCFIA.mod.on = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod on function');
-
-			if( KOCFIA.conf.mod.automatic ){
-				KOCFIA.mod.automaticOn();
-			}
-		};
-
-		KOCFIA.mod.off = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod off function');
-
-			KOCFIA.mod.automaticOff();
-		};
-
-		KOCFIA.mod.automaticOn = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod automaticOn function');
-			$('#mod-panel-automatic').prop('checked', true);
-
-			Shared.nextIteration( KOCFIA.mod.$nextBar, 60 );
-			window.setTimeout(function(){
-				Shared.nextIteration( KOCFIA.mod.$nextBar, 60 * 60 );
-				KOCFIA.mod.launchAutomaticmod();
-			}, 60 * 1000);
-
-			//recursive call every 60 minutes
-			autoModInterval = window.setInterval(function(){
-				Shared.nextIteration( KOCFIA.mod.$nextBar, 60 * 60 );
-				KOCFIA.mod.launchAutomaticmod();
-			}, 60 * 60 * 1000);
-		};
-
-		KOCFIA.mod.automaticOff = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod automaticOff function');
-
-			window.clearInterval(autoModInterval);
-
-			KOCFIA.mod.$nextBar.html('');
-		};
-
-		KOCFIA.mod.storeRules = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('kocfia mod storeRules function');
-			localStorage.setObject('kocfia_mod_rules_' + KOCFIA.storeUniqueId, KOCFIA.mod.rules);
-		};
-
-		KOCFIA.mod.deleteRules = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod deleteRules function');
-			localStorage.removeItem('kocfia_mod_rules_' + KOCFIA.storeUniqueId);
-
-			KOCFIA.mod.rules = {};
-		};
-
-		KOCFIA.mod.refreshOnGoing = function(msg){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod refreshOnGoing function');
-
-			//clean old messages
-			var timestamp = Date.timestamp(),
-				obsolete = 5 * 60 * 1000,
-				msgTimestamp, $div, $m;
-
-			$div = KOCFIA.mod.$ongoing;
-
-			$div.find('div').each(function(){
-				$m = $(this);
-				msgTimestamp = $m.data('timestamp');
-				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
-					$m.appendTo( KOCFIA.mod.$history );
-				}
-			});
-
-			if( !$.isEmptyObject(msg) ){
-				$div.append( '<div data-timestamp="'+ timestamp+'">'+ msg +'</div>' );
-			}
-		};
-
-		KOCFIA.mod.getHelp = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('mod') ) console.info('KOCFIA mod getHelp function');
-			var help = '<div id="kocfia-mod-help" class="help" title="Aide Mod">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '</ul></div>';
-
-			return help;
-		};
-*/
-
-/*
- * https://www314.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=M&y=0&n=fb149&l=fr_FR&messagebox=&sp=MTMyNzI1MDYxN3ZCHE__I3GaJow-&standalone=1&pf=1&res=1&iframe=1&lang=fr&ts=1327252086.92&entrypt=kabamGameInfo&lp=index
- * https://www280.kingdomsofcamelot.com/fb/e2/src/main_src.php?g=&y=0&n=&l=fr_FR&messagebox=&sp=MTMyNzI0NjkxNVpEHE916vtk27A-&fbIframeOn=1&standalone=0&res=1&iframe=1&lang=fr&ts=1327252570.5915&s=280&appBar=&signed_request=vqZ8zHGizRd5MFAjJSDtgR9t-SK330EnSqFWL2WgtRA.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEzMjcyNTg4MDAsImlzc3VlZF9hdCI6MTMyNzI1MjU2Niwib2F1dGhfdG9rZW4iOiJBQUFBQUhseVpBcjlzQkFPUVpDUHcyaXpIYTQ2NmNHZnNsNDI4akhnWkFTTUtEU3RhdnB3dTZZaU9wTllxcnRTeUtGeHREMWVXUDEweDExQjRlMVJiZmpKM1pDSVpCd2d1bG1IcWVnYlpDNFpBYzlIV3NBMnhBQUMiLCJ1c2VyIjp7ImNvdW50cnkiOiJmciIsImxvY2FsZSI6ImZyX0ZSIiwiYWdlIjp7Im1pbiI6MjF9fSwidXNlcl9pZCI6IjEwMDAwMTUxNTcxNzg0OCJ9
- *
- * open in a iframe on kabam site, get the seed with a grease monkey script and postMessage it to the main window
- */
 
 /*
 	//Construction :

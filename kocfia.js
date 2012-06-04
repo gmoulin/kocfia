@@ -8384,7 +8384,7 @@ jQuery(document).ready(function(){
 			help += '<li>Pour chaque ligne, dans la colonne action, peuvent se trouver plusieurs icônes permettant par exemple d\'attaquer, de transporter, ... vers la coordonnées correspondante. L\'onglet "Marche" est alors sélectionné, le type de marche et la coordonnée ciblée préremplis.</li>';
 			help += '</ul><h4>Actions sur sélection :</h4><ul>';
 			help += '<li>La première colonne comporte des cases à cocher, une pour chaque résultat.</li>';
-			help += '<li>Plusieurs icônes sont présentes en bas à gauche de chaque grille pour exporter les résultats sélectionnés (coordonnées) vers par exemple les ongles CB, TS, Fôret, Pillage, ... et le bloc-note.</li>';
+			help += '<li>Plusieurs icônes sont présentes en bas à gauche de chaque grille pour exporter les résultats sélectionnés vers par exemple les onglets CB, TS, Fôret, Pillage, ... et le bloc-note.</li>';
 			help += '</ul></div>';
 
 			return help;

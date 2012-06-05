@@ -2301,8 +2301,21 @@ html, body {
 		margin-right: 0;
 	}
 
+	.kocfia-build-menu .planned {
+		text-align: left;
+		display: none;
+	}
+
+	.kocfia-build-menu .planned.hasTasks {
+		display: block;
+	}
+
 	.kocfia-build-menu .planned:not(.hasTasks) ~ .buttons .delete {
 		visibility: hidden;
+	}
+
+	.kocfia-build-menu .planned.hasTasks ~ .buttons .delete {
+		visibility: visible;
 	}
 
 	.kocfia-build-menu .buildings,
@@ -2310,6 +2323,7 @@ html, body {
 	.kocfia-build-menu .guardians,
 	.kocfia-build-menu .fields,
 	.kocfia-build-menu .levels,
+	.kocfia-build-menu .planned,
 	.kocfia-build-menu .buttons {
 		margin-top: 4px;
 		padding-top: 4px;

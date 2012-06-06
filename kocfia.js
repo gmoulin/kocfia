@@ -1320,11 +1320,11 @@ jQuery(document).ready(function(){
 						KOCFIA.conf.confPanel.selected = ui.index;
 						Shared.storeConf();
 
-						if( $(ui.panel).is('#kocfia-map') ){
+						if( $(ui.panel).filter('#kocfia-map, #kocfia-reports').length > 0 ){
 							//use timeout so the tab selection is "finished" and the element inside have the correct width
 							window.setTimeout(function(){
 								KOCFIA.$confPanel.trigger('resizestop');
-							}, 50);
+							}, 0);
 						}
 					}
 				})
@@ -8321,11 +8321,14 @@ jQuery(document).ready(function(){
 				;
 
 			KOCFIA.$confPanel.on('resizestop', function(){
-				var size = $("#kocfia-map").find('.search').innerWidth() + 1;
-				KOCFIA.map.$resultsCities.jqGrid('setGridWidth', size);
-				KOCFIA.map.$resultsBarbarians.jqGrid('setGridWidth', size);
-				KOCFIA.map.$resultsWilderness.jqGrid('setGridWidth', size);
-				KOCFIA.map.$resultsDarkForests.jqGrid('setGridWidth', size);
+				var $div = $("#kocfia-map");
+				if( $div.is(':visible') ){
+					var size = $div.find('.search').innerWidth() + 1;
+					KOCFIA.map.$resultsCities.jqGrid('setGridWidth', size);
+					KOCFIA.map.$resultsBarbarians.jqGrid('setGridWidth', size);
+					KOCFIA.map.$resultsWilderness.jqGrid('setGridWidth', size);
+					KOCFIA.map.$resultsDarkForests.jqGrid('setGridWidth', size);
+				}
 			});
 		};
 
@@ -8945,7 +8948,11 @@ jQuery(document).ready(function(){
 					KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href="#kocfia-'+ to +'"]').trigger('click');
 				}
 			} else {
-				alert('L\'onglet '+ KOCFIA.tabLabel[ to ] +' n\'est pas actif.');
+				if( to != 'notepad' ){
+					alert('L\'onglet '+ KOCFIA.tabLabel[ to ] +' n\'est pas actif.');
+				} else {
+					alert('Le bloc-note n\'est pas actif.');
+				}
 			}
 		};
 
@@ -13040,7 +13047,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.alarm.selection = {};
 
-		KOCFIA.map.gridParams = {
+		KOCFIA.alarm.gridParams = {
 			datatype: 'local',
 			loadui: 'disable',
 			rowNum: 20,
@@ -14235,6 +14242,7 @@ jQuery(document).ready(function(){
 			KOCFIA.knights.buttons.fire = '<button class=" button danger"><span>Licencie</span></button>';
 
 			var header = '<div class="infos">';
+			header += '<button class="button secondary massSkillUp" title="Attribut à tous les chevaliers disponibles les points restant dans leur compétence principale"><span>Attribution en masse</span></button>';
 			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.knights +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
@@ -14274,6 +14282,20 @@ jQuery(document).ready(function(){
 				.on('change', '.buttonset input', function(){
 					KOCFIA.knights.$tbodies.filter('[data-city="'+ this.value +'"]').toggle( $(this).prop('checked') );
 				})
+				.on('click', '.massSkillUp', function(){
+					Shared.working();
+					$.when( KOCFIA.knights.massSkillUp() )
+						.done(function(){
+							Shared.success( null );
+						})
+						.fail(function(){
+							Shared.notify('Erreur');
+						})
+						.always(function(){
+							$('.tipsy').remove();
+							KOCFIA.knights.update();
+						});
+				})
 				.on('click', '.update', function(){
 					KOCFIA.knights.update();
 				})
@@ -14292,11 +14314,13 @@ jQuery(document).ready(function(){
 					$.when( KOCFIA.knights.promote(cityKey, knightKey, position, flag) )
 						.done(function(){
 							Shared.success( null );
-							$('.tipsy').remove();
-							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						})
 						.fail(function(){
 							Shared.notify('Erreur');
+						})
+						.always(function(){
+							$('.tipsy').remove();
+							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						});
 				})
 				.on('click', '.fire', function(){
@@ -14310,11 +14334,13 @@ jQuery(document).ready(function(){
 					$.when( KOCFIA.knights.dismiss(cityKey, knightKey) )
 						.done(function(){
 							Shared.success( null );
-							$('.tipsy').remove();
-							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						})
 						.fail(function(){
 							Shared.notify('Erreur');
+						})
+						.always(function(){
+							$('.tipsy').remove();
+							$tbody.html( $(KOCFIA.knights.byCity(cityKey)).html() );
 						});
 				})
 				.on('click', '.stats', function(){
@@ -14350,17 +14376,22 @@ jQuery(document).ready(function(){
 						return false;
 					}
 					stats[ index ] += points;
-					if( stats[ index ] > 255 ) stats[ index ] = 255;
+					if( stats[ index ] > 255 ){
+						points -= stats[ index ] - 255;
+						stats[ index ] = 255;
+					}
 
 					Shared.working();
 					$.when( KOCFIA.knights.skillUp(cityKey, knightKey, stats, points) )
 						.done(function(){
 							Shared.success(null);
-							$('.tipsy').remove();
-							$tbody.html( $( KOCFIA.knights.byCity(cityKey) ).html() );
 						})
 						.fail(function(){
 							Shared.notify('Erreur');
+						})
+						.always(function(){
+							$('.tipsy').remove();
+							$tbody.html( $( KOCFIA.knights.byCity(cityKey) ).html() );
 						});
 				})
 				.on('click', '.boost', function(){
@@ -14375,11 +14406,13 @@ jQuery(document).ready(function(){
 					$.when( KOCFIA.knights.boost(cityKey, knightKey, itemKey, ($this.hasClass('xp') ? 'xp' : 'stat')) )
 						.done(function(){
 							Shared.success( null );
-							$('.tipsy').remove();
-							KOCFIA.knights.update();
 						})
 						.fail(function(){
 							Shared.notify('Erreur');
+						})
+						.always(function(){
+							$('.tipsy').remove();
+							KOCFIA.knights.update();
 						});
 				});
 
@@ -14402,6 +14435,8 @@ jQuery(document).ready(function(){
 			help += '<li>Les listes des chevaliers ne sont pas mises à jour tout le temps lors d\'autre action externe à l\'onglet</li>';
 			help += '<li>Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville</li>';
 			help += '<li>Pour attribuer des points à un chevalier, cliquer sur la compétence voulue (par exemple le score de combat)</li>';
+			help += '<li>Cliquer sur l\'icône d\'un objet de l\'inventaire l\'appliquera pour le chevalier</li>';
+			help += '<li>Le bouton "Attribution en masse" permet d\'attribuer à tous les chevaliers disponibles, ayant des niveaux non attribués, des points dans la compétence principale (la plus haute)</li>';
 			help += '</ul></div>';
 
 			return help;
@@ -14509,7 +14544,8 @@ jQuery(document).ready(function(){
 				max = Math.max(p, c, i, r),
 				pc = '', cc = '', ic = '', rc = '', //stats css class then boosted
 				pt, ct, it, rt, //time left on boost
-				isMarching = (knight.knightStatus == 10);
+				isMarching = (knight.knightStatus == 10),
+				title;
 
 			ct = parseInt(knight.combatBoostExpireUnixtime, 10) - timestamp;
 			if( ct > 0 ){
@@ -14559,10 +14595,37 @@ jQuery(document).ready(function(){
 			code += '<td>'+ Shared.readable((parseInt(knight.skillPointsApplied, 10) + 1) * 20) +'</td>'; //salary*/
 			code += '<td>'+ skillPointsLeft +'</td>';
 
-			code += '<td class="p '+ (isMarching ? '' : 'stats') +' '+ pc +' '+ (max == knight.politics ? 'primary' : '') +'" '+ (pt > 0 ? 'title="Boost 25% - reste '+ Shared.readableDuration(pt) +'"' : '') +'>'+ p +'</td>'; //politic
-			code += '<td class="c '+ (isMarching ? '' : 'stats') +' '+ cc +' '+ (max == knight.combat ? 'primary' : '') +'" '+ (ct > 0 ? 'title="Boost 25% - reste '+ Shared.readableDuration(ct) +'"' : '') +'>'+ c +'</td>'; //combat
-			code += '<td class="i '+ (isMarching ? '' : 'stats') +' '+ ic +' '+ (max == knight.intelligence ? 'primary' : '') +'" '+ (it > 0 ? 'title="Boost 25% - reste '+ Shared.readableDuration(it) +'"' : '') +'>'+ i +'</td>'; //intelligence
-			code += '<td class="r '+ (isMarching ? '' : 'stats') +' '+ rc +' '+ (max == knight.resourcefulness ? 'primary' : '') +'" '+ (rt > 0 ? 'title="Boost 25% - reste '+ Shared.readableDuration(rt) +'"' : '') +'>'+ r +'</td>'; //resourcefulness
+			//politic
+			title = (skillPointsLeft > 0 && !isMarching ? 'Attribuer en politique' : '');
+			if( pt > 0 ){
+				if( title.length > 0 ) title += '<br>';
+				title += 'Boost 25% - reste '+ Shared.readableDuration(pt);
+			}
+			code += '<td class="p '+ (isMarching ? 'marching' : 'stats') +' '+ pc +' '+ (max == knight.politics ? 'primary' : '') +'" title="'+ title +'">'+ p +'</td>';
+
+			//combat
+			title = (skillPointsLeft > 0 && !isMarching ? 'Attribuer en combat' : '');
+			if( ct > 0 ){
+				if( title.length > 0 ) title += '<br>';
+				title += 'Boost 25% - reste '+ Shared.readableDuration(ct);
+			}
+			code += '<td class="c '+ (isMarching ? 'marching' : 'stats') +' '+ cc +' '+ (max == knight.combat ? 'primary' : '') +'" title="'+ title +'">'+ c +'</td>';
+
+			//intelligence
+			title = (skillPointsLeft > 0 && !isMarching ? 'Attribuer en intelligence' : '');
+			if( it > 0 ){
+				if( title.length > 0 ) title += '<br>';
+				title += 'Boost 25% - reste '+ Shared.readableDuration(it);
+			}
+			code += '<td class="i '+ (isMarching ? 'marching' : 'stats') +' '+ ic +' '+ (max == knight.intelligence ? 'primary' : '') +'" title="'+ title +'">'+ i +'</td>';
+
+			//resourcefulness
+			title = (skillPointsLeft > 0 && !isMarching ? 'Attribuer en ingéniosité' : '');
+			if( rt > 0 ){
+				if( title.length > 0 ) title += '<br>';
+				title += 'Boost 25% - reste '+ Shared.readableDuration(rt);
+			}
+			code += '<td class="r '+ (isMarching ? 'marching' : 'stats') +' '+ rc +' '+ (max == knight.resourcefulness ? 'primary' : '') +'" title="'+ title +'">'+ r +'</td>';
 
 			code += '<td>'; //actions
 			if( knight.knightStatus != 10 ){
@@ -14822,6 +14885,102 @@ jQuery(document).ready(function(){
 				};
 
 				return dfd.pipe( request(3) );
+			}).promise();
+		};
+
+		KOCFIA.knights.massSkillUp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights massSkillUp function');
+			return $.Deferred(function(dfd){
+				var cityIndex = 0,
+					cityKey, city,
+					knightIndex, knights, knightsKey, knightKey, knight, stats, lvl, points,
+					p, c, i, r, max, index;
+
+				var byCity = function(dfd){
+					if( cityIndex >= KOCFIA.citiesKey.length ){
+						return dfd.resolve();
+					}
+
+					cityKey = KOCFIA.citiesKey[ cityIndex ];
+					if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+						city = KOCFIA.cities[ cityKey ];
+						knightIndex = 0;
+						knights = window.seed.knights[ cityKey ];
+						if( Object.isObject(knights) && !$.isEmptyObject(knights) ){
+							knightsKey = Object.keys(knights);
+
+							return dfd.pipe( byKnight(dfd) );
+						} else {
+							cityIndex++;
+							return dfd.pipe( byCity(dfd) );
+						}
+					} else {
+						cityIndex++;
+						return dfd.pipe( byCity(dfd) );
+					}
+				};
+
+				var byKnight = function(dfd){
+					if( knightIndex >= knightsKey.length ){
+						cityIndex++;
+						return dfd.pipe( byCity(dfd) );
+					}
+
+					knightKey = knightKeys[ knightIndex ];
+
+					if( knights.hasOwnProperty(knightKey) ){
+						knight = knights[ knightKey ];
+
+						//no skillup while marching
+						if( knight.knightStatus == 10 ){
+							knightIndex++;
+							return dfd.pipe( byKnight(dfd) );
+						}
+
+						//points left
+						lvl = window.convertKnightExpToLvl(knight.experience);
+						points = lvl - parseInt(knight.skillPointsApplied, 10);
+
+						//stats
+						p = parseInt(knight.politics, 10);
+						c = parseInt(knight.combat, 10);
+						i = parseInt(knight.intelligence, 10);
+						r = parseInt(knight.resourcefulness, 10);
+						max = Math.max(p, c, i, r);
+
+						stats = [p, c, i, r];
+
+						if( max == p ) index = 0;
+						else if( max == c ) index = 1;
+						else if( max == i ) index = 2;
+						else if( max == r ) index = 3;
+
+						if( stats[ index ] == 255 ){
+							knightIndex++;
+							return dfd.pipe( byKnight(dfd) );
+						}
+
+						stats[ index ] += points;
+						if( stats[ index ] > 255 ){
+							points -= stats[ index ] - 255;
+							stats[ index ] = 255;
+						}
+
+						$.when( KOCFIA.knight.skillUp( cityKey, knightKey, stats, points ) )
+							.done(function(){
+								knightIndex++;
+								return dfd.pipe( byKnight(dfd) );
+							})
+							.fail(function(){
+								return dfd.fail();
+							});
+					} else {
+						knightIndex++;
+						return dfd.pipe( byKnight(dfd) );
+					}
+				};
+
+				return dfd.pipe( byCity(dfd) );
 			}).promise();
 		};
 
@@ -15111,7 +15270,7 @@ jQuery(document).ready(function(){
 			code += '<th colspan="2">Coût <img src="'+ KOCFIA.resourceInfo.gold.icon +'" title="'+ KOCFIA.resourceInfo.gold.label +'">: ';
 			code += '<span class="cost" title="0">0</span> / <span title="'+ Shared.readable( window.seed.citystats[ cityKey ].gold[0] ) +'">';
 			code += Shared.format( window.seed.citystats[ cityKey ].gold[0] ) + '</span>';
-			code += '<button class="button modify defend" title="Construit les pièges et engages des mercenaires paramétrés pour les terres sauvages conquises de cette ville"><span>Appliquer</span></button></th>';
+			code += '<button class="button modify defend" title="Construit les pièges et engage des mercenaires paramétrés pour les terres sauvages conquises de cette ville"><span>Appliquer</span></button></th>';
 			code += '</tr>';
 
 			if( KOCFIA.estates.modifications.hasOwnProperty(cityKey) ) delete KOCFIA.estates.modifications[ cityKey ];
@@ -19436,13 +19595,13 @@ jQuery(document).ready(function(){
 					{name: 'isGuildMateDefending', index: 'isGuildMateDefending', hidedlg: true, hidden: true, search: false, sortable: false}
 				],
 				caption: 'Rapports de l\'Alliance',
-				pager: '#kocfia-reports-pager-mine',
+				pager: '#kocfia-reports-pager-alliance',
 				onSelectRow: function(key, checked){
 					//xxxyyy -> xxx,yyy with padded 0 cleaned
 					if( checked ){
-						KOCFIA.reports.selection.mine[ key ] = key;
+						KOCFIA.reports.selection.alliance[ key ] = key;
 					} else {
-						delete KOCFIA.reports.selection.mine[ key ];
+						delete KOCFIA.reports.selection.alliance[ key ];
 					}
 				}
 			}
@@ -19498,6 +19657,7 @@ jQuery(document).ready(function(){
 			code += '<input type="number" id="kocfia-reports-reportId">';
 			code += '<button class="button secondary detail"><span>Ouvrir</span></button>';
 			code += '</div>';
+
 			code += '<fieldset class="boundary mine">';
 			code += '<legend>Vos rapports</legend>';
 			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
@@ -19506,6 +19666,7 @@ jQuery(document).ready(function(){
 			code += '</fieldset>';
 			code += '<table id="kocfia-reports-mine" class="reports-results"></table>';
 			code += '<div id="kocfia-reports-pager-mine" class="reports-pager"></div>';
+
 			code += '<fieldset class="boundary alliance">';
 			code += '<legend>Rapports d\'Alliance</legend>';
 			code += '<label>Page&nbsp;:&nbsp;</label><input type="number" class="min" value="1" min="1" required>';
@@ -19622,9 +19783,11 @@ jQuery(document).ready(function(){
 				;
 
 			KOCFIA.$confPanel.on('resizestop', function(){
-				var size = KOCFIA.reports.$div.find('.boundary.mine').innerWidth() + 1;
-				KOCFIA.reports.$resultsMine.jqGrid('setGridWidth', size);
-				KOCFIA.reports.$resultsAlliance.jqGrid('setGridWidth', size);
+				if( KOCFIA.reports.$div.is(':visible') ){
+					var size = KOCFIA.reports.$div.find('.boundary.mine').innerWidth() + 1;
+					KOCFIA.reports.$resultsMine.jqGrid('setGridWidth', size);
+					KOCFIA.reports.$resultsAlliance.jqGrid('setGridWidth', size);
+				}
 			});
 
 			KOCFIA.reports.$div = KOCFIA.$confPanel.find('#kocfia-reports');

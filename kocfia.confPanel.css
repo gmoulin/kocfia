@@ -430,6 +430,11 @@ html, body {
 		padding: 2px;
 	}
 
+	#kocfia-conf-panel .ui-jqgrid .ui-jqgrid-pager .ui-icon {
+		position: relative;
+		top: 0;
+	}
+
 /* map tiles additionnal infos */
 	#maparea_map .mod_coord.improved {
 		top: -76px !important;
@@ -1450,6 +1455,10 @@ html, body {
 		cursor: pointer;
 	}
 
+	#kocfia-knights .skillPointsLeft .marching {
+		color: #999;
+	}
+
 	#kocfia-knights .skillPointsLeft .stats:hover {
 		background-color: #CAD2D6;
 	}
@@ -1460,7 +1469,7 @@ html, body {
 	}
 
 	#kocfia-knights td select {
-		max-width: 60px;
+		max-width: 65px;
 	}
 
 	#kocfia-knights .boost {
@@ -1489,7 +1498,6 @@ html, body {
 
 	#kocfia-knights .skillPointsLeft td:nth-child(3) {
 		color: #0030FF;
-		font-weight: bold;
 	}
 
 /* estates tab */

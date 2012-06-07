@@ -151,7 +151,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.7.1',
+		version: '0.7.2',
 		userScriptLoaderVersion: 3,
 		debug: true,
 		debugWhat: { //comment module line for no debug
@@ -2747,6 +2747,21 @@ jQuery(document).ready(function(){
 				KOCFIA.captchaDetected = false;
 			};
 
+		/* help */
+			Shared.generateHelp = function( texts ){
+				var help = '';
+				if( Object.isObject(texts) && !$.isEmptyObject(texts) ){
+					var title;
+					for( title in texts ){
+						if( texts.hasOwnProperty(title) ){
+							help += '<h4>'+ title +'</h4><ul><li>'+ texts[ title ].join('</li><li>') +'</li></ul>';
+						}
+					}
+				}
+
+				return help;
+			};
+
 	/* FACEBOOK WALL POST POPUP */
 		KOCFIA.fbWallPopup = {
 			options: {
@@ -5276,46 +5291,54 @@ jQuery(document).ready(function(){
 		KOCFIA.autoAttack.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getHelp function');
 			var help = '<div id="kocfia-'+ this.module +'-help" class="help" title="Aide '+ KOCFIA.modulesLabel[ this.module ] +'">';
-			help += '<h4>Informations et limitations :</h4><ul>';
+
+			var texts = {
+				'Informations et limitations :': [],
+				'Méthode :': [],
+			};
+
+			var titles = Object.keys(texts);
+
 			if( this.module == 'wilderness' ){
-				help += '<li>Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)</li>';
+				texts[ titles[0] ].push('Les terres sauvages occupées ne seront pas attaquées (vérification pour chaque coordonnée à chaque attaque)');
 			} else if( this.module == 'plunder' ){
-				help += '<li>Les villes ciblées ne seront attaquées que si le joueur n\'est pas connecté</li>';
-				help += '<li>Aucun éclairage n\'est effectué avant l\'attaque</li>';
-				help += '<li>Il est donc préférable d\'être sûr que les joueurs ciblés sont bien inactifs et que les villes ciblées ne disposent pas de défenses</li>';
-				help += '<li>En mode automatique un délai de 1 heure sépare deux séries de pillages sur les villes d\'un joueur</li>';
+				texts[ titles[0] ].push('Les villes ciblées ne seront attaquées que si le joueur n\'est pas connecté');
+				texts[ titles[0] ].push('Aucun éclairage n\'est effectué avant l\'attaque');
+				texts[ titles[0] ].push('Il est donc préférable d\'être sûr que les joueurs ciblés sont bien inactifs et que les villes ciblées ne disposent pas de défenses');
+				texts[ titles[0] ].push('En mode automatique un délai de 1 heure sépare deux séries de pillages sur les villes d\'un joueur');
 			}
-			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques</li>';
-			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer toutes les vagues de l\'attaque</li>';
-			help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant supérieur à 1 minute)</li>';
+			texts[ titles[0] ].push('Les attaques sauvegardées peuvent être lancées manuellement ou en activant les attaques automatiques');
+			texts[ titles[0] ].push('Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer toutes les vagues de l\'attaque');
+			texts[ titles[0] ].push('Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant supérieur à 1 minute)');
 			if( this.module != 'scout' && this.module != 'darkForest' ){
-				help += '<li>La dernière vague peut être duppliquée au maximum 10 fois lors du lancement de l\'attaque (permet de par exemple de lancer x fois 1 milicien pour récupérer plus d\'objets de trône)</li>';
-				help += '<li>Chaque dupplication vérifie les places dans le point de ralliement, les chevaliers et les troupes disponibles</li>';
-				help += '<li>Ces dupplications de vague sont optionnelles, elles ne bloquent pas le lancement de l\'attaque</li>';
+				texts[ titles[0] ].push('La dernière vague peut être duppliquée au maximum 10 fois lors du lancement de l\'attaque (permet de par exemple de lancer x fois 1 milicien pour récupérer plus d\'objets de trône)');
+				texts[ titles[0] ].push('Chaque dupplication vérifie les places dans le point de ralliement, les chevaliers et les troupes disponibles');
+				texts[ titles[0] ].push('Ces dupplications de vague sont optionnelles, elles ne bloquent pas le lancement de l\'attaque');
 			}
-			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardée</li>';
-			help += '<li>Entre 3 et 5 secondes s\'écoulent entre chaque lancement de vague</li>';
-			help += '<li>Dix secondes après impact sur la cible, une mise à jour des données de la marche est effectuée (survivants, status)</li>';
-			help += '<li>Les campeurs sont automatiquement rappelés</li>';
-			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-			help += '</ul><h4>Méthode :</h4><ol>';
-			help += '<li>Sélectionner une ville</li>';
-			help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
+			texts[ titles[0] ].push('Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardée');
+			texts[ titles[0] ].push('Entre 3 et 5 secondes s\'écoulent entre chaque lancement de vague');
+			texts[ titles[0] ].push('Dix secondes après impact sur la cible, une mise à jour des données de la marche est effectuée (survivants, status)');
+			texts[ titles[0] ].push('Les campeurs sont automatiquement rappelés');
+			texts[ titles[0] ].push('Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur');
+
+			texts[ titles[1] ].push('Sélectionner une ville');
+			texts[ titles[1] ].push('Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)');
 			if( this.module != 'plunder' ){
-				help += '<li>Spécifier le niveau pour les '+ (this.module == 'wilderness' ? 'TS attaquées' : 'CB attaqués') +'</li>';
+				texts[ titles[1] ].push('Spécifier le niveau pour les '+ (this.module == 'wilderness' ? 'TS attaquées' : 'CB attaqués') +'');
 			} else {
-				help += '<li>Spécifier le nom du joueur ciblé pour le retrouver plus facilement dans les listes des attaques sauvegardées et en cours</li>';
-				help += '<li>Ce nom est aussi utilisé pour les vérifications de présence en ligne lors des lancements, il est donc nécessaire qu\'il soit complet et sans faute</li>';
+				texts[ titles[1] ].push('Spécifier le nom du joueur ciblé pour le retrouver plus facilement dans les listes des attaques sauvegardées et en cours');
+				texts[ titles[1] ].push('Ce nom est aussi utilisé pour les vérifications de présence en ligne lors des lancements, il est donc nécessaire qu\'il soit complet et sans faute');
 			}
-			help += '<li>Spécifier combien de places conserver dans le point de ralliement (optionnel)</li>';
-			help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
-			help += '<li>Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
-			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
+			texts[ titles[1] ].push('Spécifier combien de places conserver dans le point de ralliement (optionnel)');
+			texts[ titles[1] ].push('Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)');
+			texts[ titles[1] ].push('Spécifier les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)');
+			texts[ titles[1] ].push('Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)');
 			if( this.module != 'scout' && this.module != 'darkForest' ){
-				help += '<li>Spécifier le nombre de fois que la dernière vague sera lancée (optionnel)</li>';
+				texts[ titles[1] ].push('Spécifier le nombre de fois que la dernière vague sera lancée (optionnel)');
 			}
-			help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
-			help += '</ol></div>';
+			texts[ titles[1] ].push('Spécifier les quantités de troupes à conserver (optionnel)');
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -5683,32 +5706,33 @@ jQuery(document).ready(function(){
 		KOCFIA.darkForest.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' getHelp function');
 			var help = '<div id="kocfia-'+ this.module +'-help" class="help" title="Aide '+ KOCFIA.modulesLabel[ this.module ] +'">';
-			help += '<h4>Informations et limitations :</h4>';
-			help += '<ul>';
-			help += '<li>Chaque coordonnée est vérifiée avant lancement (vérification du niveau et si ce n\'est pas un marais)</li>';
-			help += '<li>Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique</li>';
-			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-			help += '<li>Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque</li>';
-			help += '<li>Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant supérieur à 1 minute)</li>';
-			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé</li>';
-			help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
-			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-			help += '<li>Pour les coordonnées une recherche automatique est effectuée à 100 de distance autour des villes activées pour lister les fôrets sombres et marais</li>';
-			help += '<li>Cette liste ne changera plus, sauf si vous activez une nouvelle ville ou déplacez une ville (portail) et si une erreur est détectée durant une vérification avant lancement</li>';
-			help += '<li>La recherche automatique est faite par étape de 5% jusqu\'à complétion</li>';
-			help += '<li>La recherche automatique est volontairement ralentie pour éviter de surcharger le serveur</li>';
-			help += '</ul>';
-			help += '<h4>Méthode :</h4>';
-			help += '<ol>';
-			help += '<li>Sélectionner une ville</li>';
-			help += '<li>Spécifier le niveau pour les FS attaquées</li>';
-			help += '<li>Spécifier combien de places conserver dans le point de ralliement (optionnel)</li>';
-			help += '<li>Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)</li>';
-			help += '<li>Spécifier la priorité pour les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)</li>';
-			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
-			help += '<li>Spécifier les quantités de troupes à conserver (optionnel)</li>';
-			help += '</ol>';
-			help += '</div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'Les attaques sauvegardées peuvent être lancées manuellement ou via le mode automatique',
+					'Pour le formulaire les erreurs seront listées au-dessus',
+					'Aucune vague n\'est lancée si il n\'y a pas assez de chevaliers pour lancer tous les vagues de l\'attaque',
+					'Si une vague est en erreur les vagues précédentes seront rappelées (sous réserves des limitations de temps de marche restant supérieur à 1 minute)',
+					'Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'attaque sauvegardé',
+					'Dix secondes s\'écoulent entre chaque lancement de vague',
+					'Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur',
+					'Pour les coordonnées une recherche automatique est effectuée à 100 de distance autour des villes activées pour lister les fôrets sombres et marais',
+					'Cette liste ne changera plus, sauf si vous activez une nouvelle ville ou déplacez une ville (portail) et si une erreur est détectée durant une vérification avant lancement',
+					'La recherche automatique est faite par étape de 5% jusqu\'à complétion',
+					'La recherche automatique est volontairement ralentie pour éviter de surcharger le serveur'
+				],
+				'Méthode :': [
+					'Sélectionner une ville',
+					'Spécifier le niveau pour les FS attaquées',
+					'Spécifier combien de places conserver dans le point de ralliement (optionnel)',
+					'Remplir les vagues d\'attaques (manuellement ou via les attaques préprogrammées)',
+					'Spécifier la priorité pour les chevaliers (optionnel, par défaut le premier chevalier disponible est utilisé)',
+					'Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)',
+					'Spécifier les quantités de troupes à conserver (optionnel)'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -6986,24 +7010,26 @@ jQuery(document).ready(function(){
 
 		KOCFIA.scout.getHelp = function(){
 			var help = '<div id="kocfia-'+ this.module +'-help" class="help" title="Aide '+ KOCFIA.modulesLabel[ this.module ] +'">';
-			help += '<h4>Informations et limitations :</h4>';
-			help += '<ul>';
-			help += '<li>Les éclairages sauvegardés peuvent être lancés manuellement ou en activant les éclairages automatiques</li>';
-			help += '<li>Pour le formulaire les erreurs seront listées au-dessus</li>';
-			help += '<li>Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'éclairage sauvegardé</li>';
-			help += '<li>Dix secondes s\'écoulent entre chaque lancement de vague</li>';
-			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-			help += '</ul>';
-			help += '<h4>Méthode :</h4>';
-			help += '<ol>';
-			help += '<li>Sélectionner une ou plusieurs villes</li>';
-			help += '<li>Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)</li>';
-			help += '<li>Spécifier combien de places conserver dans le point de ralliement (optionnel)</li>';
-			help += '<li>Spécifier les quantités d\'éclaireurs à envoyer par éclairage (optionnel)</li>';
-			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
-			help += '<li>Spécifier les quantités d\'éclaireurs à conserver (optionnel)</li>';
-			help += '</ol>';
-			help += '</div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'Les éclairages sauvegardés peuvent être lancés manuellement ou en activant les éclairages automatiques',
+					'Pour le formulaire les erreurs seront listées au-dessus',
+					'Lors du démarrage du mode automatique, 20 secondes s\'écoulent entre chaque lancement de plan d\'éclairage sauvegardé',
+					'Dix secondes s\'écoulent entre chaque lancement de vague',
+					'Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur'
+				],
+				'Méthode :': [
+					'Sélectionner une ou plusieurs villes',
+					'Spécifier une ou plusieurs coordonnées (séparées par un retour à la ligne, sous le format x,y)',
+					'Spécifier combien de places conserver dans le point de ralliement (optionnel)',
+					'Spécifier les quantités d\'éclaireurs à envoyer par éclairage (optionnel)',
+					'Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)',
+					'Spécifier les quantités d\'éclaireurs à conserver (optionnel)'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -8365,30 +8391,40 @@ jQuery(document).ready(function(){
 		KOCFIA.map.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map getHelp function');
 			var help = '<div id="kocfia-map-help" class="help" title="Aide '+ KOCFIA.modulesLabel.map +'">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '<li>Par défaut les résultats sont triés par distance croissante</li>';
-			help += '<li>Les requêtes au serveur sont optmisées pour limiter l\'impact</li>';
-			help += '<li>Le status en ligne et sa date de dernière connection sont à faire manuellement (requêtes serveur différentes), cependant pour chaque vérification tous les résultats du même joueur sont mis à jour</li>';
-			help += '</ul><h4>Méthode :</h4><ol>';
-			help += '<li>Spécifier une coordonnée</li>';
-			help += '<li>Spécifier une distance de recherche autour de la coordonnée</li>';
-			help += '<li>Lancer la recherche</li>';
-			help += '<li>Déployer une des 4 grilles de résultats (Ville, Terres sauvages, Fôrets sombres et camps barbares) pour visionner les résultats</li>';
-			help += '</ol><h4>Filtres rapides :</h4><ul>';
-			help += '<li>Dans chaque grille, l\'icône <span class="ui-icon ui-icon-pin-s"></span> permet d\'afficher ou masquer sous l\'entête des colonnes des champs de filtrage rapide</li>';
-			help += '<li>Saisir du texte dans l\'un de ces champs permet de filtrer les résultats</li>';
-			help += '<li>L\'icône <span class="ui-icon ui-icon-refresh"></span> permet de vider les champs de filtrage rapide</li>';
-			help += '</ul><h4>Filtrage poussé :</h4><ul>';
-			help += '<li>Dans chaque grille, l\'icône <span class="ui-icon ui-icon-zoomin"></span> permet d\'afficher une popup où un filtrage plus poussé des résultats est possible</li>';
-			help += '<li>Par exemple vous pouvez choisir d\'afficher uniquement les niveaux supérieur à 5</li>';
-			help += '<li>Vous pouvez aussi coupler plusieurs valeurs pour une colonne mais aussi enchaîner les filtres sur plusieurs colonnes</li>';
-			help += '<li>Cette méthode se rapproche grandement du requêttage de base de données</li>';
-			help += '</ul><h4>Actions par ligne :</h4><ul>';
-			help += '<li>Pour chaque ligne, dans la colonne action, peuvent se trouver plusieurs icônes permettant par exemple d\'attaquer, de transporter, ... vers la coordonnées correspondante. L\'onglet "Marche" est alors sélectionné, le type de marche et la coordonnée ciblée préremplis.</li>';
-			help += '</ul><h4>Actions sur sélection :</h4><ul>';
-			help += '<li>La première colonne comporte des cases à cocher, une pour chaque résultat.</li>';
-			help += '<li>Plusieurs icônes sont présentes en bas à gauche de chaque grille pour exporter les résultats sélectionnés vers par exemple les onglets CB, TS, Fôret, Pillage, ... et le bloc-note.</li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'Par défaut les résultats sont triés par distance croissante',
+					'Les requêtes au serveur sont optmisées pour limiter l\'impact',
+					'Le status en ligne et sa date de dernière connection sont à faire manuellement (requêtes serveur différentes), cependant pour chaque vérification tous les résultats du même joueur sont mis à jour',
+					'Chaque colonne de la grille peut être redimensionnée via la bordure droite de son entête',
+					'Chaque colonne peut être triée en cliquant dessus'
+				],
+				'Méthode :': [
+					'Spécifier une coordonnée',
+					'Spécifier une distance de recherche autour de la coordonnée',
+					'Lancer la recherche',
+					'Déployer une des 4 grilles de résultats (Ville, Terres sauvages, Fôrets sombres et camps barbares) pour visionner les résultats'
+				],
+				'Filtres rapides :': [
+					'Dans chaque grille, l\'icône <span class="ui-icon ui-icon-pin-s"></span> permet d\'afficher ou masquer sous l\'entête des colonnes des champs de filtrage rapide',
+					'Saisir du texte dans l\'un de ces champs permet de filtrer les résultats',
+					'L\'icône <span class="ui-icon ui-icon-refresh"></span> permet de vider les champs de filtrage rapide'
+				],
+				'Filtrage poussé :': [
+					'Dans chaque grille, l\'icône <span class="ui-icon ui-icon-search"></span> permet d\'afficher une popup où un filtrage plus poussé des résultats est possible',
+					'Par exemple vous pouvez choisir d\'afficher uniquement les niveaux supérieur à 5',
+					'Vous pouvez aussi coupler plusieurs valeurs pour une colonne mais aussi enchaîner les filtres sur plusieurs colonnes',
+					'Cette méthode se rapproche grandement du requêttage de base de données'
+				],
+				'Actions par ligne :': [
+					'Pour chaque ligne, dans la colonne action, peuvent se trouver plusieurs icônes permettant par exemple d\'attaquer, de transporter, ... vers la coordonnées correspondante. L\'onglet "Marche" est alors sélectionné, le type de marche et la coordonnée ciblée préremplis.'
+				],
+				'Actions sur sélection :': [
+					'La première colonne comporte des cases à cocher, une pour chaque résultat.',
+					'Plusieurs icônes sont présentes en bas à gauche de chaque grille pour exporter les résultats sélectionnés vers par exemple les onglets CB, TS, Fôret, Pillage, ... et le bloc-note.'
+				]
+			};
 
 			return help;
 		}
@@ -9105,11 +9141,14 @@ jQuery(document).ready(function(){
 				onGoing += '<table class="fort"><thead><tr>'+ headers +'<th>Suivi</th></tr></thead>';
 				onGoing += '<tbody><tr>'+ cels +'<td class="info"></td></tr></tbody></table></div>';
 
+			var cancelForm = '<div class="cancelForm"><label for="kocfia-formation-cancel-from">Supprimer les formations de cette ville à partir de la </label>';
+			cancelForm += '<input type="number" id="kocfia-formation-cancel-from" min="1" value="2" required> incluse</div>';
+
 			var help = KOCFIA.formation.getHelp();
 			var history = '<div id="kocfia-formation-history-unit" class="history unit" title="Historique des formations"></div>';
 			history += '<div id="kocfia-formation-history-fort" class="history fort" title="Historique des fortifications"></div>';
 
-			$section.html( form + onGoing + help + history );
+			$section.html( form + onGoing + cancelForm + help + history );
 
 			KOCFIA.formation.addSectionListeners();
 
@@ -9124,6 +9163,8 @@ jQuery(document).ready(function(){
 			KOCFIA.formation.$fortHistory = $section.find('.history.fort');
 			KOCFIA.formation.$unitInfo = KOCFIA.formation.$ongoing.find('.unit').find('.info');
 			KOCFIA.formation.$fortInfo = KOCFIA.formation.$ongoing.find('.fort').find('.info');
+
+			KOCFIA.formation.$cancelForm = $section.find('.cancelForm');
 
 			KOCFIA.formation.$autoForm.find('.train-max, .train-quantity, .train-recalc').trigger('change');
 
@@ -9374,26 +9415,57 @@ jQuery(document).ready(function(){
 						cityKey = $this.closest('tbody').data('city'),
 						$info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ cityKey +'"]').find('.info');
 					if( $this.hasClass('recursive') ){
-						var cancelSequence = function(){
-							return $.Deferred(function(dfd){
-								KOCFIA.formation.cancelTraining(dfd, cityKey, i, null, 3);
-							}).promise();
-						};
+						KOCFIA.formation.$cancelForm.dialog({
+							title: 'Suppression de masse',
+							height: 300,
+							width: 350,
+							modal: true,
+							buttons: {
+								'Supprimer': function(){
+									$(this).dialog('close');
 
-						var i = window.seed.queue_unt[cityKey].length;
+									var $from = $('#kocfia-formation-cancel-from');
+									if( !$from[0].checkValidity() ){
+										Shared.notify('Numéro de la formation à partir de laquelle annuler invalide.');
+									}
 
-						$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation des formations en masse en cours.</div>');
+									var from = parseInt($.trim( $from.val() ), 10);
+									if( isNaN(from) ){
+										Shared.notify('Numéro de la formation à partir de laquelle annuler invalide.');
+									}
 
-						$.when( cancelSequence() )
-							.done(function(){
-								$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation des formations en masse finies.</div>');
-							})
-							.fail(function(){
-								$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation des formations en masse échouée.</div>');
-							})
-							.always(function(){
-								KOCFIA.formation.listCityFormations( cityKey );
-							});
+									if( from > window.seed.queue_unt[ cityKey ].length ){
+										Shared.notify('Le numéro de la formation à partir de laquelle annuler ne correspond pas à une des formations de la ville choisie.');
+									}
+
+									from -= 1; //seed.queue_unt.cityXXXXX is a 0 based array
+
+									var cancelSequence = function(){
+										return $.Deferred(function(dfd){
+											KOCFIA.formation.cancelTraining(dfd, cityKey, from, null, 3);
+										}).promise();
+									};
+
+									$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation des formations en masse en cours.</div>');
+
+									Shared.working();
+									$.when( cancelSequence() )
+										.done(function(){
+											$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation des formations en masse finies.</div>');
+										})
+										.fail(function(){
+											$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation des formations en masse échouée.</div>');
+										})
+										.always(function(){
+											KOCFIA.formation.listCityFormations( cityKey );
+										});
+								},
+								'Annuler': function(){
+									$(this).dialog('close');
+								}
+							}
+						});
+
 					} else {
 						$info.append('<div data-timestamp="'+ Date.timestamp() +'">Annulation d\'une formation en cours.</div>');
 						KOCFIA.formation.cancelTraining( null, null, null, $this.attr('rel'), 3 );
@@ -9597,32 +9669,39 @@ jQuery(document).ready(function(){
 		KOCFIA.formation.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation getHelp function');
 			var help = '<div id="kocfia-formation-help" class="help" title="Aide formation">';
-			help += '<h4>Formation automatique</h4><ul>';
-			help += '<li>La configuration automatique en cours peut être sauvegardée en lui attribuant un nom</li>';
-			help += '<li>Cocher les villes ou la formation automatique sera utilisée</li>';
-			help += '<li>Une ville décochée sera omise lors des tentatives de formations automatique</li>';
-			help += '<li>Choisir une unité ou une fortification ou les deux</li>';
-			help += '<li>Spécifier une quantité de troupe minimum et maximum</li>';
-			help += '<li>(optionel) Activer l\'option de recalcul du minimum et maximum à chaque tentative de formation.</li>';
-			help += '<li>Spécifier une vitesse (optionnel, par défaut vitesse de base)</li>';
-			help += '<li>Choisir le pourcentage de travailleurs utilisables (optionnel, par défaut 0%)</li>';
-			help += '<li>Spécifier une quantité de fortification</li>';
-			help += '<li>Spécifier les quantités de ressources à conserver (optionnel)</li>';
-			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
-			help += '<li>Cliquer sur enregistrer</li>';
-			help += '<li>Si les formations automatiques sont actives, la modification sera prise en compte dès la prochaine tentative de formation</li>';
-			help += '<li>Douze minutes entre chaque tentative</li>';
-			help += '</ul><h4>Configurations enregistrées</h4><ul>';
-			help += '<li>Une configuration sauvegardée peut être chargée ou supprimée</li>';
-			help += '<li>Une configuration chargée sera prise en compte à la prochaine tentative de formation (pour les villes cochées)</li>';
-			help += '<li>Une configuration supprimée n\'affecte pas la configuration en cours</li>';
-			help += '</ul><h4>Formation manuelle</h4><ul>';
-			help += '<li>Choisir une ville</li>';
-			help += '<li>Le remplissage du formulaire se fait comme pour les formations automatiques</li>';
-			help += '<li>Cliquer sur Former</li>';
-			help += '<li>La file d\'attente sera remplie jusqu\'à ne plus avoir de place dans les casernes ou d\'avoir une erreur</li>';
-			help += '<li>20 secondes entre chaque tentative</li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Formation automatique :': [
+					'La configuration automatique en cours peut être sauvegardée en lui attribuant un nom',
+					'Cocher les villes ou la formation automatique sera utilisée',
+					'Une ville décochée sera omise lors des tentatives de formations automatique',
+					'Choisir une unité ou une fortification ou les deux',
+					'Spécifier une quantité de troupe minimum et maximum',
+					'(optionel) Activer l\'option de recalcul du minimum et maximum à chaque tentative de formation.',
+					'Spécifier une vitesse (optionnel, par défaut vitesse de base)',
+					'Choisir le pourcentage de travailleurs utilisables (optionnel, par défaut 0%)',
+					'Spécifier une quantité de fortification',
+					'Spécifier les quantités de ressources à conserver (optionnel)',
+					'Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)',
+					'Cliquer sur enregistrer',
+					'Si les formations automatiques sont actives, la modification sera prise en compte dès la prochaine tentative de formation',
+					'Douze minutes entre chaque tentative'
+				],
+				'Configurations enregistrées :': [
+					'Une configuration sauvegardée peut être chargée ou supprimée',
+					'Une configuration chargée sera prise en compte à la prochaine tentative de formation (pour les villes cochées)',
+					'Une configuration supprimée n\'affecte pas la configuration en cours',
+				],
+				'Formation manuelle :': [
+					'Choisir une ville',
+					'Le remplissage du formulaire se fait comme pour les formations automatiques',
+					'Cliquer sur Former',
+					'La file d\'attente sera remplie jusqu\'à ne plus avoir de place dans les casernes ou d\'avoir une erreur',
+					'20 secondes entre chaque tentative'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -10025,8 +10104,8 @@ jQuery(document).ready(function(){
 				//troops
 				queue = window.seed.queue_unt[ cityKey ];
 				if( queue.length > 0 ){
-					formations += '<div class="global"><button class="button danger recursive" title="Supprimer les formations de cette ville à partir de la deuxième incluse">';
-					formations += '<span>Supprimer &ge; 2e</span></button></div>';
+					formations += '<div class="global"><button class="button danger recursive" title="Supprimer les formations de cette ville à partir de la x<sup>ème</sup> incluse">';
+					formations += '<span>Supprimer &ge; à</span></button></div>';
 				}
 				formations += '<ol class="formations">';
 				for( i = 0; i < queue.length; i += 1 ){
@@ -10323,15 +10402,17 @@ jQuery(document).ready(function(){
 			return result;
 		};
 
-		KOCFIA.formation.cancelTraining = function( dfd, cityKey, i, info, attempts ){
+		KOCFIA.formation.cancelTraining = function( dfd, cityKey, from, info, attempts ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation cancelTraining function');
-			var j, totalReturn,
+			var j, totalReturn, index,
 				params = $.extend({}, window.g_ajaxparams);
 
 			if( dfd ){
-				if( i === 0 || i > window.seed.queue_unt.length ) return dfd.resolve();
+				index = window.seed.queue_unt[ cityKey ].length - 1;
 
-				info = window.seed.queue_unt[cityKey][i];
+				if( index <= 0 || index < from ) return dfd.resolve();
+
+				info = window.seed.queue_unt[ cityKey ][ index ];
 			} else {
 				info = info.split(',');
 				cityKey = 'city' + info[1];
@@ -10359,20 +10440,20 @@ jQuery(document).ready(function(){
 						window.update_seed_ajax(true, function(){
 							for( var k = 1; k < 5; k += 1 ){
 								totalReturn = parseInt(window.unitcost["unt" + info[1]][k], 10) * parseInt(info[2], 10) * 3600 / 2;
-								window.seed.resources[cityKey]["rec" + k][0] = parseInt(window.seed.resources[cityKey]["rec" + k][0], 10) + totalReturn;
+								window.seed.resources[ cityKey ]["rec" + k][0] = parseInt(window.seed.resources[ cityKey ]["rec" + k][0], 10) + totalReturn;
 							}
 						});
 
 						var j = 0, k;
-						for( k = 0; k < window.seed.queue_unt[cityKey].length; k += 1 ){
+						for( k = 0; k < window.seed.queue_unt[ cityKey ].length; k += 1 ){
 							if( k > info[0] ){
-								window.seed.queue_unt[cityKey][k][2] = parseInt(result.dateTraining[j]["start"], 10);
-								window.seed.queue_unt[cityKey][k][3] = parseInt(result.dateTraining[j]["end"], 10);
+								window.seed.queue_unt[ cityKey ][k][2] = parseInt(result.dateTraining[j]['start'], 10);
+								window.seed.queue_unt[ cityKey ][k][3] = parseInt(result.dateTraining[j]['end'], 10);
 								j += 1;
 							}
 						}
 						//remove canceled training
-						window.seed.queue_unt[cityKey].splice(info[0], 1);
+						window.seed.queue_unt[ cityKey ].splice(info[0], 1);
 
 						if( dfd === null ){
 							KOCFIA.formation.listCityFormations( cityKey );
@@ -10383,7 +10464,7 @@ jQuery(document).ready(function(){
 					} else {
 						attempts -= 1;
 						if( attempts > 0 ){
-							if( dfd ) return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, cityKey, i, null, attempts) );
+							if( dfd ) return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, cityKey, from, null, attempts) );
 							else KOCFIA.formation.cancelTraining( null, null, null, info, attempts );
 						} else {
 							if( dfd ) return dfd.reject();
@@ -10394,7 +10475,7 @@ jQuery(document).ready(function(){
 					//network or server error
 					attempts -= 1;
 					if( attempts > 0 ){
-						if( dfd ) return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, cityKey, i, null, attempts) );
+						if( dfd ) return dfd.pipe( KOCFIA.formation.cancelTraining(dfd, cityKey, from, null, attempts) );
 						else KOCFIA.formation.cancelTraining( null, null, null, info, attempts );
 					} else {
 						if( dfd ) return dfd.reject();
@@ -11186,35 +11267,42 @@ jQuery(document).ready(function(){
 		KOCFIA.transport.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport getHelp function');
 			var help = '<div id="kocfia-transport-help" class="help" title="Aide transport">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
-			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-			help += '<li>Pour chaque transport, les quantités de troupes et ressources seront limitées par les quantités disponible et la capacité de chaque marche en fonction du niveau du point de ralliement (tiens compte des boosts en cours et des bonus de la salle du trône)</li>';
-			help += '</ul><h4>Transports automatiques</h4><ul>';
-			help += '<li>Pour chaque ressource vous pouvez ajouter des configurations de transport</li>';
-			help += '<li>Vous devrez choisir une ville expéditrice, une destination (ville ou coordonnée)</li>';
-			help += '<li>Vous devrez choisir une quantité de la ressource et la troupe servant au transport</li>';
-			help += '<li>Pour chaque transport, la quantité minimum de troupe à utiliser sera calculée en fonction de la quantité de ressources que contiendra le transport</li>';
-			help += '<li>Pour chaque transport, la quantité minimum de ressources pour valider le transport est 100k</li>';
-			help += '<li>Pour un stockage, si la ressource dépasse la quantité le surplus sera envoyé à la destination après vérifications (point de ralliement, troupes)</li>';
-			help += '<li>Pour un approvisionnement, si la ressource dans la ville de destination est en deça de la quantité la différence sera envoyé à la destination après vérifications (point de ralliement, troupes)</li>';
-			help += '<li>Pour chaque couple expéditeur / destinataire il y aura autant de marches que de troupes différentes (3 configurations avec wagon, 4 avec cavalerie équivaut à 2 marches)</li>';
-			help += '<li>Utiliser la fonction de copie au niveau d\'une configuration va l\'ajouter pour toutes les villes manquantes (ormis la destination) pour la ressource</li>';
-			help += '<li>Utiliser la fonction de copie dans la colonne ressource va prendre les configurations de la ressource et les ajouter dans les autres ressources en écrasant celles déjà présentes</li>';
-			help += '<li>Les approvisionnements sont fait toutes les 15 minutes</li>';
-			help += '<li>Les stockages sont fait toutes les 18 minutes</li>';
-			help += '<li>Si les transports automatiques sont actifs, les modifications seront prises en compte dès la prochaine tentative de transport</li>';
-			help += '</ul><h4>Transport manuel :</h4><ul>';
-			help += '<li>Les troupes listées sont celles de la ville de départ choisie</li>';
-			help += '<li>Quand la ville ou coordonnée de destination est choisie, le temps de la marche est affichée pour chaque troupe <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small></li>';
-			help += '<li>La quantité d\'une unité est limitée à la quantité disponible et à la limitation du point de ralliement <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small></li>';
-			help += '<li>Le bouton "Minimiser" permet de réduire la quantité de l\'unité choisie par rapport aux quantités de ressources spécifiées <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small></li>';
-			help += '<li>Les ressources listées sont celles de la ville de départ choisie</li>';
-			help += '<li>La quantité d\'une ressource est limitée à la quantité disponible</li>';
-			help += '<li>Le bouton "Maximiser" permet d\'accroître la quantité de la ressource choisie par rapport aux quantités d\'unités spécifiées <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small></li>';
-			help += '<li>Seuls les objets présents dans votre inventaire sont listés</li>';
-			help += '<li>Certains objets ne peuvent être utilisés en même temps (même effet mais durée différente)</li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)',
+					'Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur',
+					'Pour chaque transport, les quantités de troupes et ressources seront limitées par les quantités disponible et la capacité de chaque marche en fonction du niveau du point de ralliement (tiens compte des boosts en cours et des bonus de la salle du trône)'
+				],
+				'Transports automatiques :': [
+					'Pour chaque ressource vous pouvez ajouter des configurations de transport',
+					'Vous devrez choisir une ville expéditrice, une destination (ville ou coordonnée)',
+					'Vous devrez choisir une quantité de la ressource et la troupe servant au transport',
+					'Pour chaque transport, la quantité minimum de troupe à utiliser sera calculée en fonction de la quantité de ressources que contiendra le transport',
+					'Pour chaque transport, la quantité minimum de ressources pour valider le transport est 100k',
+					'Pour un stockage, si la ressource dépasse la quantité le surplus sera envoyé à la destination après vérifications (point de ralliement, troupes)',
+					'Pour un approvisionnement, si la ressource dans la ville de destination est en deça de la quantité la différence sera envoyé à la destination après vérifications (point de ralliement, troupes)',
+					'Pour chaque couple expéditeur / destinataire il y aura autant de marches que de troupes différentes (3 configurations avec wagon, 4 avec cavalerie équivaut à 2 marches)',
+					'Utiliser la fonction de copie au niveau d\'une configuration va l\'ajouter pour toutes les villes manquantes (ormis la destination) pour la ressource',
+					'Utiliser la fonction de copie dans la colonne ressource va prendre les configurations de la ressource et les ajouter dans les autres ressources en écrasant celles déjà présentes',
+					'Les approvisionnements sont fait toutes les 15 minutes',
+					'Les stockages sont fait toutes les 18 minutes',
+					'Si les transports automatiques sont actifs, les modifications seront prises en compte dès la prochaine tentative de transport'
+				],
+				'Transport manuel :': [
+					'Les troupes listées sont celles de la ville de départ choisie',
+					'Quand la ville ou coordonnée de destination est choisie, le temps de la marche est affichée pour chaque troupe <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small>',
+					'La quantité d\'une unité est limitée à la quantité disponible et à la limitation du point de ralliement <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small>',
+					'Le bouton "Minimiser" permet de réduire la quantité de l\'unité choisie par rapport aux quantités de ressources spécifiées <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small>',
+					'Les ressources listées sont celles de la ville de départ choisie',
+					'La quantité d\'une ressource est limitée à la quantité disponible',
+					'Le bouton "Maximiser" permet d\'accroître la quantité de la ressource choisie par rapport aux quantités d\'unités spécifiées <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small>',
+					'Seuls les objets présents dans votre inventaire sont listés',
+					'Certains objets ne peuvent être utilisés en même temps (même effet mais durée différente)'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -12236,27 +12324,34 @@ jQuery(document).ready(function(){
 		KOCFIA.reassign.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('KOCFIA reassign getHelp function');
 			var help = '<div id="kocfia-reassign-help" class="help" title="Aide Réassignements">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '<li>Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)</li>';
-			help += '<li>Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur</li>';
-			help += '</ul><h4>Réassignement automatiques</h4><ul>';
-			help += '<li>Pour chaque unité vous pouvez ajouter des configurations de réassignement</li>';
-			help += '<li>Vous devrez choisir une ville de départ et une de destination</li>';
-			help += '<li>Vous devrez choisir une quantité de l\'unité</li>';
-			help += '<li>(optionel) Vous pouvez spécifier que le réassignement peut transporter des ressources. Dans ce cas les règles automatiques de transport sont utilisées.</li>';
-			help += '<li>Utiliser la fonction de copie au niveau d\'une configuration va l\'ajouter pour toutes les villes manquantes (ormis la destination) pour l\'unité</li>';
-			help += '<li>Utiliser la fonction de copie dans la colonne unité va prendre les configurations de l\'unité et les ajouter dans les autres unités en écrasant celles déjà présentes</li>';
-			help += '<li>Les réassignement sont fait toutes les heures</li>';
-			help += '<li>Si les réassignement automatiques sont actifs, les modifications seront prises en compte dès la prochaine tentative de réassignement</li>';
-			help += '</ul><h4>Transport manuel :</h4><ul>';
-			help += '<li>Les troupes listées sont celles de la ville de départ choisie</li>';
-			help += '<li>Quand la ville de destination est choisie, le temps de la marche est affichée pour chaque troupe <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small></li>';
-			help += '<li>La quantité d\'une unité est limitée à la quantité disponible et à la limitation du point de ralliement <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small></li>';
-			help += '<li>Les chevaliers listés sont ceux étant disponible dans la ville de départ choisie</li>';
-			help += '<li>(optionel) Vous pouvez spécifier des ressources à transporter</li>';
-			help += '<li>Seuls les objets présents dans votre inventaire sont listés</li>';
-			help += '<li>Certains objets ne peuvent être utilisés en même temps (même effet mais durée différente)</li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)',
+					'Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur'
+				],
+				'Réassignement automatique :': [
+					'Pour chaque unité vous pouvez ajouter des configurations de réassignement',
+					'Vous devrez choisir une ville de départ et une de destination',
+					'Vous devrez choisir une quantité de l\'unité',
+					'(optionel) Vous pouvez spécifier que le réassignement peut transporter des ressources. Dans ce cas les règles automatiques de transport sont utilisées.',
+					'Utiliser la fonction de copie au niveau d\'une configuration va l\'ajouter pour toutes les villes manquantes (ormis la destination) pour l\'unité',
+					'Utiliser la fonction de copie dans la colonne unité va prendre les configurations de l\'unité et les ajouter dans les autres unités en écrasant celles déjà présentes',
+					'Les réassignement sont fait toutes les heures',
+					'Si les réassignement automatiques sont actifs, les modifications seront prises en compte dès la prochaine tentative de réassignement'
+				],
+				'Réassignement manuel :': [
+					'Les troupes listées sont celles de la ville de départ choisie',
+					'Quand la ville de destination est choisie, le temps de la marche est affichée pour chaque troupe <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small>',
+					'La quantité d\'une unité est limitée à la quantité disponible et à la limitation du point de ralliement <small>(tiens compte des boosts en cours, choisis et des bonus de salle du trone)</small>',
+					'Les chevaliers listés sont ceux étant disponible dans la ville de départ choisie',
+					'(optionel) Vous pouvez spécifier des ressources à transporter',
+					'Seuls les objets présents dans votre inventaire sont listés',
+					'Certains objets ne peuvent être utilisés en même temps (même effet mais durée différente)'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -14430,14 +14525,19 @@ jQuery(document).ready(function(){
 		KOCFIA.knights.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights getHelp function');
 			var help = '<div id="kocfia-knights-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.knights +'">';
-			help += '<h4>Gestion des chevaliers</h4><ul>';
-			help += '<li>Seuls les chevaliers en ville peuvent être gérés</li>';
-			help += '<li>Les listes des chevaliers ne sont pas mises à jour tout le temps lors d\'autre action externe à l\'onglet</li>';
-			help += '<li>Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville</li>';
-			help += '<li>Pour attribuer des points à un chevalier, cliquer sur la compétence voulue (par exemple le score de combat)</li>';
-			help += '<li>Cliquer sur l\'icône d\'un objet de l\'inventaire l\'appliquera pour le chevalier</li>';
-			help += '<li>Le bouton "Attribution en masse" permet d\'attribuer à tous les chevaliers disponibles, ayant des niveaux non attribués, des points dans la compétence principale (la plus haute)</li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Gestion des chevaliers :': [
+					'Seuls les chevaliers en ville peuvent être gérés',
+					'Les listes des chevaliers ne sont pas mises à jour tout le temps lors d\'autre action externe à l\'onglet',
+					'Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville',
+					'Pour attribuer des points à un chevalier, cliquer sur la compétence voulue (par exemple le score de combat)',
+					'Cliquer sur l\'icône d\'un objet de l\'inventaire l\'appliquera pour le chevalier',
+					'Le bouton "Attribution en masse" permet d\'attribuer à tous les chevaliers disponibles, ayant des niveaux non attribués, des points dans la compétence principale (la plus haute)'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -15224,15 +15324,20 @@ jQuery(document).ready(function(){
 		KOCFIA.estates.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA estates getHelp function');
 			var help = '<div id="kocfia-estates-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.estates +'">';
-			help += '<h4>Ajouter des défenses à une terre sauvage conquise</h4><ul>';
-			help += '<li>Les terres conquises ne sont pas mises à jour automatiquement lors d\'une conquête ou toute autre action externe à l\'onglet</li>';
-			help += '<li>Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville</li>';
-			help += '<li>Les mercenaires sont payés à l\'heure</li>';
-			help += '<li>Le coût est de 200 pour des novices, 400 pour des intermédiaires et 1000 pour des vétérans</li>';
-			help += '<li>Le coût de chaque piège est de 200</li>';
-			help += '<li>Chaque terre peut contenir 100 pièges par niveau</li>';
-			help += '<li>Cliquer sur le bouton appliquer pour construire les pièges et engager les mercenaires configurés</li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Ajouter des défenses à une terre sauvage conquise :': [
+					'Les terres conquises ne sont pas mises à jour automatiquement lors d\'une conquête ou toute autre action externe à l\'onglet',
+					'Un bouton "Raffraîchir" permet de mettre à jour la liste d\'une ville',
+					'Les mercenaires sont payés à l\'heure',
+					'Le coût est de 200 pour des novices, 400 pour des intermédiaires et 1000 pour des vétérans',
+					'Le coût de chaque piège est de 200',
+					'Chaque terre peut contenir 100 pièges par niveau',
+					'Cliquer sur le bouton appliquer pour construire les pièges et engager les mercenaires configurés'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -15531,14 +15636,14 @@ jQuery(document).ready(function(){
 			sums: {},
 			calculator: {
 				population: 38000,
-				barrack: 9,
+				barrack: 10,
 				nbBarracks: 14,
 				sumLvlBarracks: 14 * 9,
 				workshop: 9,
 				stable: 9,
 				blacksmith: 9,
 				combat: 255,
-				geometry: 9,
+				geometry: 10,
 				trainingSpeed: 0
 			},
 			stored: ['calculator']
@@ -15714,13 +15819,14 @@ jQuery(document).ready(function(){
 
 			//unit training and delta calculator
 			stats += '<fieldset class="calculator">';
-			stats += '<legend><span class="ui-icon ui-icon-triangle-1-e toggle"></span>Calculateur</legend>';
+			stats += '<legend><span class="ui-icon ui-icon-triangle-1-e toggle"></span>Calculateur&nbsp;:&nbsp;</legend>';
 			//population, nbBarracks, sumLvlBarracks, workshop, stable, blacksmith, combat, geometry, training speed
 			stats += '<dl>';
 			stats += '<dt><label for="calculator-population">Population :</label></dt>';
 			stats += '<dd><input type="number" min="0" id="calculator-population" name="population" value="'+ KOCFIA.dataAndStats.calculator.population +'"></dd>';
-			stats += '<dt><label for="calculator-barrack">Niveau de la caserne :</label></dt>';
-			stats += '<dd><input type="number" min="0" id="calculator-barracks" name="barrack" value="'+ KOCFIA.dataAndStats.calculator.barrack +'"></dd>';
+			stats += '<dt><label for="calculator-barrack">Niveau de la caserne principale :</label></dt>';
+			stats += '<dd><input type="number" min="0" id="calculator-barracks" name="barrack" value="'+ KOCFIA.dataAndStats.calculator.barrack +'">';
+			stats += ' <small>(sert pour la vérification des troupes entraînables)</small></dd>';
 			stats += '<dt><label for="calculator-nbBarracks">Nombre de casernes :</label></dt>';
 			stats += '<dd><input type="number" min="0" id="calculator-nbBarracks" name="nbBarracks" value="'+ KOCFIA.dataAndStats.calculator.nbBarracks +'"></dd>';
 			stats += '<dt><label for="calculator-sumLvlBarracks">Somme du niveau des casernes :</label></dt>';
@@ -15733,11 +15839,11 @@ jQuery(document).ready(function(){
 			stats += '<dd><input type="number" min="0" id="calculator-blacksmith" name="blacksmith" value="'+ KOCFIA.dataAndStats.calculator.blacksmith +'"></dd>';
 			stats += '<dt><label for="calculator-combat">Score de combat du maréchal :</label></dt>';
 			stats += '<dd><input type="number" min="0" id="calculator-combat" name="combat" value="'+ KOCFIA.dataAndStats.calculator.combat +'"></dd>';
-			stats += '<dt><label for="calculator-geometry">'+ window.techcost.tch5[0] +'</label></dt>';
+			stats += '<dt><label for="calculator-geometry">'+ window.techcost.tch5[0] +' :</label></dt>';
 			stats += '<dd><input type="number" min="0" id="calculator-geometry" name="geometry" value="'+ KOCFIA.dataAndStats.calculator.geometry +'"></dd>';
 			stats += '<dt><label for="calculator-trainingSpeed">Training Speed :</label></dt>';
 			stats += '<dd><input type="number" min="0" id="calculator-trainingSpeed" name="trainingSpeed" value="'+ KOCFIA.dataAndStats.calculator.trainingSpeed +'"> %</dd>';
-			stats += '<dt></dt><dd><button class="button secondary calc"><span>Appliquer</span></button></dd>';
+			stats += '<dt>&nbsp;</dt><dd><button class="button calc"><span>Appliquer</span></button></dd>';
 			stats += '</dl></fieldset>';
 
 			$section.append( header + data + stats + KOCFIA.dataAndStats.getHelp() )
@@ -15766,7 +15872,6 @@ jQuery(document).ready(function(){
 
 					KOCFIA.dataAndStats.storeCalculator();
 
-					KOCFIA.dataAndStats.compute();
 					KOCFIA.dataAndStats.update();
 				});
 
@@ -15781,9 +15886,14 @@ jQuery(document).ready(function(){
 		KOCFIA.dataAndStats.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats getHelp function');
 			var help = '<div id="kocfia-dataAndStats-help" class="help" title="Aide Infos & Stats">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '<li></li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -15981,7 +16091,7 @@ jQuery(document).ready(function(){
 			cities.push('calculator');
 
 			for( i = 0; i < cities.length; i += 1 ){
-				isCalculator = (cities[i] == 'calculator');
+				isCalculator = (cities[ i ] == 'calculator');
 				cityKey = (!isCalculator ? cities[ i ] : null);
 
 				if( isCalculator || KOCFIA.cities.hasOwnProperty(cityKey) ){
@@ -16957,9 +17067,14 @@ jQuery(document).ready(function(){
 		KOCFIA.build.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build getHelp function');
 			var help = '<div id="kocfia-build-help" class="help" title="Aide Construction">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '<li></li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -17740,8 +17855,28 @@ jQuery(document).ready(function(){
 		KOCFIA.marches.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA marches getHelp function');
 			var help = '<div id="kocfia-marches-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.marches +'">';
-			help += '<h4>Gestion des déplacements de troupes (marches)</h4><ul>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'Les quantités peuvent être spécifiées via un nombre ou un abréviation (ex. 1k pour un milliers, 1.5k pour 1500, 2m pour deux millions, 3g pour trois milliards)',
+					'Chaque requête au serveur est exécutée au maximum 3 fois lors de problème réseau ou serveur',
+					'Pour chaque transport, les quantités de troupes et ressources seront limitées par les quantités disponible et la capacité de chaque marche en fonction du niveau du point de ralliement (tiens compte des boosts en cours et des bonus de la salle du trône)',
+					'La colonne Butin ne comporte pas les objets (armoiries, trône) car l\'information n\'est pas disponible au niveau de la marche, mais uniquement au niveau du rapport et il n\'existe pas de lien entre une marche et un rapport',
+					'Pour les troupes quand il y a un nombre entre parenthèses cela correspond à : survivants (envoyés)',
+					'Dans la colonne type, "inconnu" apparaît lorsque le nom du joueur ciblé n\'est pas disponible dans les données du jeu',
+					'Les horaires n\'utilisent pas de décompte pour éviter de surcharger inutilement le navigateur'
+				],
+				'Boutons': [
+					'Le bouton "Met à jour" fait une requête au serveur pour chaque marche de la ville et mets à jour son status et ses quantités de troupes',
+					'Le bouton "Raffraîchir" reliste les marches de la ville',
+					'Le bouton "Arrêt" envoie au serveur l\'ordre d\'arrêter tous les raids barbare de la ville',
+					'Le bouton "Reprise" envoie au serveur l\'ordre de reprendre tous les raids barbare de la ville',
+					'Le bouton "Stop" arrête le raid barbare',
+					'Le bouton "Rappel" est disponible jusqu\'à 60 secondes avant l\'arrivée d\'une marche sur sa cible et permet de la rappeler'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -19410,8 +19545,14 @@ jQuery(document).ready(function(){
 		KOCFIA.throne.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getHelp function');
 			var help = '<div id="kocfia-throne-help" class="help" title="Aide Améliorations Salle du Trône">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -19826,9 +19967,14 @@ jQuery(document).ready(function(){
 
 		KOCFIA.reports.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports getHelp function');
-			var help = '<div id="kocfia-reports-help" class="help" title="Aide Rapports">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -20940,8 +21086,14 @@ jQuery(document).ready(function(){
 		KOCFIA.hospital.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital getHelp function');
 			var help = '<div id="kocfia-hospital-help" class="help" title="Aide Hôpital">';
-			help += '<h4>Informations et limitations</h4><ul>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -21482,8 +21634,14 @@ jQuery(document).ready(function(){
 		KOCFIA.tournament.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament getHelp function');
 			var help = '<div id="kocfia-tournament-help" class="help" title="Aide tournament">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};

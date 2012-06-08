@@ -81,10 +81,9 @@
 	}
 
 //localized
-var MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre", "Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
-var DAY_NAMES = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+	var MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre", "Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+	var DAY_NAMES = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
-jQuery(document).ready(function(){
 //CSS rules declarations
 	var chatMoveableCss = ".kocmain .mod_comm { background: #FCF8DD; border: 1px solid #A56631; z-index: 99997; }";
 		chatMoveableCss += "\n.kocmain .mod_comm .comm_tabs { background-color: #1054A7; width: auto; top: 0; left: 0; height: 20px; }";
@@ -132,9 +131,12 @@ jQuery(document).ready(function(){
 		chatHighlightAlarmCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.scout { background-color: %scoutColor%; }";
 		chatHighlightAlarmCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.autonomy { background-color: %autonomyColor%; }";
 
+jQuery(document).ready(function(){
+(function(window, document, $, undefined){
+	'use strict';
+
 	jQuery.jgrid.no_legacy_api = true;
 
-(function(window, document, $, undefined){
 	var $head = $('head'),
 		$body = $('body'),
 		reloadTimeout, reloadInterval, reloadTimer, refreshTimeout, confChoiceTimeout,
@@ -1439,7 +1441,7 @@ jQuery(document).ready(function(){
 		};
 
 	/* SHARED */
-		Shared = {};
+		var Shared = {};
 
 		/* conf */
 			Shared.storeConf = function(){
@@ -3496,7 +3498,7 @@ jQuery(document).ready(function(){
 			KOCFIA.overview.$tbodyTrs = KOCFIA.overview.$tbody.find('tr');
 			KOCFIA.overview.$headersThsLength = KOCFIA.overview.$headersThs.length;
 
-			var trs, $details, detail;
+			var $trs, $details, detail;
 			for( part in KOCFIA.conf.overview.parts_visible ){
 				if( KOCFIA.conf.overview.parts_visible.hasOwnProperty(part) ){
 					$trs = KOCFIA.overview.$tbodyTrs.filter( '.' + part );
@@ -3549,13 +3551,13 @@ jQuery(document).ready(function(){
 				keys = ['gold', 'food', 'wood', 'stone', 'ore'],
 				guardianBase = {gold: 0, food: 0, wood: 0, stone: 0, ore: 0},
 				throneSlot = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
-				i, j, k, m, b, r, n, s, e, d,
+				i, j, k, m, b, r, n, s, e, d, inSeed, unit, finish, text,
 				subLength, population, hapiness, cityKey, rowsLength,
-				queue, queuedUnits, duration, formation,
-				barbariansRes, barbariansTroops, marches, march, populationModifier,
+				queue, queuedUnits, duration, formation, guardianBonus, wounded,
+				barbariansRes, barbarianRes, barbariansTroops, marches, march, populationModifier,
 				time, factor, bonusG, bonusW, fort, line, type, $tds, $td, stock,
 				stockInSeed, take, substract, bonusK, brLength, bonusT, item,
-				base, total, nbLine, timestamp, effectGrowth, effectBase;
+				base, total, nbLine, timestamp, effectGrowth, effectBase, effect;
 
 			for( i = 0; i < length; i += 1 ){
 				cityKey = KOCFIA.citiesKey[i];
@@ -4906,7 +4908,7 @@ jQuery(document).ready(function(){
 
 			//attacks ongoing and plan tbodies
 				var cityKey, city, line;
-				for( i = 0; i < length; i += 1 ){
+				for( var i = 0; i < length; i += 1 ){
 					cityKey = KOCFIA.citiesKey[i];
 					if( KOCFIA.cities.hasOwnProperty(cityKey) ){
 						city = KOCFIA.cities[cityKey];
@@ -7054,7 +7056,7 @@ jQuery(document).ready(function(){
 
 			var checkBoxes = '', units = '', keeps = '', cityKey, city;
 			form += '<table>';
-			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+			for( var i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
 				cityKey = KOCFIA.citiesKey[i];
 				if( KOCFIA.cities.hasOwnProperty(cityKey) ){
 					city = KOCFIA.cities[cityKey];
@@ -7786,7 +7788,7 @@ jQuery(document).ready(function(){
 			code += '<tr><td title="Somme de la population récupérable des formations en cours">&Sigma; <img src="'+ KOCFIA.population[0].icon +'"></td>'+ cels +'</tr>';
 
 			//total stone
-			code += '<tr><td title="Stock '+ KOCFIA.resourceInfo.rec3.labelBis + KOCFIA.resourceInfo.rec3.label +'"><img src="'+ KOCFIA.resourceInfo.rec3.icon +'"></td>'+ cels +'</tr>';
+			code += '<tr><td title="Stock '+ KOCFIA.resourceInfo.rec1.labelBis + KOCFIA.resourceInfo.rec1.label +'"><img src="'+ KOCFIA.resourceInfo.rec1.icon +'"></td>'+ cels +'</tr>';
 
 			//total ore
 			code += '<tr><td title="Stock '+ KOCFIA.resourceInfo.rec4.labelBis + KOCFIA.resourceInfo.rec4.label +'"><img src="'+ KOCFIA.resourceInfo.rec4.icon +'"></td>'+ cels +'</tr>';
@@ -7898,7 +7900,8 @@ jQuery(document).ready(function(){
 			if( !KOCFIA.conf.summary.active ) return;
 			if( !KOCFIA.summary.hasOwnProperty('$tds') ) return;
 			var i, b, l, t, length, nb, queue, keys,
-				popPerHour, hapiness, unit2Delta,
+				cityKey, time, train, food, ore,
+				popPerHour, hapiness, unit2Delta, stat,
 				timestamp = Date.timestamp();
 
 			var sums = {
@@ -7908,7 +7911,7 @@ jQuery(document).ready(function(){
 				hapiness: 0,
 				trainTime: 0,
 				trainPopulation: 0,
-				stone: 0,
+				food: 0,
 				ore: 0
 			};
 
@@ -7939,7 +7942,7 @@ jQuery(document).ready(function(){
 
 						if( time < 0 ) time = 0;
 
-						stone = parseInt(window.seed.resources[ cityKey ].rec3[0], 10) / 3600;
+						food = parseInt(window.seed.resources[ cityKey ].rec1[0], 10) / 3600;
 						ore = parseInt(window.seed.resources[ cityKey ].rec4[0], 10) / 3600;
 
 						KOCFIA.summary.$tds.eq(i + 1 + KOCFIA.summary.numCelsPerLine * 0).html( Shared.format(stat.unit2PerHour) ).attr('title', Shared.readable(stat.unit2PerHour));
@@ -7958,7 +7961,7 @@ jQuery(document).ready(function(){
 						KOCFIA.summary.$tds.eq(i + 1 + KOCFIA.summary.numCelsPerLine * 4).html( b ).toggleClass('warning', time < 3600).attr('title', Shared.readableDuration(time));
 						KOCFIA.summary.$tds.eq(i + 1 + KOCFIA.summary.numCelsPerLine * 5).html( Shared.format(nb) ).attr('title', Shared.readable(nb));
 
-						KOCFIA.summary.$tds.eq(i + 1 + KOCFIA.summary.numCelsPerLine * 6).html( Shared.format(stone) ).attr('title', Shared.readable(stone));
+						KOCFIA.summary.$tds.eq(i + 1 + KOCFIA.summary.numCelsPerLine * 6).html( Shared.format(food) ).attr('title', Shared.readable(food));
 						KOCFIA.summary.$tds.eq(i + 1 + KOCFIA.summary.numCelsPerLine * 7).html( Shared.format(ore) ).attr('title', Shared.readable(ore));
 
 						sums.popPerHour += popPerHour;
@@ -7970,7 +7973,7 @@ jQuery(document).ready(function(){
 						sums.trainTime += time;
 						sums.trainPopulation += nb;
 
-						sums.stone += stone;
+						sums.food += food;
 						sums.ore += ore;
 					}
 				}
@@ -9712,9 +9715,9 @@ jQuery(document).ready(function(){
 				rule = KOCFIA.formation.rules[ cityKey ],
 				units = KOCFIA.formation.getTrainableUnits( cityKey ),
 				defenses = KOCFIA.formation.getTrainableDefenses( cityKey ),
-				rLength = KOCFIA.resources.length;
-
-			var form = '';
+				rLength = KOCFIA.resources.length,
+				form = '',
+				j, u, d, f, res;
 			if( withWrapper ){
 				form += '<fieldset>';
 				form += '<legend class="buttonset">';
@@ -11519,7 +11522,7 @@ jQuery(document).ready(function(){
 		KOCFIA.transport.loadAutoRuleset = function(type){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport loadAutoRuleset function', type);
 			if( !$.isEmptyObject( KOCFIA.transport[ type ] ) ){
-				var r, resourceRules, cityKey, dest, to, coord, $tr, $addRule, $rules,
+				var r, resourceRules, cityKey, destinations, dest, to, coord, $tr, $addRule, $rules, rule, $rule,
 					$resources = KOCFIA.transport.$autoForms.filter('.'+ type).find('tbody').find('tr');
 
 				for( cityKey in KOCFIA.transport[ type ] ){
@@ -12358,7 +12361,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.reassign.getAutoForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('KOCFIA reassign getAutoForm function');
-			var i, res;
+			var i, unit, res;
 
 			var form = '<h3>Réassignement Automatique</h3>';
 			form += '<div class="reassign-form">';
@@ -13285,7 +13288,7 @@ jQuery(document).ready(function(){
 
 			var $soundAttack = $('<audio id="kocfia-sound-attack" src="'+ KOCFIA.conf.alarm.attackSoundUrl +'" preload="auto">'),
 				$soundScout = $('<audio id="kocfia-sound-scout" src="'+ KOCFIA.conf.alarm.scoutSoundUrl +'" preload="auto">'),
-				$soundAutonomy = $('<audio id="kocfia-sound-autonomy" src="'+ KOCFIA.conf.alarm.autonomySoundUrl +'" preload="auto">');
+				$soundAutonomy = $('<audio id="kocfia-sound-autonomy" src="'+ KOCFIA.conf.alarm.autonomySoundUrl +'" preload="auto">'),
 				$soundAlliance = $('<audio id="kocfia-sound-alliance" src="'+ KOCFIA.conf.alarm.allianceSoundUrl +'" preload="auto">');
 
 			$body.append( $soundAttack )
@@ -14560,7 +14563,8 @@ jQuery(document).ready(function(){
 			var code = '<tbody data-city="'+ cityKey +'">',
 				knights = window.seed.knights[ cityKey ],
 				leaders = window.seed.leaders[ cityKey ],
-				options = '', k;
+				options = '',
+				k, knight;
 
 			code += '<tr><th colspan="12">'+ KOCFIA.cities[ cityKey ].label +'</th></tr>';
 
@@ -15108,7 +15112,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-estates').html('');
 
-			var i, cityKey, city;
+			var i, l, cityKey, city;
 
 			var header = '<div class="infos">';
 			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
@@ -15906,7 +15910,7 @@ jQuery(document).ready(function(){
 				i, unit, unitKey, $unitStatsTds, stats,
 				lifeBase, attackBase, defenseBase, speedBase, rangeBase, loadBase,
 				life, attack, defense, speed, range, load,
-				lifePct, attackPct, defensePct, speedPct, rangePct, loadPct;
+				lifePct, attackPct, defensePct, speedPct, rangePct, loadPct, durationPct;
 
 			for( i = 0; i < KOCFIA.troops.length; i += 1 ){
 				unit = KOCFIA.troops[i];
@@ -16057,7 +16061,7 @@ jQuery(document).ready(function(){
 				timestamp = Date.timestamp(),
 				marshall, foreman, boost, popPerHour,
 				cities = KOCFIA.citiesKey.slice(), //copy
-				isCalculator;
+				isCalculator, lvl, knights;
 
 			var sums = {
 				population: 0,
@@ -16489,7 +16493,7 @@ jQuery(document).ready(function(){
 
 			//building list
 			buildMenu += '<div class="buildings"><h3>Bâtiments :</h3>';
-			for( i = 5; i < 22; i+= 1 ){
+			for( var i = 5; i < 22; i+= 1 ){
 				if( window.buildingcost['bdg'+ i] ){
 					buildMenu += '<input type="radio" name="kocfia-build-buildings" id="kocfia-build-buildings-bdg'+ i +'" value="'+ i +'">';
 					buildMenu += '<label for="kocfia-build-buildings-bdg'+ i +'">'+ window.buildingcost['bdg'+ i][0] +'</label>';
@@ -17691,7 +17695,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-marches').html('');
 
-			var i, cityKey, city;
+			var i, l, cityKey, city;
 
 			var header = '<div class="infos">';
 			header += '<span class="buttonset"><input type="checkbox" class="raid-toggle" name="kocfia-marches-raid-toggle" id="kocfia-marches-raid-toggle">';
@@ -17905,7 +17909,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches refreshByCity function');
 			var code = '',
 				marches = window.seed.queue_atkp[ cityKey ],
-				m, march, ts, info, eta, type, city, player,
+				i, m, march, ts, info, eta, type, city, player, res, amount,
 				timeDestination, timeReturn, hours, minutes, seconds, time,
 				hasBot = false,
 				nb = 0,
@@ -19967,6 +19971,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.reports.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports getHelp function');
+			var help = '<div id="kocfia-reports-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.reports +'">';
 
 			var texts = {
 				'Informations et limitations :': [
@@ -20868,7 +20873,7 @@ jQuery(document).ready(function(){
 		KOCFIA.hospital.refreshOnGoing = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital refreshOnGoing function');
 			var onGoing = '',
-				i, j, unit, queue,
+				i, j, cityKey, city, unit, queue,
 				units = '',
 				text, wounded, timestamp, finish,
 				healing = '<th><button class="button secondary refresh" title="Raffraîchir les données affichées"><span>Raffraîchir</span></button></th>',
@@ -21128,7 +21133,7 @@ jQuery(document).ready(function(){
 		KOCFIA.hospital.loadAutoRuleset = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital loadAutoRuleset function');
 			if( !$.isEmptyObject( KOCFIA.hospital.rules ) ){
-				var u, unitRules, cityKey, city, $tr, $addRule, $rules,
+				var u, unitRules, cityKey, city, $tr, $addRule, $rules, rule, $rule,
 					$units = KOCFIA.hospital.$autoForm.find('tbody').find('tr');
 
 				KOCFIA.hospital.$autoForm.find('.keep').val( Shared.format(KOCFIA.conf.hospital.keep) );

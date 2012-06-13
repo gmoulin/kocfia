@@ -740,7 +740,7 @@ jQuery(document).ready(function(){
 					//}
 				})
 				.on('click', '.reduceToggle', function(){
-					$(this).toggleClass('ui-icon-triangle-1-se ui-icon-triangle-1-e')
+					$(this).toggleClass('icon-caret-down icon-caret-up')
 						.closest('.chatwrap').find('.reduce').stop(true, true).slideToggle();
 				})
 				.on('click', '.reinforce, .attack, .scout, .food', function(){
@@ -1236,8 +1236,8 @@ jQuery(document).ready(function(){
 					var $this = $(this),
 						$p = $this.parent(),
 						$audio = $p.find('audio'),
-						$play = $p.find('.ui-icon-play'),
-						$pause = $p.find('.ui-icon-pause');
+						$play = $p.find('.icon-play'),
+						$pause = $p.find('.icon-pause');
 
 					if( $this[0].checkValidity() ){
 						$audio[0].pause();
@@ -1247,25 +1247,25 @@ jQuery(document).ready(function(){
 						$pause.css('display', 'inline-block');
 					}
 				})
-				.on('click', '.audio .ui-icon-play', function(){
+				.on('click', '.audio .icon-play', function(){
 					$(this).parent()
-						.find('.ui-icon-play').css('display', 'none').end()
-						.find('.ui-icon-pause').css('display', 'inline-block').end()
+						.find('.icon-play').css('display', 'none').end()
+						.find('.icon-pause').css('display', 'inline-block').end()
 						.find('audio')[0].play();
 				})
-				.on('click', '.audio .ui-icon-pause', function(){
+				.on('click', '.audio .icon-pause', function(){
 					$(this).parent()
-						.find('.ui-icon-play').css('display', 'inline-block').end()
-						.find('.ui-icon-pause').css('display', 'none').end()
+						.find('.icon-play').css('display', 'inline-block').end()
+						.find('.icon-pause').css('display', 'none').end()
 						.find('audio')[0].pause();
 				})
-				.on('click', '.audio .ui-icon-stop', function(){
+				.on('click', '.audio .icon-stop', function(){
 					var $this = $(this),
 						$p = $this.parent();
 
 					$p
-						.find('.ui-icon-play').css('display', 'inline-block').end()
-						.find('.ui-icon-pause').css('display', 'none');
+						.find('.icon-play').css('display', 'inline-block').end()
+						.find('.icon-pause').css('display', 'none');
 
 					var $audio = $p.find('audio');
 
@@ -1286,7 +1286,7 @@ jQuery(document).ready(function(){
 
 			//conf panel markup
 			$confPanel
-				.append( '<span class="ui-icon ui-icon-close"></span>' )
+				.append( '<span class="icon-remove"></span>' )
 				.append( '<nav id="kocfia-conf-panel-tabs"><ul>' + lis + '</ul></nav>' )
 				.append( $wrapper )
 				.append( moveHandles );
@@ -1337,7 +1337,7 @@ jQuery(document).ready(function(){
 					height: KOCFIA.conf.confPanel.size.height,
 					position: 'absolute'
 				})
-				.find('.ui-icon-close').click(function(e){
+				.find('.icon-remove').click(function(e){
 					e.preventDefault();
 					KOCFIA.$confPanel.hide();
 					KOCFIA.conf.confPanel.visible = 0;
@@ -1736,9 +1736,9 @@ jQuery(document).ready(function(){
 				var code = '<p class="audio"><label for="'+ module +'-'+ option +'">'+ text +'</label><br>';
 				code += '<input type="url" class="conf-choice" id="'+ module +'-'+ option +'" value="'+ value +'" rel="'+ rel +'">';
 				code += '<audio src="'+ value +'" preload="auto" />';
-				code += '<span class="ui-icon ui-icon-play"></span>';
-				code += '<span class="ui-icon ui-icon-pause"></span>';
-				code += '<span class="ui-icon ui-icon-stop"></span>';
+				code += '<span class="icon-play"></span>';
+				code += '<span class="icon-pause"></span>';
+				code += '<span class="icon-stop"></span>';
 				code += '</p>';
 
 				return code;
@@ -2858,13 +2858,13 @@ jQuery(document).ready(function(){
 			var friends = '',
 				i, length = KOCFIA.chat.friendsList.length;
 			for( i = 0; i < length; i += 1 ){
-				friends += '<li><a href="#">'+ KOCFIA.chat.friendsList[ i ] +'</a><span class="ui-icon ui-icon-trash" title="supprimer"></span></li>';
+				friends += '<li><a href="#">'+ KOCFIA.chat.friendsList[ i ] +'</a><span class="icon-trash" title="supprimer"></span></li>';
 			}
 
 			var foes = '';
 			length = KOCFIA.chat.foesList.length;
 			for( i = 0; i < length; i += 1 ){
-				foes += '<li><a href="#">'+ KOCFIA.chat.foesList[ i ] +'</a><span class="ui-icon ui-icon-trash" title="supprimer"></span></li>';
+				foes += '<li><a href="#">'+ KOCFIA.chat.foesList[ i ] +'</a><span class="icon-trash" title="supprimer"></span></li>';
 			}
 
 			var code = '<h3>Liste d\'amis</h3>';
@@ -2894,7 +2894,7 @@ jQuery(document).ready(function(){
 						KOCFIA.chat[list].sort();
 						var f = '', i, length = KOCFIA.chat[list].length;
 						for( i = 0; i < length; i += 1 ){
-							f += '<li><a href="#">'+ KOCFIA.chat[list][ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>';
+							f += '<li><a href="#">'+ KOCFIA.chat[list][ i ] +'</a><span class="icon-trash"></span></li>';
 						}
 						$ul.html( f );
 
@@ -2908,7 +2908,7 @@ jQuery(document).ready(function(){
 
 					$input.val('');
 				})
-				.on('click', '.ui-icon-trash', function(){
+				.on('click', '.icon-trash', function(){
 					var $li = $(this).parent(),
 						rel = $li.parent().attr('rel'),
 						list = rel + 'List';
@@ -3026,12 +3026,12 @@ jQuery(document).ready(function(){
 				var friends = '', foes = '',
 					i, length = KOCFIA.chat.friendsList.length;
 				for( i = 0; i < length; i += 1 ){
-					friends += '<li><a href="#">'+ KOCFIA.chat.friendsList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>';
+					friends += '<li><a href="#">'+ KOCFIA.chat.friendsList[ i ] +'</a><span class="icon-trash"></span></li>';
 				}
 
 				length = KOCFIA.chat.foesList.length;
 				for( i = 0; i < length; i += 1 ){
-					foes += '<li><a href="#">'+ KOCFIA.chat.foesList[ i ] +'</a><span class="ui-icon ui-icon-trash"></span></li>';
+					foes += '<li><a href="#">'+ KOCFIA.chat.foesList[ i ] +'</a><span class="icon-trash"></span></li>';
 				}
 
 				KOCFIA.chat.$lists.filter('[rel="friends"]').html( friends );
@@ -3394,7 +3394,7 @@ jQuery(document).ready(function(){
 						dataTable += ' title="Estimé pour chaque raid barbare revenant en ville, donc total non complet tant que tous les raids n\'ont pas été vu en train de rentrer"';
 					}
 					dataTable += '>';
-					dataTable += '<span class="ui-icon ui-icon-triangle-1-'+ (KOCFIA.conf.overview.parts_visible[ part ] ? 'se' : 'e') +'"></span>';
+					dataTable += '<span class="icon icon-caret-'+ (KOCFIA.conf.overview.parts_visible[ part ] ? 'up' : 'down') +'"></span>';
 					dataTable += KOCFIA.overview.parts[ part ].capitalize();
 					dataTable += '</th></tr>';
 					kocfia_part = KOCFIA[ part ];
@@ -3460,12 +3460,11 @@ jQuery(document).ready(function(){
 				//toggles
 					.on('click', '.toggle', function(){
 						var $this = $(this),
-							$triangle = $this.find('.ui-icon'),
-							part = $this.attr('class').split(' ')[0];
-							opened = !$triangle.hasClass('ui-icon-triangle-1-se');
+							$triangle = $this.find('.icon'),
+							part = $this.attr('class').split(' ')[0],
+							opened = !$triangle.hasClass('icon-caret-up');
 
-						if( opened ) $triangle.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-se');
-						else $triangle.removeClass('ui-icon-triangle-1-se').addClass('ui-icon-triangle-1-e');
+						$triangle.toggleClass('icon-caret-down icon-caret-up');
 
 						var $trs = KOCFIA.overview.$tbodyTrs.filter( '.' + part );
 
@@ -4156,7 +4155,7 @@ jQuery(document).ready(function(){
 
 				KOCFIA.overview.$div
 					.prepend('<h3>État des lieux</h3>')
-					.prepend('<span class="ui-icon ui-icon-close"></span>')
+					.prepend('<span class="icon-remove"></span>')
 					.append( moveHandles )
 					.draggable({
 						handle: 'h3, .move-handle',
@@ -4186,7 +4185,7 @@ jQuery(document).ready(function(){
 						width: KOCFIA.conf.overview.size.width,
 						height: KOCFIA.conf.overview.size.height
 					})
-					.on('click', '.ui-icon-close', function(e){
+					.on('click', '.icon-remove', function(e){
 						e.preventDefault();
 						KOCFIA.overview.$div.hide();
 						KOCFIA.conf.overview.visible = 0;
@@ -4221,7 +4220,7 @@ jQuery(document).ready(function(){
 				KOCFIA.overview.$div
 					.draggable('destroy')
 					.resizable('destroy')
-					.find('h3, .ui-icon-close, .move-handle').remove();
+					.find('h3, .icon-remove, .move-handle').remove();
 			};
 
 			KOCFIA.overview.resetPlacement = function(){
@@ -7554,13 +7553,13 @@ jQuery(document).ready(function(){
 			for( var n in KOCFIA.notepad.notes ){
 				if( KOCFIA.notepad.notes.hasOwnProperty(n) ){
 					var note = KOCFIA.notepad.notes[n];
-					code += '<li><button class="button secondary" data-id="'+ n +'"><span>'+ note.name +'</span></button><span class="ui-icon ui-icon-trash"></span></li>';
+					code += '<li><button class="button secondary" data-id="'+ n +'"><span>'+ note.name +'</span></button><span class="icon-trash"></span></li>';
 				}
 			}
 			code += '</ul></div></div>';
 
 			$notepad
-				.append( '<span class="ui-icon ui-icon-close"></span>' )
+				.append( '<span class="icon-remove"></span>' )
 				.append( code )
 				.append( moveHandles )
 				.draggable({
@@ -7591,7 +7590,7 @@ jQuery(document).ready(function(){
 					width: KOCFIA.conf.notepad.size.width,
 					height: KOCFIA.conf.notepad.size.height
 				})
-				.on('click', '.ui-icon-close', function(){
+				.on('click', '.icon-remove', function(){
 					KOCFIA.notepad.$div.hide();
 					KOCFIA.conf.notepad.visible = 0;
 					Shared.storeConf();
@@ -7608,7 +7607,9 @@ jQuery(document).ready(function(){
 							KOCFIA.notepad.notes[ id ] = {name: name, text: text};
 							KOCFIA.notepad.storeNotes();
 
-							KOCFIA.notepad.$notes.append( '<li><button class="button secondary" data-id="'+ id +'"><span>'+ name +'</span></button><span class="ui-icon ui-icon-trash"></span></li>' );
+							KOCFIA.notepad.$notes.append( '<li><button class="button secondary" data-id="'+ id +'"><span>'+ name +'</span></button><span class="icon-trash"></span></li>' );
+
+							KOCFIA.notepad.$wrapper.css('height', KOCFIA.notepad.calcInnerHeight());
 						}
 					} else {
 						alert('Nom de la note invalide.');
@@ -7621,7 +7622,7 @@ jQuery(document).ready(function(){
 				.on('click', '.notes button', function(){
 					KOCFIA.notepad.load( $(this).data('id') );
 				})
-				.on('click', '.notes .ui-icon-trash', function(){
+				.on('click', '.notes .icon-trash', function(){
 					var $this = $(this);
 					KOCFIA.notepad.deleteNote( $this.siblings().data('id') );
 					$this.parent().remove();
@@ -7632,7 +7633,7 @@ jQuery(document).ready(function(){
 			KOCFIA.notepad.$div = $('#kocfia-notepad');
 			KOCFIA.notepad.$title = KOCFIA.notepad.$div.find('.title');
 			KOCFIA.notepad.$notes = KOCFIA.notepad.$div.find('.notes');
-			KOCFIA.notepad.$wrapper = KOCFIA.notepad.$div.find('.wrap');
+			KOCFIA.notepad.$wrapper = KOCFIA.notepad.$div.find('.wrapper');
 			KOCFIA.notepad.$name = $('#kocfia-notepad-note-name');
 			KOCFIA.notepad.$textarea = $('#kocfia-notepad-note-text');
 			KOCFIA.notepad.$charsLeft = KOCFIA.notepad.$div.find('.charsLeft');
@@ -7796,7 +7797,7 @@ jQuery(document).ready(function(){
 			code += '</tbody></table></div>';
 
 			$summary
-				.append( '<span class="ui-icon ui-icon-close"></span>' )
+				.append( '<span class="icon-remove"></span>' )
 				.append( code )
 				.append( moveHandles )
 				.draggable({
@@ -7827,7 +7828,7 @@ jQuery(document).ready(function(){
 					width: KOCFIA.conf.summary.size.width,
 					height: KOCFIA.conf.summary.size.height
 				})
-				.on('click', '.ui-icon-close', function(){
+				.on('click', '.icon-remove', function(){
 					KOCFIA.summary.$div.hide();
 					KOCFIA.conf.summary.visible = 0;
 					Shared.storeConf();
@@ -8015,8 +8016,8 @@ jQuery(document).ready(function(){
 		/* grid related */
 		KOCFIA.map.gridRowActions = function( cellValue, options, rowObject ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map gridRowActions function', cellValue, options, rowObject);
-			var code = '<span class="ui-icon ui-icon-cart attack-shortcut" data-coords="'+ rowObject.coords +'" title="Attaquer"></span>';
-			code += '<span class="ui-icon ui-icon-note scout-shortcut" data-coords="'+ rowObject.coords +'" title="Eclairer"></span>';
+			var code = '<span class="icon-bolt attack-shortcut" data-coords="'+ rowObject.coords +'" title="Attaquer"></span>';
+			code += '<span class="icon-eye-open scout-shortcut" data-coords="'+ rowObject.coords +'" title="Eclairer"></span>';
 
 			return code;
 		};
@@ -8282,37 +8283,37 @@ jQuery(document).ready(function(){
 			KOCFIA.map.$resultsCities = $section.find('#kocfia-map-results-cities')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.cities) )
 				.jqGrid('navGrid', '#kocfia-map-pager-cities', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsCities[0].toggleToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd','#kocfia-map-pager-cities', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsCities[0].clearToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet d'éclairage", buttonicon: 'ui-icon-contact', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'scout'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet de pillage", buttonicon: 'ui-icon-cart', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'plunder'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'notepad'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.map.$resultsCities[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-cities', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsCities[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet d'éclairage", buttonicon: 'icon-eye-open', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'scout'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet de pillage", buttonicon: 'icon-fire', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'plunder'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-cities', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'icon-book', onClickButton: function(){ KOCFIA.map.exportSelection('cities', 'notepad'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 			KOCFIA.map.$resultsBarbarians = $section.find('#kocfia-map-results-barbarians')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.barbarians) )
 				.jqGrid('navGrid', '#kocfia-map-pager-barbarians', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsBarbarians[0].toggleToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd','#kocfia-map-pager-barbarians', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsBarbarians[0].clearToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet des camps barbares", buttonicon: 'ui-icon-cart', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'barbarian'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'notepad'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.map.$resultsBarbarians[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-barbarians', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsBarbarians[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet des camps barbares", buttonicon: 'icon-legal', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'barbarian'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-barbarians', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'icon-book', onClickButton: function(){ KOCFIA.map.exportSelection('barbarians', 'notepad'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 			KOCFIA.map.$resultsWilderness = $section.find('#kocfia-map-results-wilderness')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.wilderness) )
 				.jqGrid('navGrid', '#kocfia-map-pager-wilderness', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsWilderness[0].toggleToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd','#kocfia-map-pager-wilderness', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsWilderness[0].clearToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet des terres sauvages", buttonicon: 'ui-icon-cart', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'wilderness'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.map.$resultsWilderness[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-wilderness', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsWilderness[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter les coordonnées sélectionnées dans l'onglet des terres sauvages", buttonicon: 'icon-picture', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'wilderness'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'icon-book', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 			KOCFIA.map.$resultsDarkForests = $section.find('#kocfia-map-results-darkForests')
 				.jqGrid( $.extend({}, KOCFIA.map.gridParams.shared, KOCFIA.map.gridParams.darkForests) )
 				.jqGrid('navGrid', '#kocfia-map-pager-darkForests', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-darkForests', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.map.$resultsDarkForests[0].toggleToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd','#kocfia-map-pager-darkForests', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsDarkForests[0].clearToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'ui-icon-note', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-darkForests', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.map.$resultsDarkForests[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-map-pager-darkForests', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.map.$resultsDarkForests[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-map-pager-wilderness', {caption: '', title: "Exporter la sélection dans le bloc note", buttonicon: 'icon-book', onClickButton: function(){ KOCFIA.map.exportSelection('wilderness', 'notepad'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 			//grid listeners
@@ -8410,9 +8411,9 @@ jQuery(document).ready(function(){
 					'Déployer une des 4 grilles de résultats (Ville, Terres sauvages, Fôrets sombres et camps barbares) pour visionner les résultats'
 				],
 				'Filtres rapides :': [
-					'Dans chaque grille, l\'icône <span class="ui-icon ui-icon-pin-s"></span> permet d\'afficher ou masquer sous l\'entête des colonnes des champs de filtrage rapide',
+					'Dans chaque grille, l\'icône <span class="icon-pushpin"></span> permet d\'afficher ou masquer sous l\'entête des colonnes des champs de filtrage rapide',
 					'Saisir du texte dans l\'un de ces champs permet de filtrer les résultats',
-					'L\'icône <span class="ui-icon ui-icon-refresh"></span> permet de vider les champs de filtrage rapide'
+					'L\'icône <span class="icon-refresh"></span> permet de vider les champs de filtrage rapide'
 				],
 				'Filtrage poussé :': [
 					'Dans chaque grille, l\'icône <span class="ui-icon ui-icon-search"></span> permet d\'afficher une popup où un filtrage plus poussé des résultats est possible',
@@ -9413,7 +9414,7 @@ jQuery(document).ready(function(){
 					}
 				})
 				//training and fortification cancel
-				.on('click', '.ongoing .unit .ui-icon-trash, .ongoing .unit .recursive', function(){
+				.on('click', '.ongoing .unit .icon-trash, .ongoing .unit .recursive', function(){
 					var $this = $(this),
 						cityKey = $this.closest('tbody').data('city'),
 						$info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ cityKey +'"]').find('.info');
@@ -9474,7 +9475,7 @@ jQuery(document).ready(function(){
 						KOCFIA.formation.cancelTraining( null, null, null, $this.attr('rel'), 3 );
 					}
 				})
-				.on('click', '.ongoing .fort .ui-icon-trash, .ongoing .fort .recursive', function(){
+				.on('click', '.ongoing .fort .icon-trash, .ongoing .fort .recursive', function(){
 					var $this = $(this),
 						cityKey = $this.closest('tbody').data('city'),
 						$info = KOCFIA.formation.$ongoing.find('tbody').filter('[data-city="'+ cityKey +'"]').find('.info');
@@ -10116,7 +10117,7 @@ jQuery(document).ready(function(){
 					unit = KOCFIA.unitInfo[ 'unt' + formation[0] ];
 
 					formations += '<li title="'+ unit.label +' - '+ Shared.readable( formation[1] ) +' - '+ Shared.readableDuration(parseFloat(formation[3]) - parseFloat(formation[2])) +'">';
-					formations += '<span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
+					formations += '<span class="icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
 					formations += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"> ';
 					formations += '<span class="unit">'+ Shared.format( formation[1] ) +'</span></li>';
 				}
@@ -10143,7 +10144,7 @@ jQuery(document).ready(function(){
 					unit = KOCFIA.fortInfo[ 'frt' + formation[0] ];
 
 					fortifications += '<li title="'+ unit.label +' - '+ Shared.readable( formation[1] ) +' - '+ Shared.readableDuration(parseFloat(formation[3]) - parseFloat(formation[2])) +'">';
-					fortifications += '<span class="ui-icon ui-icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
+					fortifications += '<span class="icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
 					fortifications += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"> ';
 					fortifications += '<span class="unit">'+ Shared.format( formation[1] ) +'</span></li>';
 				}
@@ -13120,22 +13121,22 @@ jQuery(document).ready(function(){
 			var code = '';
 
 			if( rowObject.type == 'attack' || rowObject.type == 'scout' ){
-				//code += '<span class="ui-icon ui-icon-trash remove" data-arrival="'+ cellValue +'" title="Supprimer"></span>';
+				//code += '<span class="icon-trash remove" data-arrival="'+ cellValue +'" title="Supprimer"></span>';
 
-				code += '<span class="ui-icon ui-icon-cart attack-shortcut" data-coords="'+ rowObject.targetCoords +'" title="Renforcer"></span>';
+				code += '<span class="icon-umbrella attack-shortcut" data-coords="'+ rowObject.targetCoords +'" title="Renforcer"></span>';
 
 				if( rowObject.fromCoords !== '' ){
-					code += '<span class="ui-icon ui-icon-note attack-shortcut" data-coords="'+ rowObject.fromCoords +'" title="Contre-Attaquer"></span>';
-					code += '<span class="ui-icon ui-icon-note scout-shortcut" data-coords="'+ rowObject.fromCoords +'" title="Contre-Eclairer"></span>';
+					code += '<span class="icon-bolt attack-shortcut" data-coords="'+ rowObject.fromCoords +'" title="Contre-Attaquer"></span>';
+					code += '<span class="icon-eye-open scout-shortcut" data-coords="'+ rowObject.fromCoords +'" title="Contre-Eclairer"></span>';
 				}
 
-				code += '<span class="ui-icon ui-icon-person player-search" data-player="'+ rowObject.attacker +'" title="Recherche du joueur"></span>';
+				code += '<span class="icon-user player-search" data-player="'+ rowObject.attacker +'" title="Recherche du joueur"></span>';
 
-				if( rowObject.alliance !== '') code += '<span class="ui-icon ui-icon-contact alliance-search" data-alliance="'+ rowObject.alliance +'" title="Recherche de l\'alliance"></span>';
+				if( rowObject.alliance !== '') code += '<span class="icon-group alliance-search" data-alliance="'+ rowObject.alliance +'" title="Recherche de l\'alliance"></span>';
 			} else if( type == 'reinforce' ){
-				//code += '<span class="ui-icon ui-icon-refresh reinforce-refresh" title="Raffraîchir les troupes"></span>';
+				//code += '<span class="icon-refresh reinforce-refresh" title="Raffraîchir les troupes"></span>';
 				if( rowObject.cityKey !== '' ){
-					code += '<span class="ui-icon ui-icon-arrowreturn-1-e reinforce-kickout" data-marchKey="'+ rowObject.marchKey +'" data-cityKey="'+ rowObject.cityKey +'" title="Renvoyer"></span>';
+					code += '<span class="icon-signout reinforce-kickout" data-marchKey="'+ rowObject.marchKey +'" data-cityKey="'+ rowObject.cityKey +'" title="Renvoyer"></span>';
 				}
 			}
 
@@ -13879,7 +13880,7 @@ jQuery(document).ready(function(){
 						var code = '<h3 class="title">Résumé des alertes pour les rapports d\'alliance</h3><div class="wrap"></div>';
 
 						$div
-							.append( '<span class="ui-icon ui-icon-close"></span>' )
+							.append( '<span class="icon-remove"></span>' )
 							.append( code )
 							.append( moveHandles )
 							.draggable({
@@ -13902,7 +13903,7 @@ jQuery(document).ready(function(){
 								width: 250,
 								height: 250
 							})
-							.on('click', '.ui-icon-close', function(){
+							.on('click', '.icon-remove', function(){
 								KOCFIA.alarm.$warning.hide();
 							});
 
@@ -13948,10 +13949,10 @@ jQuery(document).ready(function(){
 						end, i,
 						flag = text.slice(0, 4);
 
-					text = text.replace(/&rArr;\((.*)\)/, '<span class="mapLink">$1</span> <span class="ui-icon ui-icon-wrench reinforce" title="Renforce" rel="$1"></span>')
-								.replace(/&oplus;\((.*)\)/, '$1 <span class="ui-icon ui-icon-person research player" title="Recherche" rel="$1"></span>')
-								.replace(/&forall;\((.*)\)/, '$1 <span class="ui-icon ui-icon-person research alliance" title="Recherche" rel="$1"></span>')
-								.replace(/&Xi;\((.*)\)/, '<span class="mapLink">$1</span> <span class="ui-icon ui-icon-note scout" title="Éclaire" rel="$1"></span><span class="ui-icon ui-icon-flag attack" title="Attaque" rel="$1"></span>');
+					text = text.replace(/&rArr;\((.*)\)/, '<span class="mapLink">$1</span> <span class="icon-umbrella reinforce" title="Renforce" rel="$1"></span>')
+								.replace(/&oplus;\((.*)\)/, '$1 <span class="icon-user research player" title="Recherche" rel="$1"></span>')
+								.replace(/&forall;\((.*)\)/, '$1 <span class="icon-group research alliance" title="Recherche" rel="$1"></span>')
+								.replace(/&Xi;\((.*)\)/, '<span class="mapLink">$1</span> <span class="icon-eye-open scout" title="Éclaire" rel="$1"></span><span class="icon-bolt attack" title="Attaque" rel="$1"></span>');
 
 					if( flag.indexOf('&Psi;') > -1 ){
 						var type,
@@ -13973,7 +13974,7 @@ jQuery(document).ready(function(){
 									formatted += $.trim( flag[i] );
 								} else {
 									if( i === 1 ){
-										formatted += '<span class="ui-icon ui-icon-triangle-1-se reduceToggle"></span><div class="reduce">';
+										formatted += '<span class="icon-caret-down reduceToggle"></span><div class="reduce">';
 									}
 
 									formatted += '<div>'+ $.trim( flag[i] ) +'</div>';
@@ -14002,7 +14003,7 @@ jQuery(document).ready(function(){
 									formatted += $.trim( flag[i] );
 								} else {
 									if( i === 1 ){
-										formatted += '<span class="ui-icon ui-icon-triangle-1-se reduceToggle"></span><div class="reduce">';
+										formatted += '<span class="icon-caret-down reduceToggle"></span><div class="reduce">';
 									}
 
 									formatted += '<div>'+ $.trim( flag[i] ) +'</div>';
@@ -14031,7 +14032,7 @@ jQuery(document).ready(function(){
 							$this.closest('.chatwrap').addClass('autonomy');
 
 							formatted = text.substring(('&Psi;&phi;').length, text.length);
-							$this.html( '<span class="ui-icon ui-icon-suitcase food"></span>'+ formatted );
+							$this.html( '<span class="icon-lemon food"></span>'+ formatted );
 						}
 
 						if( type && KOCFIA.conf.alarm[ 'playSoundFor'+ type.capitalize() ] && !KOCFIA.alarm.sounds[ type ].playing ){
@@ -14227,7 +14228,7 @@ jQuery(document).ready(function(){
 					code += '</div>';
 
 					$div
-						.append( '<span class="ui-icon ui-icon-close"></span>' )
+						.append( '<span class="icon-remove"></span>' )
 						.append( code )
 						.append( moveHandles )
 						.draggable({
@@ -14254,7 +14255,7 @@ jQuery(document).ready(function(){
 							width: 250,
 							height: 250
 						})
-						.on('click', '.ui-icon-close', function(){
+						.on('click', '.icon-remove', function(){
 							KOCFIA.alarm.$summary.hide();
 						});
 
@@ -14265,9 +14266,9 @@ jQuery(document).ready(function(){
 					KOCFIA.alarm.$grid = KOCFIA.alarm.$summary.find('#kocfia-alarm-grid')
 						.jqGrid( KOCFIA.alarm.gridParams )
 						.jqGrid('navGrid', '#kocfia-alarm-pager', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-						.jqGrid('navButtonAdd', '#kocfia-alarm-pager', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.alarm.grid[0].toggleToolbar(); }, position: 'last'})
-						.jqGrid('navButtonAdd','#kocfia-alarm-pager', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.alarm.grid[0].clearToolbar(); }, position: 'last'})
-						.jqGrid('navButtonAdd', '#kocfia-alarm-pager', {caption: '', title: "Supprimer les lignes sélectionnées", buttonicon: 'ui-icon-trash', onClickButton: function(){ KOCFIA.alarm.removeSelection(); }, position: 'last'})
+						.jqGrid('navButtonAdd', '#kocfia-alarm-pager', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.alarm.grid[0].toggleToolbar(); }, position: 'last'})
+						.jqGrid('navButtonAdd','#kocfia-alarm-pager', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.alarm.grid[0].clearToolbar(); }, position: 'last'})
+						.jqGrid('navButtonAdd', '#kocfia-alarm-pager', {caption: '', title: "Supprimer les lignes sélectionnées", buttonicon: 'icon-trash', onClickButton: function(){ KOCFIA.alarm.removeSelection(); }, position: 'last'})
 						.jqGrid('filterToolbar');
 
 					KOCFIA.alarm.$grid
@@ -15823,7 +15824,7 @@ jQuery(document).ready(function(){
 
 			//unit training and delta calculator
 			stats += '<fieldset class="calculator">';
-			stats += '<legend><span class="ui-icon ui-icon-triangle-1-e toggle"></span>Calculateur&nbsp;:&nbsp;</legend>';
+			stats += '<legend><span class="icon-caret-up toggle"></span>Calculateur&nbsp;:&nbsp;</legend>';
 			//population, nbBarracks, sumLvlBarracks, workshop, stable, blacksmith, combat, geometry, training speed
 			stats += '<dl>';
 			stats += '<dt><label for="calculator-population">Population :</label></dt>';
@@ -15860,7 +15861,7 @@ jQuery(document).ready(function(){
 				})
 				.on('click', 'legend', function(){
 					$(this)
-						.find('.ui-icon').toggleClass('ui-icon-triangle-1-e ui-icon-triangle-1-se').end()
+						.find('.toogle').toggleClass('icon-caret-up icon-caret-up').end()
 						.closest('.calculator').find('dl').stop(true, true).slideToggle();
 				})
 				.on('click', '.calc', function(){
@@ -16488,7 +16489,7 @@ jQuery(document).ready(function(){
 			var buildMenu = '<div class="kocfia-build-menu ui-widget ui-widget-content ui-corner-all buttonset"><section id="hover">';
 
 			//destroy
-			buildMenu += '<span class="ui-icon ui-icon-close close"></span>';
+			buildMenu += '<span class="icon-remove close"></span>';
 			buildMenu += '<input type="checkbox" class="destroy" id="kocfia-build-destroy"><label for="kocfia-build-destroy">Détruire</label>';
 
 			//building list
@@ -17168,7 +17169,7 @@ jQuery(document).ready(function(){
 						}
 					}
 
-					//TODO
+					//@TODO
 					//try detecting building destruction
 
 					//has tasks ?
@@ -18673,14 +18674,14 @@ jQuery(document).ready(function(){
 			form += '<div class="info"></div>'; //for target info when using coordinates
 
 			form += '<div class="troop">';
-			form += '<span class="ui-icon ui-icon-refresh refresh" title="Recharge les troupes disponible"></span>';
+			form += '<span class="icon-refresh refresh" title="Recharge les troupes disponible"></span>';
 			form += '<label>Troupes&nbsp;:&nbsp;</label>';
 			form += '<div class="available"></div>';
 			form += '<div class="chosen"></div>';
 			form += '</div>';
 
 			form += '<div class="resource">';
-			form += '<span class="ui-icon ui-icon-refresh refresh" title="Recharge les ressources disponible"></span>';
+			form += '<span class="icon-refresh refresh" title="Recharge les ressources disponible"></span>';
 			form += '<label>Ressources&nbsp;:&nbsp;</label>';
 			form += '<div class="available"></div>';
 			form += '<div class="sums"><output class="sum"></output> / <output class="max"></output></div>';
@@ -18688,12 +18689,12 @@ jQuery(document).ready(function(){
 			form += '</div>';
 
 			form += '<div class="knight">';
-			form += '<span class="ui-icon ui-icon-refresh refresh" title="Recharge les chevaliers disponible"></span>';
+			form += '<span class="icon-refresh refresh" title="Recharge les chevaliers disponible"></span>';
 			form += '<label>Chevaliers&nbsp;:&nbsp;</label>';
 			form += '<select class="available"></select>';
 			form += '</div>';
 
-			form += '<span class="ui-icon ui-icon-refresh refresh" title="Recharge les objets disponible"></span>';
+			form += '<span class="icon-refresh refresh" title="Recharge les objets disponible"></span>';
 			form += '<label>Boosts&nbsp;:&nbsp;</label>';
 			form += '<div class="items buttonset"></div>';
 
@@ -18877,7 +18878,7 @@ jQuery(document).ready(function(){
 						var code = '', info;
 						info = KOCFIA.unitInfo[ rel ];
 						code += '<div class="tro">';
-						code += '<span class="ui-icon ui-icon-trash remove"></span>';
+						code += '<span class="icon-trash remove"></span>';
 						code += '<label title="'+ info.label +'"><img src="'+ info.icon +'"></label>&nbsp;';
 						code += '<input type="text" name="'+ rel +'" value="" required pattern="'+ Shared.numberRegExp +'">';
 						code += '<button class="minTroop button secondary" title="Calculer le minimum de cette troupe nécessaire pour transporter les ressources définies">Minimum</buton>';
@@ -18927,7 +18928,7 @@ jQuery(document).ready(function(){
 						var code = '', info;
 						info = KOCFIA.resourceInfo[ rel ];
 						code += '<div class="res">';
-						code += '<span class="ui-icon ui-icon-trash remove"></span>';
+						code += '<span class="icon-trash remove"></span>';
 						code += '<label title="'+ info.label +'"><img src="'+ info.icon +'"></label>&nbsp;';
 						code += '<input type="text" name="'+ rel +'" value="" required pattern="'+ Shared.numberRegExp +'">';
 						code += '<button class="maxLoad button secondary" title="Calculer le maximum transportable de cette ressource pour les troupes définies">Maximum</buton>';
@@ -19639,24 +19640,24 @@ jQuery(document).ready(function(){
 		/* grid related */
 		KOCFIA.reports.gridRowActions = function( cellValue, options, rowObject ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports gridRowActions function', cellValue, options, rowObject);
-			var code = '<span class="ui-icon ui-icon-trash delete" data-id="'+ rowObject.reportId +'" title="Supprimer ce rapport"></span>';
+			var code = '<span class="icon-trash delete" data-id="'+ rowObject.reportId +'" title="Supprimer ce rapport"></span>';
 
 			if( rowObject.isMine ){
-				code += '<span class="ui-icon ui-icon-mail-open open" data-id="'+ rowObject.reportId +'" title="Afficher ce rapport"></span>';
+				code += '<span class="icon-list-alt open" data-id="'+ rowObject.reportId +'" title="Afficher ce rapport"></span>';
 			}
 
 			if( rowObject.isPvP ){
 				if( rowObject.guildMateDefending ){
-					code += '<span class="ui-icon ui-icon-cart attack" data-coords="'+ rowObject.attackerCoords +'" title="Attaquer"></span>';
-					code += '<span class="ui-icon ui-icon-note scout" data-coords="'+ rowObject.attackerCoords +'" title="Eclairer"></span>';
-					code += '<span class="ui-icon ui-icon-wrench reinforce" data-coords="'+ rowObject.defenderCoords +'" title="Renforcer"></span>';
+					code += '<span class="icon-bolt attack" data-coords="'+ rowObject.attackerCoords +'" title="Attaquer"></span>';
+					code += '<span class="icon-eye-open scout" data-coords="'+ rowObject.attackerCoords +'" title="Eclairer"></span>';
+					code += '<span class="icon-umbrella reinforce" data-coords="'+ rowObject.defenderCoords +'" title="Renforcer"></span>';
 				} else {
-					code += '<span class="ui-icon ui-icon-cart attack" data-coords="'+ rowObject.defenderCoords +'" title="Attaquer"></span>';
-					code += '<span class="ui-icon ui-icon-note scout" data-coords="'+ rowObject.defenderCoords +'" title="Eclairer"></span>';
+					code += '<span class="icon-bolt attack" data-coords="'+ rowObject.defenderCoords +'" title="Attaquer"></span>';
+					code += '<span class="icon-eye-open scout" data-coords="'+ rowObject.defenderCoords +'" title="Eclairer"></span>';
 				}
 			} else if( rowObject.isAttack ) {
-				code += '<span class="ui-icon ui-icon-cart attack" data-coords="'+ rowObject.defenderCoords +'" title="Attaquer"></span>';
-				code += '<span class="ui-icon ui-icon-note scout" data-coords="'+ rowObject.defenderCoords +'" title="Eclairer"></span>';
+				code += '<span class="icon-bolt attack" data-coords="'+ rowObject.defenderCoords +'" title="Attaquer"></span>';
+				code += '<span class="icon-eye-open scout" data-coords="'+ rowObject.defenderCoords +'" title="Eclairer"></span>';
 			}
 
 			return code;
@@ -19838,18 +19839,18 @@ jQuery(document).ready(function(){
 			KOCFIA.reports.$resultsMine = $section.find('#kocfia-reports-mine')
 				.jqGrid( $.extend({}, KOCFIA.reports.gridParams.shared, KOCFIA.reports.gridParams.mine) )
 				.jqGrid('navGrid', '#kocfia-reports-pager-mine', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-reports-pager-mine', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.reports.$resultsMine[0].toggleToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd','#kocfia-reports-pager-mine', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.reports.$resultsMine[0].clearToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-reports-pager-mine', {caption: '', title: "Supprimer les rapports sélectionnés", buttonicon: 'ui-icon-trash', onClickButton: function(){ KOCFIA.reports.removeSelection('mine'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-mine', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.reports.$resultsMine[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-reports-pager-mine', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.reports.$resultsMine[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-mine', {caption: '', title: "Supprimer les rapports sélectionnés", buttonicon: 'icon-trash', onClickButton: function(){ KOCFIA.reports.removeSelection('mine'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 			KOCFIA.reports.$resultsAlliance = $section.find('#kocfia-reports-alliance')
 				.jqGrid( $.extend({}, KOCFIA.reports.gridParams.shared, KOCFIA.reports.gridParams.alliance) )
 				.jqGrid('navGrid', '#kocfia-reports-pager-alliance', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
-				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: 'Filtre rapide', buttonicon: 'ui-icon-pin-s', onClickButton: function(){ KOCFIA.reports.$resultsAlliance[0].toggleToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd','#kocfia-reports-pager-alliance', {caption: '', title: 'Vider les filtres', buttonicon: 'ui-icon-refresh', onClickButton: function(){ KOCFIA.reports.$resultsAlliance[0].clearToolbar(); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: "Supprimer les rapports sélectionnés", buttonicon: 'ui-icon-trash', onClickButton: function(){ KOCFIA.reports.removeSelection('alliance'); }, position: 'last'})
-				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: "Compilation des rapports sélectionnés", buttonicon: 'ui-icon-script', onClickButton: function(){ KOCFIA.reports.summarize('alliance'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.reports.$resultsAlliance[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-reports-pager-alliance', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.reports.$resultsAlliance[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: "Supprimer les rapports sélectionnés", buttonicon: 'icon-trash', onClickButton: function(){ KOCFIA.reports.removeSelection('alliance'); }, position: 'last'})
+				.jqGrid('navButtonAdd', '#kocfia-reports-pager-alliance', {caption: '', title: "Compilation des rapports sélectionnés", buttonicon: 'icon-bar-chart', onClickButton: function(){ KOCFIA.reports.summarize('alliance'); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
 

@@ -4,6 +4,7 @@
 		<title>koc test</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/font-awesome.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.miniColors.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.tipsy.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/ui.jqgrid.css" />

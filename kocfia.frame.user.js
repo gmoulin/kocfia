@@ -125,6 +125,7 @@ if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 			'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js', //latest 1.x.x jquery
 			domain + "jquery-ui-1.8.18.custom.min.js",
 			domain + "jquery-ui-1.8.18.custom.css",
+			domain + "font-awesome.css",
 			domain + "jquery.miniColors.css",
 			domain + "jquery.miniColors.min.js",
 			domain + "jquery.tipsy.css",

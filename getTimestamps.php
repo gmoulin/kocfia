@@ -5,6 +5,7 @@ $urls = array(
 	'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js', //latest 1.x.x jquery
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery-ui-1.8.18.custom.min.js',
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery-ui-1.8.18.custom.css',
+	'http://'.$_SERVER['SERVER_NAME'].'/font-awesome.css',
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery.miniColors.css',
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery.miniColors.min.js',
 	'http://'.$_SERVER['SERVER_NAME'].'/jquery.tipsy.css',

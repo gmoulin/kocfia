@@ -413,6 +413,34 @@ html, body {
 		background-color: #EAEAEA;
 	}
 
+	.hostile td {
+		background-color: rgba(176, 0, 0, 0.5);
+	}
+
+	.friendly td {
+		background-color: rgba(44, 103, 0, 0.5);
+	}
+
+	.ally td {
+		background-color: rgba(51, 201, 153, 0.5);
+	}
+
+	.friendly-to-you td {
+		background-color: rgba(146, 205, 0, 0.5);
+	}
+
+	.friendly-to-them td {
+		background-color: rgba(146, 205, 0, 0.5);
+	}
+
+	.attaque td {
+		background-color: rgba(153, 0, 51, 0.5);
+	}
+
+	.renfort td {
+		background-color: rgba(120, 33, 60, 0.5);
+	}
+
 	/* Headers: */
 	.ui-jqgrid .ui-jqgrid-htable th div,
 	/* Other cells: */
@@ -2782,4 +2810,19 @@ html, body {
 		width: 70px;
 		text-align: center;
 		margin-right: 5px;
+	}
+
+/* tournament */
+	#kocfia-tournament .one {
+		display: none;
+	}
+
+	#kocfia-tournament .times {
+		width: 100%;
+		margin: 5px 0;
+	}
+
+	#kocfia-tournament .times td {
+		width: 30%;
+		padding: 2px 5px;
 	}

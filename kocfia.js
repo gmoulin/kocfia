@@ -263,7 +263,7 @@ jQuery(document).ready(function(){
 			reports: 'Rapports',
 			search: 'Recherche',
 			gifts: 'Cadeaux',
-			tournament: 'Tournois'
+			tournament: 'Tournoi'
 		},
 		stored: ['conf'],
 		/* default configuration */
@@ -1322,7 +1322,7 @@ jQuery(document).ready(function(){
 						KOCFIA.conf.confPanel.selected = ui.index;
 						Shared.storeConf();
 
-						if( $(ui.panel).filter('#kocfia-map, #kocfia-reports').length > 0 ){
+						if( $(ui.panel).filter('#kocfia-map, #kocfia-reports, #kocfia-tournament, #kocfia-search').length > 0 ){
 							//use timeout so the tab selection is "finished" and the element inside have the correct width
 							window.setTimeout(function(){
 								KOCFIA.$confPanel.trigger('resizestop');
@@ -2512,6 +2512,15 @@ jQuery(document).ready(function(){
 					});
 			};
 
+			Shared.cssDiplomacy = {
+				'neutre': '',
+				'hostile': 'hostile',
+				'amical': 'friendly',
+				'allié': 'ally',
+				'allié envers vous': 'friendly-to-you',
+				'allié envers eux': 'friendly-to-them'
+			};
+
 			Shared.getDiplomacy = function( allianceId ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('shared') ) console.info('KOCFIA shared getDiplomacy function');
 
@@ -2521,6 +2530,10 @@ jQuery(document).ready(function(){
 
 				if( window.seed.allianceDiplomacies === null || $.isEmptyObject(window.seed.allianceDiplomacies) ){
 					return 'neutre';
+				} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendlyToYou') && window.seed.allianceDiplomacies.friendlyToYou && window.seed.allianceDiplomacies.friendlyToYou.hasOwnProperty( 'a' + allianceId ) ){
+					return 'amical envers vous';
+				} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendlyToThem') && window.seed.allianceDiplomacies.friendlyToThem && window.seed.allianceDiplomacies.friendlyToThem.hasOwnProperty( 'a' + allianceId ) ){
+					return 'amical envers eux';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendly') && window.seed.allianceDiplomacies.friendly && window.seed.allianceDiplomacies.friendly.hasOwnProperty( 'a' + allianceId ) ){
 					return 'amical';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('hostile') && window.seed.allianceDiplomacies.hostile && window.seed.allianceDiplomacies.hostile.hasOwnProperty( 'a' + allianceId ) ){
@@ -5295,7 +5308,7 @@ jQuery(document).ready(function(){
 
 			var texts = {
 				'Informations et limitations :': [],
-				'Méthode :': [],
+				'Méthode :': []
 			};
 
 			var titles = Object.keys(texts);
@@ -8036,6 +8049,11 @@ jQuery(document).ready(function(){
 			darkForests: {}
 		};
 
+		KOCFIA.map.rowColor = {
+			cities: [],
+			wilderness: []
+		};
+
 		KOCFIA.map.gridParams = {
 			shared: {
 				datatype: 'local',
@@ -8067,7 +8085,7 @@ jQuery(document).ready(function(){
 					{name: 'player', index: 'player', width: 100},
 					{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
 					{name: 'guild', index: 'guild', width: 100},
-					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
+					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ var d = Shared.getDiplomacy(cellValue); if( d !== 'neutral' ){ KOCFIA.map.rowColor.cities.push({id: options.rowId, css: Shared.cssDiplomacy[ d ] }); } return d; }, width: 70},
 					{name: 'mist', index: 'mist', align: 'center', formatter: function( cellValue, options, rowObject ){ return cellValue === 1 ? 'Oui' : ''; }, width: 55},
 					{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
 					{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
@@ -8081,6 +8099,11 @@ jQuery(document).ready(function(){
 						KOCFIA.map.selection.cities[ coord ] = KOCFIA.map.$resultsCities.jqGrid('getRowData', key);
 					} else {
 						delete KOCFIA.map.selection.cities[ coord ];
+					}
+				},
+				loadComplete: function(){
+					for( var i = 0; i < KOCFIA.map.rowColor.cities.length; i += 1 ){
+						$('#'+ KOCFIA.map.rowColor.cities[i].id).addClass( KOCFIA.map.rowColor.cities[i].css );
 					}
 				}
 			},
@@ -8115,7 +8138,7 @@ jQuery(document).ready(function(){
 					{name: 'player', index: 'player', width: 100},
 					{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
 					{name: 'guild', index: 'guild', width: 100},
-					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ return Shared.getDiplomacy(cellValue); }, width: 70},
+					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ var d = Shared.getDiplomacy(cellValue); if( d !== 'neutral' ){ KOCFIA.map.rowColor.wilderness.push({id: options.rowId, css: Shared.cssDiplomacy[ d ] }); } return d; }, width: 70},
 					{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
 					{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
 				],
@@ -8129,7 +8152,13 @@ jQuery(document).ready(function(){
 					} else {
 						delete KOCFIA.map.selection.wilderness[ coord ];
 					}
+				},
+				loadComplete: function(){
+					for( var i = 0; i < KOCFIA.map.rowColor.wilderness.length; i += 1 ){
+						$('#'+ KOCFIA.map.rowColor.wilderness[i].id).addClass( KOCFIA.map.rowColor.cities[i].css );
+					}
 				}
+
 			},
 			darkForests: {
 				colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
@@ -8431,7 +8460,7 @@ jQuery(document).ready(function(){
 			};
 
 			return help;
-		}
+		};
 
 		KOCFIA.map.improveCoordsForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map improveCoordsForm function');
@@ -8498,11 +8527,7 @@ jQuery(document).ready(function(){
 								name = user.n;
 								diplomacy = Shared.getDiplomacy(user.a);
 
-								text = '<span class="kocfia-map-tile-info ';
-								if( diplomacy == 'hostile' ) text += 'hostile';
-								else if( diplomacy == 'amical' ) text += 'friendly';
-								else if( diplomacy == 'allié' ) text += 'ally';
-								text += '">';
+								text = '<span class="kocfia-map-tile-info '+ Shared.cssDiplomacy[ diplomacy ] +'">';
 								text += tile.tileLevel;
 								text += ', '+ name;
 								text += ', '+ Shared.format(user.m); //might
@@ -8530,11 +8555,7 @@ jQuery(document).ready(function(){
 									alliance = (result.allianceNames.hasOwnProperty('a' + user.a) ? result.allianceNames['a' + user.a] : '');
 									diplomacy = Shared.getDiplomacy(user.a);
 
-									text = '<span class="kocfia-map-tile-info ';
-									if( diplomacy == 'hostile' ) text += 'hostile';
-									else if( diplomacy == 'amical' ) text += 'friendly';
-									else if( diplomacy == 'allié' ) text += 'ally';
-									text += '">';
+									text = '<span class="kocfia-map-tile-info '+ Shared.cssDiplomacy[ diplomacy ] +'">';
 									text += tile.tileLevel;
 									text += ', '+ name;
 									text += ', '+ Shared.format(user.m); //might
@@ -8880,18 +8901,22 @@ jQuery(document).ready(function(){
 			$('.tipsy').remove();
 
 			if( tiles.cities.length > 0 ){
+				KOCFIA.map.rowColor.cities.length = 0;
 				KOCFIA.map.data.cities = KOCFIA.map.data.cities.concat(tiles.cities);
 				KOCFIA.map.$resultsCities.jqGrid('setGridParam', {data: KOCFIA.map.data.cities}).trigger('reloadGrid');
 			}
 			if( tiles.barbarians.length > 0 ){
+				KOCFIA.map.rowColor.barbarians.length = 0;
 				KOCFIA.map.data.barbarians = KOCFIA.map.data.barbarians.concat(tiles.barbarians);
 				KOCFIA.map.$resultsBarbarians.jqGrid('setGridParam', {data: KOCFIA.map.data.barbarians}).trigger('reloadGrid');
 			}
 			if( tiles.wilderness.length > 0 ){
+				KOCFIA.map.rowColor.wilderness.length = 0;
 				KOCFIA.map.data.wilderness = KOCFIA.map.data.wilderness.concat(tiles.wilderness);
 				KOCFIA.map.$resultsWilderness.jqGrid('setGridParam', {data: KOCFIA.map.data.wilderness}).trigger('reloadGrid');
 			}
 			if( tiles.darkForests.length > 0 ){
+				KOCFIA.map.rowColor.darkForests.length = 0;
 				KOCFIA.map.data.darkForests = KOCFIA.map.data.darkForests.concat(tiles.darkForests);
 				KOCFIA.map.$resultsDarkForests.jqGrid('setGridParam', {data: KOCFIA.map.data.darkForests}).trigger('reloadGrid');
 			}
@@ -9694,7 +9719,7 @@ jQuery(document).ready(function(){
 				'Configurations enregistrées :': [
 					'Une configuration sauvegardée peut être chargée ou supprimée',
 					'Une configuration chargée sera prise en compte à la prochaine tentative de formation (pour les villes cochées)',
-					'Une configuration supprimée n\'affecte pas la configuration en cours',
+					'Une configuration supprimée n\'affecte pas la configuration en cours'
 				],
 				'Formation manuelle :': [
 					'Choisir une ville',
@@ -19668,7 +19693,9 @@ jQuery(document).ready(function(){
 			alliance: []
 		};
 
-		KOCFIA.map.selection = {
+		KOCFIA.reports.rowColor = [];
+
+		KOCFIA.reports.selection = {
 			mine: {},
 			alliance: {}
 		};
@@ -19727,7 +19754,7 @@ jQuery(document).ready(function(){
 				colModel: [
 					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
 					{name: 'date', index: 'date', formatter: function( cellValue, options, rowObject ){ return window.formatDateByUnixTime( cellValue ); }, width: 100},
-					{name: 'type', index: 'type', width: 100},
+					{name: 'type', index: 'type', formatter: function( cellValue, options, rowObject ){ if( rowObject.isPvP && rowObject.isGuildMateDefending ){ KOCFIA.reports.rowColor.mine.push({id: options.rowId, css: rowObject.type.toLowerCase()}); } return cellValue; }, width: 100},
 					{name: 'attacker', index: 'attacker', width: 100},
 					{name: 'attackerGuild', index: 'attackerGuild', width: 100},
 					{name: 'attackerCoords', index: 'attackerCoords', align: 'center', sortable: false, search: false, formatter: function( cellValue, options, rowObject ){ return Shared.mapLink(cellValue); }, width: 60},
@@ -19749,7 +19776,13 @@ jQuery(document).ready(function(){
 					} else {
 						delete KOCFIA.reports.selection.alliance[ key ];
 					}
+				},
+				loadComplete: function(){
+					for( var i = 0; i < KOCFIA.reports.rowColor.length; i += 1 ){
+						$('#'+ KOCFIA.reports.rowColor[i].id).addClass( KOCFIA.reports.rowColor[i].css );
+					}
 				}
+
 			}
 		};
 
@@ -20367,11 +20400,12 @@ jQuery(document).ready(function(){
 				$('.tipsy').remove();
 
 				if( info.length > 0 ){
-					KOCFIA.reports.data[ type ] = KOCFIA.reports.data[ type ].concat(tiles.cities);
+					KOCFIA.reports.data[ type ] = KOCFIA.reports.data[ type ].concat(info);
 					if( type == 'mine' ){
 						KOCFIA.reports.$resultsMine.jqGrid('setGridParam', {data: KOCFIA.report.data.mine}).trigger('reloadGrid');
 					} else {
-						KOCFIA.reports.$resultsalliance.jqGrid('setGridParam', {data: KOCFIA.report.data.alliance}).trigger('reloadGrid');
+						KOCFIA.reports.rowColor.length = 0;
+						KOCFIA.reports.$resultsAlliance.jqGrid('setGridParam', {data: KOCFIA.report.data.alliance}).trigger('reloadGrid');
 					}
 				}
 			};
@@ -20731,7 +20765,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports summarize function', type);
 
 			if( !$.isEmptyObject(KOCFIA.selection[ type ]) ){
-
+				//@TODO
 			}
 		};
 
@@ -20744,7 +20778,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports removeSelection function', type);
 
 			if( !$.isEmptyObject(KOCFIA.selection[ type ]) ){
-
+				//@TODO
 			}
 		};
 
@@ -21538,6 +21572,60 @@ jQuery(document).ready(function(){
 			stored: []
 		};
 
+		/* grid related */
+		KOCFIA.tournament.gridRowActions = function( cellValue, options, rowObject ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament gridRowActions function', cellValue, options, rowObject);
+			var code = '';
+
+			//code += '<span class="icon-user search" data-name="'+ rowObject.name +'" title="Recherche le joueur"></span>';
+			//code += '<span class="icon-group search alliance" data-name="'+ rowObject.guild +'" title="Rechercher l\'alliance"></span>';
+			//code += '<span class="icon-group throne" data-name="'+ rowObject.name +'" title="Voir le trône"></span>';
+
+			return code;
+		};
+
+		KOCFIA.tournament.data = {};
+
+		KOCFIA.tournament.rowColor = [];
+
+		KOCFIA.tournament.gridParams = {
+			datatype: 'local',
+			loadui: 'disable',
+			rowNum: 20,
+			rowList: [20, 50, 100],
+			sortname: 'date',
+			sortorder: 'desc',
+			altRows: true,
+			altclass: 'zebra',
+			height: 'auto',
+			autowidth: true,
+			viewrecords: true, //total in pager
+			gridview: true, //speed boost
+			hiddengrid: true,
+			multiselect: true,
+			multiboxonly: true,
+			multikey: 'shiftKey',
+			shrinkToFit: true,
+			colNames: ['', '#', 'Nom', 'Alliance', 'Gain', 'Différence', 'Récompense', ''],
+			colModel: [
+				{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+				{name: 'position', index: 'position', width: 30},
+				{name: 'player', index: 'player', width: 150},
+				{name: 'guild', index: 'guild', width: 150},
+				{name: 'score', index: 'score', formatter: function( cellValue, options, rowObject ){ return Shared.readable(cellValue); }, width: 100},
+				{name: 'delta', index: 'delta', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 100},
+				{name: 'reward', index: 'reward', width: 100},
+				{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ if( cellValue > 0 ){ var d = Shared.getDiplomacy( cellValue ); if( d != 'neutre' ){ KOCFIA.tournament.rowColor.push({id: options.rowId, css: Shared.cssDiplomacy[ d ]}); } } return cellValue; }, hidedlg: true, hidden: true, search: false, sortable: false}
+			],
+			caption: 'Classement',
+			pager: '#kocfia-tournament-pager',
+			loadComplete: function(){
+				for( var i = 0; i < KOCFIA.tournament.rowColor.length; i += 1 ){
+					$('#'+ KOCFIA.tournament.rowColor[i].id).addClass( KOCFIA.tournament.rowColor[i].css );
+				}
+			}
+		};
+
 		KOCFIA.tournament.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament confPanel function');
 			var code = '<h3>'+ KOCFIA.modulesLabel.tournament +'</h3>';
@@ -21551,32 +21639,89 @@ jQuery(document).ready(function(){
 			$section.append( code );
 		};
 
-		KOCFIA.tournament.tournamentPanel = function(){
+		KOCFIA.tournament.modPanel = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament tournamentPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-tournament').html('');
 
 			var help = KOCFIA.tournament.getHelp();
 
 			var code = '<div class="infos">';
+			code += '<button class="button secondary refresh><span>Raffraîchir</span></button>';
 			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
-			code += '</div><h3>Classement</h3>';
+			code += '</div><h3>Tournoi</h3>';
+			code += '<div class="none">Aucun tournois en cours</div>';
+			code += '<div class="one">';
+			code += '<table class="times"><tbody>';
+			code += '<tr><td>Début : <span class="start"></span></td><td>Fin : <span class="end"></span></td><td>Restant : <span class="remaining"></span></td></tr>';
+			code += '<tr><td>Position : <span class="rank"></span></td><td>Score : <span class="score"></span></td><td>Récompense : <span class="reward"></span></tr>';
+			code += '</tbody></table>';
+			code += '<table id="kocfia-tournament-grid" class="ranking-results"></table>';
+			code += '<div id="kocfia-tournament-pager" class="ranking-pager"></div>';
+			code += '</div>';
 			code += help;
 
 			$section.append( code );
+
+			KOCFIA.tournament.$grid = $section.find('#kocfia-tournament-grid')
+				.jqGrid( KOCFIA.tournament.gridParams )
+				.jqGrid('navGrid', '#kocfia-tournament-pager', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-tournament-pager', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.tournament.$grid[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-tournament-pager', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.tournament.$grid[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('filterToolbar');
+
+
+			//grid listeners
+			$section
+				.on('click', '.refresh', function(){
+					KOCFIA.tournament.checkTournament(3);
+				})
+				.on('click', '.search', function(){
+					if( KOCFIA.conf.search.on ){
+						var $this = $(this),
+							type = 'player';
+
+						if( $this.hasClass('alliance') ) type = 'alliance';
+
+						KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$="search"]').trigger('click');
+
+						$('#kocfia-search');
+							//@TODO
+					} else {
+						alert('L\'onglet de recherche des joueurs et alliances n\'est pas actif.');
+					}
+				})
+				.on('click', '.ui-jqgrid-titlebar', function(){
+					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
+				})
+				.find('.ui-jqgrid-titlebar-close').click(function(e){
+					e.stopPropagation();
+
+					$(this)
+						.filter('.ui-icon-circle-triangle-s') //grid was closed ?
+						.closest('.ui-jqgrid-view').siblings('.ui-jqgrid-view') //get other grids
+						.find('.ui-icon-circle-triangle-n').parent().trigger('click'); //close them
+				});
+
+			KOCFIA.$confPanel.on('resizestop', function(){
+				if( KOCFIA.tournament.$div.is(':visible') ){
+					var size = KOCFIA.tournament.$div.find('.times').innerWidth() + 1;
+					KOCFIA.tournament.$grid.jqGrid('setGridWidth', size);
+				}
+			});
+
+			KOCFIA.tournament.$div = KOCFIA.$confPanel.find('#kocfia-tournament');
 		};
 
 		KOCFIA.tournament.on = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament on function');
 
-			if( KOCFIA.conf.tournament.monitor ){
-				KOCFIA.tournament.monitor();
-			}
+			KOCFIA.tournament.monitor();
 		};
 
 		KOCFIA.tournament.off = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament off function');
 
-			KOCFIA.tournament.automaticOff();
+			KOCFIA.tournament.monitor();
 		};
 
 		KOCFIA.tournament.monitor = function(){
@@ -21607,6 +21752,108 @@ jQuery(document).ready(function(){
 				.done(function( result ){
 					if( result.ok ){
 						if( result.data ){
+							KOCFIA.tournament.$div
+								.find('.none').hide().end()
+								.find('.one').show();
+
+							//times
+								if( result.startdate && result.enddate ){
+									var date = new Date();
+									KOCFIA.tournament.$div
+										.find('.start').html(function(){
+											date.setTime( result.startdate * 1000 );
+											return date.toLocaleDateString() +' - '+ date.toLocaleTimeString();
+										}).end()
+										.find('.end').html(function(){
+											date.setTime( result.enddate * 1000 );
+											return date.toLocaleDateString() +' - '+ date.toLocaleTimeString();
+										}).end()
+										.find('.remaining').html(function(){
+											return Shared.readableDuration( result.enddate * 1000 - Date.now() );
+										});
+								}
+
+							//parse data
+								var data = [],
+									alliances = {}, aKey,
+									info, reward = '', might, delta, name, guild, ownMight = 0;
+
+								if( window.seed.allianceDiplomacies.hasOwnProperty('friendlyToYou') ){
+									for( aKey in window.seed.allianceDiplomacies.friendlyToYou ){
+										if( window.seed.allianceDiplomacies.friendlyToYou.hasOwnProperty(aKey) ){
+											alliances[ window.seed.allianceDiplomacies.friendlyToYou[ aKey ].allianceName ] = window.seed.allianceDiplomacies.friendlyToYou[ aKey ].allianceId;
+										}
+									}
+								} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendlyToThem') ){
+									for( aKey in window.seed.allianceDiplomacies.friendlyToThem ){
+										if( window.seed.allianceDiplomacies.friendlyToThem.hasOwnProperty(aKey) ){
+											alliances[ window.seed.allianceDiplomacies.friendlyToThem[ aKey ].allianceName ] = window.seed.allianceDiplomacies.friendlyToThem[ aKey ].allianceId;
+										}
+									}
+								} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendly') ){
+									for( aKey in window.seed.allianceDiplomacies.friendly ){
+										if( window.seed.allianceDiplomacies.friendly.hasOwnProperty(aKey) ){
+											alliances[ window.seed.allianceDiplomacies.friendly[ aKey ].allianceName ] = window.seed.allianceDiplomacies.friendly[ aKey ].allianceId;
+										}
+									}
+								} else if( window.seed.allianceDiplomacies.hasOwnProperty('hostile') ){
+									for( aKey in window.seed.allianceDiplomacies.hostile ){
+										if( window.seed.allianceDiplomacies.hostile.hasOwnProperty(aKey) ){
+											alliances[ window.seed.allianceDiplomacies.hostile[ aKey ].allianceName ] = window.seed.allianceDiplomacies.hostile[ aKey ].allianceId;
+										}
+									}
+								}
+
+								for( i = 0; i < result.data.length; i += 1 ){
+									info = result.data[ i ];
+									if( (result.type == 24 && getMyAlliance()[1] == info.alliance)
+										|| (window.seed.player.prefix +' '+ window.seed.player.name == info.name)
+									){
+										if( info.itemType === 0 ){
+											reward = info.itemCount +' '+ window.g_js_strings.commonstr.gems;
+										} else if( Object.isObject(window.itemlist['i'+ info.itemType]) ){
+											reward = info.itemCount +' '+ window.itemlist['i'+ info.itemType].name;
+										}
+
+										ownMight = info.contestValue;
+										break;
+									}
+								}
+
+								KOCFIA.tournament.$div
+									.find('.rank').html( info.ranking ).end()
+									.find('.score').html( Shared.readable(ownMight) ).end()
+									.find('.reward').html( reward );
+
+
+								for( var i = 0; i < result.data.length; i += 1 ){
+									info = result.data[ i ];
+
+									if( info.itemType === 0 ){
+										reward = info.itemCount +' '+ window.g_js_strings.commonstr.gems;
+									} else {
+										reward = info.itemCount +' '+ (Object.isObject(window.itemlist['i'+ info.itemType]) ? window.itemlist['i'+ info.itemType].name : '');
+									}
+
+									data.push({
+										id: i,
+										position: info.ranking,
+										player: info.name,
+										guild: (info.hasOwnProperty('alliance') ? info.alliance : ''),
+										score: info.contestValue,
+										delta: info.contestValue - ownMight,
+										reward: reward,
+										diplomacy: ( alliances.hasOwnProperty(info.alliance) ? alliances[ info.alliance ] : 0 )
+									});
+								}
+
+								KOCFIA.tournament.rowColor.length = 0; //reset color array
+
+								KOCFIA.tournament.data = data;
+
+							//update grid
+								KOCFIA.tournament.$grid.jqGrid('setGridParam', {data: KOCFIA.tournament.data}).trigger('reloadGrid');
+
 							if( !KOCFIA.conf.tournament.onGoing ){
 								KOCFIA.conf.tournament.onGoing = 1;
 								Shared.storeConf();
@@ -21619,13 +21866,19 @@ jQuery(document).ready(function(){
 								window.setTimeout(function(){ $soundTournament.remove(); }, 30000);
 							}
 						} else if( KOCFIA.conf.tournament.onGoing ){
-							KOCFIA.conf.tournament.onGoing = 1;
+							KOCFIA.tournament.$div
+								.find('.one').hide().end()
+								.find('.none').show();
+
+							KOCFIA.conf.tournament.onGoing = 0;
 							Shared.storeConf();
 						}
 					} else {
 						attempts -= 1;
 						if( attempts > 0 ){
 							KOCFIA.tournament.checkTournament( attempts );
+						} else {
+							Shared.notify('Erreur de requête');
 						}
 					}
 				})
@@ -21633,6 +21886,8 @@ jQuery(document).ready(function(){
 					attempts -= 1;
 					if( attempts > 0 ){
 						KOCFIA.tournament.checkTournament( attempts );
+					} else {
+						Shared.notify('Erreur internet ou serveur');
 					}
 				});
 		};

@@ -2826,3 +2826,17 @@ html, body {
 		width: 30%;
 		padding: 2px 5px;
 	}
+
+/* search */
+	#kocfia-search fieldset {
+		margin: 0;
+	}
+
+	#kocfia-search .alliance {
+		margin-top: 40px;
+	}
+
+	#kocfia-search .fieldset input {
+		width: 100px;
+		text-align: center;
+	}

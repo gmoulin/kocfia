@@ -153,7 +153,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.7.2',
+		version: '0.8.0',
 		userScriptLoaderVersion: 3,
 		debug: true,
 		debugWhat: { //comment module line for no debug
@@ -181,6 +181,7 @@ jQuery(document).ready(function(){
 			alarm: 1,
 			hospital: 1,
 			throne: 1,
+			set: 1,
 			quickMarch: 1,
 			reports: 1,
 			search: 1,
@@ -203,6 +204,7 @@ jQuery(document).ready(function(){
 			'alarm',
 			'hospital',
 			'throne',
+			'set',
 			'quickMarch',
 			'reports',
 			'search',
@@ -233,6 +235,7 @@ jQuery(document).ready(function(){
 			alarm: 'Alertes',
 			hospital: 'Hôpital',
 			throne: 'Salle du trône',
+			set: 'Utilisation optimisée des sets de la salle du thrône',
 			quickMarch: 'Marches simplifiées',
 			reports: 'Rapports',
 			search: 'Recherche de joueurs et alliances',
@@ -259,6 +262,7 @@ jQuery(document).ready(function(){
 			build: 'Constructions',
 			hospital: 'Hôpital',
 			throne: 'Trône',
+			set: 'Set',
 			quickMarch: 'Marche',
 			reports: 'Rapports',
 			search: 'Recherche',
@@ -2512,13 +2516,13 @@ jQuery(document).ready(function(){
 					});
 			};
 
-			Shared.cssDiplomacy = {
-				'neutre': '',
+			Shared.diplomacyLabels = {
+				'neutral': 'neutre',
 				'hostile': 'hostile',
-				'amical': 'friendly',
-				'allié': 'ally',
-				'allié envers vous': 'friendly-to-you',
-				'allié envers eux': 'friendly-to-them'
+				'friendly': 'amical',
+				'ally': 'allié',
+				'friendly-to-you': 'amical envers vous',
+				'friendly-to-them': 'amical envers eux'
 			};
 
 			Shared.getDiplomacy = function( allianceId ){
@@ -2526,22 +2530,23 @@ jQuery(document).ready(function(){
 
 				if( allianceId === null || allianceId == '?' ) return '';
 
-				if( allianceId === '' ) return 'aucune';
+				if( allianceId === '' ) return '';
 
 				if( window.seed.allianceDiplomacies === null || $.isEmptyObject(window.seed.allianceDiplomacies) ){
-					return 'neutre';
+					return 'neutral';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendlyToYou') && window.seed.allianceDiplomacies.friendlyToYou && window.seed.allianceDiplomacies.friendlyToYou.hasOwnProperty( 'a' + allianceId ) ){
-					return 'amical envers vous';
+					return 'friendly-to-you';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendlyToThem') && window.seed.allianceDiplomacies.friendlyToThem && window.seed.allianceDiplomacies.friendlyToThem.hasOwnProperty( 'a' + allianceId ) ){
-					return 'amical envers eux';
+					return 'friendly-to-them';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('friendly') && window.seed.allianceDiplomacies.friendly && window.seed.allianceDiplomacies.friendly.hasOwnProperty( 'a' + allianceId ) ){
-					return 'amical';
+					return 'friendly';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('hostile') && window.seed.allianceDiplomacies.hostile && window.seed.allianceDiplomacies.hostile.hasOwnProperty( 'a' + allianceId ) ){
 					return 'hostile';
 				} else if( window.seed.allianceDiplomacies.hasOwnProperty('allianceId') && window.seed.allianceDiplomacies.allianceId == allianceId ){
-					return 'allié';
+					return 'ally';
 				}
-				return 'neutre';
+
+				return 'neutral';
 			};
 
 			Shared.playerStatusLink = function( playerId ){
@@ -4874,7 +4879,7 @@ jQuery(document).ready(function(){
 				}
 			});
 
-			if( !$.isEmptyObject(msg) ){
+			if( msg !== '' ){
 				$tr.find('.info').append( '<div data-timestamp="'+ timestamp +'">'+ msg +'</div>' );
 			}
 		};
@@ -6139,7 +6144,7 @@ jQuery(document).ready(function(){
 				}
 			});
 
-			if( !$.isEmptyObject(msg) ){
+			if( msg !== '' ){
 				$tr.find('.info').append('<div data-timestamp="'+ timestamp +'">'+ msg +'</div>');
 			}
 		};
@@ -7433,7 +7438,7 @@ jQuery(document).ready(function(){
 				}
 			});
 
-			if( !$.isEmptyObject(msg) ){
+			if( msg !== '' ){
 				$tr.find('.info').append('<div data-timestamp="'+ timestamp +'">'+ msg +'</div>');
 			}
 		};
@@ -8085,7 +8090,7 @@ jQuery(document).ready(function(){
 					{name: 'player', index: 'player', width: 100},
 					{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
 					{name: 'guild', index: 'guild', width: 100},
-					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ var d = Shared.getDiplomacy(cellValue); if( d !== 'neutral' ){ KOCFIA.map.rowColor.cities.push({id: options.rowId, css: Shared.cssDiplomacy[ d ] }); } return d; }, width: 70},
+					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ var d = Shared.getDiplomacy(cellValue); if( d !== 'neutral' ){ KOCFIA.map.rowColor.cities.push({id: options.rowId, css: d}); } return (Shared.diplomacyLabels.hasOwnProperty(d) ? Shared.diplomacyLabels[ d ] : ''); }, width: 70},
 					{name: 'mist', index: 'mist', align: 'center', formatter: function( cellValue, options, rowObject ){ return cellValue === 1 ? 'Oui' : ''; }, width: 55},
 					{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
 					{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
@@ -8138,7 +8143,7 @@ jQuery(document).ready(function(){
 					{name: 'player', index: 'player', width: 100},
 					{name: 'might', index: 'might', align: 'right', defval: 0, sorttype: 'int', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 50},
 					{name: 'guild', index: 'guild', width: 100},
-					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ var d = Shared.getDiplomacy(cellValue); if( d !== 'neutral' ){ KOCFIA.map.rowColor.wilderness.push({id: options.rowId, css: Shared.cssDiplomacy[ d ] }); } return d; }, width: 70},
+					{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ var d = Shared.getDiplomacy(cellValue); if( d !== 'neutral' ){ KOCFIA.map.rowColor.wilderness.push({id: options.rowId, css: d}); } return (Shared.diplomacyLabels.hasOwnProperty(d) ? Shared.diplomacyLabels[ d ] : ''); }, width: 70},
 					{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
 					{name: 'playerStatus', index: 'playerStatus', search: false, width: 90}
 				],
@@ -8509,7 +8514,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map addTilesInfo function');
 			if( !$('#mapwindow').is(':visible') || !KOCFIA.conf.map.additionalInfo ) return;
 
-			var id, tile, user, alliance, name, might, text, diplomacy;
+			var id, tile, user, alliance, name, might, text;
 			for( id in result.data ){
 				if( result.data.hasOwnProperty(id) ){
 					tile = result.data[id];
@@ -8525,9 +8530,8 @@ jQuery(document).ready(function(){
 								user = result.userInfo['u'+ tile.tileUserId];
 								alliance = (result.allianceNames.hasOwnProperty('a' + user.a) ? result.allianceNames['a' + user.a] : '');
 								name = user.n;
-								diplomacy = Shared.getDiplomacy(user.a);
 
-								text = '<span class="kocfia-map-tile-info '+ Shared.cssDiplomacy[ diplomacy ] +'">';
+								text = '<span class="kocfia-map-tile-info '+ Shared.getDiplomacy(user.a) +'">';
 								text += tile.tileLevel;
 								text += ', '+ name;
 								text += ', '+ Shared.format(user.m); //might
@@ -8553,9 +8557,8 @@ jQuery(document).ready(function(){
 									name = user.n;
 									might = Shared.format(user.m);
 									alliance = (result.allianceNames.hasOwnProperty('a' + user.a) ? result.allianceNames['a' + user.a] : '');
-									diplomacy = Shared.getDiplomacy(user.a);
 
-									text = '<span class="kocfia-map-tile-info '+ Shared.cssDiplomacy[ diplomacy ] +'">';
+									text = '<span class="kocfia-map-tile-info '+ Shared.getDiplomacy(user.a) +'">';
 									text += tile.tileLevel;
 									text += ', '+ name;
 									text += ', '+ Shared.format(user.m); //might
@@ -12345,7 +12348,7 @@ jQuery(document).ready(function(){
 				}
 			});
 
-			if( !$.isEmptyObject(msg) ){
+			if( msg !== '' ){
 				$div.append( '<div data-timestamp="'+ timestamp+'">'+ msg +'</div>' );
 			}
 		};
@@ -15102,7 +15105,7 @@ jQuery(document).ready(function(){
 								return dfd.pipe( byKnight(dfd) );
 							})
 							.fail(function(){
-								return dfd.fail();
+								return dfd.reject();
 							});
 					} else {
 						knightIndex++;
@@ -19455,7 +19458,8 @@ jQuery(document).ready(function(){
 			},
 			maxItems: 60,
 			stored: ['improvements'],
-			improvements: {}
+			improvements: {},
+			setNames: {}
 		};
 
 		//favoris
@@ -19633,6 +19637,48 @@ jQuery(document).ready(function(){
 			}
 
 			return summary;
+		};
+
+		KOCFIA.throne.getObjectLabel = function( itemId ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getObjectLabel function');
+
+			var label = '',
+				summary = {},
+				slot, effect,
+				effectRank, effectInfo, tierInfo, bonus,
+				item, itemObject;
+
+			if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
+				item = window.seed.throne.inventory[ itemId ];
+				if( item && Object.isObject(item) ){
+					itemObject = new cm.ThroneItemModel(item.id, item);
+
+					for( slot in item.effects ){
+						if( item.effects.hasOwnProperty(slot) ){
+							effect = item.effects[ slot ];
+							effectRank = parseInt(slot.replace(/slot/, ''), 10);
+							if( effectRank <= item.quality ){
+								tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
+								bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+
+								if( !summary.hasOwnProperty(effect.id) ){
+									effectInfo = window.cm.thronestats.effects[ effect.id ];
+									summary[ effect.id ] = {
+										label: effectInfo[1],
+										percent: bonus
+									};
+								} else {
+									summary[ effect.id ].percent += bonus;
+								}
+							}
+						}
+					}
+
+					label = itemObject.name +' - '+ $.map(summary, function(effect){ return effect.label +' '+ effect.percent +'%'; }).join(', ');
+				}
+			}
+
+			return label;
 		};
 
 	/* REPORTS */
@@ -19910,8 +19956,8 @@ jQuery(document).ready(function(){
 				.on('click', '.load', function(){
 					var $this = $(this),
 						$fieldset = $this.closest('.boundary'),
-						min = $.trim($fieldset.find('.min')),
-						max = $.trim($fieldset.find('.max')),
+						min = $.trim( $fieldset.find('.min').val() ),
+						max = $.trim( $fieldset.find('.max').val() ),
 						type = $fieldset.hasClass('mine') ? 'mine' : 'alliance';
 
 					if( min === '' || max === '' ){
@@ -19951,8 +19997,6 @@ jQuery(document).ready(function(){
 				})
 				.find('.ui-jqgrid-titlebar-close').click(function(e){
 					e.stopPropagation();
-
-					console.log(this, $(this));
 
 					$(this)
 						.filter('.ui-icon-circle-triangle-s') //grid was closed ?
@@ -20525,7 +20569,7 @@ jQuery(document).ready(function(){
 											if( computed.isPvP == 2 ){
 												computed.isPvP = true;
 
-												if( isSelf(report.side0PlayerId) || Shared.getDiplomacy(report.side0AllianceId) == 'allié' ){
+												if( isSelf(report.side0PlayerId) || Shared.getDiplomacy(report.side0AllianceId) == 'ally' ){
 													computed.isGuildMateDefending = true;
 												}
 											}
@@ -20704,13 +20748,13 @@ jQuery(document).ready(function(){
 						} else {
 							if( data.msg ){
 								console.log( data.msg );
-								return dfd.fail();
+								return dfd.reject();
 							} else {
 								attempts -= 1;
 								if( attempts > 0 ){
 									window.setTimeout(function(){ return dfd.pipe( fetchPage(dfd, attempts) ); }, 5000);
 								} else {
-									return dfd.fail();
+									return dfd.reject();
 								}
 							}
 						}
@@ -20720,7 +20764,7 @@ jQuery(document).ready(function(){
 						if( attempts > 0 ){
 							window.setTimeout(function(){ return dfd.pipe( fetchPage(dfd, attempts) ); }, 5000);
 						} else {
-							return dfd.fail();
+							return dfd.reject();
 						}
 					});
 			};
@@ -21470,7 +21514,126 @@ jQuery(document).ready(function(){
 			options: {
 				active: 0
 			},
-			stored: []
+			stored: [],
+			fetching: {
+				player: false,
+				alliance: false
+			}
+		};
+
+		/* grid related */
+		KOCFIA.search.gridRowActions = function( cellValue, options, rowObject ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search gridRowActions function', cellValue, options, rowObject);
+			var code = '';
+
+			if( rowObject.hasOwnProperty('fbUserId') && rowObject.fbUserId.length > 0 ){
+				code += '<a href="http://www.facebook.com/profile.php?id='+ rowObject.fbUserId +'" target="_blank" class="icon-facebook-sign profile"></a>';
+			}
+
+			return code;
+		};
+
+		KOCFIA.search.data = {
+			cities: [],
+			players: [],
+			alliances: [],
+			myAlliance: []
+		};
+
+		KOCFIA.search.selection = {
+			cities: {},
+			players: {}
+		};
+
+		KOCFIA.search.gridParams = {
+			shared: {
+				datatype: 'local',
+				loadui: 'disable',
+				rowNum: 20,
+				rowList: [20, 50, 100],
+				sortname: 'date',
+				sortorder: 'desc',
+				altRows: true,
+				altclass: 'zebra',
+				height: 'auto',
+				autowidth: true,
+				viewrecords: true, //total in pager
+				gridview: true, //speed boost
+				hiddengrid: true,
+				multiselect: true,
+				multiboxonly: true,
+				multikey: 'shiftKey',
+				shrinkToFit: true
+			},
+			cities: {
+				colNames: ['', 'Nom'],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'name', index: 'name', width: 100}
+				],
+				caption: 'Liste des Joueurs',
+				pager: '#kocfia-search-pager-player',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					if( checked ){
+						KOCFIA.search.selection.cities[ key ] = key;
+					} else {
+						delete KOCFIA.search.selection.cities[ key ];
+					}
+				}
+			},
+			players: {
+				colNames: ['', 'Nom', ''],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'player', index: 'player', width: 100},
+					{name: 'fbUserId', index: 'fbUserId', hidedlg: true, hidden: true, search: false, sortable: false}
+				],
+				caption: 'Liste des Joueurs',
+				pager: '#kocfia-search-pager-player',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					if( checked ){
+						KOCFIA.search.selection.players[ key ] = key;
+					} else {
+						delete KOCFIA.search.selection.players[ key ];
+					}
+				}
+			},
+			alliances: {
+				colNames: ['', 'Nom'],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'guild', index: 'guild', width: 100}
+				],
+				caption: 'Liste des Alliances',
+				pager: '#kocfia-search-pager-alliance',
+				onSelectRow: function(key, checked){
+					//xxxyyy -> xxx,yyy with padded 0 cleaned
+					if( checked ){
+						KOCFIA.search.selection.alliances[ key ] = key;
+					} else {
+						delete KOCFIA.search.selection.alliances[ key ];
+					}
+				}
+			},
+			myAlliance: {
+				colNames: ['', 'Nom', 'Puissance', 'Villes', 'Poste', 'Connexion', 'Gloire', 'Depuis', '', ''],
+				colModel: [
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'name', index: 'name', width: 100},
+					{name: 'might', index: 'might', formatter: function( cellValue, options, rowObject ){ return Shared.format( cellValue ); }, width: 50},
+					{name: 'cities', index: 'cities', width: 200}, //@TODO split cities
+					{name: 'position', index: 'position', width: 100},
+					{name: 'glory', index: 'glory', formatter: function( cellValue, options, rowObject ){ return Shared.format( cellValue ); }, width: 50},
+					{name: 'lastLogin', index: 'lastLogin', width: 100},
+					{name: 'dateJoined', index: 'dateJoined', width: 100},
+					{name: 'userId', index: 'userId', hidedlg: true, hidden: true, search: false, sortable: false},
+					{name: 'fbUserId', index: 'fbUserId', hidedlg: true, hidden: true, search: false, sortable: false}
+				],
+				caption: 'Membres de l\'Alliance',
+				pager: '#kocfia-search-pager-myAlliance'
+			}
 		};
 
 		KOCFIA.search.confPanel = function( $section ){
@@ -21486,6 +21649,135 @@ jQuery(document).ready(function(){
 		KOCFIA.search.modPanel = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-search').html('');
+
+			var code = '<div class="infos">';
+			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '</div>';
+			code += KOCFIA.search.getHelp();
+
+			//grids
+			code += '<fieldset class="players form">';
+			code += '<legend>Recherche Joueur</legend>';
+			code += '<label>Nom comportant&nbsp;:&nbsp;</label><input type="text" value="">';
+			code += '<button class="button secondary load"><span>Charger</span></button>';
+			code += '</fieldset>';
+			code += '<table id="kocfia-search-players" class="search-results"></table>';
+			code += '<div id="kocfia-search-pager-players" class="search-pager"></div>';
+
+			code += '<fieldset class="alliances form">';
+			code += '<legend>Recherche d\'Alliance</legend>';
+			code += '<label>Nom comportant&nbsp;:&nbsp;</label><input type="text" value="">';
+			code += '<button class="button secondary load"><span>Charger</span></button>';
+			code += '</fieldset>';
+			code += '<table id="kocfia-search-alliances" class="search-results"></table>';
+			code += '<div id="kocfia-search-pager-alliances" class="search-pager"></div>';
+
+			code += '<div class="myAlliance form"><button class="button secondary load"><span>Recharger les membres de l\'Alliance</span></button></div>';
+			code += '<table id="kocfia-search-myAlliance" class="search-results"></table>';
+			code += '<div id="kocfia-search-pager-myAlliance" class="search-pager"></div>';
+
+			code += '<table id="kocfia-search-cities" class="search-results"></table>';
+			code += '<div id="kocfia-search-pager-cities" class="search-pager"></div>';
+
+			$section.append( code );
+
+			//grids
+			KOCFIA.search.$resultsPlayers = $section.find('#kocfia-search-players')
+				.jqGrid( $.extend({}, KOCFIA.search.gridParams.shared, KOCFIA.search.gridParams.players) )
+				.jqGrid('navGrid', '#kocfia-search-pager-players', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-search-pager-players', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.search.$resultsPlayers[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-search-pager-players', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.search.$resultsPlayers[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('filterToolbar');
+
+			KOCFIA.search.$resultsAlliance = $section.find('#kocfia-search-alliances')
+				.jqGrid( $.extend({}, KOCFIA.search.gridParams.shared, KOCFIA.search.gridParams.alliances) )
+				.jqGrid('navGrid', '#kocfia-search-pager-alliances', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-search-pager-alliances', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.search.$resultsAlliances[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-search-pager-alliances', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.search.$resultsAlliances[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('filterToolbar');
+
+			KOCFIA.search.$resultsMyAlliance = $section.find('#kocfia-search-myAlliance')
+				.jqGrid( $.extend({}, KOCFIA.search.gridParams.shared, KOCFIA.search.gridParams.myAlliance) )
+				.jqGrid('navGrid', '#kocfia-search-pager-myAlliance', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-search-pager-myAlliance', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.search.$resultsMyAlliance[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-search-pager-myAlliance', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.search.$resultsMyAlliance[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('filterToolbar');
+
+			KOCFIA.search.$resultsCities = $section.find('#kocfia-search-cities')
+				.jqGrid( $.extend({}, KOCFIA.search.gridParams.shared, KOCFIA.search.gridParams.cities) )
+				.jqGrid('navGrid', '#kocfia-search-pager-cities', {edit: false, add: false, del: false, refresh: false}, {}, {}, {}, {multipleSearch: true})
+				.jqGrid('navButtonAdd', '#kocfia-search-pager-cities', {caption: '', title: 'Filtre rapide', buttonicon: 'icon-pushpin', onClickButton: function(){ KOCFIA.search.$resultsCities[0].toggleToolbar(); }, position: 'last'})
+				.jqGrid('navButtonAdd','#kocfia-search-pager-cities', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.search.$resultsCities[0].clearToolbar(); }, position: 'last'})
+				.jqGrid('filterToolbar');
+
+			//grid listeners
+			$section
+				.on('click', '.attack, .scout, .reinforce', function(){
+					if( KOCFIA.conf.quickMarch.on ){
+						var $this = $(this),
+							type = 'attack';
+
+						if( $this.hasClass('attack') ) type = 'attack';
+						else if( $this.hasClass('scout')) type = 'scout';
+						else if( $this.hasClass('reinforce')) type = 'reinforce';
+
+						KOCFIA.$confPanel.find('#kocfia-conf-panel-tabs').find('a').filter('[href$="quickMarch"]').trigger('click');
+
+						$('#kocfia-quickMarch')
+							.find('.type').find('#kocfia-quickMarch-type-'+ type).prop('checked').end()
+							.find('.coord').val( $this.attr('data-coord') ).trigger('change');
+					} else {
+						alert('L\'onglet marche simplifées n\'est pas actif.');
+					}
+				})
+				.on('click', '.load', function(){
+					var $this = $(this),
+						$form = $this.closest('.form'),
+						text = $.trim( $fieldset.find('input').val() ),
+						type = $.trim( $form.attr('class').replace(/form/, '') );
+
+					if( text === '' || text.length === 0 ){
+						return false;
+					}
+
+					$this.removeClass('load secondary').addClass('stop danger').find('span').html('Arrêter');
+
+					KOCFIA.search.fetching[ type ] = true;
+
+					KOCFIA.search.load(type, text, null);
+				})
+				.on('click', '.stop', function(){
+					var $this = $(this),
+						type = $.trim( $form.attr('class').replace(/form/, '') );
+
+					$this.removeClass('stop danger').addClass('load secondary').find('span').html('Charger');
+
+					KOCFIA.search.fetching[ type ] = false;
+				})
+				.on('click', '.ui-jqgrid-titlebar', function(){
+					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
+				})
+				.find('.ui-jqgrid-titlebar-close').click(function(e){
+					e.stopPropagation();
+
+					$(this)
+						.filter('.ui-icon-circle-triangle-s') //grid was closed ?
+						.closest('.ui-jqgrid-view').siblings('.ui-jqgrid-view') //get other grids
+						.find('.ui-icon-circle-triangle-n').parent().trigger('click'); //close them
+				})
+				;
+
+			KOCFIA.$confPanel.on('resizestop', function(){
+				if( KOCFIA.search.$div.is(':visible') ){
+					var size = KOCFIA.search.$div.find('.player').innerWidth() + 1;
+					KOCFIA.search.$resultsPlayer.jqGrid('setGridWidth', size);
+					KOCFIA.search.$resultsAlliance.jqGrid('setGridWidth', size);
+					KOCFIA.search.$resultsMyAlliance.jqGrid('setGridWidth', size);
+					KOCFIA.search.$resultsCities.jqGrid('setGridWidth', size);
+				}
+			});
+
+			KOCFIA.search.$div = KOCFIA.$confPanel.find('#kocfia-search');
 		};
 
 		KOCFIA.search.on = function(){
@@ -21494,6 +21786,353 @@ jQuery(document).ready(function(){
 
 		KOCFIA.search.off = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search off function');
+		};
+
+		KOCFIA.search.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search getHelp function');
+			var help = '<div id="kocfia-search-help" class="help" title="Aide gestion des '+ KOCFIA.modulesLabel.search +'">';
+
+			var texts = {
+				'Informations et limitations :': [
+
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
+
+			return help;
+		};
+
+		KOCFIA.search.load = function( type, text, id ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load function', text, type);
+
+			if( type == 'myAlliance' && (window.seed.allianceDiplomacies === null || window.seed.allianceDiplomacies.allianceName === null) ){
+				Shared.notify('Vous ne faites pas parti d\'une alliance.');
+				return false;
+			}
+
+			var displayResults = function( dfd, info ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred displayResults function');
+				if( !KOCFIA.search.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				$('.tipsy').remove();
+
+				if( info.length > 0 ){
+					KOCFIA.search.data[ type ] = KOCFIA.search.data[ type ].concat(info);
+					if( type == 'players' ){
+						KOCFIA.search.$resultsPlayers.jqGrid('setGridParam', {data: KOCFIA.search.data.players}).trigger('reloadGrid');
+					} else if( type == 'alliances' ) {
+						KOCFIA.search.$resultsAlliances.jqGrid('setGridParam', {data: KOCFIA.search.data.alliances}).trigger('reloadGrid');
+					} else if( type == 'myAlliance' ) {
+						KOCFIA.search.$resultsMyAlliance.jqGrid('setGridParam', {data: KOCFIA.search.data.myAlliance}).trigger('reloadGrid');
+					} else if( type == 'cities' ) {
+						KOCFIA.search.$resultsCities.jqGrid('setGridParam', {data: KOCFIA.search.data.cities}).trigger('reloadGrid');
+					}
+				}
+			};
+
+			var fetchAlliancesList = function( dfd, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred fetchAllianceList function');
+				if( !KOCFIA.search.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				var params = $.extend({}, window.g_ajaxparams);
+				params.allianceName = text;
+
+				$.ajax({
+						url: window.g_ajaxpath + "ajax/allianceGetSearchResults.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function( data ){
+						if( !KOCFIA.search.fetching[ type ] ){
+							return dfd.resolve();
+						}
+
+						if( data.ok ){
+							//@TODO
+
+							return dfd.pipe( displayResults(dfd, alliances) );
+						} else {
+							if( data.msg ){
+								console.log( data.msg );
+								return dfd.reject();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									window.setTimeout(function(){ return dfd.pipe( fetchAlliancesList(dfd, attempts) ); }, 2000);
+								} else {
+									return dfd.reject();
+								}
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){ return dfd.pipe( fetchAlliancesList(dfd, attempts) ); }, 2000);
+						} else {
+							return dfd.reject();
+						}
+					});
+			};
+
+			var fetchMyAllianceInfo = function( dfd, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred fetchMyAllianceMembers function');
+				if( !KOCFIA.search.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				var params = $.extend({}, window.g_ajaxparams);
+				params.pf = 0;
+
+				$.ajax({
+						url: window.g_ajaxpath + "ajax/allianceGetInfo.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function( data ){
+						if( !KOCFIA.search.fetching[ type ] ){
+							return dfd.resolve();
+						}
+
+						if( data.ok ){
+							numMembers = data.allianceMembers;
+							pageNum = 1;
+
+							return dfd.pipe( fetchMyAllianceMembers(dfd, 3) );
+						} else {
+							if( data.msg ){
+								console.log( data.msg );
+								return dfd.reject();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									window.setTimeout(function(){ return dfd.pipe( fetchMyAllianceInfo(dfd, attempts) ); }, 2000);
+								} else {
+									return dfd.reject();
+								}
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){ return dfd.pipe( fetchMyAllianceInfo(dfd, attempts) ); }, 2000);
+						} else {
+							return dfd.reject();
+						}
+					});
+			};
+
+			var fetchMyAllianceMembers = function( dfd, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred fetchMyAllianceInfo function');
+				if( !KOCFIA.search.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				if( pageNum > 10 || members.length >= numMembers ){
+					return dfd.pipe( displayResults(dfd, members) );
+				}
+
+				var params = $.extend({}, window.g_ajaxparams);
+				params.pf = 0;
+				params.pageNo = pageNum;
+
+				$.ajax({
+						url: window.g_ajaxpath + "ajax/allianceGetMembersInfo.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function( data ){
+						if( !KOCFIA.search.fetching[ type ] ){
+							return dfd.resolve();
+						}
+
+						if( data.ok ){
+							for( m in data.memberInfo ){
+								if( data.memberInfo.hasOwnProperty(m) ){
+									member = data.memberInfo[ m ];
+
+									members.push ({
+										name: member.name,
+										might: member.might,
+										cities: member.cities,
+										position: member.positionType,
+										lastLogin: member.lastLogin,
+										userId: member.userId,
+										fbUserId: member.fbUserId,
+										avatar: member.avatar,
+										glory: member.glory,
+										dateJoined: member.dateJoined
+									});
+								}
+							}
+
+							pageNum += 1;
+							return dfd.pipe( fetchMyAllianceMembers(dfd, 3) );
+						} else {
+							if( data.msg ){
+								console.log( data.msg );
+								return dfd.reject();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									window.setTimeout(function(){ return dfd.pipe( fetchPlayerInfo(dfd, attempts) ); }, 2000);
+								} else {
+									return dfd.reject();
+								}
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){ return dfd.pipe( fetchPlayerInfo(dfd, attempts) ); }, 2000);
+						} else {
+							return dfd.reject();
+						}
+					});
+			};
+
+			var fetchPlayerInfo = function( dfd, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred fetchPlayerInfo function');
+				if( !KOCFIA.search.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				var params = $.extend({}, window.g_ajaxparams);
+				params.uid = id;
+
+				$.ajax({
+						url: window.g_ajaxpath + "ajax/getUserGeneralInfo.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function( data ){
+						if( !KOCFIA.search.fetching[ type ] ){
+							return dfd.resolve();
+						}
+
+						if( data.ok ){
+							//@TODO
+						} else {
+							if( data.msg ){
+								console.log('getUserGeneralInfo.php error ', data.msg );
+								return dfd.reject();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									window.setTimeout(function(){ return dfd.pipe( fetchPlayerInfo(dfd, attempts) ); }, 2000);
+								} else {
+									return dfd.reject();
+								}
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){ return dfd.pipe( fetchPlayerInfo(dfd, attempts) ); }, 2000);
+						} else {
+							return dfd.reject();
+						}
+					});
+			};
+
+			var fetchPlayersList = function( dfd, attempts ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred fetchPlayersList function');
+				if( !KOCFIA.search.fetching[ type ] ){
+					return dfd.resolve();
+				}
+
+				var params = $.extend({}, window.g_ajaxparams);
+
+				params.searchName = text;
+				params.subType = "ALLIANCE_INVITE";
+
+				$.ajax({
+						url: window.g_ajaxpath + "ajax/searchPlayers.php" + window.g_ajaxsuffix,
+						type: 'post',
+						data: params,
+						dataType: 'json',
+						timeout: 10000
+					})
+					.done(function( data ){
+						if( !KOCFIA.search.fetching[ type ] ){
+							return dfd.resolve();
+						}
+
+						if( data.ok ){
+							//@TODO
+						} else {
+							if( data.msg ){
+								console.log( data.msg );
+								return dfd.reject();
+							} else {
+								attempts -= 1;
+								if( attempts > 0 ){
+									window.setTimeout(function(){ return dfd.pipe( fetchPlayerInfo(dfd, attempts) ); }, 2000);
+								} else {
+									return dfd.reject();
+								}
+							}
+						}
+					})
+					.fail(function(){
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){ return dfd.pipe( fetchPlayerInfo(dfd, attempts) ); }, 2000);
+						} else {
+							return dfd.reject();
+						}
+					});
+			};
+
+			var sequence = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search load deferred sequence function');
+				return $.Deferred(function( dfd ){
+					if( type == 'myAlliance' ){
+						members = [];
+						return dfd.pipe( fetchMyAllianceInfo(dfd, 3) );
+					} else if( type == 'alliances' ){
+						alliances = [];
+						return dfd.pipe( fetchAlliancesList(dfd, 3) );
+					} else if( type == 'players' ){
+						return dfd.pipe( fetchPlayersList(dfd, 3) );
+					} else if( type == 'cities' ){
+						return dfd.pipe( fetchPlayerInfo(dfd, 3) );
+					}
+				}).promise();
+			};
+
+			var pageNum,
+				numMembers, members, member, m,
+				alliances;
+
+			$.when( sequence() )
+				.fail(function(){
+					Shared.notify('Erreur durant le chargement des pages de votre recherche');
+				})
+				.always(function(){
+					KOCFIA.search.$div
+						.find('fieldset').filter('.'+ type)
+						.find('.button').removeClass('danger stop').addClass('secondary load')
+						.find('span').html('Charger');
+
+					KOCFIA.search.fetching[ type ] = false;
+				});
 		};
 
 	/* GIFTS */
@@ -21615,7 +22254,7 @@ jQuery(document).ready(function(){
 				{name: 'score', index: 'score', formatter: function( cellValue, options, rowObject ){ return Shared.readable(cellValue); }, width: 100},
 				{name: 'delta', index: 'delta', formatter: function( cellValue, options, rowObject ){ return Shared.format(cellValue); }, width: 100},
 				{name: 'reward', index: 'reward', width: 100},
-				{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ if( cellValue > 0 ){ var d = Shared.getDiplomacy( cellValue ); if( d != 'neutre' ){ KOCFIA.tournament.rowColor.push({id: options.rowId, css: Shared.cssDiplomacy[ d ]}); } } return cellValue; }, hidedlg: true, hidden: true, search: false, sortable: false}
+				{name: 'diplomacy', index: 'diplomacy', formatter: function( cellValue, options, rowObject ){ if( cellValue > 0 ){ var d = Shared.getDiplomacy( cellValue ); if( d != 'neutral' ){ KOCFIA.tournament.rowColor.push({id: options.rowId, css: d}); } } return (Shared.diplomacyLabels.hasOwnProperty(d) ? Shared.diplomacyLabels[d] : ''); }, hidedlg: true, hidden: true, search: false, sortable: false}
 			],
 			caption: 'Classement',
 			pager: '#kocfia-tournament-pager',
@@ -21905,6 +22544,655 @@ jQuery(document).ready(function(){
 			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
+		};
+
+	/* THRONE SETS */
+		KOCFIA.set = {
+			options: {
+				active: 0,
+				automatic: 0
+			},
+			stored: ['pairs', 'currentPair', 'previousSet', 'previousEquipedItems'],
+			tasks: ['formation', 'hospital', 'transport', 'reassign'/*, 'repair', 'research', 'build'*/],
+			pairs: {}, //by task
+			currentPair: '',
+			previousEquipedItems: {}, //by type
+			previousSet: '',
+			itemTypes: ['advisor', 'chair', 'banner', 'table', /*'trophy',*/ 'window'],
+			labels: {
+				'repair': 'Réparation des objets de trône',
+				'noSwap': 'Ne pas changer ce type d\'objet',
+				'briton': 'Un objet de la faction Briton',
+				'druid': 'Un objet de la faction Druid',
+				'fey': 'Un objet de la faction Fey'
+			}
+		};
+
+		//@TODO manage under attack flag
+		//@TODO change tasks to do throne items swap
+
+		KOCFIA.set.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.set +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('set', 'active', 'Activer', KOCFIA.conf.set.active);
+			code += Shared.generateCheckbox('set', 'automatic', 'Equiper les sets automatiquement', KOCFIA.conf.set.automatic);
+			code += Shared.generateButton('rules', 'deletePairs', 'Supprimer toutes les couples set - tâche enregistrés');
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.set.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set setPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-set').html('');
+
+			var help = KOCFIA.set.getHelp();
+
+			var code = '<div class="infos">';
+			code += '<span class="buttonset"><input type="checkbox" id="set-panel-automatic" '+ (KOCFIA.conf.set.automatic ? 'checked' : '') +' autocomplete="off" />';
+			code += '<label for="set-panel-automatic">Equiper les sets automatiquement</label></span>';
+			code += '<button class="button secondary history-toggle" title="Historique '+ KOCFIA.modulesLabel.set +'"><span>Historique</span></button>';
+			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '</div><h3>Configurations</h3>';
+			code += '<div class="accordion">';
+			for( var i = 0; i < KOCFIA.set.tasks.length; i += 1 ){
+				code += KOCFIA.set.getForm( KOCFIA.set.tasks[ i ] );
+			}
+			code += '</div>';
+			code += '<div class="log"></div>';
+			code += help;
+			code += '<div id="kocfia-set-history" class="history" title="Historique '+ KOCFIA.modulesLabel.set +'"></div>';
+
+			$section.append( code )
+			//listener
+				.on('change', '#set-panel-automatic', function(){
+					$('#set-automatic').prop('checked', $(this).prop('checked')).change();
+				});
+
+			$section.find('.accordion')
+				.accordion({
+					collapsible: true,
+					autoHeight: false,
+					animated: false,
+					change: function(event, ui){
+						KOCFIA.$confPanelWrapper[0].scrollTop = 0;
+						KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
+					}
+				})
+				.accordion('activate', false);
+
+			KOCFIA.set.addSectionListeners();
+
+			KOCFIA.set.$div = KOCFIA.$confPanel.find('#kocfia-set');
+			KOCFIA.set.$history = KOCFIA.set.$div.find('#kocfia-set-history');
+			KOCFIA.set.$log = KOCFIA.set.$div.find('.log');
+			KOCFIA.set.$forms = KOCFIA.set.$div.find('.forms');
+		};
+
+		KOCFIA.set.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set on function');
+
+			if( KOCFIA.conf.set.automatic ){
+				KOCFIA.set.automaticOn();
+			}
+		};
+
+		KOCFIA.set.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set off function');
+
+			KOCFIA.set.automaticOff();
+		};
+
+		KOCFIA.set.automaticOn = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set automaticOn function');
+			$('#set-panel-automatic').prop('checked', true);
+		};
+
+		KOCFIA.set.automaticOff = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set automaticOff function');
+			$('#set-panel-automatic').prop('checked', false);
+		};
+
+		KOCFIA.set.storePairs = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set storePairs function');
+			localStorage.setObject('kocfia_set_pairs_' + KOCFIA.storeUniqueId, KOCFIA.set.pairs);
+		};
+
+		KOCFIA.set.deletePairs = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set deletePairs function');
+			localStorage.removeItem('kocfia_set_pairs_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.conf.set.pairs = {};
+		};
+
+		KOCFIA.set.storeCurrentPair = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set storeCurrentPair function');
+			localStorage.setObject('kocfia_set_currentPair_' + KOCFIA.storeUniqueId, KOCFIA.set.currentPair);
+		};
+
+		KOCFIA.set.deleteCurrentPair = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set deleteCurrentPair function');
+			localStorage.removeItem('kocfia_set_currentPair_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.conf.set.currentPair = '';
+		};
+
+		KOCFIA.set.storePreviousSet = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set storePreviousSet function');
+			localStorage.setObject('kocfia_set_previousSet_' + KOCFIA.storeUniqueId, KOCFIA.set.previousSet);
+		};
+
+		KOCFIA.set.deletePreviousSet = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set deletePreviousEquipedItems function');
+			localStorage.removeItem('kocfia_set_previousSet_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.conf.set.previousSet = '';
+		};
+
+		KOCFIA.set.storePreviousEquipedItems = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set storePreviousEquipedItems function');
+			localStorage.setObject('kocfia_set_previousEquipedItems_' + KOCFIA.storeUniqueId, KOCFIA.set.previousEquipedItems);
+		};
+
+		KOCFIA.set.deletePreviousEquipedItems = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('kocfia set deletePreviousEquipedItems function');
+			localStorage.removeItem('kocfia_set_previousEquipedItems_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.conf.set.previousEquipedItems = {};
+		};
+
+		KOCFIA.set.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set getHelp function');
+			var help = '<div id="kocfia-set-help" class="help" title="Aide set">';
+			help += '<h4>Informations et limitations :</h4><ul>';
+			help += '<li>L\'équipement automatique d\'un objet ou set avant la réalisation d\'une tâche (formation, ...) ne modifie pas l\'affichage de la salle du trône</li>';
+			help += '</ul></div>';
+
+			return help;
+		};
+
+		KOCFIA.set.addSectionListeners = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set addSectionListeners function');
+		};
+
+		KOCFIA.set.getForm = function( task ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set getForm function', task);
+			var defaultActions = ['noSwap', 'briton', 'druid', 'fey'],
+				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabels[ task ] : KOCFIA.set.labels[ task ]),
+				i, j, type, action, itemId, item, setNum, set, key;
+
+			var code = '<h3>'+ title +'</h3>';
+			code += '<div id="kocfia-set-'+ task +'-form" class="forms">';
+			code += '<label for="kocfia-set-'+ task +'-set">Équiper un set précis</label>';
+			code += '<select id="kocfia-set-'+ task +'-set">';
+			code += '<option value="">Non</option>';
+			for( setNum in window.seed.throne.slotEquip ){
+				if( window.seed.throne.slotEquip(setNum) ){
+					set = window.seed.throne.slotEquip[ setNum ];
+					name = KOCFIA.throne.setNames.hasOwnProperty(setNum) ? KOCFIA.throne.setNames[ setNum ] : 'Set '+ setNum;
+					key = 'set-'+ setNum;
+
+					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ label +'</option>';
+				}
+			}
+			code += '</select><br />';
+
+			for( i = 0; i < KOCFIA.set.itemTypes.length; i += 1 ){
+				type = KOCFIA.set.itemTypes[ i ];
+				code += '<label for="kocfia-set-'+ task +'-type-'+ type +'">'+ window.g_js_strings.throneroom[ type ] +'</label>';
+				code += '<select id="kocfia-set-'+ task +'-type-'+ type +'">';
+
+				//default actions
+				for( j = 0; j < defaultActions.length; j += 1 ){
+					action = defaultActions[ j ];
+					key = 'action-'+ action;
+					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ labels[ action ] +'</option>';
+				}
+
+				//object list
+				for( itemId in window.seed.throne.inventory ){
+					if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
+						item = window.seed.throne.inventory[ itemId ];
+
+						//limit on current type
+						if( item.type == type ){
+							label = KOCFIA.throne.getObjectLabel( itemId );
+							if( label !== '' ){
+								key = 'item-'+ itemId;
+								code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ label +'</option>';
+							}
+						}
+					}
+				}
+
+				code += '</select><br />';
+			}
+
+			code += '<div>';
+			code += '<button class="button save" title="Sauvegarde cette configuration d\'objets"><span>Sauvegarder</span></button>';
+			code += '<button class="button danger" title="Remet à zéro le formulaire"><span>Annuler</span></button>';
+			code += '<button class="button secondary" title="Recharge le formulaire"><span>Raffraîchir</span></button>';
+			code += '</div>';
+
+			code += '</div>';
+
+			return code;
+		};
+
+		KOCFIA.set.userInformation = function( msg ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA set userInformation function');
+
+			//clean old messages
+			var timestamp = Date.timestamp(),
+				obsolete = 5 * 60 * 1000,
+				msgTimestamp;
+			$msg = KOCFIA.set.$log.find('.info').find('div');
+			if( $msg.length > 14 ){
+				//keep one for td width
+				KOCFIA.set.$history.append( $msg.filter(':lt(14)') );
+			}
+			$msg.each(function(){
+				var $div = $(this);
+				msgTimestamp = $div.data('timestamp');
+				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
+					KOCFIA.set.$history.append( $div );
+				}
+			});
+
+			if( msg !== '' ){
+				KOCFIA.set.$log.append('<div data-timestamp="'+ timestamp +'">'+ msg +'</div>');
+			}
+		};
+
+		KOCFIA.set.isSwappingItems = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set isSwappingItems function');
+
+			return KOCFIA.set.currentPair !== '';
+		};
+
+		KOCFIA.set.equipSet = function( dfd, attempts, setNum ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set equipSet function');
+
+			var params = $.extend({}, window.g_ajaxparams);
+			params.ctrl = "throneRoom\\ThroneRoomServiceAjax";
+			params.action = 'setPreset';
+			params.presetId = setNum;
+
+			$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(){
+					if( data.ok ){
+						return dfd.resolve();
+
+					} else {
+						if( attempts > 0 ){
+							attempts -= 1;
+							return dfd.pipe( KOCFIA.set.equipSet(dfd, attempts) );
+						}
+
+						KOCFIA.set.userInformation('Erreur : impossible d\'équiper le set '+ setNum +', requête refusée ('+ data.msg +')');
+						return dfd.reject();
+					}
+				})
+				.fail(function(){
+					if( attempts > 0 ){
+						attempts -= 1;
+						return dfd.pipe( KOCFIA.set.equipSet(dfd, attempts) );
+					}
+
+					KOCFIA.set.userInformation('Erreur : impossible d\'équiper le set '+ setNum +', problème serveur ou internet');
+					return dfd.reject();
+				});
+		};
+
+		KOCFIA.set.equipItem = function( dfd, attempts, itemId ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set equipItem function');
+			return $.Deferred(function(dfd){
+
+			}).promise();
+
+			var params = $.extend({}, window.g_ajaxparams);
+			params.ctrl = "throneRoom\\ThroneRoomServiceAjax";
+			params.action = 'equipItem';
+			params.itemId = itemId;
+			params.presetId = window.seed.throne.activeSlot;
+
+			$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function( data ){
+					if( data.ok ){
+						typeIndex += 1;
+						return dfd.resolve();
+
+					} else {
+						if( attempts > 0 ){
+							attempts -= 1;
+							return dfd.pipe( KOCFIA.set.equipItem(dfd, attempts, itemId) );
+						}
+
+						KOCFIA.set.userInformation('Erreur : impossible d\'équiper l\'objet, requête refusée ('+ data.msg +')');
+						return dfd.reject();
+					}
+				})
+				.fail(function(){
+					if( attempts > 0 ){
+						attempts -= 1;
+						return dfd.pipe( KOCFIA.set.equipItem(dfd, attempts, itemId) );
+					}
+
+					KOCFIA.set.userInformation('Erreur : impossible d\'équiper l\'objet, problème serveur ou internet');
+					return dfd.reject();
+				});
+		};
+
+		KOCFIA.set.unequipItem = function( dfd, attempts, itemId ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set unequipItem function');
+
+			var params = $.extend({}, window.g_ajaxparams);
+			params.ctrl = "throneRoom\\ThroneRoomServiceAjax";
+			params.action = 'unequipItem';
+			params.itemId = itemId;
+			params.presetId = window.seed.throne.activeSlot;
+
+			$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function( data ){
+					if( data.ok ){
+						typeIndex += 1;
+						return dfd.resolve();
+
+					} else {
+						if( attempts > 0 ){
+							attempts -= 1;
+							return dfd.pipe( KOCFIA.set.unequipItem(dfd, attempts, itemId) );
+						}
+
+						KOCFIA.set.userInformation('Erreur : impossible d\'équiper l\'objet, requête refusée ('+ data.msg +')');
+						return dfd.reject();
+					}
+				})
+				.fail(function(){
+					if( attempts > 0 ){
+						attempts -= 1;
+						return dfd.pipe( KOCFIA.set.unequipItem(dfd, attempts, itemId) );
+					}
+
+					KOCFIA.set.userInformation('Erreur : impossible d\'équiper l\'objet, problème serveur ou internet');
+					return dfd.reject();
+				});
+		};
+
+		KOCFIA.set.activatePair = function( task, dfd ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set activatePair function', task);
+
+			//get current set
+			var setItems = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
+				pairItems = KOCFIA.set.pairs[ task ],
+				typeIndex, type, pairInfo,
+				faction, itemId, item,
+				setNum,
+				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabels[ task ] : KOCFIA.set.labels[ task ]);
+
+			KOCFIA.set.userInformation('Tentative d\'équipement automatique pour la tâche '+ title);
+
+			KOCFIA.set.currentPair = task;
+			KOCFIA.set.storeCurrentPair();
+
+			if( pairItems !== null && Object.isObject(pairItems) && !$.isEmptyObject(pairItems) ){
+				//for sets the "advisor" type is used
+
+				if( pairItem.advisor.indexOf('set') > -1 ){
+					KOCFIA.set.previousSet = window.seed.throne.activeSlot;
+					KOCFIA.set.storePreviousSet();
+
+				} else if( setItems !== null && Object.isObject(setItems) && !$.isEmptyObject(setItems) ){
+					//by type check if item match
+					for( itemId in setItems ){
+						if( setItems.hasOwnProperty(itemId) ){
+							item = window.seed.throne.inventory[ itemId ];
+							if( item && Object.isObject(item) ){
+								KOCFIA.set.previousEquipedItems[ item.type ] = item.id;
+							}
+						}
+					}
+					KOCFIA.set.storePreviousEquipedItems();
+				}
+
+				var equipSequence = function(){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set activatePair deferred equipSequence function');
+					return $.Deferred(function( sdfd ){
+						typeIndex = 0;
+						return sdfd.pipe( byType(sdfd) );
+					}).promise();
+				};
+
+				var byType = function( sdfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set activatePair deferred byType function');
+					if( typeIndex >= KOCFIA.set.itemTypes ){
+						return sdfd.resolve();
+					}
+
+					type = KOCFIA.set.itemTypes[ typeIndex ];
+
+					pairInfo = pairItem[ type ];
+					if( pairInfo ){
+						pairInfo = pairInfo[ i ].split('-');
+						sort = pairItem[0];
+						id = pairItem[1];
+
+						if( sort == 'action' ){
+							if( id == 'noSwap' ){
+								typeIndex += 1;
+								return sdfd.pipe( byType(sdfd) );
+
+							} else {
+								faction = id;
+								if( KOCFIA.set.previousEquipedItems.hasOwnProperty(type) ){
+									item = window.seed.throne.inventory[ KOCFIA.set.previousEquipedItems[ type ] ];
+									if( item && Object.isObject(item) && item.faction == faction ){
+										KOCFIA.set.userInformation('Objet du type '+ type +' déjà de la faction configurée');
+										typeIndex += 1;
+										return sdfd.pipe( byType(sdfd) );
+									}
+								}
+
+								return sdfd.pipe( findItemByTypeAndFaction(sdfd) );
+							}
+
+						} else if( sort == 'set' ){
+							setNum = id;
+							if( setNum == window.seed.throne.activeSlot ){
+								KOCFIA.set.userInformation('Set '+ setNum +' déjà actif');
+								return sdfd.resolve();
+							}
+
+							if( window.seed.throne.slotEquip.hasOwnProperty(setNum) && Array.isArray(window.seed.throne.slotEquip[ setNum ]) && window.seed.throne.slotEquip[ setNum ].length > 0 ){
+								return sdfd.pipe( KOCFIA.set.equipSet(sdfd, 3, setNum) );
+
+							} else {
+								KOCFIA.set.userInformation('Erreur : Set configuré non trouvé');
+								return sdfd.reject();
+							}
+
+						} else if( sort == 'item' ){
+							itemId = id;
+							if( KOCFIA.set.previousEquipedItems[ type ] != itemId ){
+								return sdfd.pipe( equipItemWrapper(dfd) );
+
+							} else {
+								KOCFIA.set.userInformation('Objet configuré pour le type '+ type +' déjà équipé');
+								typeIndex += 1;
+								return sdfd.pipe( byType(sdfd) );
+							}
+						}
+
+						KOCFIA.set.userInformation('Erreur : action inconnue pour le type '+ type);
+						return sdfd.reject();
+					} else {
+						typeIndex += 1;
+						return sdfd.pipe( byType(sdfd) );
+					}
+				};
+
+				var findItemByTypeAndFaction = function( sdfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set activatePair deferred findItemByTypeAndFaction function');
+
+					for( itemId in window.seed.throne.inventory ){
+						if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
+							item = window.seed.throne.inventory[ itemId ];
+
+							if( item.type == type && item.faction == faction && !item.isBroken ){
+								return sdfd.pipe( equipItemWrapper(dfd) );
+							}
+						}
+					}
+
+					KOCFIA.set.userInformation('Erreur : pas d\'objet équipable de type '+ type +' pour la faction '+ faction);
+					return sdfd.reject();
+				};
+
+				var equipItemWrapper = function( sdfd ){
+					return $.Deferred(function( wdfd ){
+						$.when( KOCFIA.set.equipItem(wdfd, 3, itemId) )
+							.done(function(){
+								typeIndex += 1;
+								return sdfd.pipe( byType(sdfd) );
+							})
+							.fail(function(){
+								return sdfd.reject();
+							});
+					}).promise();
+				};
+
+				$.when( equipSequence() )
+					.done(function(){
+						KOCFIA.set.userInformation('Équipement réussi');
+						if( dfd ) return dfd.resolve();
+					})
+					.fail(function(){
+						if( dfd ) return dfd.reject();
+					});
+			}
+
+			KOCFIA.set.userInformation('Pas de configuration pour la tâche '+ title);
+			if( dfd ) return dfd.resolve();
+		};
+
+		KOCFIA.set.reequipSetItems = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set reequipSetItems function');
+			var typeIndex, type, itemId, setNum,
+				currentItems = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ];
+
+			KOCFIA.set.userInformation('Tentative de rétablissement du set d\'objet de la salle du trône');
+
+			var reequipSequence = function(){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set reequipSetItems deferred reequipSequence function');
+				return $.Deferred(function( dfd ){
+					if( KOCFIA.set.previousSet !== '' ){
+						setNum = KOCFIA.set.previousSet;
+						return dfd.pipe( equipSet(dfd) );
+
+					} else if( !$.isEmptyObject(KOCFIA.set.previousEquipedItems) ){
+						typeIndex = 0;
+						return dfd.pipe( byType(dfd) );
+
+					} else {
+						KOCFIA.set.userInformation('Aucun objet ou set à rééquiper');
+						return dfd.resolve();
+					}
+				}).promise();
+			};
+
+			var byType = function( dfd ){
+				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set reequipSetItems deferred byType function');
+				if( typeIndex >= KOCFIA.set.itemTypes ){
+					return dfd.resolve();
+				}
+
+				type = KOCFIA.set.itemTypes[ typeIndex ];
+
+				if( KOCFIA.set.previousEquipedItems.hasOwnProperty(type) ){
+					itemId = KOCFIA.set.previousEquipedItems[ type ];
+					if( $.inArray(itemId, currentItems) == -1 ){
+						return dfd.pipe( equipItemWrapper(dfd) );
+					}
+
+					typeIndex += 1;
+					return dfd.pipe( byType(dfd) );
+
+				} else {
+					for( var i = 0; i < currentItems.length; i += 1 ){
+						item = window.seed.throne.inventory[ currentItems[ i ] ];
+						if( item && item.type == type ){
+							itemId = currentItems[ i ];
+							return dfd.pipe( unequipItemWrapper(dfd) );
+						}
+					}
+
+					typeIndex += 1;
+					return dfd.pipe( byType(dfd) );
+				}
+
+				KOCFIA.set.userInformation('Erreur : action inconnue pour le type '+ type);
+				return dfd.reject();
+			};
+
+			var equipItemWrapper = function( dfd ){
+				return $.Deferred(function( wdfd ){
+					$.when( KOCFIA.set.equipItem(wdfd, 3, itemId) )
+						.done(function(){
+							typeIndex += 1;
+							return dfd.pipe( byType(dfd) );
+						})
+						.fail(function(){
+							return dfd.reject();
+						});
+				}).promise();
+			};
+
+			var unequipItemWrapper = function( dfd ){
+				return $.Deferred(function( wdfd ){
+					$.when( KOCFIA.set.unequipItem(wdfd, 3, itemId) )
+						.done(function(){
+							typeIndex += 1;
+							return dfd.pipe( byType(dfd) );
+						})
+						.fail(function(){
+							return dfd.reject();
+						});
+				}).promise();
+			};
+
+			$.when( reequipSequence() )
+				.done(function(){
+					KOCFIA.set.userInformation('Set d\'objets de la salle du trône rétabli');
+				})
+				.fail(function(){
+					KOCFIA.set.userInformation('Problème lors du rétablissement du set d\'objets de la salle du trône');
+
+					Shared.notify('Problème lors du rétablissement du set d\'objets de la salle du trône');
+				});
+
+			//reset variables and their stored values
+			KOCFIA.set.deleteCurrentPair();
+			KOCFIA.set.deletePreviousSet();
+			KOCFIA.set.deletePreviousEquipedItems();
 		};
 
 	/* CHECK AND LAUNCH ATTACK */

@@ -235,7 +235,7 @@ jQuery(document).ready(function(){
 			alarm: 'Alertes',
 			hospital: 'Hôpital',
 			throne: 'Salle du trône',
-			set: 'Utilisation optimisée des sets de la salle du thrône',
+			set: 'Utilisation optimisée des objets de la salle du trône',
 			quickMarch: 'Marches simplifiées',
 			reports: 'Rapports',
 			search: 'Recherche de joueurs et alliances',
@@ -13138,7 +13138,7 @@ jQuery(document).ready(function(){
 			},
 			underAttack: {}, //city keys
 			incomings: {}, //march ids
-			lastScanned: {},
+			lastScanned: {}, //for reports
 			summary: {}, //march ids
 			stored: ['incomings', 'summary']
 		};
@@ -22550,7 +22550,8 @@ jQuery(document).ready(function(){
 		KOCFIA.set = {
 			options: {
 				active: 0,
-				automatic: 0
+				automatic: 0,
+				noSwapWhileAttacked: 1
 			},
 			stored: ['pairs', 'currentPair', 'previousSet', 'previousEquipedItems'],
 			tasks: ['formation', 'hospital', 'transport', 'reassign'/*, 'repair', 'research', 'build'*/],
@@ -22577,7 +22578,8 @@ jQuery(document).ready(function(){
 			code += '<div>';
 			code += Shared.generateCheckbox('set', 'active', 'Activer', KOCFIA.conf.set.active);
 			code += Shared.generateCheckbox('set', 'automatic', 'Equiper les sets automatiquement', KOCFIA.conf.set.automatic);
-			code += Shared.generateButton('rules', 'deletePairs', 'Supprimer toutes les couples set - tâche enregistrés');
+			code += Shared.generateCheckbox('set', 'noSwapWhileAttacked', 'Ne pas changer les objets équipés quand une des villes est attaquée', KOCFIA.conf.set.noSwapWhileAttacked);
+			code += Shared.generateButton('rules', 'deleteStored', 'Supprimer toutes les couples set - tâche enregistrés');
 			code += '</div>';
 
 			$section.append( code );
@@ -22587,17 +22589,23 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set setPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-set').html('');
 
-			var help = KOCFIA.set.getHelp();
+			var help = KOCFIA.set.getHelp(),
+				code = '<div class="infos">',
+				i, title, task;
 
-			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="set-panel-automatic" '+ (KOCFIA.conf.set.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="set-panel-automatic">Equiper les sets automatiquement</label></span>';
+			code += '<button class="button secondary refresh" title="Recharger les formulaires"><span>Raffraîchir</span></button>';
 			code += '<button class="button secondary history-toggle" title="Historique '+ KOCFIA.modulesLabel.set +'"><span>Historique</span></button>';
 			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
-			for( var i = 0; i < KOCFIA.set.tasks.length; i += 1 ){
-				code += KOCFIA.set.getForm( KOCFIA.set.tasks[ i ] );
+			for( i = 0; i < KOCFIA.set.tasks.length; i += 1 ){
+				task = KOCFIA.set.tasks[ i ];
+				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabel[ task ] : KOCFIA.set.labels[ task ]),
+
+				code += '<h3>'+ title +'</h3>';
+				code += KOCFIA.set.getForm( task );
 			}
 			code += '</div>';
 			code += '<div class="log"></div>';
@@ -22659,6 +22667,14 @@ jQuery(document).ready(function(){
 			localStorage.setObject('kocfia_set_pairs_' + KOCFIA.storeUniqueId, KOCFIA.set.pairs);
 		};
 
+		KOCFIA.set.deleteStored = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set deleteStored function');
+
+			KOCFIA.set.deleteCurrentPair();
+			KOCFIA.set.deletePreviousSet();
+			KOCFIA.set.deletePreviousEquipedItems();
+		};
+
 		KOCFIA.set.deletePairs = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set deletePairs function');
 			localStorage.removeItem('kocfia_set_pairs_' + KOCFIA.storeUniqueId);
@@ -22707,6 +22723,7 @@ jQuery(document).ready(function(){
 			var help = '<div id="kocfia-set-help" class="help" title="Aide set">';
 			help += '<h4>Informations et limitations :</h4><ul>';
 			help += '<li>L\'équipement automatique d\'un objet ou set avant la réalisation d\'une tâche (formation, ...) ne modifie pas l\'affichage de la salle du trône</li>';
+			help += '<li>Si une des villes est attaquée, aucun changement d\'objet n\'est réalisé (limitation désactivable dans l\'onglet option)</li>';
 			help += '</ul></div>';
 
 			return help;
@@ -22714,40 +22731,102 @@ jQuery(document).ready(function(){
 
 		KOCFIA.set.addSectionListeners = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set addSectionListeners function');
+
+			KOCFIA.set.$div
+				.on('click', '.save', function(){
+					var $form = $(this).closest('.form'),
+						task = $form.attr('data-task'),
+						set = $form.find('.set').val(),
+						$types = $form.find('.type');
+
+					KOCFIA.pairs[ task ] = {};
+
+					if( set !== '' ){
+						KOCFIA.pairs[ task ]['advisor'] = set;
+					} else {
+						$types.each(function(){
+							var $this = $(this),
+								value = $this.val(),
+								type = $this.attr('data-type');
+							if( value !== '' ){
+								KOCFIA.pairs[ task ][ type ] = value;
+							}
+						});
+					}
+
+					KOCFIA.storePairs();
+				})
+				.on('click', '.cancel', function(){
+					var $form = $(this).closest('.form'),
+						task = $form.attr('data-task');
+
+					if( KOCFIA.set.pairs.hasOwnProperty(task) ){
+						if( KOCFIA.set.pairs[ task ].hasOwnProperty('advisor') && KOCFIA.set.pairs[ task ].advisor.indexOf('set') > -1 ){
+							$form
+								.find('.set').val( KOCFIA.set.pairs[ task ].advisor ).end()
+								.find('.type').val('');
+
+						} else {
+							$form
+								.find('.set').val('').end()
+								.find('.type').each(function(){
+									var $this = $(this),
+										type = $this.attr('data-type');
+
+									if( KOCFIA.set.pairs[ task ].hasOwnProperty(type) ){
+										$this.val( KOCFIA.set.pairs[ task ][ type ] );
+									} else {
+										$this.val('');
+									}
+								});
+						}
+					} else {
+						$form
+							.find('.set').val('').end()
+							.find('.type').val('');
+					}
+				})
+				.on('click', '.refresh', function(){
+					KOCFIA.set.$div.find('.form').each(function(){
+						var $this = $(this),
+							task = $this.attr('data-task');
+
+						$this.replaceWith( KOCFIA.set.getForm(task) );
+					});
+				});
 		};
 
 		KOCFIA.set.getForm = function( task ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set getForm function', task);
 			var defaultActions = ['noSwap', 'briton', 'druid', 'fey'],
-				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabels[ task ] : KOCFIA.set.labels[ task ]),
-				i, j, type, action, itemId, item, setNum, set, key;
+				i, j, type, action, itemId, item, setNum, set, key, name;
 
-			var code = '<h3>'+ title +'</h3>';
-			code += '<div id="kocfia-set-'+ task +'-form" class="forms">';
+			var code = '<div id="kocfia-set-'+ task +'-form" class="forms" data-task="'+ task +'">';
 			code += '<label for="kocfia-set-'+ task +'-set">Équiper un set précis</label>';
-			code += '<select id="kocfia-set-'+ task +'-set">';
+			code += '<select id="kocfia-set-'+ task +'-set" class="set">';
 			code += '<option value="">Non</option>';
 			for( setNum in window.seed.throne.slotEquip ){
-				if( window.seed.throne.slotEquip(setNum) ){
+				if( window.seed.throne.slotEquip.hasOwnProperty(setNum) ){
 					set = window.seed.throne.slotEquip[ setNum ];
 					name = KOCFIA.throne.setNames.hasOwnProperty(setNum) ? KOCFIA.throne.setNames[ setNum ] : 'Set '+ setNum;
 					key = 'set-'+ setNum;
 
-					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ label +'</option>';
+					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ name +'</option>';
 				}
 			}
 			code += '</select><br />';
 
 			for( i = 0; i < KOCFIA.set.itemTypes.length; i += 1 ){
 				type = KOCFIA.set.itemTypes[ i ];
-				code += '<label for="kocfia-set-'+ task +'-type-'+ type +'">'+ window.g_js_strings.throneroom[ type ] +'</label>';
-				code += '<select id="kocfia-set-'+ task +'-type-'+ type +'">';
+				code += '<label for="kocfia-set-'+ task +'-type-'+ type +'">'+ (window.hasOwnProperty('g_js_strings') ? window.g_js_strings.throneroom[ type ] : type) +'</label>';
+				code += '<select id="kocfia-set-'+ task +'-type-'+ type +'" class="type" data-type="'+ type +'">';
+				code += '<option value="">Choisir</option>';
 
 				//default actions
 				for( j = 0; j < defaultActions.length; j += 1 ){
 					action = defaultActions[ j ];
 					key = 'action-'+ action;
-					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ labels[ action ] +'</option>';
+					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ KOCFIA.set.labels[ action ] +'</option>';
 				}
 
 				//object list
@@ -22757,10 +22836,10 @@ jQuery(document).ready(function(){
 
 						//limit on current type
 						if( item.type == type ){
-							label = KOCFIA.throne.getObjectLabel( itemId );
+							name = KOCFIA.throne.getObjectLabel( itemId );
 							if( label !== '' ){
 								key = 'item-'+ itemId;
-								code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ label +'</option>';
+								code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ name +'</option>';
 							}
 						}
 					}
@@ -22771,8 +22850,7 @@ jQuery(document).ready(function(){
 
 			code += '<div>';
 			code += '<button class="button save" title="Sauvegarde cette configuration d\'objets"><span>Sauvegarder</span></button>';
-			code += '<button class="button danger" title="Remet à zéro le formulaire"><span>Annuler</span></button>';
-			code += '<button class="button secondary" title="Recharge le formulaire"><span>Raffraîchir</span></button>';
+			code += '<button class="button danger cancel" title="Remet à zéro le formulaire"><span>Annuler</span></button>';
 			code += '</div>';
 
 			code += '</div>';
@@ -22807,6 +22885,10 @@ jQuery(document).ready(function(){
 
 		KOCFIA.set.isSwappingItems = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set isSwappingItems function');
+
+			if( KOCFIA.set.noSwapWhileAttacked && !$.isEmptyObject(KOCFIA.alarms.underAttack) ){
+				return true; //will prevent swapping by "task" modules
+			}
 
 			return KOCFIA.set.currentPair !== '';
 		};
@@ -23190,9 +23272,7 @@ jQuery(document).ready(function(){
 				});
 
 			//reset variables and their stored values
-			KOCFIA.set.deleteCurrentPair();
-			KOCFIA.set.deletePreviousSet();
-			KOCFIA.set.deletePreviousEquipedItems();
+			KOCFIA.set.deleteStored();
 		};
 
 	/* CHECK AND LAUNCH ATTACK */

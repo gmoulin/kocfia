@@ -1326,11 +1326,16 @@ jQuery(document).ready(function(){
 						KOCFIA.conf.confPanel.selected = ui.index;
 						Shared.storeConf();
 
-						if( $(ui.panel).filter('#kocfia-map, #kocfia-reports, #kocfia-tournament, #kocfia-search').length > 0 ){
+						var $panel = $(ui.panel);
+
+						if( $panel.filter('#kocfia-map, #kocfia-reports, #kocfia-tournament, #kocfia-search').length > 0 ){
 							//use timeout so the tab selection is "finished" and the element inside have the correct width
 							window.setTimeout(function(){
 								KOCFIA.$confPanel.trigger('resizestop');
 							}, 0);
+						} else if( $panel.filter('#kocfia-quickMarch').length > 0 ){
+							var $set = KOCFIA.quickMarch.$form.find('#kocfia-quickMarch-set');
+							$set.html( KOCFIA.quickMarch.getSets( $set.val() ) );
 						}
 					}
 				})
@@ -9053,7 +9058,8 @@ jQuery(document).ready(function(){
 			options: {
 				active: 1,
 				automatic: 0,
-				minPercentage: 0.75
+				minPercentage: 0.75,
+				trainWithoutOptimizedThroneSet: 1
 			},
 			stored: ['rules', 'savedRules'],
 			rules: {}, //by city id
@@ -9067,6 +9073,7 @@ jQuery(document).ready(function(){
 			code += Shared.generateCheckbox('formation', 'active', 'Activer', KOCFIA.conf.formation.active);
 			code += Shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOCFIA.conf.formation.automatic);
 			code += Shared.generateSelect('formation', 'minPercentage', 'Pourcentage du maximum pour calculer la quantité minimum d\'une formation', KOCFIA.conf.formation.minPercentage, {labels: ['0%', '25%', '50%', '75%', '90%', '100%'], values: [0, 0.25, 0.5, 0.75, 0.9, 1]});
+			code += Shared.generateCheckbox('formation', 'trainWithoutOptimizedThroneSet', 'Lancer les formations même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.formation.trainWithoutOptimizedThroneSet);
 			code += Shared.generateButton('formation', 'deleteAllRules', 'Supprimer toutes les configurations de formation enregistrées');
 			code += '</div>';
 
@@ -9138,6 +9145,7 @@ jQuery(document).ready(function(){
 				}
 				form += '</select>';
 				form += '<div class="dynamic"></div>';
+				form += '<div class="buttonset useSet"><input type="checkbox" checked id="kocfia-formation-manual-useSet"><label for="kocfia-formation-manual-useSet">Optimiser les objets de trône <small>(cf. onglet Set)</small></label></div>';
 				form += '<button class="launch button modify">Former</button>';
 				form += '<button class="reset button danger">Annuler</button>';
 				form += '</fieldset>';
@@ -9267,10 +9275,10 @@ jQuery(document).ready(function(){
 						//saving the form values
 						$fieldset.data('values', $dynamic.find(':input').serializeArray());
 						$dynamic.html('');
-						$fieldset.find('.launch, .reset').hide();
+						$fieldset.find('.useSet, .launch, .reset').hide();
 					} else {
 						$dynamic.html( KOCFIA.formation.getFieldset(cityKey, false) );
-						$fieldset.find('.launch, .reset').show();
+						$fieldset.find('.useSet, .launch, .reset').show();
 						var data = $fieldset.data('values'),
 							$inputs = $dynamic.find(':input'),
 							field;
@@ -10083,6 +10091,8 @@ jQuery(document).ready(function(){
 				errors.push('Aucune troupe et aucune fortification, configuration non prise en compte.');
 			}
 
+			rule.useOptimizedThroneSet = $fieldset.find('#kocfia-formation-manual-useSet').prop('checked');
+
 			return {rule: rule, errors: errors};
 		};
 
@@ -10092,22 +10102,77 @@ jQuery(document).ready(function(){
 				return;
 			}
 
-			var delayedTrain = function(i, rule){
-				window.setTimeout(function(){
-					KOCFIA.formation.addToQueue( rule, null );
-				}, i * 12000);
+			var sequence = function(){
+				return $.Deferred(function( dfd ){
+					return dfd.pipe( equipSet(dfd, 10) );
+				}).promise();
 			};
 
-			var cityKey, rule, i = 0;
-			for( cityKey in KOCFIA.formation.rules ){
-				if( KOCFIA.formation.rules.hasOwnProperty(cityKey) ){
-					rule = KOCFIA.formation.rules[ cityKey ];
-					if( rule.active ){
-						delayedTrain( i, rule );
-						i += 1;
+			var equipSet = function( dfd, attempts ){
+				if( KOCFIA.set.currentPair == 'formation' ){
+					return dfd.pipe( launch(dfd) );
+				} else {
+					if( !KOCFIA.set.isSwappingItems() ){
+						var setWrapper = function(){
+							return $.Deferred(function( wdfd ){
+								return wdfd.pipe( KOCFIA.set.activatePair('formation', wdfd) );
+							}).promise();
+						};
+
+						$.when( setWrapper() )
+							.done(function(){
+								KOCFIA.formation.refreshInfo( ['set de formation équipé'] );
+
+								return dfd.pipe( launch(dfd) );
+							})
+							.fail(function(){
+								KOCFIA.formation.refreshInfo( ['problème lors de l\'équipement du set de formation'] );
+
+								if( KOCFIA.formation.trainWithoutOptimizedThroneSet ){
+									return dfd.pipe( launch(dfd) );
+								} else {
+									return dfd.reject();
+								}
+							});
+
+					} else if( KOCFIA.formation.trainWithoutOptimizedThroneSet ) {
+						return dfd.pipe( launch(dfd) );
+
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){
+								return dfd.pipe( equipSet(dfd, attempts) );
+							}, 5000);
+						} else {
+							return dfd.reject();
+						}
 					}
 				}
-			}
+			};
+
+			var launch = function(){
+				var delayedTrain = function(i, rule){
+					window.setTimeout(function(){
+						KOCFIA.formation.addToQueue( rule, null );
+					}, i * 5000);
+				};
+
+				var cityKey, rule, i = 0;
+				for( cityKey in KOCFIA.formation.rules ){
+					if( KOCFIA.formation.rules.hasOwnProperty(cityKey) ){
+						rule = KOCFIA.formation.rules[ cityKey ];
+						if( rule.active ){
+							delayedTrain( i, rule );
+							i += 1;
+						}
+					}
+				}
+
+				return dfd.resolve();
+			};
+
+			$.when( sequence() );
 		};
 
 		KOCFIA.formation.launchFormations = function( rule ){
@@ -10951,26 +11016,7 @@ jQuery(document).ready(function(){
 
 			$.when( trainUnitSequence(), buildFortificationSequence() )
 				.always(function(){
-					//clean old messages
-					var m = '', i;
-
-					$msgUnit = KOCFIA.formation.$unitInfo.find('div');
-					if( $msgUnit.length > 15 ) $msgUnit.filter(':lt(15)').appendTo( KOCFIA.formation.$unitHistory );
-					if( msgUnit.length ){
-						for( i = 0; i < msgUnit.length; i += 1 ){
-							m += '<div>'+ msgUnit[i] +'</div>';
-						}
-						KOCFIA.formation.$unitInfo.append( m );
-					}
-
-					$msgFort = KOCFIA.formation.$fortInfo.find('div');
-					if( $msgFort.length > 15 ) $msgFort.filter(':lt(15)').appendTo( KOCFIA.formation.$fortHistory );
-					if( msgFort.length ){
-						for( i = 0; i < msgFort.length; i += 1 ){
-							m += '<div>'+ msgFort[i] +'</div>';
-						}
-						KOCFIA.formation.$fortInfo.append( m );
-					}
+					KOCFIA.formation.refreshInfo( msgUnit, msgFort );
 
 					//manual launch
 					if( dfd ){
@@ -10986,14 +11032,87 @@ jQuery(document).ready(function(){
 				});
 		};
 
+		KOCFIA.formation.refreshInfo = function( msgUnit, msgFort ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation refreshInfo function', rule);
+
+			//clean old messages
+			var m = '', i;
+
+			$msgUnit = KOCFIA.formation.$unitInfo.find('div');
+			if( $msgUnit.length > 15 ) $msgUnit.filter(':lt(15)').appendTo( KOCFIA.formation.$unitHistory );
+			if( msgUnit.length ){
+				for( i = 0; i < msgUnit.length; i += 1 ){
+					m += '<div>'+ msgUnit[i] +'</div>';
+				}
+				KOCFIA.formation.$unitInfo.append( m );
+			}
+
+			$msgFort = KOCFIA.formation.$fortInfo.find('div');
+			if( $msgFort.length > 15 ) $msgFort.filter(':lt(15)').appendTo( KOCFIA.formation.$fortHistory );
+			if( msgFort.length ){
+				for( i = 0; i < msgFort.length; i += 1 ){
+					m += '<div>'+ msgFort[i] +'</div>';
+				}
+				KOCFIA.formation.$fortInfo.append( m );
+			}
+		};
+
 		KOCFIA.formation.fillQueue = function( rule ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation fillQueue function', rule);
 			//manual launch, will fill the training queue according to the rule parameters
 
 			var fillSequence = function(){
 				return $.Deferred(function( dfd ){
-					return dfd.pipe( KOCFIA.formation.addToQueue(rule, dfd) );
+					if( rule.useOptimizedThroneSet ){
+						return dfd.pipe( equipSet(dfd, 10) );
+					} else {
+						return dfd.pipe( KOCFIA.formation.addToQueue(rule, dfd) );
+					}
 				}).promise();
+			};
+
+			var equipSet = function( dfd, attempts ){
+				if( KOCFIA.set.currentPair == 'formation' ){
+					KOCFIA.formation.refreshInfo( ['set de formation déjà équipé'] );
+					return dfd.pipe( KOCFIA.formation.addToQueue(rule, dfd) );
+				} else {
+					if( !KOCFIA.set.isSwappingItems() ){
+						var setWrapper = function(){
+							return $.Deferred(function( wdfd ){
+								return wdfd.pipe( KOCFIA.set.activatePair('formation', wdfd) );
+							}).promise();
+						};
+
+						$.when( setWrapper() )
+							.done(function(){
+								KOCFIA.formation.refreshInfo( ['set de formation équipé'] );
+
+								return dfd.pipe( launch(dfd) );
+							})
+							.fail(function(){
+								KOCFIA.formation.refreshInfo( ['problème lors de l\'équipement du set de formation'] );
+
+								if( KOCFIA.formation.trainWithoutOptimizedThroneSet ){
+									return dfd.pipe( launch(dfd) );
+								} else {
+									return dfd.reject();
+								}
+							});
+
+					} else if( KOCFIA.formation.trainWithoutOptimizedThroneSet ) {
+						return dfd.pipe( KOCFIA.formation.addToQueue(rule, dfd) );
+
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							window.setTimeout(function(){
+								return dfd.pipe( equipSet(dfd, attempts) );
+							}, 5000);
+						} else {
+							return dfd.reject();
+						}
+					}
+				}
 			};
 
 			$.when( fillSequence() )
@@ -11002,6 +11121,8 @@ jQuery(document).ready(function(){
 					KOCFIA.formation.$ongoing.find('.unit').find('.info').append('<div>'+ city.label +': lancement des formations fini.</div>');
 					KOCFIA.formation.$ongoing.find('.fort').find('.info').append('<div>'+ city.label +': lancement des fortifications fini.</div>');
 					KOCFIA.formation.listCityFormations( rule.cityKey );
+
+					KOCFIA.set.reequipSetItems();
 				});
 		};
 
@@ -11009,13 +11130,13 @@ jQuery(document).ready(function(){
 		KOCFIA.transport = {
 			options: {
 				active: 1,
-				//automatic: 0,
 				automaticPileUp: 0,
 				automaticSupply: 0,
 				priority: {
 					pileUp: ['rec4', 'rec3', 'rec2', 'rec1', 'rec0', 'rec5'],
 					supply:['rec2', 'rec4', 'rec3', 'rec1', 'rec0', 'rec5']
-				}
+				},
+				transportWithoutOptimizedThroneSet: 1
 			},
 			stored: ['pileUp', 'supply'],
 			pileUp: {},
@@ -11027,9 +11148,9 @@ jQuery(document).ready(function(){
 			var code = '<h3>'+ KOCFIA.modulesLabel.transport +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('transport', 'active', 'Activer', KOCFIA.conf.transport.active);
-			//code += Shared.generateCheckbox('transport', 'automatic', 'Activer les transports automatiques', KOCFIA.conf.transport.automatic);
 			code += Shared.generateCheckbox('transport', 'automaticPileUp', 'Lancer les stockages automatiques', KOCFIA.conf.transport.automaticPileUp);
 			code += Shared.generateCheckbox('transport', 'automaticSupply', 'Lancer les approvisionnements automatiques', KOCFIA.conf.transport.automaticSupply);
+			code += Shared.generateCheckbox('transport', 'transportWithoutOptimizedThroneSet', 'Transporter des transports même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.transport.transportWithoutOptimizedThroneSet);
 			code += Shared.generateButton('transport', 'deleteSupply', 'Supprimer toutes les configurations d\'approvisionnement enregistrées');
 			code += Shared.generateButton('transport', 'deletePileUp', 'Supprimer toutes les configurations de stockage enregistrées');
 			code += '</div>';
@@ -11047,8 +11168,6 @@ jQuery(document).ready(function(){
 				help = KOCFIA.transport.getHelp();
 
 			var code = '<div class="infos">';
-			//code += '<span class="buttonset"><input type="checkbox" id="transport-panel-automatic" '+ (KOCFIA.conf.transport.automatic ? 'checked' : '') +' autocomplete="off" />';
-			//code += '<label for="formation-panel-automatic">transports automatiques</label></span>';
 			code += '<span class="buttonset"><input type="checkbox" id="transport-panel-automatic-pileUp" '+ (KOCFIA.conf.transport.automaticPileUp ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="transport-panel-automatic-pileUp">Stockages automatiques</label>';
 			code += '<input type="checkbox" id="transport-panel-automatic-supply" '+ (KOCFIA.conf.transport.automaticSupply ? 'checked' : '') +' autocomplete="off" />';
@@ -11160,21 +11279,6 @@ jQuery(document).ready(function(){
 			KOCFIA.transport.automaticPileUpOff();
 			KOCFIA.transport.automaticSupplyOff();
 		};
-
-		/*KOCFIA.transport.automaticOn = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport automaticOn function');
-			$('#transport-panel-automatic').prop('checked', true);
-
-			if( KOCFIA.conf.transport.pileUp ) KOCFIA.transport.pileUpOn();
-			if( KOCFIA.conf.transport.supply ) KOCFIA.transport.supplyOn();
-		};*/
-
-		/*KOCFIA.transport.automaticOff = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport automaticOff function');
-
-			KOCFIA.transport.pileUpOff();
-			KOCFIA.transport.supplyOff();
-		};*/
 
 		KOCFIA.transport.automaticPileUpOn = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport automaticPileUpOn function');
@@ -11788,12 +11892,59 @@ jQuery(document).ready(function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred sequence function', KOCFIA.transport[ type ]);
 					KOCFIA.transport.refreshOnGoing('Tentative '+ (type == 'pileUp' ? 'de stockage' : 'd\'approvisionnement') + '.', type);
 					return $.Deferred(function(dfd){
-						return dfd.pipe( fromCity(dfd) );
+						return dfd.pipe( equipSet(dfd, 10) );
 					}).promise();
 				};
 
-				//step 1 - find the sender
-				var fromCity = function(dfd){
+				//step 1 - optimize throne items
+				var equipSet = function( dfd, attempts ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred equipSet function', attempts);
+
+					if( KOCFIA.set.currentPair == 'transport' ){
+						KOCFIA.transport.refreshOnGoing('set de transport déjà équipé', type);
+						return dfd.pipe( fromCity(dfd) );
+					} else {
+						if( !KOCFIA.set.isSwappingItems() ){
+							var setWrapper = function(){
+								return $.Deferred(function( wdfd ){
+									return wdfd.pipe( KOCFIA.set.activatePair('transport', wdfd) );
+								}).promise();
+							};
+
+							$.when( setWrapper() )
+								.done(function(){
+									KOCFIA.transport.refreshOnGoing('set de transport équipé', type);
+
+									return dfd.pipe( fromCity(dfd) );
+								})
+								.fail(function(){
+									KOCFIA.transport.refreshOnGoing('problème lors de l\'équipement du set de transport', type);
+
+									if( KOCFIA.transport.transportWithoutOptimizedThroneSet ){
+										return dfd.pipe( fromCity(dfd) );
+									} else {
+										return dfd.reject();
+									}
+								});
+
+						} else if( KOCFIA.transport.transportWithoutOptimizedThroneSet ) {
+							return dfd.pipe( fromCity(dfd) );
+
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){
+									return dfd.pipe( equipSet(dfd, attempts) );
+								}, 5000);
+							} else {
+								return dfd.reject();
+							}
+						}
+					}
+				};
+
+				//step 2 - find the sender
+				var fromCity = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred fromCity function', cityIndex);
 
 					//sender loop finished
@@ -11837,8 +11988,8 @@ jQuery(document).ready(function(){
 					return dfd.pipe( toCity(dfd) );
 				};
 
-				//step 2 - loop the recipient
-				var toCity = function(dfd){
+				//step 3 - loop the recipient
+				var toCity = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred toCity function', destinationIndex, destinationsKeys, destinations);
 					//recipients loop finished
 					if( destinationIndex >= destinationsKeys.length ){
@@ -11879,8 +12030,8 @@ jQuery(document).ready(function(){
 					return dfd.pipe( getUnits(dfd) );
 				};
 
-				//step 3 - loop on rules unit to find how many request have to be done for the destination
-				var getUnits = function(dfd){
+				//step 4 - loop on rules unit to find how many request have to be done for the destination
+				var getUnits = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred getUnits function', unitIndex, units, rules);
 					//get the rules units
 					if( units.length === 0 ){
@@ -11921,8 +12072,8 @@ jQuery(document).ready(function(){
 					return dfd.pipe( checkRules(dfd) );
 				};
 
-				//step 4 - check the rule (resource, unit)
-				var checkRules = function(dfd){
+				//step 5 - check the rule (resource, unit)
+				var checkRules = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred checkRules function', currentUnit);
 
 					//reset request variables
@@ -12101,7 +12252,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( getUnits(dfd) );
 				};
 
-				//step 5 - try to launch the march
+				//step 6 - try to launch the march
 				var launch = function( dfd, tParams, attempts ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('kocfia transport launchAutomaticTransport deferred launch function', tParams, attempts, unitsArr, resources);
 					$.ajax({
@@ -12195,6 +12346,8 @@ jQuery(document).ready(function(){
 				$.when( sequence() )
 					.always(function(){
 						KOCFIA.transport.refreshOnGoing((type == 'pileUp' ? 'Stockage' : 'Approvisionnement') + ' fini.', type);
+
+						KOCFIA.set.reequipSetItems();
 					});
 			}
 		};
@@ -12203,7 +12356,8 @@ jQuery(document).ready(function(){
 		KOCFIA.reassign = {
 			options: {
 				active: 1,
-				automatic: 0
+				automatic: 0,
+				reassignWithoutOptimizedThroneSet: 1
 			},
 			stored: ['rules'],
 			rules: {}
@@ -12215,6 +12369,7 @@ jQuery(document).ready(function(){
 			code += '<div>';
 			code += Shared.generateCheckbox('reassign', 'active', 'Activer', KOCFIA.conf.reassign.active);
 			code += Shared.generateCheckbox('reassign', 'automatic', 'Activer les réassignements automatiques', KOCFIA.conf.reassign.automatic);
+			code += Shared.generateCheckbox('reassign', 'reassignWithoutOptimizedThroneSet', 'Réassigner même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.reassign.reassignWithoutOptimizedThroneSet);
 			code += Shared.generateButton('reassign', 'deleteRules', 'Supprimer toutes les configurations enregistrées');
 			code += '</div>';
 
@@ -12684,11 +12839,58 @@ jQuery(document).ready(function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticReassign deferred sequence function');
 					KOCFIA.reassign.refreshOnGoing('Tentative de réassignement.');
 					return $.Deferred(function(dfd){
-						return dfd.pipe( fromCity(dfd) );
+						return dfd.pipe( equipSet(dfd, 10) );
 					}).promise();
 				};
 
-				//step 1 - find the sender
+				//step 1 - optimize throne items
+				var equipSet = function( dfd, attempts ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticReassign deferred equipSet function', attempts);
+
+					if( KOCFIA.set.currentPair == 'reassign' ){
+						KOCFIA.reassign.refreshOnGoing('set de réassignement déjà équipé');
+						return dfd.pipe( fromCity(dfd) );
+					} else {
+						if( !KOCFIA.set.isSwappingItems() ){
+							var setWrapper = function(){
+								return $.Deferred(function( wdfd ){
+									return wdfd.pipe( KOCFIA.set.activatePair('reassign', wdfd) );
+								}).promise();
+							};
+
+							$.when( setWrapper() )
+								.done(function(){
+									KOCFIA.reassign.refreshOnGoing('set de réassignement équipé');
+
+									return dfd.pipe( fromCity(dfd) );
+								})
+								.fail(function(){
+									KOCFIA.reassign.refreshOnGoing('problème lors de l\'équipement du set de réassignement');
+
+									if( KOCFIA.reassign.reassignWithoutOptimizedThroneSet ){
+										return dfd.pipe( fromCity(dfd) );
+									} else {
+										return dfd.reject();
+									}
+								});
+
+						} else if( KOCFIA.reassign.reassignWithoutOptimizedThroneSet ) {
+							return dfd.pipe( fromCity(dfd) );
+
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){
+									return dfd.pipe( equipSet(dfd, attempts) );
+								}, 5000);
+							} else {
+								return dfd.reject();
+							}
+						}
+					}
+				};
+
+				//step 2 - find the sender
 				var fromCity = function(dfd){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticReassign deferred fromCity function', cityIndex);
 
@@ -12727,7 +12929,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( toCity(dfd) );
 				};
 
-				//step 2 - loop the recipient
+				//step 3 - loop the recipient
 				var toCity = function(dfd){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticReassign deferred toCity function', destinationIndex, destinationsKeys, destinations);
 					//recipients loop finished
@@ -12762,7 +12964,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( checkRules(dfd) );
 				};
 
-				//step 3 - check the rule (resource, unit)
+				//step 4 - check the rule (resource, unit)
 				var checkRules = function(dfd){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticreassign deferred checkRules function');
 
@@ -12904,7 +13106,7 @@ jQuery(document).ready(function(){
 					}
 				};
 
-				//step 4 - try to launch the march
+				//step 5 - try to launch the march
 				var launch = function( dfd, tParams, attempts ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('kocfia reassign launchAutomaticReassign deferred launch function', tParams, attempts, unitsArr);
 					$.ajax({
@@ -12983,6 +13185,8 @@ jQuery(document).ready(function(){
 				$.when( sequence() )
 					.always(function(){
 						KOCFIA.reassign.refreshOnGoing('Réassignement fini.');
+
+						KOCFIA.set.reequipSetItems();
 					});
 			}
 		};
@@ -12990,7 +13194,7 @@ jQuery(document).ready(function(){
 	/* MAP VISUALISATION WITH CANVAS */
 		KOCFIA.canvas = {
 			options: {
-				active: 1
+				active: 0
 			}
 		};
 
@@ -18383,9 +18587,10 @@ jQuery(document).ready(function(){
 	/* QUICK MARCH */
 		KOCFIA.quickMarch = {
 			options: {
-				active: 0
+				active: 1
 			},
-			stored: []
+			stored: [],
+			reequipSetTimeout: null
 		};
 
 		KOCFIA.quickMarch.confPanel = function( $section ){
@@ -18664,7 +18869,16 @@ jQuery(document).ready(function(){
 			var form = '<h3>Marche manuelle</h3>';
 			form += '<div class="form">';
 
-			form += '<label>Type&nbsp;:&nbsp;</label><div class="buttonset type">';
+			form += '<div class="buttonset useSet">';
+			form += '<label for="kocfia-quickMarch-set" title="Liste les configurations optimisées d\'objets de salle du trône enregistrées (cf. onglet Set) pour les marches.<br>Attention cela n\'influe que sur la capacité de transport, la vitesse et la taille de la marche, pas le combat en lui même.">Sets optimisés :</label>';
+			form += '<select id="kocfia-quickMarch-set">';
+			form += KOCFIA.quickMarch.getSets('');
+			form += '</select>';
+			form += '<button class="button secondary equip" title="Equipe la configuration d\'objets choisie <small>(cf. onglet Set)</small>"><span>Équiper cette configuration optimisée</span></button>';
+			form += '<button class="button secondary revert" title="Rééquipe le set courant <small>(cf. onglet Set)</small>"><span>Remettre le set courant</span></button>';
+			form += '</div>';
+
+			form += '<br><br><label>Type&nbsp;:&nbsp;</label><div class="buttonset type">';
 			form += '<input type="radio" name="type" value="4" id="kocfia-quickMarch-type-attack" required>';
 			form += '<label for="kocfia-quickMarch-type-attack">Attaque</label>';
 			form += '<input type="radio" name="type" value="3" id="kocfia-quickMarch-type-scout" required>';
@@ -18749,6 +18963,31 @@ jQuery(document).ready(function(){
 				$coord = KOCFIA.quickMarch.$form.find('.coord');
 
 			KOCFIA.quickMarch.$form
+				//set
+				.on('click', '.equip', function(){
+					var set = $(this).val();
+					if( set != '' ){
+						var sequence = function(){
+							return $.Deferred(function( dfd ){
+								return dfd.pipe( KOCFIA.set.activatePair( set ) );
+							}).promise();
+						};
+
+						$.when( sequence() )
+							.done(function(){
+								Shared.success('Optimisation des objets de trône réussie');
+							})
+							.fail(function(){
+								Shared.notify('Optimisation des objets de trône échouée');
+							});
+					} else {
+						Shared.notify('Aucune configuration sélectionnée');
+						KOCFIA.quickMarch.$form.find('#kocfia-quickMarch-set').focus();
+					}
+				})
+				.on('click', '.revert', function(){
+					KOCFIA.set.reequipSetItems();
+				})
 				//march type
 				.on('change', '.type input', function(){
 					KOCFIA.quickMarch.$form.trigger('getAndSetTroops');
@@ -19209,6 +19448,30 @@ jQuery(document).ready(function(){
 				});
 		};
 
+		KOCFIA.quickMarch.getSets = function( previousType ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch planMarch function');
+
+			var i, type, code,
+				types = ['attack', 'scout', 'reinforce', 'transport', 'reassign'],
+				labels = {
+					attack: 'attaque',
+					scout: 'éclairage',
+					reinforce: 'renfort',
+					transport: 'transport',
+					reassign: 'réassignement'
+				};
+
+			code = '<option value="">Choisir</option>';
+			for( i = 0; i < types.length; i += 1 ){
+				type = types[ i ];
+				if( KOCFIA.set.pairs.hasOwnProperty(type) ){
+					code += '<option value="'+ type +'" '+ (previousType == type ? 'selected' : '')+'>'+ labels[ type ] +'</option>';
+				}
+			}
+
+			return code;
+		};
+
 		KOCFIA.quickMarch.planMarch = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch planMarch function');
 			var plan = {},
@@ -19335,6 +19598,10 @@ jQuery(document).ready(function(){
 		KOCFIA.quickMarch.launchMarch = function( plan ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch launchMarch function');
 
+			if( KOCFIA.quickMarch.reequipSetTimeout ){
+				window.clearTimeout( KOCFIA.quickMarch.reequipSetTimeout );
+			}
+
 			var tParams = $.extend({}, window.g_ajaxparams),
 				unitsArr = {},
 				resources = [0, 0, 0, 0, 0, 0],
@@ -19422,32 +19689,35 @@ jQuery(document).ready(function(){
 						window.setTimeout(function(){
 							Shared.forceMarchUpdate(attack, false, dfd);
 						}, eta + 10000);
+
 					} else if( data.user_action ){
 						if( data.user_action == 'marchWarning' ){
 							tParams.marchWarning = 1;
-							launch();
+
 						} else if( data.user_action == 'marchCaptcha' ){
 							Shared.notify('Lancement échoué (captcha)');
 							Shared.manageCaptcha('Marche rapide');
+
 						} else {
 							Shared.notify('Lancement échoué (action)');
 						}
 					} else if( data.msg ){
 						Shared.notify('Lancement refusé ('+ data.msg +')');
+
 					} else {
 						Shared.notify('Lancement refusé (serveur)');
 					}
 				})
 				.fail(function(){
 					attempts -= 1;
-					if( attempts > 0 ) launch();
-					else {
+					if( attempts > 0 ){
+						launch();
+					} else {
 						Shared.notify('Lancement refusé (erreur internet)');
 					}
 				});
 			};
 
-			launch();
 		};
 
 	/* THRONE */
@@ -19684,7 +19954,7 @@ jQuery(document).ready(function(){
 	/* REPORTS */
 		KOCFIA.reports = {
 			options: {
-				active: 0,
+				active: 1,
 				automatic: 0,
 				autoWilderness: 0,
 				autoBarbarian: 0,
@@ -20832,7 +21102,8 @@ jQuery(document).ready(function(){
 				active: 1,
 				automatic: 0,
 				priority: ['unt1', 'unt2', 'unt3', 'unt4', 'unt5', 'unt6', 'unt7', 'unt8', 'unt9', 'unt10', 'unt11', 'unt12'],
-				keep: 0
+				keep: 0,
+				reviveWithoutOptimizedThroneSet: 1
 			},
 			stored: ['rules'],
 			rules: {} //by unit key and city key
@@ -20844,6 +21115,7 @@ jQuery(document).ready(function(){
 			code += '<div>';
 			code += Shared.generateCheckbox('hospital', 'active', 'Activer', KOCFIA.conf.hospital.active);
 			code += Shared.generateCheckbox('hospital', 'automatic', 'Lancer les soins automatiques', KOCFIA.conf.hospital.automatic);
+			code += Shared.generateCheckbox('hospital', 'reviveWithoutOptimizedThroneSet', 'Lancer les soins même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.hospital.reviveWithoutOptimizedThroneSet);
 			code += Shared.generateButton('hospital', 'deleteRules', 'Supprimer les configurations de soin enregistrées');
 			code += '</div>';
 
@@ -21338,11 +21610,51 @@ jQuery(document).ready(function(){
 				var sequence = function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital launchAutomaticRules deferred sequence function');
 					return $.Deferred(function(dfd){
-						return dfd.pipe( fromCity(dfd) );
+						return dfd.pipe( equipSet(dfd, 10) );
 					}).promise();
 				};
 
-				//step 1 - find the sender
+				//step 1 - equip optimized throne items
+				var equipSet = function( dfd, attempts ){
+					if( KOCFIA.set.currentPair == 'hospital' ){
+						return dfd.pipe( byCity(dfd) );
+					} else {
+						if( !KOCFIA.set.isSwappingItems() ){
+							var setWrapper = function(){
+								return $.Deferred(function( wdfd ){
+									return wdfd.pipe( KOCFIA.set.activatePair('hospital', wdfd) );
+								}).promise();
+							};
+
+							$.when( setWrapper() )
+								.done(function(){
+									return dfd.pipe( byCity(dfd) );
+								})
+								.fail(function(){
+									if( KOCFIA.hospital.reviveWithoutOptimizedThroneSet ){
+										return dfd.pipe( byCity(dfd) );
+									} else {
+										return dfd.reject();
+									}
+								});
+
+						} else if( KOCFIA.formation.reviveWithoutOptimizedThroneSet ) {
+							return dfd.pipe( byCity(dfd) );
+
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){
+									return dfd.pipe( equipSet(dfd, attempts) );
+								}, 5000);
+							} else {
+								return dfd.reject();
+							}
+						}
+					}
+				};
+
+				//step 2 - find the sender
 				var byCity = function(dfd){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital launchAutomaticRules deferred fromCity function', cityIndex);
 
@@ -21371,7 +21683,7 @@ jQuery(document).ready(function(){
 					//units
 					units = KOCFIA.hospital.rules[ cityKey ];
 					//use the priority list for looping
-					unitsKeys = KOCFIA.conf.hospital.priority;
+					unitsKeys = KOCFIA.hospital.priority;
 					unitsIndex = 0;
 
 					//requests parameters base
@@ -21381,7 +21693,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( byUnit(dfd) );
 				};
 
-				//step 2 - loop the units
+				//step 3 - loop the units
 				var byUnit = function(dfd){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital launchAutomaticRules deferred toCity function', unitsIndex, unitsKeys, units);
 					//units loop finished
@@ -21417,7 +21729,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( checkRule(dfd) );
 				};
 
-				//step 3 - check the rule
+				//step 4 - check the rule
 				var checkRule = function(dfd){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital launchAutomaticRules deferred checkRule function', rule);
 
@@ -21452,7 +21764,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( launch(dfd, params, 3) );
 				};
 
-				//step 4 - try to launch the march
+				//step 5 - try to launch the march
 				var launch = function( dfd, tParams, attempts ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('kocfia hospital launchAutomaticRules deferred launch function', tParams, attempts);
 					$.ajax({
@@ -21505,14 +21817,17 @@ jQuery(document).ready(function(){
 						});
 				};
 
-				$.when( sequence() );
+				$.when( sequence() )
+					.always(function(){
+						KOCFIA.set.reequipSetItems();
+					});
 			}
 		};
 
 	/* PLAYERS OR ALLIANCES SEARCH */
 		KOCFIA.search = {
 			options: {
-				active: 0
+				active: 1
 			},
 			stored: [],
 			fetching: {
@@ -22202,7 +22517,7 @@ jQuery(document).ready(function(){
 	/* TOURNAMENT */
 		KOCFIA.tournament = {
 			options: {
-				active: 0,
+				active: 1,
 				refresh: 0,
 				monitor: 0,
 				soundUrl: 'http://kocfia.kapok.fr/alliance.ogg',
@@ -22549,18 +22864,21 @@ jQuery(document).ready(function(){
 	/* THRONE SETS */
 		KOCFIA.set = {
 			options: {
-				active: 0,
+				active: 1,
 				automatic: 0,
 				noSwapWhileAttacked: 1
 			},
 			stored: ['pairs', 'currentPair', 'previousSet', 'previousEquipedItems'],
-			tasks: ['formation', 'hospital', 'transport', 'reassign'/*, 'repair', 'research', 'build'*/],
+			tasks: ['formation', 'hospital', 'transport', 'reassign', 'attack', 'scout', 'reinforce'/*, 'repair', 'research', 'build'*/],
 			pairs: {}, //by task
 			currentPair: '',
 			previousEquipedItems: {}, //by type
 			previousSet: '',
-			itemTypes: ['advisor', 'chair', 'banner', 'table', /*'trophy',*/ 'window'],
+			itemTypes: ['advisor', 'chair', 'banner', 'table', 'trophy', 'window'],
 			labels: {
+				'attack': 'Attaque',
+				'scout': 'Éclairage',
+				'reinforce': 'Renfort',
 				'repair': 'Réparation des objets de trône',
 				'noSwap': 'Ne pas changer ce type d\'objet',
 				'briton': 'Un objet de la faction Briton',
@@ -22569,8 +22887,17 @@ jQuery(document).ready(function(){
 			}
 		};
 
-		//@TODO manage under attack flag
 		//@TODO change tasks to do throne items swap
+		//formation ok
+		//hospital ok
+		//transport ok
+		//reassign ok
+		//repair
+		//research
+		//build
+		//reinforce ok
+		//attack ok
+		//scout ok
 
 		KOCFIA.set.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set confPanel function');
@@ -22579,7 +22906,7 @@ jQuery(document).ready(function(){
 			code += Shared.generateCheckbox('set', 'active', 'Activer', KOCFIA.conf.set.active);
 			code += Shared.generateCheckbox('set', 'automatic', 'Equiper les sets automatiquement', KOCFIA.conf.set.automatic);
 			code += Shared.generateCheckbox('set', 'noSwapWhileAttacked', 'Ne pas changer les objets équipés quand une des villes est attaquée', KOCFIA.conf.set.noSwapWhileAttacked);
-			code += Shared.generateButton('rules', 'deleteStored', 'Supprimer toutes les couples set - tâche enregistrés');
+			code += Shared.generateButton('rules', 'deleteStored', 'Supprimer toutes les couples objets - tâches enregistrés');
 			code += '</div>';
 
 			$section.append( code );
@@ -22724,6 +23051,8 @@ jQuery(document).ready(function(){
 			help += '<h4>Informations et limitations :</h4><ul>';
 			help += '<li>L\'équipement automatique d\'un objet ou set avant la réalisation d\'une tâche (formation, ...) ne modifie pas l\'affichage de la salle du trône</li>';
 			help += '<li>Si une des villes est attaquée, aucun changement d\'objet n\'est réalisé (limitation désactivable dans l\'onglet option)</li>';
+			help += '<li>Les sets optimisés pour les attaques automatiques ou manuelle (pas les renforts ou transport) n\'optimisent que le lancement, pas le combat. Donc cela permet de maximiser la vitesse et la taille de la marche uniquement</li>';
+			help += '<li><b>Il est conseillé de configurer les tâches en utilisant des sets plutôt que plusieurs objets, chaque objet nécessitant une requête au serveur, ralentissant donc les tâches</b></li>';
 			help += '</ul></div>';
 
 			return help;
@@ -22865,11 +23194,13 @@ jQuery(document).ready(function(){
 			var timestamp = Date.timestamp(),
 				obsolete = 5 * 60 * 1000,
 				msgTimestamp;
+
 			$msg = KOCFIA.set.$log.find('.info').find('div');
 			if( $msg.length > 14 ){
 				//keep one for td width
 				KOCFIA.set.$history.append( $msg.filter(':lt(14)') );
 			}
+
 			$msg.each(function(){
 				var $div = $(this);
 				msgTimestamp = $div.data('timestamp');
@@ -23023,6 +23354,11 @@ jQuery(document).ready(function(){
 		KOCFIA.set.activatePair = function( task, dfd ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set activatePair function', task);
 
+			if( !KOCFIA.set.on || (KOCFIA.set.noSwapWhileAttacked && !$.isEmptyObject(KOCFIA.alarms.underAttack)) ){
+				if( dfd ) return dfd.reject();
+				else return false;
+			}
+
 			//get current set
 			var setItems = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
 				pairItems = KOCFIA.set.pairs[ task ],
@@ -23173,11 +23509,20 @@ jQuery(document).ready(function(){
 			}
 
 			KOCFIA.set.userInformation('Pas de configuration pour la tâche '+ title);
+
 			if( dfd ) return dfd.resolve();
+
+			return true;
 		};
 
-		KOCFIA.set.reequipSetItems = function(){
+		KOCFIA.set.reequipSetItems = function( cdfd ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set reequipSetItems function');
+
+			if( !KOCFIA.set.on || (KOCFIA.set.noSwapWhileAttacked && !$.isEmptyObject(KOCFIA.alarms.underAttack)) ){
+				if( cdfd ) cdfd.reject();
+				else return false;
+			}
+
 			var typeIndex, type, itemId, setNum,
 				currentItems = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ];
 
@@ -23264,16 +23609,23 @@ jQuery(document).ready(function(){
 			$.when( reequipSequence() )
 				.done(function(){
 					KOCFIA.set.userInformation('Set d\'objets de la salle du trône rétabli');
+
+					if( cdfd ) cdfd.resolve();
 				})
 				.fail(function(){
 					KOCFIA.set.userInformation('Problème lors du rétablissement du set d\'objets de la salle du trône');
 
 					Shared.notify('Problème lors du rétablissement du set d\'objets de la salle du trône');
+
+					if( cdfd ) cdfd.reject();
 				});
 
 			//reset variables and their stored values
 			KOCFIA.set.deleteStored();
 		};
+
+	/* CRAFT */
+		//kocRecipes
 
 	/* CHECK AND LAUNCH ATTACK */
 		KOCFIA.checkAndLaunchAttack = function( attack ){

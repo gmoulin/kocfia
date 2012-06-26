@@ -1119,9 +1119,18 @@ html, body {
 		margin-top: 2px;
 	}
 
+	#kocfia-formation .manual-train-form .useSet,
 	#kocfia-formation .manual-train-form .launch,
 	#kocfia-formation .manual-train-form .reset {
 		display: none;
+	}
+
+	#kocfia-formation .manual-train-form .useSet {
+		margin: 8px 0;
+	}
+
+	#kocfia-formation .manual-train-form .useSet input + label {
+		margin: 0;
 	}
 
 	#kocfia-formation .forms .button + .button {

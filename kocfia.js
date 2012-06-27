@@ -1335,7 +1335,7 @@ jQuery(document).ready(function(){
 							}, 0);
 						} else if( $panel.filter('#kocfia-quickMarch').length > 0 ){
 							var $set = KOCFIA.quickMarch.$form.find('#kocfia-quickMarch-set');
-							$set.html( KOCFIA.quickMarch.getSets( $set.val() ) );
+							$set.html( KOCFIA.set.getSets($set.val(), 'quickMarch') );
 						}
 					}
 				})
@@ -18871,8 +18871,8 @@ jQuery(document).ready(function(){
 
 			form += '<div class="buttonset useSet">';
 			form += '<label for="kocfia-quickMarch-set" title="Liste les configurations optimisées d\'objets de salle du trône enregistrées (cf. onglet Set) pour les marches.<br>Attention cela n\'influe que sur la capacité de transport, la vitesse et la taille de la marche, pas le combat en lui même.">Sets optimisés :</label>';
-			form += '<select id="kocfia-quickMarch-set">';
-			form += KOCFIA.quickMarch.getSets('');
+			form += '<select id="kocfia-quickMarch-set" class="set-dropdown">';
+			form += KOCFIA.set.getSets('', 'quickMarch');
 			form += '</select>';
 			form += '<button class="button secondary equip" title="Equipe la configuration d\'objets choisie <small>(cf. onglet Set)</small>"><span>Équiper cette configuration optimisée</span></button>';
 			form += '<button class="button secondary revert" title="Rééquipe le set courant <small>(cf. onglet Set)</small>"><span>Remettre le set courant</span></button>';
@@ -18965,7 +18965,7 @@ jQuery(document).ready(function(){
 			KOCFIA.quickMarch.$form
 				//set
 				.on('click', '.equip', function(){
-					var set = $(this).val();
+					var set = $('#kocfia-quickMarch-set').val();
 					if( set != '' ){
 						var sequence = function(){
 							return $.Deferred(function( dfd ){
@@ -19446,30 +19446,6 @@ jQuery(document).ready(function(){
 						KOCFIA.quickMarch.launchMarch( result.plan );
 					}
 				});
-		};
-
-		KOCFIA.quickMarch.getSets = function( previousType ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch planMarch function');
-
-			var i, type, code,
-				types = ['attack', 'scout', 'reinforce', 'transport', 'reassign'],
-				labels = {
-					attack: 'attaque',
-					scout: 'éclairage',
-					reinforce: 'renfort',
-					transport: 'transport',
-					reassign: 'réassignement'
-				};
-
-			code = '<option value="">Choisir</option>';
-			for( i = 0; i < types.length; i += 1 ){
-				type = types[ i ];
-				if( KOCFIA.set.pairs.hasOwnProperty(type) ){
-					code += '<option value="'+ type +'" '+ (previousType == type ? 'selected' : '')+'>'+ labels[ type ] +'</option>';
-				}
-			}
-
-			return code;
 		};
 
 		KOCFIA.quickMarch.planMarch = function(){
@@ -22963,6 +22939,11 @@ jQuery(document).ready(function(){
 			KOCFIA.set.$history = KOCFIA.set.$div.find('#kocfia-set-history');
 			KOCFIA.set.$log = KOCFIA.set.$div.find('.log');
 			KOCFIA.set.$forms = KOCFIA.set.$div.find('.forms');
+
+			//force every set dropdowns to have the same value (if in options)
+			$body.on('change', '.set-dropdown', function(){
+				$body.find('.set-dropdown').val( $(this).val() );
+			});
 		};
 
 		KOCFIA.set.on = function(){
@@ -23624,8 +23605,39 @@ jQuery(document).ready(function(){
 			KOCFIA.set.deleteStored();
 		};
 
+		KOCFIA.set.getSets = function( previousType, module ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set getSets function');
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty(module) ) console.info('KOCFIA '+ module +' getSets function');
+
+			var i, type, code,
+				types = ['attack', 'scout', 'reinforce', 'transport', 'reassign'],
+				labels = {
+					attack: 'attaque',
+					scout: 'éclairage',
+					reinforce: 'renfort',
+					transport: 'transport',
+					reassign: 'réassignement'
+				};
+
+			if( module == 'quickmarch' ){
+				types = ['attack', 'scout', 'reinforce', 'transport', 'reassign'];
+			}
+
+			code = '<option value="">Choisir</option>';
+			for( i = 0; i < types.length; i += 1 ){
+				type = types[ i ];
+				if( KOCFIA.set.pairs.hasOwnProperty(type) ){
+					code += '<option value="'+ type +'" '+ (previousType == type ? 'selected' : '')+'>'+ labels[ type ] +'</option>';
+				}
+			}
+
+			return code;
+		};
+
 	/* CRAFT */
 		//kocRecipes
+
+	/* RESEARCH */
 
 	/* CHECK AND LAUNCH ATTACK */
 		KOCFIA.checkAndLaunchAttack = function( attack ){

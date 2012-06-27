@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for changes check via Last-Modified header of kabam code
+ * Class for changes check via version number of kabam code
  *
  * class name is in lowerclass to match table name ("common" class __construct) and file name (__autoload function)
  *

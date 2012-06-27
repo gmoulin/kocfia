@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 DROP TABLE IF EXISTS `checker`;
 CREATE TABLE IF NOT EXISTS `checker` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `timestamp` int(11) unsigned NOT NULL,
+  `version` int(11) unsigned NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `checker` (
 -- Dumping data for table `checker`
 --
 
-INSERT INTO `checker` (`id`, `timestamp`) VALUES
+INSERT INTO `checker` (`id`, `version`) VALUES
 (1, 0);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,6 +1,29 @@
 <?php
+/**
+ * Fonction pour afficher les erreurs des blocs try catch
+ * finalise la page (die)
+ *
+ * @param msg : le message de l'erreur
+ */
+function erreur( $msg ) {
+	print "Error!: " . $msg->getMessage() . "<br />";
+	die();
+}
+
+/**
+ * Affiche les erreurs "PDOException"
+ *
+ * @param string $msg : le message de l'erreur
+ * @param string $className : le nom de la classe où l'erreur a été détectée
+ * @param string $functionName : le nom de la fonction où l'erreur a été détectée
+ */
+function erreur_pdo( $msg, $className, $functionName ) {
+	print "erreur dans la classe ".$className.", fonction ".$functionName."<br />";
+	erreur( $msg );
+}
+
 function __autoload( $class_name ){
-if( file_exists(__DIR__."/inc/class_".$class_name.".php") ){
+	if( file_exists(__DIR__."/inc/class_".$class_name.".php") ){
 		require_once __DIR__."/inc/class_".$class_name.".php";
 		return true;
 	}

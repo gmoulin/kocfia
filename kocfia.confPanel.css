@@ -2849,3 +2849,18 @@ html, body {
 		width: 100px;
 		text-align: center;
 	}
+
+/* throne compare */
+	.throne-compare {
+		width: 100%;
+	}
+
+	.throne-compare th,
+	.throne-compare td {
+		padding: 2 3px;
+	}
+
+	.throne-compare .refresh {
+		float: left;
+	}
+

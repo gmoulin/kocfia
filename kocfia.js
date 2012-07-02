@@ -18,12 +18,14 @@
 	};
 
 	// Return new array with duplicate values removed
-	Array.prototype.unique = function(){
-		var o = {}, i, l = this.length, r = [];
-		for( i = 0; i < l; i += 1 ) o[ this[i] ] = this[i];
-		for( i in o ) r.push( o[i] );
-		return r;
-	};
+	if( !Array.hasOwnProperty('unique') ){
+		Array.prototype.unique = function(){
+			var o = {}, i, l = this.length, r = [];
+			for( i = 0; i < l; i += 1 ) o[ this[i] ] = this[i];
+			for( i in o ) r.push( o[i] );
+			return r;
+		};
+	}
 
 	var uniqueObject = function( arr ){
 		var hash = {}, result = [], i , length = arr.length;
@@ -37,13 +39,17 @@
 		return result;
 	};
 
-	Array.max = function( array ){
-		return Math.max.apply( Math, array );
-	};
+	if( !Array.hasOwnProperty('max') ){
+		Array.max = function( array ){
+			return Math.max.apply( Math, array );
+		};
+	}
 
-	Array.min = function( array ){
-		return Math.min.apply( Math, array );
-	};
+	if( !Array.hasOwnProperty('min') ){
+		Array.min = function( array ){
+			return Math.min.apply( Math, array );
+		};
+	}
 
 	/* array isArray */
 	if( !Array.hasOwnProperty('isArray') ){
@@ -66,9 +72,11 @@
 		};
 	}
 
-	Date.timestamp = function(){
-		return Date.now() / 1000;
-	};
+	if( !Date.hasOwnProperty('timestamp') ){
+		Date.timestamp = function(){
+			return Date.now() / 1000;
+		};
+	}
 
 //prototype json.stringify bug with array
 	if( window.Prototype ){
@@ -153,7 +161,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.8.0',
+		version: '0.8.1',
 		userScriptLoaderVersion: 3,
 		debug: true,
 		debugWhat: { //comment module line for no debug
@@ -8168,7 +8176,6 @@ jQuery(document).ready(function(){
 						$('#'+ KOCFIA.map.rowColor.wilderness[i].id).addClass( KOCFIA.map.rowColor.cities[i].css );
 					}
 				}
-
 			},
 			darkForests: {
 				colNames: ['', 'Distance', 'Coordonnées', 'Niveau'],
@@ -13364,14 +13371,20 @@ jQuery(document).ready(function(){
 
 				code += '<span class="icon-user player-search" data-player="'+ rowObject.attacker +'" title="Recherche du joueur"></span>';
 
-				if( rowObject.alliance !== '') code += '<span class="icon-group alliance-search" data-alliance="'+ rowObject.alliance +'" title="Recherche de l\'alliance"></span>';
+				if( rowObject.alliance !== ''){
+					code += '<span class="icon-group alliance-search" data-alliance="'+ rowObject.alliance +'" title="Recherche de l\'alliance"></span>';
+				}
+
+				if( rowObject.playerId !== '' && rowObject.attackerId !== '' ){
+					code += '<span class="icon-tasks trone-compare" data-player="'+ rowObject.player +'" data-playerId="'+ rowObject.playerId +'" data-attacker="'+ rowObject.attacker +'" data-attackerId="'+ rowObject.attackerId +'" title="Comparaison des salles du trône des protagonistes"></span>';
+				}
+
 			} else if( type == 'reinforce' ){
 				//code += '<span class="icon-refresh reinforce-refresh" title="Raffraîchir les troupes"></span>';
 				if( rowObject.cityKey !== '' ){
 					code += '<span class="icon-signout reinforce-kickout" data-marchKey="'+ rowObject.marchKey +'" data-cityKey="'+ rowObject.cityKey +'" title="Renvoyer"></span>';
 				}
 			}
-
 
 			return code;
 		};
@@ -13396,7 +13409,7 @@ jQuery(document).ready(function(){
 			multiboxonly: true,
 			multikey: 'shiftKey',
 			shrinkToFit: true,
-			colNames: ['', '', 'Type', 'Joueur', 'Cible', 'ETA', 'Proche', 'Durées', 'Attaquant', 'Alliance', 'Depuis', 'Troupes', 'Statut', 'Empennage', 'Trône', 'Maréchal', 'Autorenforts', 'Renforts'],
+			colNames: ['', '', 'Type', 'Joueur', 'Cible', 'ETA', 'Proche', 'Durées', 'Attaquant', 'Alliance', 'Depuis', 'Troupes', 'Statut', 'Empennage', 'Trône', 'Maréchal', 'Autorenforts', 'Renforts', ''],
 			colModel: [
 				{name: 'marchKey', index: 'marchKey', sortable: false, search: false, formatter: KOCFIA.alarm.gridRowActions, width: 40},
 				{name: 'cityKey', index: 'cityKey', sortable: false, search: false, hidedlg: true, hidden: true},
@@ -13416,7 +13429,9 @@ jQuery(document).ready(function(){
 				{name: 'throne', index: 'throne', width: 60},
 				{name: 'marshall', index: 'marshall', width: 60},
 				{name: 'selfReinforcement', index: 'selfReinforcement', width: 60},
-				{name: 'reinforcement', index: 'reinforcement', width: 60}
+				{name: 'reinforcement', index: 'reinforcement', width: 60},
+				{name: 'playerId', index: 'playerId', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'attackerId', index: 'attackerId', hidedlg: true, hidden: true, search: false, sortable: false}
 			],
 			caption: '',
 			pager: '#kocfia-alarm-pager',
@@ -13462,7 +13477,7 @@ jQuery(document).ready(function(){
 			//autonomy
 			code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForAutonomy', 'Jouer un son pour les autonomies', KOCFIA.conf.alarm.playSoundForAutonomy);
 			code += Shared.generateAudioInput('alarm', 'autonomySoundUrl', 'Adresse web du son à jouer pour les alertes d\'autonomie <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.autonomySoundUrl, 'autonomy');
-			code += '<p><label for="kocfia-alarm-autonomyColor">Couleur des attaques&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-autonomyColor" name="autonomyColor" class="alarmColors">';
+			code += '<p><label for="kocfia-alarm-autonomyColor">Couleur des autonomies&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-autonomyColor" name="autonomyColor" class="alarmColors">';
 
 			//alliance reports
 			code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForAllianceReport', 'Jouer un son pour les rapports d\'alliance', KOCFIA.conf.alarm.playSoundForAllianceReport);
@@ -13765,9 +13780,9 @@ jQuery(document).ready(function(){
 
 							//attacker
 							var attacker = '',
-								player = (window.seed.players.hasOwnProperty('u' + info.pid) ? window.seed.players['u' + info.pid] : (info.hasOwnProperty('players') && info.players.hasOwnProperty('u' + info.pid) ? info.players['u' + info.pid] : null )),
 								playerName = '',
-								alliance = '';
+								alliance = '',
+								player = (window.seed.players.hasOwnProperty('u' + info.pid) ? window.seed.players['u' + info.pid] : (info.hasOwnProperty('players') && info.players.hasOwnProperty('u' + info.pid) ? info.players['u' + info.pid] : null ));
 							if( player ){
 								attacker += 'par &oplus;('+ player.n +') ('+ Shared.format( parseInt(player.m, 10) ) +')';
 
@@ -13900,7 +13915,7 @@ jQuery(document).ready(function(){
 
 							if( type == 'attack' || type == 'scout' ){
 								//throne bonus
-								var throneBonus = KOCFIA.throne.getSetBonus( window.seed.throne.activeSlot ),
+								var throneBonus = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null),
 									bonusText = '',
 									ranges = [0, 0, 0], //range, ranged range, siege range
 									debuffs = [0, 0, 0]; //range debuff, ranged range debuff, siege range debuff
@@ -13971,7 +13986,7 @@ jQuery(document).ready(function(){
 								message += ' | '+ autoReinforcements;
 								message += ' | '+ reinforcements;
 
-								KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name);
+								KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name, KOCFIA.kabamuid, info.pid);
 
 								KOCFIA.alarm.summarize();
 							} else if( type == 'reinforce' ){
@@ -13979,7 +13994,7 @@ jQuery(document).ready(function(){
 								message += ' | '+ attacker;
 								message += ' | '+ troops;
 
-								KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name);
+								KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name, KOCFIA.kabamuid, info.pid);
 
 								KOCFIA.alarm.summarize();
 							} else {
@@ -13991,7 +14006,7 @@ jQuery(document).ready(function(){
 								}
 							}
 
-							message += '#'+ info.marchId +'#'+ info.arrivalTime +'#';
+							message += '#'+ info.marchId +'#'+ info.arrivalTime +'#'+ KOCFIA.kabamuid +'#'+ info.pid;
 						break;
 					default:
 						return false;
@@ -14197,7 +14212,7 @@ jQuery(document).ready(function(){
 
 							flag = text.split('#');
 
-							KOCFIA.alarms.generateSummaryForAttack(flag, $chatwrap.find('.nm').text());
+							KOCFIA.alarms.generateSummaryForAttack(flag, $chatwrap.find('.nm').text(), flag[3], flag[4]);
 
 							flag = flag[0].substring(('&Psi;&alpha;').length, flag[0].length);
 							flag = flag.split['|'];
@@ -14226,7 +14241,7 @@ jQuery(document).ready(function(){
 
 							flag = text.split('#');
 
-							KOCFIA.alarms.generateSummaryForAttack(flag, $chatwrap.find('.nm').text());
+							KOCFIA.alarms.generateSummaryForAttack(flag, $chatwrap.find('.nm').text(), flag[3], flag[4]);
 
 							flag = flag[0].substring(('&Psi;&epsilon;').length, flag[0].length);
 							flag = flag.split['|'];
@@ -14341,8 +14356,8 @@ jQuery(document).ready(function(){
 			window.seed.queue_atkinc[ marchId ] = march;
 		};
 
-		KOCFIA.alarm.generateSummaryForAttack = function( message, player ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('kocfia alarm generateSummaryForAttack function', message, player);
+		KOCFIA.alarm.generateSummaryForAttack = function( message, player, defenderId, attackerId ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('kocfia alarm generateSummaryForAttack function', message, player, defenderId, attackerId);
 			var type;
 			if( message.indexOf('&Psi;&alpha;') > -1 ){
 				type = 'attack';
@@ -14444,7 +14459,9 @@ jQuery(document).ready(function(){
 				throne:				(infos[6] ? $.trim( infos[6] ) : ''),
 				marshall:			(infos[7] ? $.trim( infos[7] ) : ''),
 				selfReinforcements:	(infos[8] ? $.trim( infos[8] ) : ''),
-				reinforcements:		(infos[9] ? $.trim( infos[9] ) : '')
+				reinforcements:		(infos[9] ? $.trim( infos[9] ) : ''),
+				playerId:			playerId,
+				attackerId: 		attackerId
 			};
 		};
 
@@ -14521,6 +14538,17 @@ jQuery(document).ready(function(){
 							} else {
 								alert('L\'onglet marche simplifées n\'est pas actif.');
 							}
+						})
+						.on('click', '.trone-compare', function(){
+							var $this = $(this),
+								defender = $this.attr('data-defender'),
+								defenderId = $this.attr('data-defenderId'),
+								attacker = $this.attr('data-attacker'),
+								attackerId = $this.attr('data-attackerId');
+
+							Shared.working();
+
+							KOCFIA.throne.compareThrones(defender, defenderId, attacker, attackerId);
 						})
 						.on('click', '.ui-jqgrid-titlebar', function(){
 							$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
@@ -16139,7 +16167,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats update function');
 
 			//thone bonuses
-			var throneBonus = KOCFIA.throne.getSetBonus( window.seed.throne.activeSlot ),
+			var throneBonus = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null),
 				i, unit, unitKey, $unitStatsTds, stats,
 				lifeBase, attackBase, defenseBase, speedBase, rangeBase, loadBase,
 				life, attack, defense, speed, range, load,
@@ -18966,7 +18994,7 @@ jQuery(document).ready(function(){
 				//set
 				.on('click', '.equip', function(){
 					var set = $('#kocfia-quickMarch-set').val();
-					if( set != '' ){
+					if( set !== '' ){
 						var sequence = function(){
 							return $.Deferred(function( dfd ){
 								return dfd.pipe( KOCFIA.set.activatePair( set ) );
@@ -19841,38 +19869,52 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne addListeners function');
 		};
 
-		KOCFIA.throne.getSetBonus = function( setNum ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getActiveBonus function');
+		KOCFIA.throne.getSetBonus = function( setNum, items ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getSetBonus function');
 
-			var setItems = window.seed.throne.slotEquip[ setNum ],
+			var setItems,
 				summary = {},
+				isOtherPlayer = false;
 				itemId, item,
 				slot, effect,
 				effectRank, effectInfo, tierInfo, bonus;
 
-			if( setItems !== null && Object.isObject(setItems) && !$.isEmptyObject(setItems) ){
-				for( itemId in setItems ){
-					if( setItems.hasOwnProperty(itemId) ){
-						item = window.seed.throne.inventory[ itemId ];
-						if( item && Object.isObject(item) ){
-							if( !item.isBrocken ){
-								for( slot in item.effects ){
-									if( item.effects.hasOwnProperty(slot) ){
-										effect = item.effects[ slot ];
-										effectRank = parseInt(slot.replace(/slot/, ''), 10);
-										if( effectRank <= item.quality ){
-											tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
-											bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+			if( items !== null && Object.isObject(items) && !$.isEmptyObject(items) ){
+				setItems = Object.keys(items);
+				isOtherPlayer = true;
+			} else {
+				setItems = window.seed.throne.slotEquip[ setNum ];
+			}
 
-											if( !summary.hasOwnProperty(effect.id) ){
-												effectInfo = window.cm.thronestats.effects[ effect.id ];
-												summary[ effect.id ] = {
-													label: effectInfo[1],
-													percent: bonus
-												};
-											} else {
-												summary[ effect.id ].percent += bonus;
-											}
+			if( setItems !== null && Array.isArray(setItems) && setItems.length > 0 ){
+				for( itemId in setItems ){
+					if( isOtherPlayer ){
+						if( !items.hasOwnProperty(itemId) ){
+							continue;
+						}
+						item = items[ itemId ];
+					} else {
+						item = window.seed.throne.inventory[ itemId ];
+					}
+
+					if( item && Object.isObject(item) ){
+						if( !item.hasOwnProperty('isBrocken') || !item.isBrocken ){
+							for( slot in item.effects ){
+								if( item.effects.hasOwnProperty(slot) ){
+									effect = item.effects[ slot ];
+									effectRank = parseInt(slot.replace(/slot/, ''), 10);
+									if( effectRank <= item.quality ){
+										tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
+										bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+
+										if( !summary.hasOwnProperty(effect.id) ){
+											effectInfo = window.cm.thronestats.effects[ effect.id ];
+											summary[ effect.id ] = {
+												label: effectInfo[1],
+												percent: bonus
+											};
+										} else {
+											summary[ effect.id ].percent += bonus;
 										}
 									}
 								}
@@ -19925,6 +19967,213 @@ jQuery(document).ready(function(){
 			}
 
 			return label;
+		};
+
+		KOCFIA.throne.compareThrones = function( defender, defenderId, attacker, attackerId ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne compareThrones function');
+
+			var thrones = {defender: null, attacker: null, player: null},
+				summary, code;
+
+			var sequence = function(){
+				return $.Deferred(function( dfd ){
+					return dfd.pipe( getThrone(dfd, 'defender', 3) );
+				}).promise();
+			};
+
+			var getThrone = function(dfd, type, attempts){
+				var params = $.extend({}, window.g_ajaxparams);
+				params.playerId = (type == 'defender' ? defenderId : attackerId);
+
+				if( params.playerId === '' || params.playerId === null ){
+					return dfd.reject();
+				}
+
+				//player is the defender, no need to request the server
+				if( type == 'defender' && defenderId == KOCFIA.kabamuid ){
+					thrones.defender = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null);
+					delete thrones.player;
+
+					return dfd.pipe( getThrone(dfd, 'attacker', 3) );
+				} else if( type == 'attacker' && attackerId == KOCFIA.kabamuid ){
+					thrones.attacker = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null);
+					delete thrones.player;
+
+					return dfd.pipe( compare(dfd) );
+				} else if( type == 'player' ){
+					thrones.player = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null);
+
+					return dfd.pipe( compare(dfd) );
+				}
+
+				params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
+				params.action = 'getEquipped';
+
+				summary = null;
+
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(data){
+					if( data.ok && data.hasOwnProperty('items') ){
+						//transform items into effect summary
+						summary = KOCFIA.throne.getSetBonus(null, data.items);
+
+						if( type == 'defender' ){
+							thrones.defender = summary;
+
+							return dfd.pipe( getThrone(dfd, 'attacker', 3) );
+
+						} else if( type == 'attacker' ){
+							thrones.attacker = summary;
+
+							if( thrones.hasOwnProperty('player') ){
+								thrones.player = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null);
+							}
+
+							return dfd.pipe( compare(dfd) );
+						}
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							return dfd.pipe( getThrone(dfd, type, attempts) );
+						} else {
+							return dfd.reject();
+						}
+					}
+				})
+				.fail(function(){
+					attempts -= 1;
+					if( attempts > 0 ){
+						return dfd.pipe( getThrone(dfd, type, attempts) );
+					} else {
+						return dfd.reject();
+					}
+				});
+			};
+
+			var compare = function(dfd){
+				code = '<table><thead><tr><th><span class="refresh icon-refresh"></span>Effets</th><th>Défenseur</th><th>&delta;</th><th>Attaquant</th>';
+
+				var i, eId, d, a, p, delta_d_a, delta_a_p,
+					effects,
+					effectIds = {},
+					types = Object.keys(thrones),
+					isThreeWays = types.length == 3,
+					effectsPriority = [5, 21, 37, 42, 58, 63]; //ranges bonus
+
+				for( i = 0; i < 3; i += 1 ){
+					if( thrones.hasOwnProperty( types[i] ) ){
+						for( eId in thrones[ types[i] ] ){
+							if( thrones[ types[i] ].hasOwnProperty(eId) ){
+								effectIds[ eId ] = 1;
+							}
+						}
+					}
+				}
+
+				//three ways
+				if( isThreeWays ){
+					code += '<th>&delta;</th><th>Vous</th>';
+				}
+
+				code += '</tr></thead></tbody>';
+
+				for( i = 0; i < effectsPriority.length; i += 1 ){
+					eId = effectsPriority[ i ];
+
+					if( thrones.defender.hasOwnProperty(eId) || thrones.attacker.hasOwnProperty(eId) || (isThreeWays && thrones.player.hasOwnProperty(eId)) ){
+						code += '<tr>';
+
+						//label
+						code += '<td>'+ (thrones.defender.hasOwnProperty(eId) ? thrones.defender[ eId ].label : ( thrones.attacker.hasOwnProperty(eId) ? thrones.attacker[ eId ].label : thrones.player[ eId ].label )) +'</td>';
+						d = thrones.defender.hasOwnProperty(eId) ? thrones.defender[ eId ].percent : 0;
+						a = thrones.attacker.hasOwnProperty(eId) ? thrones.attacker[ eId ].percent : 0;
+						p = isThreeWays && thrones.player.hasOwnProperty(eId) ? thrones.player[ eId ].percent : 0;
+						delta_d_a = d - a;
+						delta_a_p = a - p;
+
+						code += '<td>'+ d +'%</td>';
+						code += '<td>'+ (delta_d_a > 0 ? '+' : '') + delta_d_a +'</td>';
+						code += '<td>'+ a +'%</td>';
+						if( isThreeWays ){
+							code += '<td>'+ (delta_a_p > 0 ? '+' : '') + delta_a_p +'</td>';
+							code += '<td>'+ p +'%</td>';
+						}
+
+						code += '</tr>';
+					}
+				}
+
+				for( i = 0; i < effectIds.length; i += 1 ){
+					eId = effectIds[ i ];
+
+					if( $.inArray(eId, effectsPriority) > -1 ){
+						code += '<tr>';
+
+						//label
+						code += '<td>'+ (thrones.defender.hasOwnProperty(eId) ? thrones.defender[ eId ].label : ( thrones.attacker.hasOwnProperty(eId) ? thrones.attacker[ eId ].label : thrones.player[ eId ].label )) +'</td>';
+						d = thrones.defender.hasOwnProperty(eId) ? thrones.defender[ eId ].percent : 0;
+						a = thrones.attacker.hasOwnProperty(eId) ? thrones.attacker[ eId ].percent : 0;
+						p = isThreeWays && thrones.player.hasOwnProperty(eId) ? thrones.player[ eId ].percent : 0;
+						delta_d_a = d - a;
+						delta_a_p = a - p;
+
+						code += '<td>'+ d +'%</td>';
+						code += '<td>'+ (delta_d_a > 0 ? '+' : '') + delta_d_a +'</td>';
+						code += '<td>'+ a +'%</td>';
+						if( isThreeWays ){
+							code += '<td>'+ (delta_a_p > 0 ? '+' : '') + delta_a_p +'</td>';
+							code += '<td>'+ p +'%</td>';
+						}
+
+						code += '</tr>';
+					}
+				}
+
+				code += '</tbody></table>';
+
+				return dfd.resolve();
+			};
+
+			$.when( sequence() )
+				.done(function(){
+					var id = 'kocfia-throne-compare-'+ defenderId +'-'+ attackerID,
+						$dialog = $('#'+ id);
+
+					//open new dialog if none present for the comparaison
+					if( $dialog.length === 0 ){
+						$('<div id="'+ id +'" class="throne-compare">')
+							.attr('data-defender', defender)
+							.attr('data-defenderId', defenderId)
+							.attr('data-attacker', attacker)
+							.attr('data-attackerId', attackerId)
+							.append( code )
+							.on('click', '.refresh', function(){
+								var $div = $(this).closest('.throne-compare'),
+									defender = $div.attr('data-defender'),
+									defenderId = $div.attr('data-defenderId'),
+									attacker = $div.attr('data-attacker'),
+									attackerId = $div.attr('data-attackerId');
+
+								KOCFIA.throne.compareThrones(defender, defenderId, attacker, attackerId);
+							})
+							.dialog({
+								title: 'Comparaison '+ defender +' - '+ attacker,
+								height: 300,
+								zIndex: 100003
+							});
+					} else { //refresh and focus the opened one
+						$dialog.find('table').replaceWith( code );
+					}
+				})
+				.fail(function(){
+					Shared.notify('Problème durant la récupération des salles du trône');
+				});
 		};
 
 	/* REPORTS */
@@ -25026,17 +25275,8 @@ jQuery(document).ready(function(){
 	//Entraînement :
 	//- entraînement programmé (x miliciens puis y archers puis ...)
 
-	//Recherche :
-	//- file d'attente des recherches par ville
-
 	//Exploration :
 	//recherche joueur
-
-	//Alerte :
-	//- attaque
-		//- plusieurs niveaux de dangerosité (éclairage, grosse attaque, vidage, ...)
-	//- manque de nourriture
-	//- manque de ressource (couplée avec les files d'attente)
 
 	//Rapport :
 	//- auto-suppression
@@ -25044,28 +25284,12 @@ jQuery(document).ready(function(){
 	//- consultation simplifiée
 	//- vision claire des horaires
 
-	//Attaque :
-	//- mode rainbow (1 cible, x attaques de y miliciens)
-
-	//X Avoir des recherches de TS/CB/FS indexées par villes et mémorisées pour ne pas avoir à refaire les recherches à chaque fois qu'on passe d'une recherche sur une ville à une autre.
-
-	//Renforcement :
-	//- garder x miliciens dans la ville 1, le reste va à la ville 2
-	//- prise en compte des attaques (CB, ...)
-	//- envoyer de la nourriture avec les renforts
-
 	//Coordination :
-	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des pourfendeurs connectés jusqu'à un point donné, pour un type d'unité à choisir)
+	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des membres connectés jusqu'à un point donné, pour un type d'unité à choisir)
 
 	//Laboratorie :
 	//-auto search
 	//-liste d'attente
-
-	//mode tournoi
-		//sauvegarde puissance récurrent
-		//pas de sauvegarde durant un tournois
-		//donner la position avec la différence sur le plus proche avec changement de cadeau
-
 
 	//paying features
 		//import / export whole conf

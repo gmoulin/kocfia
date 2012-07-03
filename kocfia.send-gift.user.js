@@ -15,11 +15,11 @@ if( !Object.hasOwnProperty('isObject') ){
 	};
 }
 
-var fbCss = "body.canvas div#globalContainer { padding: 0; }"
-	+ "\nbody.canvas #rightCol { display: none; }"
-	+ "\nbody.canvas.center_fixed_width_app #pagelet_canvas_content { width: auto; margin: 0; }"
-	+ "\nbody.canvas #mainContainer { border: none; }"
-;
+var fbCss = "body.canvas div#globalContainer { padding: 0; }";
+	fbCss +="\nbody.canvas #rightCol { display: none; }";
+	fbCss +="\nbody.canvas.center_fixed_width_app #pagelet_canvas_content { width: auto; margin: 0; }";
+	fbCss +="\nbody.canvas #mainContainer { border: none; }";
+
 var styleElement = document.createElement("style");
 styleElement.innerHTML = fbCss;
 document.getElementsByTagName("head")[0].appendChild(styleElement);
@@ -54,7 +54,7 @@ unsafeWindow.addEventListener('message', function(event){
 			} else if( event.data.task == 'secondMethodStepOne' ){
 				GM_xmlhttpRequest({
 					method: 'GET',
-					url: unsafeWindow.location.protocol +'//apps.facebook.com/kingdomsofcamelot/?fb_source=request&request_ids='+ event.data.param,
+					url: unsafeWindow.location.protocol +'//apps.facebook.com/kingdomsofcamelot/?fb_source=request&request_ids='fbCss +=event.data.param,
 					onload: function( response ){
 						//unsafeWindow.console.log('load fb', {task: event.data.task, result: response.responseText});
 						event.source.postMessage({task: event.data.task, result: response.responseText}, event.origin);

@@ -8,7 +8,7 @@
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.miniColors.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.tipsy.css" />
 		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/ui.jqgrid.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/kocfia.confPanel.css?<?php echo filemtime(__DIR__.'/../kocfia.confPanel.css'); ?>" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/kocfia.css?<?php echo filemtime(__DIR__.'/../kocfia.confPanel.css'); ?>" />
 		<style>
 			body {
 				font-size: 11px;

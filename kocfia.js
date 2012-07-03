@@ -162,7 +162,7 @@ jQuery(document).ready(function(){
 
 	var KOCFIA = {
 		version: '0.8.1',
-		userScriptLoaderVersion: 3,
+		userScriptLoaderVersion: 4,
 		debug: true,
 		debugWhat: { //comment module line for no debug
 			//shared: 1,
@@ -2843,7 +2843,7 @@ jQuery(document).ready(function(){
 				friendColor: '#FAE4E4',
 				foeColor: '#FFCAA2',
 				playSoundOnWhisper: 0,
-				whisperSoundUrl: 'http://kocfia.kapok.fr/whisper.ogg'
+				whisperSoundUrl: 'http://kocfia.kapok.fr/sounds/whisper.ogg'
 			},
 			stored: ['friends_list', 'foes_list'],
 			friendsList: [],
@@ -13336,10 +13336,10 @@ jQuery(document).ready(function(){
 				attackColor: '#FFC6A0',
 				scoutColor: '#FFF8A0',
 				autonomyColor: '#DEDEDE',
-				attackSoundUrl: 'http://kocfia.kapok.fr/attack.ogg',
-				scoutSoundUrl: 'http://kocfia.kapok.fr/scout.ogg',
-				autonomySoundUrl: 'http://kocfia.kapok.fr/autonomy.ogg',
-				allianceSoundUrl: 'http://kocfia.kapok.fr/alliance.ogg'
+				attackSoundUrl: 'http://kocfia.kapok.fr/sounds/attack.ogg',
+				scoutSoundUrl: 'http://kocfia.kapok.fr/sounds/scout.ogg',
+				autonomySoundUrl: 'http://kocfia.kapok.fr/sounds/autonomy.ogg',
+				allianceSoundUrl: 'http://kocfia.kapok.fr/sounds/alliance.ogg'
 			},
 			sounds: {
 				attack: {$tag: null, playing: false},
@@ -22745,7 +22745,7 @@ jQuery(document).ready(function(){
 				active: 1,
 				refresh: 0,
 				monitor: 0,
-				soundUrl: 'http://kocfia.kapok.fr/alliance.ogg',
+				soundUrl: 'http://kocfia.kapok.fr/sounds/alliance.ogg',
 				onGoing: 0
 			},
 			stored: []

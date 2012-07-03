@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name			KOCFIA-MAIN
-// @version			3
+// @version			4
 // @namespace		KOCFIA
 // @description		améliorations et automatisations diverses pour KOC
 // @include			*kingdomsofcamelot.com/fb/e2/standAlone.php*
@@ -85,7 +85,7 @@ if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 					if( preload[i].indexOf('jquery.min.js') > -1 ){
 						tag.onload = function(){
 							tag = unsafeWindow.document.createElement('script');
-							tag.innerHTML = "jQuery.noConflict(); var kocfiaFrameUserScriptVersion = 3; var kocfiaFrom = '"+ domain +"';";
+							tag.innerHTML = "jQuery.noConflict(); var kocfiaFrameUserScriptVersion = 4; var kocfiaFrom = '"+ domain +"';";
 							anchor.parentNode.insertBefore(tag, anchor);
 						};
 					}
@@ -123,16 +123,16 @@ if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 		d = new Date(), i,
 		preload = [
 			'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js',
-			domain + "jquery-ui-1.8.18.custom.min.js",
-			domain + "jquery-ui-1.8.18.custom.css",
-			domain + "font-awesome.css",
-			domain + "jquery.miniColors.css",
-			domain + "jquery.miniColors.min.js",
-			domain + "jquery.tipsy.css",
-			domain + "jquery.tipsy.min.js",
-			domain + "ui.jqgrid.css",
-			domain + "grid.locale-fr.js",
-			domain + "jquery.jqGrid.min.js",
+			domain + "plugins/jquery-ui-1.8.18.custom.min.js",
+			domain + "plugins/jquery-ui-1.8.18.custom.css",
+			domain + "font/font-awesome.css",
+			domain + "plugins/jquery.miniColors.css",
+			domain + "plugins/jquery.miniColors.min.js",
+			domain + "plugins/jquery.tipsy.css",
+			domain + "plugins/jquery.tipsy.min.js",
+			domain + "plugins/ui.jqgrid.css",
+			domain + "plugins/grid.locale-fr.js",
+			domain + "plugins/jquery.jqGrid.min.js",
 			domain + "kocfia.css?ts=" + d.getTime(),
 			domain + "kocfia.js?ts=" + d.getTime()
 		];

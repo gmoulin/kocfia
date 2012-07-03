@@ -3,12 +3,12 @@
 	<head>
 		<title>koc test</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/font-awesome.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.miniColors.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/jquery.tipsy.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/ui.jqgrid.css" />
-		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/kocfia.css?<?php echo filemtime(__DIR__.'/../kocfia.confPanel.css'); ?>" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/plugins/jquery-ui-1.8.18.custom.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/font/font-awesome.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/plugins/jquery.miniColors.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/plugins/jquery.tipsy.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/plugins/ui.jqgrid.css" />
+		<link rel="stylesheet" type="text/css" media="all" href="http://kocfia.kapok.dev/kocfia.css?<?php echo filemtime(__DIR__.'/../kocfia.css'); ?>" />
 		<style>
 			body {
 				font-size: 11px;
@@ -143,11 +143,11 @@
 			</div>
 		</div>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-		<script src="http://kocfia.kapok.dev/jquery-ui-1.8.18.custom.min.js"></script>
-		<script src="http://kocfia.kapok.dev/jquery.miniColors.min.js"></script>
-		<script src="http://kocfia.kapok.dev/jquery.tipsy.min.js"></script>
-		<script src="http://kocfia.kapok.dev/grid.locale-fr.js"></script>
-		<script src="http://kocfia.kapok.dev/jquery.jqGrid.min.js"></script>
+		<script src="http://kocfia.kapok.dev/plugins/jquery-ui-1.8.18.custom.min.js"></script>
+		<script src="http://kocfia.kapok.dev/plugins/jquery.miniColors.min.js"></script>
+		<script src="http://kocfia.kapok.dev/plugins/jquery.tipsy.min.js"></script>
+		<script src="http://kocfia.kapok.dev/plugins/grid.locale-fr.js"></script>
+		<script src="http://kocfia.kapok.dev/plugins/jquery.jqGrid.min.js"></script>
 		<script>
 			var cm = cm || {};
 			cm.AUTO_BARB_TROOP_MODE = {
@@ -16950,8 +16950,8 @@
 					b13: 1
 			};
 
-			var kocfiaFrameUserScriptVersion = 3;
-			var kocfiaFrom = '"+ domain +"';
+			var kocfiaFrameUserScriptVersion = 4;
+			var kocfiaFrom = window.location.host;
 
 			cm.tronestats = {
 				"effects":{
@@ -19874,10 +19874,5 @@
 			};
 		</script>
 		<script src="http://kocfia.kapok.dev/kocfia.js?<?php echo filemtime(__DIR__.'/../kocfia.js'); ?>"></script>
-		<!--
-		<script src="http://kocfia.kapok.dev/kocfia.fb.user.js"></script>
-		<script src="http://kocfia.kapok.dev/kocfia.fb-popup.user.js"></script>
-		<script src="http://kocfia.kapok.dev/kocfia.frame.user.js"></script>
-		-->
 	</body>
 </html>

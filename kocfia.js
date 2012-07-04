@@ -19736,10 +19736,75 @@ jQuery(document).ready(function(){
 			setNames: {}
 		};
 
-		//favoris
-		//appartient à tel set
-		//rééquipage auto
-		//améliorations auto (upgrade -> qualité (nombre de bonus), enhance -> niveau (puissance des bonus))
+		/* grid related */
+		KOCFIA.throne.gridRowActions = function( cellValue, options, rowObject ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne gridRowActions function', cellValue, options, rowObject);
+			var code = '';
+
+			if( !rowObject.lock ){
+				code += '<span class="icon-trash salvage" data-id="'+ rowObject.id +'" title="Détruire cet objet"></span>';
+				code += '<span class="icon-lock lock" data-id="'+ rowObject.id +'" title="Protéger cet objet contre la destruction manuelle ou automatique"></span>';
+			} else {
+				code += '<span class="icon-unlock lock" data-id="'+ rowObject.id +'" title="Enlever la protection de cet objet contre la destruction manuelle ou automatique"></span>';
+			}
+
+			if( rowObject.quality  < 5 ){
+				code += '<a class="btn" data-id="'+ rowObject.id +'" title="Débloquer les bonus de cet objet"><i class="icon-circle-arrow-up quality_upgrade"></i> Bonus</a>';
+			}
+
+			if( rowObject.level < 5 ){
+				code += '<a class="btn" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><i class="icon-plus-sign quality_upgrade"></i> Niveau</a>';
+			}
+
+			return code;
+		};
+
+		KOCFIA.throne.data = {};
+
+		KOCFIA.throne.gridParams = {
+			datatype: 'local',
+			loadui: 'disable',
+			rowNum: 20,
+			rowList: [20, 50, 100],
+			sortname: 'date',
+			sortorder: 'desc',
+			altRows: true,
+			altclass: 'zebra',
+			height: 'auto',
+			autowidth: true,
+			viewrecords: true, //total in pager
+			gridview: true, //speed boost
+			hiddengrid: true,
+			multiselect: true,
+			multiboxonly: true,
+			multikey: 'shiftKey',
+			shrinkToFit: true,
+			colNames: ['', 'Nom', 'Faction', 'Qualité', 'Niveau', 'Bonus 1', 'Bonus 2', 'Bonus 3', 'Bonus 4', 'Bonus 5', '', '', '', ''],
+			colModel: [
+				{name: 'actions', sortable: false, search: false, formatter: KOCFIA.throne.gridRowActions, width: 40},
+				{name: 'name', index: 'name', width: 60},
+				{name: 'faction', index: 'faction', width: 50},
+				{name: 'type', index: 'type', width: 50},
+				{name: 'quality', index: 'quality', width: 50},
+				{name: 'level', index: 'level', width: 30},
+				{name: 'effect1', index: 'effect1'},
+				{name: 'effect2', index: 'effect2'},
+				{name: 'effect3', index: 'effect3'},
+				{name: 'effect4', index: 'effect4'},
+				{name: 'effect5', index: 'effect5'},
+				{name: 'quality_upgrade', index: 'quality_upgrade', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'level_upgrade', index: 'level_upgrade', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'lock', index: 'lock', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'id', index: 'id', hidedlg: true, hidden: true, search: false, sortable: false}
+			],
+			caption: 'Classement',
+			pager: '#kocfia-throne-pager',
+			loadComplete: function(){
+				for( var i = 0; i < KOCFIA.throne.rowColor.length; i += 1 ){
+					$('#'+ KOCFIA.throne.rowColor[i].id).addClass( KOCFIA.throne.rowColor[i].css );
+				}
+			}
+		};
 
 		KOCFIA.throne.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne confPanel function');
@@ -19757,7 +19822,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-throne').html('');
 
-			var items = '',
+			var items = KOCFIA.throne.getItemList(),
 				improvements = '',
 				help = KOCFIA.throne.getHelp();
 
@@ -20264,7 +20329,7 @@ jQuery(document).ready(function(){
 			mine: {
 				colNames: ['', 'Date', 'Type', 'Attacker', 'Alliance', 'From', 'Defender', 'Alliance', 'To', 'Target', '', '', '', ''],
 				colModel: [
-					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.reports.gridRowActions, width: 40},
 					{name: 'date', index: 'date', formatter: function( cellValue, options, rowObject ){ return window.formatDateByUnixTime( cellValue ); }, width: 100},
 					{name: 'type', index: 'type', width: 100},
 					{name: 'attacker', index: 'attacker', width: 100},
@@ -20293,7 +20358,7 @@ jQuery(document).ready(function(){
 			alliance: {
 				colNames: ['', 'Date', 'Type', 'Attacker', 'Alliance', 'From', 'Defender', 'Alliance', 'To', 'Target', '', '', '', ''],
 				colModel: [
-					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.reports.gridRowActions, width: 40},
 					{name: 'date', index: 'date', formatter: function( cellValue, options, rowObject ){ return window.formatDateByUnixTime( cellValue ); }, width: 100},
 					{name: 'type', index: 'type', formatter: function( cellValue, options, rowObject ){ if( rowObject.isPvP && rowObject.isGuildMateDefending ){ KOCFIA.reports.rowColor.mine.push({id: options.rowId, css: rowObject.type.toLowerCase()}); } return cellValue; }, width: 100},
 					{name: 'attacker', index: 'attacker', width: 100},
@@ -20323,7 +20388,6 @@ jQuery(document).ready(function(){
 						$('#'+ KOCFIA.reports.rowColor[i].id).addClass( KOCFIA.reports.rowColor[i].css );
 					}
 				}
-
 			}
 		};
 
@@ -22108,7 +22172,7 @@ jQuery(document).ready(function(){
 			cities: {
 				colNames: ['', 'Nom'],
 				colModel: [
-					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.search.gridRowActions, width: 40},
 					{name: 'name', index: 'name', width: 100}
 				],
 				caption: 'Liste des Joueurs',
@@ -22125,7 +22189,7 @@ jQuery(document).ready(function(){
 			players: {
 				colNames: ['', 'Nom', ''],
 				colModel: [
-					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.search.gridRowActions, width: 40},
 					{name: 'player', index: 'player', width: 100},
 					{name: 'fbUserId', index: 'fbUserId', hidedlg: true, hidden: true, search: false, sortable: false}
 				],
@@ -22143,7 +22207,7 @@ jQuery(document).ready(function(){
 			alliances: {
 				colNames: ['', 'Nom'],
 				colModel: [
-					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.search.gridRowActions, width: 40},
 					{name: 'guild', index: 'guild', width: 100}
 				],
 				caption: 'Liste des Alliances',
@@ -22160,7 +22224,7 @@ jQuery(document).ready(function(){
 			myAlliance: {
 				colNames: ['', 'Nom', 'Puissance', 'Villes', 'Poste', 'Connexion', 'Gloire', 'Depuis', '', ''],
 				colModel: [
-					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+					{name: 'actions', sortable: false, search: false, formatter: KOCFIA.search.gridRowActions, width: 40},
 					{name: 'name', index: 'name', width: 100},
 					{name: 'might', index: 'might', formatter: function( cellValue, options, rowObject ){ return Shared.format( cellValue ); }, width: 50},
 					{name: 'cities', index: 'cities', width: 200}, //@TODO split cities
@@ -22787,7 +22851,7 @@ jQuery(document).ready(function(){
 			shrinkToFit: true,
 			colNames: ['', '#', 'Nom', 'Alliance', 'Gain', 'Différence', 'Récompense', ''],
 			colModel: [
-				{name: 'actions', sortable: false, search: false, formatter: KOCFIA.map.gridRowActions, width: 40},
+				{name: 'actions', sortable: false, search: false, formatter: KOCFIA.search.gridRowActions, width: 40},
 				{name: 'position', index: 'position', width: 30},
 				{name: 'player', index: 'player', width: 150},
 				{name: 'guild', index: 'guild', width: 150},

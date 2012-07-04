@@ -19798,12 +19798,7 @@ jQuery(document).ready(function(){
 				{name: 'id', index: 'id', hidedlg: true, hidden: true, search: false, sortable: false}
 			],
 			caption: 'Classement',
-			pager: '#kocfia-throne-pager',
-			loadComplete: function(){
-				for( var i = 0; i < KOCFIA.throne.rowColor.length; i += 1 ){
-					$('#'+ KOCFIA.throne.rowColor[i].id).addClass( KOCFIA.throne.rowColor[i].css );
-				}
-			}
+			pager: '#kocfia-throne-pager'
 		};
 
 		KOCFIA.throne.confPanel = function( $section ){

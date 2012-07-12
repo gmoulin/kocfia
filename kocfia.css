@@ -84,6 +84,7 @@ html, body {
 		background-position: 0 0;
 	}
 
+	.kocfia-conf-panel-tab.on.improvements,
 	.kocfia-conf-panel-tab.on.pileUp {
 		background-image: -webkit-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
 		background-image: -moz-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
@@ -92,6 +93,7 @@ html, body {
 		background-position: 0 0;
 	}
 
+	.kocfia-conf-panel-tab.on.salvage,
 	.kocfia-conf-panel-tab.on.supply {
 		background-image: -webkit-linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
 		background-image: -moz-linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
@@ -100,6 +102,7 @@ html, body {
 		background-position: right 0;
 	}
 
+	.kocfia-conf-panel-tab.on.improvements.salvage,
 	.kocfia-conf-panel-tab.on.pileUp.supply {
 		background-image: -webkit-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent), -webkit-linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);
 		background-image: -moz-linear-gradient(-45deg, #0063FF, #0063FF 15%, transparent 15%, transparent), -moz-linear-gradient(-135deg, #0063FF, #0063FF 15%, transparent 15%, transparent);

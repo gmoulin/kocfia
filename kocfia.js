@@ -3599,7 +3599,7 @@ jQuery(document).ready(function(){
 				length = KOCFIA.citiesKey.length,
 				keys = ['gold', 'food', 'wood', 'stone', 'ore'],
 				guardianBase = {gold: 0, food: 0, wood: 0, stone: 0, ore: 0},
-				throneSlot = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
+				throneItemsBonus = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null),
 				i, j, k, m, b, r, n, s, e, d, inSeed, unit, finish, text,
 				subLength, population, hapiness, cityKey, rowsLength,
 				queue, queuedUnits, duration, formation, guardianBonus, wounded,
@@ -3806,32 +3806,17 @@ jQuery(document).ready(function(){
 
 						//throne items bonus
 							bonusT = [0, 0, 0, 0, 0];
-							for( j = 1; j < 5; j += 1 ){
-								b = 0;
-								for( s in throneSlot ){
-									if( throneSlot.hasOwnProperty(s) ){
-										item = window.kocThroneItems[ throneSlot[s] ];
-										if( item && item.hasOwnProperty('effects') ){
-											for( e in item.effects ){
-												if( item.effects.hasOwnProperty(e) ){
-													effect = item.effects[ e ];
-													effectBase = parseInt(window.cm.thronestats.tiers[ effect.id ][ effect.tier ].base, 10);
-													effectGrowth = parseInt(window.cm.thronestats.tiers[ effect.id ][ effect.tier ].growth, 10);
-													if( effect.id == 82
-														|| (effect.id == 83 && j == 1)
-														|| (effect.id == 84 && j == 2)
-														|| (effect.id == 85 && j == 3)
-														|| (effect.id == 86 && j == 4)
-													){
-														b += effectBase + (parseInt(item.level, 10) * effectGrowth);
-													}
-												}
-											}
-										}
-									}
-								}
-								bonusT[ j ] = (b / 100);
+
+							if( throneItemsBonus.hasOwnProperty(82) ){
+								bonusT[1] += throneItemsBonus[82].percent / 100;
+								bonusT[2] += throneItemsBonus[82].percent / 100;
+								bonusT[3] += throneItemsBonus[82].percent / 100;
+								bonusT[4] += throneItemsBonus[82].percent / 100;
 							}
+							if( throneItemsBonus.hasOwnProperty(83) ) bonusT[1] = throneItemsBonus[83].percent / 100;
+							if( throneItemsBonus.hasOwnProperty(84) ) bonusT[2] = throneItemsBonus[84].percent / 100;
+							if( throneItemsBonus.hasOwnProperty(85) ) bonusT[3] = throneItemsBonus[85].percent / 100;
+							if( throneItemsBonus.hasOwnProperty(86) ) bonusT[4] = throneItemsBonus[86].percent / 100;
 
 						//population modifier
 							populationModifier = 1;
@@ -14467,7 +14452,7 @@ jQuery(document).ready(function(){
 				selfReinforcements:	(infos[8] ? $.trim( infos[8] ) : ''),
 				reinforcements:		(infos[9] ? $.trim( infos[9] ) : ''),
 				playerId:			playerId,
-				attackerId: 		attackerId
+				attackerId:			attackerId
 			};
 		};
 
@@ -16190,35 +16175,35 @@ jQuery(document).ready(function(){
 
 				stats = window.unitstats[ unitKey ];
 
-				if( throneBonus[1] ) attackPct  += throneBonus[1].percent; //attack
+				if( throneBonus[1] ) attackPct	+= throneBonus[1].percent; //attack
 				if( throneBonus[2] ) defensePct += throneBonus[2].percent; //defense
-				if( throneBonus[3] ) lifePct    += throneBonus[3].percent; //life
-				if( throneBonus[4] ) speedPct   += throneBonus[4].percent; //speed
-				if( throneBonus[5] ) rangePct   += throneBonus[5].percent; //range
-				if( throneBonus[6] ) loadPct    += throneBonus[6].percent; //load
+				if( throneBonus[3] ) lifePct	+= throneBonus[3].percent; //life
+				if( throneBonus[4] ) speedPct	+= throneBonus[4].percent; //speed
+				if( throneBonus[5] ) rangePct	+= throneBonus[5].percent; //range
+				if( throneBonus[6] ) loadPct	+= throneBonus[6].percent; //load
 
 				//getting unit type specific bonus
 				if( window.cm.unitFrontendType[ unitKey ] == 'infantry' ){
 					if( throneBonus[24] ) attackPct  += throneBonus[24].percent; //infantry attack
 					if( throneBonus[25] ) defensePct += throneBonus[25].percent; //infantry defense
-					if( throneBonus[26] ) lifePct    += throneBonus[26].percent; //infantry life
-					if( throneBonus[27] ) speedPct   += throneBonus[27].percent; //infantry speed
+					if( throneBonus[26] ) lifePct	 += throneBonus[26].percent; //infantry life
+					if( throneBonus[27] ) speedPct	 += throneBonus[27].percent; //infantry speed
 				} else if( window.cm.unitFrontendType[ unitKey ] == 'ranged' ){
 					if( throneBonus[34] ) attackPct  += throneBonus[34].percent; //ranged attack
 					if( throneBonus[35] ) defensePct += throneBonus[35].percent; //ranged defense
-					if( throneBonus[36] ) lifePct    += throneBonus[36].percent; //ranged life
-					if( throneBonus[37] ) rangePct   += throneBonus[37].percent; //ranged range
+					if( throneBonus[36] ) lifePct	 += throneBonus[36].percent; //ranged life
+					if( throneBonus[37] ) rangePct	 += throneBonus[37].percent; //ranged range
 				} else if( window.cm.unitFrontendType[ unitKey ] == 'horsed' ){
 					if( throneBonus[44] ) attackPct  += throneBonus[44].percent; //horsed attack
 					if( throneBonus[45] ) defensePct += throneBonus[45].percent; //horsed defense
-					if( throneBonus[46] ) lifePct    += throneBonus[46].percent; //horsed life
-					if( throneBonus[47] ) speedPct   += throneBonus[47].percent; //horsed speed
-					if( throneBonus[48] ) loadPct    += throneBonus[48].percent; //horsed load
+					if( throneBonus[46] ) lifePct	 += throneBonus[46].percent; //horsed life
+					if( throneBonus[47] ) speedPct	 += throneBonus[47].percent; //horsed speed
+					if( throneBonus[48] ) loadPct	 += throneBonus[48].percent; //horsed load
 				} else if( window.cm.unitFrontendType[ unitKey ] == 'siege' ){
 					if( throneBonus[56] ) attackPct  += throneBonus[56].percent; //siege attack
-					if( throneBonus[57] ) speedPct   += throneBonus[57].percent; //siege speed
-					if( throneBonus[58] ) rangePct   += throneBonus[58].percent; //siege range
-					if( throneBonus[59] ) loadPct    += throneBonus[59].percent; //siege load
+					if( throneBonus[57] ) speedPct	 += throneBonus[57].percent; //siege speed
+					if( throneBonus[58] ) rangePct	 += throneBonus[58].percent; //siege range
+					if( throneBonus[59] ) loadPct	 += throneBonus[59].percent; //siege load
 				}
 
 				lifeBase = parseInt(stats[0], 10);
@@ -19736,7 +19721,8 @@ jQuery(document).ready(function(){
 				automaticSalvage: 0
 			},
 			maxItems: 60,
-			stored: ['improvements', 'salvage', 'locks'],
+			stored: ['improvements', 'salvage', 'locks', 'names'],
+			names: {}, //by set number
 			improvements: { //by item id => [q1, l2, ...]
 				queue: [] //by item id
 			},
@@ -19749,8 +19735,10 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne gridRowActions function', cellValue, options, rowObject);
 			var code = '';
 
+			//@TODO add remaining time when repairing
+
 			if( !KOCFIA.throne.locks.hasOwnProperty(rowObject.id) ){
-				if( !rowObject.isBroken ){
+				if( !rowObject.isBroken && rowObject.available ){
 					code += '<span class="icon-trash salvage" data-id="'+ rowObject.id +'" title="Détruire cet objet"></span>';
 				}
 
@@ -19760,12 +19748,14 @@ jQuery(document).ready(function(){
 				code += '<span class="icon-unlock unlock" data-id="'+ rowObject.id +'" title="Enlever la protection de cet objet contre la destruction manuelle ou automatique"></span>';
 			}
 
-			if( rowObject.quality  < 5 ){
-				code += '<a class="btn quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer les bonus de cet objet"><i class="icon-circle-arrow-up"></i> Bonus</a>';
-			}
+			if( rowObject.available ){
+				if( rowObject.quality  < 5 ){
+					code += '<a class="btn quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer les bonus de cet objet"><i class="icon-circle-arrow-up"></i> Bonus</a>';
+				}
 
-			if( rowObject.level < 5 ){
-				code += '<a class="btn level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><i class="icon-plus-sign"></i> Niveau</a>';
+				if( rowObject.level < 5 ){
+					code += '<a class="btn level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><i class="icon-plus-sign"></i> Niveau</a>';
+				}
 			}
 
 			return code;
@@ -19791,7 +19781,7 @@ jQuery(document).ready(function(){
 			multiboxonly: true,
 			multikey: 'shiftKey',
 			shrinkToFit: true,
-			colNames: ['', '', 'Nom', 'Faction', 'Qualité', 'Niveau', 'Bonus 1', 'Bonus 2', 'Bonus 3', 'Bonus 4', 'Bonus 5', '', '', '', '', ''],
+			colNames: ['', '', 'Nom', 'Faction', 'Type', 'Qualité', 'Niveau', 'Bonus 1', 'Bonus 2', 'Bonus 3', 'Bonus 4', 'Bonus 5', '', '', '', '', '', '', ''],
 			colModel: [
 				{name: 'id', index: 'id', key: true, hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'actions', sortable: false, search: false, formatter: KOCFIA.throne.gridRowActions, width: 40},
@@ -19810,7 +19800,8 @@ jQuery(document).ready(function(){
 				{name: 'quality', index: 'quality', hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'isEquiped', index: 'isEquiped', hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'isInSet', index: 'isInSet', hidedlg: true, hidden: true, search: false, sortable: false},
-				{name: 'isBrocken', index: 'isBrocken', hidedlg: true, hidden: true, search: false, sortable: false}
+				{name: 'isBrocken', index: 'isBrocken', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'available', index: 'available', hidedlg: true, hidden: true, search: false, sortable: false}
 			],
 			caption: 'Classement',
 			pager: '#kocfia-throne-pager'
@@ -19836,9 +19827,9 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-throne').html('');
 
-			var items = KOCFIA.throne.getItemList(),
-				improvements = KOCFIA.throne.getImprovementsQueue(),
+			var improvements = KOCFIA.throne.getImprovementsQueue(),
 				salvage = KOCFIA.throne.getSalvageConf(),
+				sets = KOCFIA.throne.getManageSets(),
 				help = KOCFIA.throne.getHelp();
 
 			var code = '<div class="infos">';
@@ -19855,7 +19846,12 @@ jQuery(document).ready(function(){
 			code += '<button class="button secondary reload" title="Raffraîchir la liste des objets"><span>Raffraîchir</span></button>';
 			code += '<table id="kocfia-throne-items" class="search-results"></table>';
 			code += '<div id="kocfia-throne-pager" class="search-pager"></div></div>';
-			code += improvements + salvage;
+			code += '<h3>Gestion des sets</h3>';
+			code += sets;
+			code += '<h3>Améliorations</h3>';
+			code += improvements;
+			code += '<h3>Recyclage</h3>';
+			code += salvage;
 			code += '</div>';
 			code += help;
 
@@ -19897,6 +19893,7 @@ jQuery(document).ready(function(){
 			KOCFIA.throne.setCounter();
 
 			KOCFIA.throne.loadItemList();
+			KOCFIA.throne.loadSets();
 		};
 
 		KOCFIA.throne.on = function(){
@@ -20112,6 +20109,9 @@ jQuery(document).ready(function(){
 						Shared.notify('Objet non trouvé');
 					}
 				})
+				.on('click', '.reload_set', function(){
+					KOCFIA.throne.loadSets();
+				})
 				;
 		};
 
@@ -20121,9 +20121,11 @@ jQuery(document).ready(function(){
 			KOCFIA.throne.data = {};
 
 			var entry = {},
+				inSet = [],
 				equiped = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
-				itemId, item, effects, effectInfo, bonus, tierInfo,
-				inSet = [];
+				itemId, item, effects, effectInfo, bonus, tierInfo, setNum,
+				i = 0,
+				maxAvailable = parseInt(window.seed.throne.rowNum, 10) * 5; //5 items per row in kabam throne view
 
 			for( setNum in window.seed.throne.slotEquip ){
 				if( window.seed.throne.slotEquip.hasOwnProperty(setNum) ){
@@ -20174,8 +20176,11 @@ jQuery(document).ready(function(){
 							level_upgrade: level,
 							isBroken: (item.isBroken ? 1 : 0),
 							isEquiped: ($.inArray(itemId, equiped) > -1 ? 1 : 0),
-							isInSet: ($.inArray(itemId, inSet) > -1 ? 1 : 0)
+							isInSet: ($.inArray(itemId, inSet) > -1 ? 1 : 0),
+							available: (i < maxAvailable ? 1 : 0)
 						};
+
+						i++;
 					}
 				}
 			}
@@ -20189,10 +20194,131 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.getImprovementsQueue = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getImprovementsQueue function');
+			//@TODO
 
 			var code = '';
 
 			return code;
+		};
+
+		KOCFIA.throne.getManageSets = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getManageSets function');
+			var code = '<table class="manage-sets"><thead>';
+			code += '<th><button class="button secondary reload_set"><span>Raffraîchir</span></button></th>';
+			code += '<th>Nom</th>';
+			code += '<th>Conseiller</th>';
+			code += '<th>Bannière</th>';
+			code += '<th>Trône</th>';
+			code += '<th>Table</th>';
+			code += '<th>Trophé</th>';
+			code += '<th>Vitrail</th>';
+			code += '<th>Total</th>';
+			code += '</thead>';
+			code += '<tbody>';
+			code += '</tbody>';
+			code += '</table>';
+
+			return code;
+		};
+
+		KOCFIA.throne.loadSets = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne loadSets function');
+
+			var $table = KOCFIA.$confPanel.find('#kocfia-throne').find('.manage-sets').find('body').empty(),
+				bonuses, item,
+				advisorList = '',
+				windowList = '',
+				bannerList = '',
+				chairList = '',
+				tableList = '',
+				trophyList = '',
+				$tr = $('<tr>'),
+				code, text,
+				empty = '<option value="">Choississez</option>',
+				slotNum;
+
+			code = '<td></td>';
+			code += '<td><input type="text" name="name"></td>';
+			code += '<td><select name="advisor"></select></td>';
+			code += '<td><select name="banner"></select></td>';
+			code += '<td><select name="chair"></select></td>';
+			code += '<td><select name="table"></select></td>';
+			code += '<td><select name="trophy"></select></td>';
+			code += '<td><select name="window"></select></td>';
+
+			$tr.append(code);
+
+			//generate the <option>s for each item type
+			for( itemId in window.seed.throne.inventory ){
+				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
+					item = window.seed.throne.inventory[ itemId ];
+					bonuses = KOCFIA.throne.getSetBonus(null, [itemId]);
+
+					text = $.map(bonuses, function(effect){ return effect.percent +'% '+ effect.label; }).join(', ');
+
+					switch( item.type ){
+						case 'advisor':
+								advisorList += '<option value="'+ itemId +'">'+ text +'</option>';
+							break;
+						case 'banner':
+								bannerList += '<option value="'+ itemId +'">'+ text +'</option>';
+							break;
+						case 'chair':
+								chairList += '<option value="'+ itemId +'">'+ text +'</option>';
+							break;
+						case 'table':
+								tableList += '<option value="'+ itemId +'">'+ text +'</option>';
+							break;
+						case 'trophy':
+								trophyList += '<option value="'+ itemId +'">'+ text +'</option>';
+							break;
+						case 'window':
+								windowList += '<option value="'+ itemId +'">'+ text +'</option>';
+							break;
+						default:
+					}
+				}
+			}
+
+			//fill the <select>s
+			$tr.find('select')
+				.filter('[name="advisor"]').append(empty + advisorList).end()
+				.filter('[name="banner"]').append(empty + bannerList).end()
+				.filter('[name="chair"]').append(empty + chairList).end()
+				.filter('[name="table"]').append(empty + tableList).end()
+				.filter('[name="trophy"]').append(empty + trophyList).end()
+				.filter('[name="window"]').append(empty + windowList).end();
+
+			//parse the sets and generate a line for each
+			for( slotNum in window.seed.throne.slotEquip ){
+				if( window.seed.throne.slotEquip.hasOwnProperty(slotNum) ){
+					setItems = window.seed.throne.slotEquip[ slotNum ];
+
+					$line = $tr.clone();
+
+					$line.find('td').first().html( slotNum );
+
+					$line.find('input').val( KOCFIA.throne.names.hasOwnProperty(slotNum) ? KOCFIA.throne.names[ slotNum ] : '' );
+
+					if( Array.isArray(setItems) && setItems.length > 0 ){
+						bonuses = KOCFIA.throne.getSetBonus(slotNum, null);
+						text = $.map(bonuses, function(effect){ return effect.percent +'% '+ effect.label; }).join(', ');
+						$line.find('td').last().html( text );
+
+						//for each of the set items, set the corresponding select value and add a <span> with the item bonuses
+						for( i = 0; i < setItems.length; i += 1 ){
+							item = window.seed.inventory[ setItems[i] ];
+
+							if( Object.isObject(item) ){
+								$line.find('select').filter('[name="'+ item.type +'"]').val( item.id )
+									.parent().append('<span>'+ effectText[ itemId ] +'</span>');
+							}
+						}
+
+						$table.append( $line );
+					}
+				}
+			}
 		};
 
 		KOCFIA.throne.getSalvageConf = function(){
@@ -20231,14 +20357,18 @@ jQuery(document).ready(function(){
 
 			var setItems,
 				summary = {},
-				isOtherPlayer = false;
+				isOtherPlayer = false,
 				itemId, item,
 				slot, effect,
 				effectRank, effectInfo, tierInfo, bonus;
 
-			if( items !== null && Object.isObject(items) && !$.isEmptyObject(items) ){
-				setItems = Object.keys(items);
-				isOtherPlayer = true;
+			if( items !== null ){
+				if( Object.isObject(items) && !$.isEmptyObject(items) ){
+					setItems = Object.keys(items);
+					isOtherPlayer = true;
+				} else if( Array.isArray(items) && items.length >0 ){
+					setItems = items;
+				}
 			} else {
 				setItems = window.seed.throne.slotEquip[ setNum ];
 			}
@@ -21730,7 +21860,7 @@ jQuery(document).ready(function(){
 				code += '</tbody></table>';
 				code += '<div class="buttons">';
 				code += '<button class="save button modify"><span>Enregistrer</span></button>';
-				code += '<button class="reset button danger" title="Vide le codeulaire"><span>Annuler</span></button>';
+				code += '<button class="reset button danger" title="Vide le formulaire"><span>Annuler</span></button>';
 				code += '<button class="reload button danger" title="Recharge le forumlaire avec les configurations enregistrées"><span>Recharger</span></button>';
 				code += '</div>';
 				code += '</div>';
@@ -22043,9 +22173,17 @@ jQuery(document).ready(function(){
 				time = '';
 
 			if( !isNaN(factor) && quantity !== false ){
-				time = parseInt(window.unitcost[ unitKey ][7], 10) * quantity / factor;
-				if( time < 5 ) time = 5;
 				if( quantity === 0 ) time = '';
+				else {
+					time = parseInt(window.unitcost[ unitKey ][7], 10) * quantity / factor;
+					if( time < 5 ) time = 5;
+				}
+			}
+
+			var check = cm.ThroneController.hasFactionBonus()
+			if( check.hazBonus && check.faction == "druid" ){
+				var bonus = cm.ThroneController.effectBonus(94);
+				time = time - (time * (bonus / 100))
 			}
 
 			return time;
@@ -23690,7 +23828,7 @@ jQuery(document).ready(function(){
 			for( setNum in window.seed.throne.slotEquip ){
 				if( window.seed.throne.slotEquip.hasOwnProperty(setNum) ){
 					set = window.seed.throne.slotEquip[ setNum ];
-					name = KOCFIA.throne.setNames.hasOwnProperty(setNum) ? KOCFIA.throne.setNames[ setNum ] : 'Set '+ setNum;
+					name = KOCFIA.throne.names.hasOwnProperty(setNum) ? KOCFIA.throne.names[ setNum ] : 'Set '+ setNum;
 					key = 'set-'+ setNum;
 
 					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ name +'</option>';

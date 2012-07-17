@@ -2857,6 +2857,21 @@ html, body {
 		text-align: center;
 	}
 
+/* throne */
+	.improvements li {
+		display: block;
+	}
+
+	.improvements li span {
+		float: right;
+		text-align: right;
+		width: 150px;
+	}
+
+	.improvements li i {
+		margin-right: 15px;
+	}
+
 /* throne compare */
 	.throne-compare {
 		width: 100%;

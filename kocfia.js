@@ -11180,6 +11180,7 @@ jQuery(document).ready(function(){
 			code += '<div id="kocfia-transport-history-supply" class="history supply" title="Historique des approvisionnements"></div>';
 
 			code += '<div id="kocfia-transport-priority-pileUp" class="priority-list" title="Priorité des resources lors des stockages">';
+			code += '<small>Changez l\'ordre en déplaçant les éléments de la liste</small>';
 			code += '<ol rel="pileUp">';
 			var resKey, resInfo, i, l;
 			for( i = 0, l = KOCFIA.conf.transport.priority.pileUp.length; i < l; i += 1 ){
@@ -11190,6 +11191,7 @@ jQuery(document).ready(function(){
 			code += '</ol></div>';
 
 			code += '<div id="kocfia-transport-priority-supply" class="priority-list" title="Priorité des resources lors des approvisionnements">';
+			code += '<small>Changez l\'ordre en déplaçant les éléments de la liste</small>';
 			code += '<ol rel="supply">';
 			for( i = 0, l = KOCFIA.conf.transport.priority.supply.length; i < l; i += 1 ){
 				resKey = KOCFIA.conf.transport.priority.supply[i];
@@ -19763,9 +19765,7 @@ jQuery(document).ready(function(){
 			maxItems: 60,
 			stored: ['improvements', 'salvage', 'locks', 'names'],
 			names: {}, //by set number
-			improvements: { //by item id => [q1, l2, ...]
-				queue: [] //by item id
-			},
+			improvements: [], //{id: , quality: [x, y] or level: [x, y]}
 			salvage: {},
 			locks: {} //by item id
 		};
@@ -19857,7 +19857,7 @@ jQuery(document).ready(function(){
 				{name: 'available', index: 'available', hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'repairing', index: 'repairing', hidedlg: true, hidden: true, search: false, sortable: false}
 			],
-			caption: 'Classement',
+			caption: 'Objets de salle du trône',
 			pager: '#kocfia-throne-pager'
 		};
 
@@ -19881,13 +19881,10 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-throne').html('');
 
-			var improvements = KOCFIA.throne.getImprovementsQueue(),
-				salvage = KOCFIA.throne.getSalvageConf(),
-				sets = KOCFIA.throne.getManageSets(),
-				help = KOCFIA.throne.getHelp(),
-				i, cityKey, city;
+			var i, cityKey, city,
+				code = '';
 
-			var code = '<div class="infos">';
+			code += '<div class="infos">';
 			code += '<span class="buttonset">';
 			code += '<input type="checkbox" id="throne-panel-automatic-improvements" '+ (KOCFIA.conf.throne.automaticImprovements ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="throne-panel-automatic-improvements">Améliorations automatiques</label>';
@@ -19915,13 +19912,13 @@ jQuery(document).ready(function(){
 			code += '<table id="kocfia-throne-items" class="search-results"></table>';
 			code += '<div id="kocfia-throne-pager" class="search-pager"></div></div>';
 			code += '<h3>Gestion des sets</h3>';
-			code += sets;
-			code += '<h3>Améliorations</h3>';
-			code += improvements;
-			code += '<h3>Recyclage</h3>';
-			code += salvage;
+			code += KOCFIA.throne.getManageSets();
+			code += '<h3>Configuration des améliorations automatiques</h3>';
+			code += KOCFIA.throne.getImprovementsQueue();
+			code += '<h3>Configuration du recyclage automatique</h3>';
+			code += KOCFIA.throne.getSalvageConf();
 			code += '</div>';
-			code += help;
+			code += KOCFIA.throne.getHelp();
 
 			$section.append( code )
 			//listener
@@ -19957,6 +19954,9 @@ jQuery(document).ready(function(){
 				.jqGrid('navButtonAdd','#kocfia-throne-pager', {caption: '', title: 'Vider les filtres', buttonicon: 'icon-refresh', onClickButton: function(){ KOCFIA.throne.$itemList[0].clearToolbar(); }, position: 'last'})
 				.jqGrid('filterToolbar');
 
+
+			KOCFIA.throne.$div = $section;
+
 			KOCFIA.throne.addListeners();
 
 			KOCFIA.throne.setCounter();
@@ -19978,17 +19978,6 @@ jQuery(document).ready(function(){
 
 			KOCFIA.throne.automaticOff();
 		};
-
-		/*KOCFIA.throne.automaticOn = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne automaticOn function');
-			$('#throne-panel-automatic').prop('checked', true);
-
-			KOCFIA.throne.launchAutomaticImprovements();
-		};
-
-		KOCFIA.throne.automaticOff = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne automaticOff function');
-		};*/
 
 		KOCFIA.throne.automaticImprovementsOn = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne automaticImprovementsOn function');
@@ -20083,7 +20072,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne addListeners function');
 			//@TODO
 
-			KOCFIA.$confPanel.find('#kocfia-throne')
+			KOCFIA.throne.$div
 				.on('change', '#kocfia-throne-cities', function(){
 					var cityKey = $(this).val();
 
@@ -20093,6 +20082,11 @@ jQuery(document).ready(function(){
 				})
 				.on('click', '.reload', function(){
 					KOCFIA.throne.loadItemList();
+				})
+				.on('click', '.refresh', function(){
+					var $select = $(this).parent().find('select'),
+						v = $select.val();
+					$select.html( KOCFIA.throne.getItemsDropdown() ).val( v );
 				})
 				.on('click', '.salvage', function(){
 					var id = $(this).attr('data-id'),
@@ -20189,17 +20183,149 @@ jQuery(document).ready(function(){
 						Shared.notify('Objet non trouvé');
 					}
 				})
-				.on('click', '.quality_upgrade', function(e){
-					e.preventDefault();
-					//@TODO
-				})
-				.on('click', '.level_upgrade', function(e){
-					e.preventDefault();
-					//@TODO
+				.on('click', '.quality_upgrade, .level_upgrade, .optimized_upgrade', function(){
+					var $this = $(this),
+						$select = $this.parent().find('select'),
+						itemId = $select.val()
+						isQuality = $this.hasClass('quality_upgrade'),
+						isLevel = $this.hasClass('level_upgrade');
+
+					if( itemId !== '' ){
+						var $option = $select.find('option').filter(':selected'),
+							quality = parseInt($option.attr('data-quality'), 10),
+							level = parseInt($option.attr('data-level'), 10);
+
+						var maxQuality = 5,
+							maxLevel = 10,
+							upgradeLevel = 0,
+							upgradeQuality = 0,
+							i, info, improvements, item, code;
+						for( i = 0; i < KOCFIA.throne.improvements.length; i += 1 ){
+							info = KOCFIA.throne.improvements[ i ];
+							if( info.id == itemId ){
+								if( info.hasOwnProperty('quality') ){
+									if( info.quality[1] > upgradeQuality ) upgradeQuality = parseInt(info.quality[1], 10);
+								} else {
+									if( info.level[1] > upgradeLevel ) upgradeLevel = parseInt(info.level[1], 10);
+								}
+							}
+						}
+
+						if( isQuality && upgradeQuality + 1 > maxQuality ){
+							Shared.notify('Cet objet a le maximum de bonus débloqués actuellement ou en liste d\'attente');
+							return false;
+						} else if( isLevel && upgradeLevel + 1 > maxLevel ){
+							Shared.notify('Cet objet a atteint le niveau d\'augmentation maximum actuellement ou en liste d\'attente');
+							return false;
+						} else if( !isQuality && !isLevel && upgradeQuality + 1 > maxQuality && upgradeLevel + 1 > maxLevel ){
+							Shared.notify('Cet objet a atteint le maximum de bonus débloqué et le niveau d\'augmentation maximum actuellement ou en liste d\'attente');
+							return false;
+						}
+
+						if( isQuality ){
+							infos = [ {id: itemId, quality: [ (upgradeQuality === 0 ? quality : upgradeQuality), (upgradeQuality === 0 ? quality + 1 : upgradeQuality + 1) ]} ];
+
+						} else if( isLevel ) {
+							infos = [ {id: itemId, level: [ (upgradeLevel === 0 ? level : upgradeLevel), (upgradeLevel === 0 ? level + 1 : upgradeLevel + 1) ]} ];
+
+						} else { //optimized upgrade
+							//@TODO
+							var steps = {
+								'q0l0': [],
+								'q1l0': [],
+								'q2l0': [],
+								'q3l0': [],
+								'q4l0': [],
+								'q5l0': [],
+								'q0l1': [],
+								'q1l1': [],
+								'q2l1': [],
+								'q3l1': [],
+								'q4l1': [],
+								'q5l1': [],
+								'q0l2': [],
+								'q1l2': [],
+								'q2l2': [],
+								'q3l2': [],
+								'q4l2': [],
+								'q5l2': [],
+								'q0l3': [],
+								'q1l3': [],
+								'q2l3': [],
+								'q3l3': [],
+								'q4l3': [],
+								'q5l3': [],
+								'q0l4': [],
+								'q1l4': [],
+								'q2l4': [],
+								'q3l4': [],
+								'q4l4': ['q']
+							};
+
+							var q = (upgradeQuality === 0 ? quality : upgradeQuality),
+								l = (upgradeLevel === 0 ? level : upgradeLevel),
+								current = 'q'+ q +'l'+ l;
+							infos = [];
+							for( i = 0; i < steps[ current ].length; i += 1 ){
+								if( steps[ current ][ i ] == 'q' ){
+									infos.push({id: itemId, quality: [q, q + 1]});
+									q++;
+								} else {
+									infos.push({id: itemId, level: [l, l + 1]});
+									l++;
+								}
+							}
+						}
+
+						for( i = 0; i < improvements.length; i += 1 ){
+							info = improvements[ i ];
+							item = new window.cm.ThroneItemModel(info.id, window.seed.throne.inventory[ info.id ]);
+							code = '<li data-info="'+ JSON.stringify(info) +'">';
+
+							code += '<span>'; //float right
+							if( info.hasOwnProperty('quality') ){
+								code += 'déblocage bonus '+ info.quality[0] +' &rarr; '+ info.quality[1];
+							} else {
+								code += 'augmentation niveau '+ info.level[0] +' &rarr; '+ info.level[1];
+							}
+							code += '</span>';
+
+							code += '<i class="icon-trash delete"></i>';
+							code += item.name;
+							code += '</li>';
+
+							KOCFIA.throne.$div.find('.improvements').find('ol').append( code );
+
+							KOCFIA.throne.improvements.push( info );
+						}
+					} else {
+						Shared.notify('Veuillez choisir un objet à améliorer');
+					}
 				})
 				.on('click', '.reload_set', function(){
 					KOCFIA.throne.loadSets();
 				})
+				.find('.improvements')
+					.on('click', '.delete', function(){
+						var $this = $(this),
+							$list = $this.closest('ol');
+
+						$(this).parent().remove();
+						list = $list.find('li').map(function(){ return JSON.parse( $(this).attr('data-info') ); }).get();
+
+						KOCFIA.throne.improvements = list;
+						KOCFIA.throne.storeImprovements();
+					})
+					.find('ol').sortable({
+						zIndex: 100002,
+						update: function(event, ui){
+							var $list = $(event.target),
+								list = $list.find('li').map(function(){ return JSON.parse( $(this).attr('data-info') ); }).get();
+
+							KOCFIA.throne.improvements = list;
+							KOCFIA.throne.storeImprovements();
+						}
+					});
 				;
 		};
 
@@ -20283,9 +20409,87 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.getImprovementsQueue = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getImprovementsQueue function');
-			//@TODO
+			var code = '<div class="improvements">',
+				i, info, item;
 
-			var code = '';
+			//form
+			code += '<h3>Configurer les améliorations automatiques des objets</h3>';
+			code += '<form class="upgrade-form">';
+			code += '<i class="icon-refresh refresh"></i>';
+			code += '<select><option value="">Choississez</option>'+ KOCFIA.throne.getItemsDropdown() +'</select>';
+			code += '<a class="btn quality_upgrade" title="Ajouter un déblocage de bonus pour cet objet"><i class="icon-circle-arrow-up"></i> Bonus</a>';
+			code += '<a class="btn level_upgrade" title="Ajouter une augmentation de niveau pour cet objet"><i class="icon-plus-sign"></i> Niveau</a>';
+			code += '<a class="btn optimized_upgrade" title="Optimiser les améliorations pour cet objet jusqu\'à superbe (5 lignes) et +4"><i class="icon-cogs"></i> Optimiser</a>';
+			code += '</form>';
+
+			//list
+			code += '<h3>File d\'attente</h3>';
+			code += '<small>Changez l\'ordre en déplaçant les éléments de la liste</small>';
+			code += '<ol>';
+			for( i = 0; i < KOCFIA.throne.improvements.length; i += 1 ){
+				info = KOCFIA.throne.improvements[ i ];
+				if( window.seed.inventory.hasOwnProperty(info.id) ){
+					item = new window.cm.ThroneItemModel(info.id, window.seed.inventory[ info.id ]);
+					code += '<li data-info="'+ JSON.stringify(info) +'">';
+
+					code += '<span>'; //float right
+					if( info.hasOwnProperty('quality') ){
+						code += 'déblocage bonus '+ info.quality[0] +' &rarr; '+ info.quality[1];
+					} else {
+						code += 'augmentation niveau '+ info.level[0] +' &rarr; '+ info.level[1];
+					}
+					code += '</span>';
+
+					code += '<i class="icon-trash delete"></i>';
+					code += item.name;
+					code += '</li>';
+				}
+			}
+			code += '</ol>';
+			code += '</div>';
+
+			return code;
+		};
+
+		KOCFIA.throne.getItemsDropdown = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getItemsDropdown function');
+
+			//items by type using <optgroup>
+			var code = '',
+				items = {}, //by type
+				itemId, item, effect, slot, effectRank, tierInfo, bonus, type;
+
+			for( itemId in window.seed.throne.inventory ){
+				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
+					item = new window.cm.ThroneItemModel(itemId, window.seed.throne.inventory[ itemId ]);
+
+					if( !items.hasOwnProperty(item.type) ) items[ item.type ] = '';
+
+					items[ item.type ] += '<option value="'+ itemId +'" data-quality="'+ item.quality +'" data-level="'+ item.level +'">'+ item.name +' #';
+
+					for( slot in item.effects ){
+						if( item.effects.hasOwnProperty(slot) ){
+							effect = item.effects[ slot ];
+							effectRank = parseInt(slot.replace(/slot/, ''), 10);
+
+							tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
+							bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+
+							effectInfo = window.cm.thronestats.effects[ effect.id ];
+
+							items[ item.type ] += (effectRank > 1 ? ', ' : ' ')+ (effectInfo[1].indexOf('Debuff') > -1 ? '-' : '')+ bonus +'%'+ effectInfo[1];
+						}
+					}
+				}
+			}
+
+			for( type in items ){
+				if( items.hasOwnProperty(type) ){
+					code += '<optgroup label="'+ type +'">';
+					code += items[ type ];
+					code += '</optgroup>';
+				}
+			}
 
 			return code;
 		};
@@ -20412,6 +20616,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.getSalvageConf = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getSalvageConf function');
+			//@TODO
 
 			var code = '';
 
@@ -26265,7 +26470,7 @@ jQuery(document).ready(function(){
 	//Coordination :
 	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des membres connectés jusqu'à un point donné, pour un type d'unité à choisir)
 
-	//Laboratorie :
+	//Laboratory :
 	//-auto search
 	//-liste d'attente
 

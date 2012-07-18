@@ -1129,6 +1129,10 @@ jQuery(document).ready(function(){
 
 			//listeners - manage the checked status change of the options
 			$confPanel
+				.on('click', '.conf-link', function(){
+					KOCFIA.$confPanel.tabs('select', 'kocfia-options');
+					KOCFIA.$options.accordion('activate', KOCFIA.$options.find('.kocfia-'+ $(this).attr('data-conf') +'-conf'));
+				})
 				.on('click', '.help-toggle', function(){
 					var $this = $(this),
 						pos = $this.offset(),
@@ -1408,6 +1412,7 @@ jQuery(document).ready(function(){
 			KOCFIA.$confPanel = $('#kocfia-conf-panel');
 			KOCFIA.$confPanelNav = $('#kocfia-conf-panel-tabs');
 			KOCFIA.$confPanelWrapper = KOCFIA.$confPanel.find('#kocfia-conf-panel-wrapper');
+			KOCFIA.$options = $('#kocfia-options');
 
 			var delay = function( mod, i ){
 				window.setTimeout(function(){
@@ -2872,7 +2877,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.chat.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.chat +'</h3>';
+			var code = '<h3 class="kocfia-chat-conf">'+ KOCFIA.modulesLabel.chat +'</h3>';
 				code += '<div>';
 				code += Shared.generateCheckbox('chat', 'active', 'Activer', KOCFIA.conf.chat.active);
 				code += Shared.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOCFIA.conf.chat.moveable);
@@ -2894,6 +2899,11 @@ jQuery(document).ready(function(){
 		KOCFIA.chat.modPanel = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat modPanel function');
 			var $section = KOCFIA.$confPanel.find('#kocfia-chat').html('');
+
+			var header = '<div class="infos">';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="chat"><span><i class="icon-cog"></i> Options</span></button>';
+			header += '</div>';
 
 			var colors = '<div class="kocfia-chat-colors">';
 			colors += '<h3>Couleurs de fond</h3>';
@@ -2928,7 +2938,7 @@ jQuery(document).ready(function(){
 				code += '<button rel="foes" class="button modify"><span>Ajouter</span></button></p>';
 				code += '<ul class="kocfia-chat-list" rel="foes">'+ foes +'</ul>';
 
-			$section.append( colors + code )
+			$section.append( header + colors + code + KOCFIA.chat.getHelp() )
 				.on('click', 'button:not(.apply)', function(e){
 					e.preventDefault();
 
@@ -3113,6 +3123,23 @@ jQuery(document).ready(function(){
 			KOCFIA.chat.highlightLeadersOff();
 			KOCFIA.chat.highlightFriendsOff();
 			KOCFIA.chat.highlightFoesOff();
+		};
+
+		KOCFIA.chat.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat getHelp function');
+			var help = '<div id="kocfia-chat-help" class="help" title="Aide chat">';
+
+			//@TODO
+			var texts = {
+				'Couleurs :': [
+				],
+				'Amis et ennemis :': [
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
+
+			return help;
 		};
 
 		/* moveable */
@@ -3395,7 +3422,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.overview.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.overview +'</h3>';
+			var code = '<h3 class="kocfia-overview-conf">'+ KOCFIA.modulesLabel.overview +'</h3>';
 				code += '<div>';
 				code += Shared.generateCheckbox('overview', 'active', 'Activer', KOCFIA.conf.overview.active);
 				code += Shared.generateRadio('overview', 'action', ['replace', 'moveable'], ['Remplace le dessous du jeu (ne pas oublier de mettre le chat à droite)', 'État des lieux déplacable et redimensionnable'], [KOCFIA.conf.overview.replace, KOCFIA.conf.overview.moveable]);
@@ -4330,7 +4357,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.autoAttack.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel[ this.module ] +'</h3>';
+			var code = '<h3 class="kocfia-'+ this.module +'-conf">'+ KOCFIA.modulesLabel[ this.module ] +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox(this.module, 'active', 'Activer', KOCFIA.conf[ this.module ].active);
 			code += Shared.generateCheckbox(this.module, 'automatic', 'Lancer les '+ (this.module == 'scout' ? 'éclairages' : 'attaques') +' automatiques', KOCFIA.conf[ this.module ].automatic);
@@ -4913,7 +4940,8 @@ jQuery(document).ready(function(){
 			header += '<span class="buttonset"><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
 			header += '<label for="'+ this.module +'-panel-automatic">attaques automatiques</label></span>';
 			header += '<button class="button secondary history-toggle" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"><span>Historique</span></button>';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="'+ this.module +'"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div>';
 
 			return header;
@@ -7075,7 +7103,8 @@ jQuery(document).ready(function(){
 			header += '<span class="buttonset"><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
 			header += '<label for="'+ this.module +'-panel-automatic">éclairages automatiques</label></span>';
 			header += '<button class="button secondary history-toggle" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"><span>Historique</span></button>';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="'+ this.module +'"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div>';
 
 			return header;
@@ -7561,7 +7590,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.notepad.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('notepad') ) console.info('KOCFIA notepad confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.notepad +'</h3>';
+			var code = '<h3 class="kocfia-notepad-conf">'+ KOCFIA.modulesLabel.notepad +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('notepad', 'active', 'Activer', KOCFIA.conf.notepad.active);
 			code += Shared.generateButton('notepad', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions');
@@ -7773,7 +7802,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.summary.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.summary +'</h3>';
+			var code = '<h3 class="kocfia-summary-conf">'+ KOCFIA.modulesLabel.summary +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('summary', 'active', 'Activer', KOCFIA.conf.summary.active);
 			code += Shared.generateButton('summary', 'resetPositionAndDimension', 'Remise à zéro de la position et des dimensions');
@@ -8196,7 +8225,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.map.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.map +'</h3>';
+			var code = '<h3 class="kocfia-map-conf">'+ KOCFIA.modulesLabel.map +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('map', 'active', 'Activer', KOCFIA.conf.map.active);
 			code += Shared.generateCheckbox('map', 'additionalInfo', 'Afficher les informations sur la carte (niveau, joueur, puissance, alliance, diplomatie)', KOCFIA.conf.map.additionalInfo);
@@ -8219,7 +8248,8 @@ jQuery(document).ready(function(){
 			var $section = KOCFIA.$confPanel.find('#kocfia-map').html('');
 
 			var header = '<div class="infos">';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="map"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div>';
 
 			var code = '<fieldset class="search"><legend>Exploration</legend>';
@@ -9066,7 +9096,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.formation.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.formation +'</h3>';
+			var code = '<h3 class="kocfia-formation-conf">'+ KOCFIA.modulesLabel.formation +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('formation', 'active', 'Activer', KOCFIA.conf.formation.active);
 			code += Shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOCFIA.conf.formation.automatic);
@@ -9085,7 +9115,8 @@ jQuery(document).ready(function(){
 			var form = '<div class="infos">';
 			form += '<span class="buttonset"><input type="checkbox" id="formation-panel-automatic" '+ (KOCFIA.conf.formation.automatic ? 'checked' : '') +' autocomplete="off" />';
 			form += '<label for="formation-panel-automatic">formations automatiques</label></span>';
-			form += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			form += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			form += '<button class="button secondary conf-link" data-conf="formation"><span><i class="icon-cog"></i> Options</span></button>';
 			form += '</div><h3>Configurations</h3>';
 			form += '<div class="forms">';
 
@@ -11143,7 +11174,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.transport.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.transport +'</h3>';
+			var code = '<h3 class="kocfia-transport-conf">'+ KOCFIA.modulesLabel.transport +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('transport', 'active', 'Activer', KOCFIA.conf.transport.active);
 			code += Shared.generateCheckbox('transport', 'automaticPileUp', 'Lancer les stockages automatiques', KOCFIA.conf.transport.automaticPileUp);
@@ -11170,7 +11201,8 @@ jQuery(document).ready(function(){
 			code += '<label for="transport-panel-automatic-pileUp">Stockages automatiques</label>';
 			code += '<input type="checkbox" id="transport-panel-automatic-supply" '+ (KOCFIA.conf.transport.automaticSupply ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="transport-panel-automatic-supply">Approvisionnements automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="transport"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
 			code += pileUpForm + supplyForm;
@@ -12365,7 +12397,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.reassign.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('KOCFIA reassign confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.reassign +'</h3>';
+			var code = '<h3 class="kocfia-reassign-conf">'+ KOCFIA.modulesLabel.reassign +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('reassign', 'active', 'Activer', KOCFIA.conf.reassign.active);
 			code += Shared.generateCheckbox('reassign', 'automatic', 'Activer les réassignements automatiques', KOCFIA.conf.reassign.automatic);
@@ -12387,7 +12419,8 @@ jQuery(document).ready(function(){
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="reassign-panel-automatic" '+ (KOCFIA.conf.reassign.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="reassign-panel-automatic">réassignements automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="reassign"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
 			code += automaticForm;
@@ -13230,7 +13263,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.canvas.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.canvas +'</h3>';
+			var code = '<h3 class="kocfia-canvas-conf">'+ KOCFIA.modulesLabel.canvas +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('canvas', 'active', 'Activer', KOCFIA.conf.canvas.active);
 			code += '</div>';
@@ -13439,7 +13472,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.alarm.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.alarm +'</h3>';
+			var code = '<h3 class="kocfia-alarm-conf">'+ KOCFIA.modulesLabel.alarm +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('alarm', 'active', 'Activer', KOCFIA.conf.alarm.active);
 			code += '<br>';
@@ -14570,7 +14603,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.knights.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.knights +'</h3>';
+			var code = '<h3 class="kocfia-knights-conf">'+ KOCFIA.modulesLabel.knights +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('knights', 'active', 'Activer', KOCFIA.conf.knights.active);
 			code += '</div>';
@@ -14592,7 +14625,8 @@ jQuery(document).ready(function(){
 
 			var header = '<div class="infos">';
 			header += '<button class="button secondary massSkillUp" title="Attribut à tous les chevaliers disponibles les points restant dans leur compétence principale"><span>Attribution en masse</span></button>';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="knights"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.knights +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
 
@@ -15351,7 +15385,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.estates.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.estates +'</h3>';
+			var code = '<h3 class="kocfia-estates-conf">'+ KOCFIA.modulesLabel.estates +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('estates', 'active', 'Activer', KOCFIA.conf.estates.active);
 			code += '</div>';
@@ -15366,7 +15400,8 @@ jQuery(document).ready(function(){
 			var i, l, cityKey, city;
 
 			var header = '<div class="infos">';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="estates"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.estates +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
 			header += '<input type="radio" name="kocfia-estates-city-toggles" id="kocfia-estates-all" value="all" checked>';
@@ -15906,7 +15941,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.dataAndStats.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
+			var code = '<h3 class="kocfia-dataAndStats-conf">'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('dataAndStats', 'active', 'Activer', KOCFIA.conf.dataAndStats.active);
 			code += '</div>';
@@ -15928,7 +15963,8 @@ jQuery(document).ready(function(){
 
 			var header = '<div class="infos">';
 			header += '<button class="button secondary refresh"><span>Raffraîchir</span></button>';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="dataAndStats"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
 
 			var data = '<table class="costsAndAbilities"><thead><tr>';
@@ -16614,7 +16650,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.build.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.build +'</h3>';
+			var code = '<h3 class="kocfia-build-conf">'+ KOCFIA.modulesLabel.build +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
 			code += Shared.generateCheckbox('build', 'automatic', 'Activer les constructions automatiques', KOCFIA.conf.build.automatic);
@@ -16622,41 +16658,6 @@ jQuery(document).ready(function(){
 			code += '</div>';
 
 			$section.append( code );
-		};
-
-		KOCFIA.build.on = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build on function');
-
-			window.cm.CitySwitch.addEventListener(window.cm.CitySwitchEvent.CITY_CHANGED, KOCFIA.build.addBuildingsVisualInfo);
-			window.cm.CitySwitch.addEventListener(window.cm.CitySwitchEvent.VIEW_CHANGED, KOCFIA.build.addBuildingsVisualInfo);
-
-			if( KOCFIA.build.automatic ){
-				KOCFIA.build.automaticOn();
-			}
-		};
-
-		KOCFIA.build.off = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build off function');
-		};
-
-		KOCFIA.build.automaticOn = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build automaticOn function');
-			$('#build-panel-automatic').prop('checked', true);
-
-			window.setTimeout(function(){
-				KOCFIA.build.launchAutomaticBuild();
-			}, 60 * 1000);
-
-			//recursive call every 5 minutes
-			autoBuildInterval = window.setInterval(function(){
-				KOCFIA.build.launchAutomaticBuild();
-			}, 5 * 60 * 1000);
-		};
-
-		KOCFIA.build.automaticOff = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build automaticOff function');
-
-			window.clearInterval(autoBuildInterval);
 		};
 
 		KOCFIA.build.modPanel = function(){
@@ -16670,7 +16671,8 @@ jQuery(document).ready(function(){
 			header += '<input type="checkbox" id="build-panel-automatic" '+ (KOCFIA.conf.build.automatic ? 'checked' : '') +' autocomplete="off" />';
 			header += '<label for="build-panel-automatic">constructions automatiques</label>';
 			header += '</span>';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="build"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.build +'</h3>';
 
 			var help = KOCFIA.build.getHelp();
@@ -16732,6 +16734,41 @@ jQuery(document).ready(function(){
 			KOCFIA.build.addSectionListeners();
 
 			KOCFIA.build.generateBuildMenu();
+		};
+
+		KOCFIA.build.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build on function');
+
+			window.cm.CitySwitch.addEventListener(window.cm.CitySwitchEvent.CITY_CHANGED, KOCFIA.build.addBuildingsVisualInfo);
+			window.cm.CitySwitch.addEventListener(window.cm.CitySwitchEvent.VIEW_CHANGED, KOCFIA.build.addBuildingsVisualInfo);
+
+			if( KOCFIA.build.automatic ){
+				KOCFIA.build.automaticOn();
+			}
+		};
+
+		KOCFIA.build.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build off function');
+		};
+
+		KOCFIA.build.automaticOn = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build automaticOn function');
+			$('#build-panel-automatic').prop('checked', true);
+
+			window.setTimeout(function(){
+				KOCFIA.build.launchAutomaticBuild();
+			}, 60 * 1000);
+
+			//recursive call every 5 minutes
+			autoBuildInterval = window.setInterval(function(){
+				KOCFIA.build.launchAutomaticBuild();
+			}, 5 * 60 * 1000);
+		};
+
+		KOCFIA.build.automaticOff = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build automaticOff function');
+
+			window.clearInterval(autoBuildInterval);
 		};
 
 		KOCFIA.build.generateBuildMenu = function(){
@@ -17973,7 +18010,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.marches.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.marches +'</h3>';
+			var code = '<h3 class="kocfia-marches-conf">'+ KOCFIA.modulesLabel.marches +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('marches', 'active', 'Activer', KOCFIA.conf.marches.active);
 			code += '</div>';
@@ -17990,7 +18027,8 @@ jQuery(document).ready(function(){
 			var header = '<div class="infos">';
 			header += '<span class="buttonset"><input type="checkbox" class="raid-toggle" name="kocfia-marches-raid-toggle" id="kocfia-marches-raid-toggle">';
 			header += '<label for="kocfia-marches-raid-toggle">Masquer les raids</label></span>';
-			header += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary conf-link" data-conf="marches"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.marches +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
 			header += '<input type="radio" name="kocfia-marches-city-toggles" class="city-toggle" id="kocfia-marches-all" value="all" checked>';
@@ -18652,7 +18690,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.quickMarch.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.quickMarch +'</h3>';
+			var code = '<h3 class="kocfia-quickMarch-conf">'+ KOCFIA.modulesLabel.quickMarch +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('quickMarch', 'active', 'Activer', KOCFIA.conf.quickMarch.active);
 			code += '</div>';
@@ -19769,7 +19807,6 @@ jQuery(document).ready(function(){
 			salvage: {},
 			locks: {} //by item id
 		};
-		//@TODO manage protection and luck items
 		//@TODO display number of protected items
 		//@TODO add color conf for bonus of interest
 
@@ -19803,11 +19840,11 @@ jQuery(document).ready(function(){
 
 			if( rowObject.available && rowObject.repairing !== null ){
 				if( rowObject.quality  < 5 ){
-					code += '<a class="btn manual_quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer un bonus de cet objet"><i class="icon-circle-arrow-up"></i> Bonus</a>';
+					code += '<button class="button secondary manual_quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer un bonus de cet objet"><span><i class="icon-circle-arrow-up"></i> Bonus</span></button>';
 				}
 
-				if( rowObject.level < 5 ){
-					code += '<a class="btn manual_level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><i class="icon-plus-sign"></i> Niveau</a>';
+				if( rowObject.level < 10 ){
+					code += '<button class="button secondary manual_level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><span><i class="icon-plus-sign"></i> Niveau</span></button>';
 				}
 			}
 
@@ -19848,8 +19885,8 @@ jQuery(document).ready(function(){
 				{name: 'effect3', index: 'effect3', formatter: function( cellValue, options, rowObject ){ return (rowObject.quality < 3 ? '<span class="grey">'+ cellValue +'</span>' : cellValue); }},
 				{name: 'effect4', index: 'effect4', formatter: function( cellValue, options, rowObject ){ return (rowObject.quality < 4 ? '<span class="grey">'+ cellValue +'</span>' : cellValue); }},
 				{name: 'effect5', index: 'effect5', formatter: function( cellValue, options, rowObject ){ return (rowObject.quality < 5 ? '<span class="grey">'+ cellValue +'</span>' : cellValue); }},
-				{name: 'quality_upgrade', index: 'quality_upgrade', hidedlg: true, hidden: true, search: false, sortable: false},
-				{name: 'level_upgrade', index: 'level_upgrade', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'upgradeQuality', index: 'upgradeQuality', hidedlg: true, hidden: true, search: false, sortable: false},
+				{name: 'upgradeLevel', index: 'upgradeLevel', hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'quality', index: 'quality', hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'isEquiped', index: 'isEquiped', hidedlg: true, hidden: true, search: false, sortable: false},
 				{name: 'isInSet', index: 'isInSet', hidedlg: true, hidden: true, search: false, sortable: false},
@@ -19863,7 +19900,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.throne +'</h3>';
+			var code = '<h3 class="kocfia-throne-conf">'+ KOCFIA.modulesLabel.throne +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('throne', 'active', 'Activer', KOCFIA.conf.throne.active);
 			/*code += Shared.generateCheckbox('throne', 'automatic', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automatic);*/
@@ -19891,7 +19928,8 @@ jQuery(document).ready(function(){
 			code += '<input type="checkbox" id="throne-panel-automatic-salvage" '+ (KOCFIA.conf.throne.automaticSalvage ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="throne-panel-automatic-salvage">Recyclage automatique</label>';
 			code += '</span>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="throne"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += '<div>';
 			code += '<label for="kocfia-throne-cities">Ville où prendre et mettre les pierres d\'ether :</label>';
@@ -19905,7 +19943,9 @@ jQuery(document).ready(function(){
 			}
 			code += '</select>';
 			code += '</div>';
-			code += '<h3>Configurations</h3>';
+			code += '<div class="buttonset buff-items">';
+			code += KOCFIA.throne.getBuffItems();
+			code += '</div>';
 			code += '<div class="accordion">';
 			code += '<h3>Objets</h3><div>';
 			code += '<button class="button secondary reload" title="Raffraîchir la liste des objets"><span>Raffraîchir</span></button>';
@@ -19933,6 +19973,7 @@ jQuery(document).ready(function(){
 				});
 
 			KOCFIA.throne.$cities = $section.find('#kocfia-throne-cities');
+			KOCFIA.throne.$buffItems = $section.find('.buff-items');
 			KOCFIA.throne.$history = $section.find('.history');
 
 			$section.find('.accordion').accordion({
@@ -20080,6 +20121,16 @@ jQuery(document).ready(function(){
 
 					Shared.storeConf();
 				})
+				.on('click', '.refresh-buffItems', function(){
+					var $div = $(this).parent(),
+						v = $div.find('input').filter(':checked').val();
+
+					$div.html( KOCFIA.throne.getBuffItems() );
+
+					if( v !== null ){
+						$div.find('input').filter('[value="'+ v +'"]').prop('checked', true);
+					}
+				})
 				.on('click', '.reload', function(){
 					KOCFIA.throne.loadItemList();
 				})
@@ -20147,38 +20198,70 @@ jQuery(document).ready(function(){
 
 					$this.removeClass('icon-unlock unlock').addClass('icon-lock lock').attr('title', 'Protéger cet objet contre la destruction manuelle ou automatique');
 				})
-				.on('click', '.manual_quality_upgrade', function(e){
+				.on('click', '.manual_quality_upgrade, .manual_level_upgrade', function(e){
 					e.preventDefault();
 
 					var $this = $(this),
 						id = $this.attr('data-id'),
-						item = window.seed.throne.inventory[ id ];
+						item = window.seed.throne.inventory[ id ],
+						cityKey = KOCFIA.throne.$cities.val(),
+						buffItemId = KOCFIA.throne.$buffItems.find('input').filter(':checked').val();
 
 					if( item && Object.isObject(item) ){
-						KOCFIA.throne.improvements[ id ].push( 'q'+ (parseInt(item.quality, 10) + 1) );
+						Shared.working();
 
-						if( $.inArray(id, KOCFIA.throne.improvements.queue) == -1 ){
-							KOCFIA.throne.improvements.queue.push(id);
-						}
+						var sequence = function(){
+							return $.Deferred(function( dfd ){
+								return dfd.pipe( KOCFIA.throne.upgradeItem(($this.hasClass('.manual_quality_upgrade') ? 'quality' : 'level'), id, cityKey, buffItemId, false, dfd) );
+							}).promise();
+						};
 
-					} else {
-						Shared.notify('Objet non trouvé');
-					}
-				})
-				.on('click', '.manual_level_upgrade', function(e){
-					e.preventDefault();
+						$.when( sequence )
+							.done(function(){
+								var item = new window.cm.ThroneItemModel(id, window.seed.throne.inventory[ id ]),
+									effects = {
+										slot1: '',
+										slot2: '',
+										slot3: '',
+										slot4: '',
+										slot5: ''
+									},
+									slot, effect, tierInfo, bonus, effectInfo;
 
-					var $this = $(this),
-						id = $this.attr('data-id'),
-						item = window.seed.throne.inventory[ id ];
+								var data = KOCFIA.throne.$itemList.jqGrid('getRowData', id);
 
-					if( item && Object.isObject(item) ){
-						KOCFIA.throne.improvements[ id ].push( 'l'+ (parseInt(item.level, 10) + 1) );
+								data.name = item.name;
 
-						if( $.inArray(id, KOCFIA.throne.improvements.queue) == -1 ){
-							KOCFIA.throne.improvements.queue.push(id);
-						}
+								if( !item.isBroken ){
+									if( type == 'quality' ){
+										data.qualityLabel = item.createPrefix();
+										data.quality = item.quality;
+									} else {
+										data.level = item.level;
 
+										for( slot in item.effects ){
+											if( item.effects.hasOwnProperty(slot) ){
+												effect = item.effects[ slot ];
+												tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
+												bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+												effectInfo = window.cm.thronestats.effects[ effect.id ];
+
+												effects[ slot ] = bonus +'% '+ effectInfo[1];
+											}
+										}
+
+										data.effect1 = effects.slot1;
+										data.effect2 = effects.slot2;
+										data.effect3 = effects.slot3;
+										data.effect4 = effects.slot4;
+										data.effect5 = effects.slot5;
+									}
+								} else {
+									data.isBroken = 1;
+								}
+
+								KOCFIA.throne.$itemList.jqGrid('setRowData', id, data);
+							});
 					} else {
 						Shared.notify('Objet non trouvé');
 					}
@@ -20197,19 +20280,12 @@ jQuery(document).ready(function(){
 
 						var maxQuality = 5,
 							maxLevel = 10,
-							upgradeLevel = 0,
-							upgradeQuality = 0,
-							i, info, improvements, item, code;
-						for( i = 0; i < KOCFIA.throne.improvements.length; i += 1 ){
-							info = KOCFIA.throne.improvements[ i ];
-							if( info.id == itemId ){
-								if( info.hasOwnProperty('quality') ){
-									if( info.quality[1] > upgradeQuality ) upgradeQuality = parseInt(info.quality[1], 10);
-								} else {
-									if( info.level[1] > upgradeLevel ) upgradeLevel = parseInt(info.level[1], 10);
-								}
-							}
-						}
+							upgradeLevel, upgradeQuality,
+							i, info, improvements, item, code,
+							imp = KOCFIA.throne.getImprovementQualityAndLevelForItem( itemId );
+
+						upgradeLevel = imp.level;
+						upgradeQuality = imp.quality;
 
 						if( isQuality && upgradeQuality + 1 > maxQuality ){
 							Shared.notify('Cet objet a le maximum de bonus débloqués actuellement ou en liste d\'attente');
@@ -20354,6 +20430,8 @@ jQuery(document).ready(function(){
 					if( item && Object.isObject(item) ){
 						item = new cm.ThroneItemModel(itemId, item);
 
+						var imp = KOCFIA.throne.getImprovementQualityAndLevelForItem( itemId );
+
 						effects = {
 							slot1: '',
 							slot2: '',
@@ -20386,8 +20464,8 @@ jQuery(document).ready(function(){
 							effect3: effects.slot3,
 							effect4: effects.slot4,
 							effect5: effects.slot5,
-							quality_upgrade: quality,
-							level_upgrade: level,
+							upgradeQuality: imp.quality,
+							upgradeLevel: imp.level,
 							isBroken: (item.isBroken ? 1 : 0),
 							isEquiped: ($.inArray(itemId, equiped) > -1 ? 1 : 0),
 							isInSet: ($.inArray(itemId, inSet) > -1 ? 1 : 0),
@@ -20417,9 +20495,9 @@ jQuery(document).ready(function(){
 			code += '<form class="upgrade-form">';
 			code += '<i class="icon-refresh refresh"></i>';
 			code += '<select><option value="">Choississez</option>'+ KOCFIA.throne.getItemsDropdown() +'</select>';
-			code += '<a class="btn quality_upgrade" title="Ajouter un déblocage de bonus pour cet objet"><i class="icon-circle-arrow-up"></i> Bonus</a>';
-			code += '<a class="btn level_upgrade" title="Ajouter une augmentation de niveau pour cet objet"><i class="icon-plus-sign"></i> Niveau</a>';
-			code += '<a class="btn optimized_upgrade" title="Optimiser les améliorations pour cet objet jusqu\'à superbe (5 lignes) et +4"><i class="icon-cogs"></i> Optimiser</a>';
+			code += '<button class="button secondary quality_upgrade" title="Ajouter un déblocage de bonus pour cet objet"><span><i class="icon-circle-arrow-up"></i> Bonus</span></button>';
+			code += '<button class="button secondary level_upgrade" title="Ajouter une augmentation de niveau pour cet objet"><span><i class="icon-plus-sign"></i> Niveau</span></button>';
+			code += '<button class="button secondary optimized_upgrade" title="Optimiser les améliorations pour cet objet jusqu\'à superbe (5 lignes) et +4"><span><i class="icon-cogs"></i> Optimiser</span></button>';
 			code += '</form>';
 
 			//list
@@ -20699,14 +20777,14 @@ jQuery(document).ready(function(){
 			});
 		};
 
-		KOCFIA.throne.upgradeItem = function( type, id, cityKey, buffItemId, dfd ){
+		KOCFIA.throne.upgradeItem = function( type, id, cityKey, buffItemId, isAuto, dfd ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne upgradeItem function');
 			var params = $.extend({}, window.g_ajaxparams);
 			params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
-			params.action = (type == 'enhance' ? 'upgradeQuality' : 'upgradeLevel');
+			params.action = (type == 'quality' ? 'upgradeQuality' : 'upgradeLevel');
 			params.throneRoomItemId = id;
-			params,payment = 'aetherstone';
-			params.buffItemId = (buffItemId !== null ? buffItemId : 0); //global 20001 | 20002, enchance 2003 | 20004 | 20011, upgrade 20005 | 20006 | 20016
+			params.payment = 'aetherstone';
+			params.buffItemId = (buffItemId !== null ? buffItemId : 0); //global 20001 | 20002, enhance 20003 | 20004 | 20011, upgrade 20005 | 20006 | 20016
 			params.cityId = cityKey.replace(/city/, '');
 
 			$.ajax({
@@ -20728,21 +20806,20 @@ jQuery(document).ready(function(){
 						item.quality = data.item.quality;
 						item.level = data.item.level;
 						item.name = item.createName();
+
+						if( !isAuto ) Shared.success('Amélioration réussie.');
 					} else {
 						item.quality = data.item.quality;
 						item.level = data.item.level;
 						item.name = item.createName();
 
 						if( data['break'] ){
-							if( type == 'enhance' ){
-								item.brokenType = 'quality';
-							} else if( type == 'upgrade' ){
-								item.brokenType = 'level';
-							}
-
+							item.brokenType = type;
 							item.isBroken = true;
-							item.name = y.createName();
+							item.name = item.createName();
 						}
+
+						if( !isAuto ) Shared.notify('Amélioration échouée.');
 					}
 
 				} else {
@@ -20750,7 +20827,9 @@ jQuery(document).ready(function(){
 					if( attempts > 0 ){
 						if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd ) );
 						else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd );
-					} else if( dfd ) return dfd.reject();
+					} else if( dfd ){
+						return dfd.reject();
+					}
 				}
 			})
 			.fail(function(){
@@ -20758,7 +20837,9 @@ jQuery(document).ready(function(){
 				if( attempts > 0 ){
 					if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd ) );
 					else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd );
-				} else if( dfd ) return dfd.reject();
+				} else if( dfd ){
+					return dfd.reject();
+				}
 			});
 		};
 
@@ -21196,6 +21277,62 @@ jQuery(document).ready(function(){
 				});
 		};
 
+		KOCFIA.throne.getBuffItems = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getBuffItems function');
+			var code = '',
+				buffItems = {
+					'generic': [20001, 20002],
+					'enhance': [20003, 20004, 20011],
+					'upgrade': [20005, 20006, 20016]
+				},
+				labels = {
+					'generic': '',
+					'enhance': 'déblocage',
+					'upgrade': 'augmentation'
+				},
+				i, key, nb, val, info;
+
+			code += '<i class="icon-refresh refresh-buffItems"></i>';
+			for( type in buffItems ){
+				if( buffItems.hasOwnProperty(type) ){
+					for( i = 0; i < buffItems[ type ].length; i += 1 ){
+						if( labels[ type ] !== '' ) code += '<span>'+ labels[ type ] +'</span>';
+						key = 'i' + buffItems[ type ][i];
+						val = buffItems[ type ][i];
+						nb = parseInt(window.seed.items[ key ], 10);
+						info = window.itemlist[ key ];
+						code += '<input type="checkbox" value="'+ val +'" id="kocfia-throne-item-'+ val +'">';
+						code += '<label for="kocfia-throne-item-'+ val +'" data-count="'+ nb +'" title="'+ info.name +' ('+ nb +') - '+ info.description +'">';
+						code += '<img src="'+ window.stimgUrl +'img/items/70/'+ val +'.jpg">';
+						code += '</label>';
+					}
+				}
+			}
+			code += '<i class="icon-warning-sign" title="L\'object sélectionné sera utilisé pour les améliorations manuelles et automatiques"></i>';
+
+			return code;
+		};
+
+		KOCFIA.throne.getImprovementQualityAndLevelForItem = function( itemId ){
+
+			var i, info,
+				upgradeQuality = 0,
+				upgradeLevel = 0;
+
+			for( i = 0; i < KOCFIA.throne.improvements.length; i += 1 ){
+				info = KOCFIA.throne.improvements[ i ];
+				if( info.id == itemId ){
+					if( info.hasOwnProperty('quality') ){
+						if( info.quality[1] > upgradeQuality ) upgradeQuality = parseInt(info.quality[1], 10);
+					} else {
+						if( info.level[1] > upgradeLevel ) upgradeLevel = parseInt(info.level[1], 10);
+					}
+				}
+			}
+
+			return {quality: upgradeQuality, level: upgradeLevel};
+		};
+
 	/* REPORTS */
 		KOCFIA.reports = {
 			options: {
@@ -21356,7 +21493,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.reports.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.reports +'</h3>';
+			var code = '<h3 class="kocfia-reports-conf">'+ KOCFIA.modulesLabel.reports +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('reports', 'active', 'Activer', KOCFIA.conf.reports.active);
 			code += Shared.generateCheckbox('reports', 'automatic', 'Activer la suppression automatique de rapport', KOCFIA.conf.reports.automatic);
@@ -21394,7 +21531,8 @@ jQuery(document).ready(function(){
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="reports-panel-automatic" '+ (KOCFIA.conf.reports.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="reports-panel-automatic">Suppressions automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="reports"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += KOCFIA.reports.getHelp();
 
@@ -22443,7 +22581,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.hospital.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.hospital +'</h3>';
+			var code = '<h3 class="kocfia-hospital-conf">'+ KOCFIA.modulesLabel.hospital +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('hospital', 'active', 'Activer', KOCFIA.conf.hospital.active);
 			code += Shared.generateCheckbox('hospital', 'automatic', 'Lancer les soins automatiques', KOCFIA.conf.hospital.automatic);
@@ -22462,7 +22600,8 @@ jQuery(document).ready(function(){
 			code += '<span class="buttonset"><input type="checkbox" id="hospital-panel-automatic" '+ (KOCFIA.conf.hospital.automatic ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="hospital-panel-automatic">Soins automatiques</label></span>';
 			code += '<button class="button priority" title="Priorité des unités pour les soins"><span>Priorité</span></button>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="hospital"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><div class="accordion">';
 			code += '<h3>Configurations</h3>';
 
@@ -23304,7 +23443,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.search.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.search +'</h3>';
+			var code = '<h3 class="kocfia-search-conf">'+ KOCFIA.modulesLabel.search +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('search', 'active', 'Activer', KOCFIA.conf.search.active);
 			code += '</div>';
@@ -23317,7 +23456,8 @@ jQuery(document).ready(function(){
 			var $section = KOCFIA.$confPanel.find('#kocfia-search').html('');
 
 			var code = '<div class="infos">';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="search"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += KOCFIA.search.getHelp();
 
@@ -23846,7 +23986,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.gifts.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.gifts +'</h3>';
+			var code = '<h3 class="kocfia-gifts-conf">'+ KOCFIA.modulesLabel.gifts +'</h3>';
 			code += '<div>';
 			code += '<p>Séléctionne automatiquement les joueurs précédemment sélectionnés pour l\'envoie de cadeaux</p>';
 			code += Shared.generateCheckbox('gifts', 'active', 'Activer', KOCFIA.conf.gifts.active);
@@ -23967,7 +24107,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.tournament.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.tournament +'</h3>';
+			var code = '<h3 class="kocfia-tournament-conf">'+ KOCFIA.modulesLabel.tournament +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('tournament', 'active', 'Activer', KOCFIA.conf.tournament.active);
 			code += Shared.generateCheckbox('tournament', 'monitor', 'Vérifier le lancement de tournoi', KOCFIA.conf.tournament.monitor);
@@ -23986,7 +24126,8 @@ jQuery(document).ready(function(){
 
 			var code = '<div class="infos">';
 			code += '<button class="button secondary refresh><span>Raffraîchir</span></button>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="tournament"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Tournoi</h3>';
 			code += '<div class="none">Aucun tournois en cours</div>';
 			code += '<div class="one">';
@@ -24284,7 +24425,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.set.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set confPanel function');
-			var code = '<h3>'+ KOCFIA.modulesLabel.set +'</h3>';
+			var code = '<h3 class="kocfia-set-conf">'+ KOCFIA.modulesLabel.set +'</h3>';
 			code += '<div>';
 			code += Shared.generateCheckbox('set', 'active', 'Activer', KOCFIA.conf.set.active);
 			code += Shared.generateCheckbox('set', 'automatic', 'Equiper les sets automatiquement', KOCFIA.conf.set.automatic);
@@ -24307,7 +24448,8 @@ jQuery(document).ready(function(){
 			code += '<label for="set-panel-automatic">Equiper les sets automatiquement</label></span>';
 			code += '<button class="button secondary refresh" title="Recharger les formulaires"><span>Raffraîchir</span></button>';
 			code += '<button class="button secondary history-toggle" title="Historique '+ KOCFIA.modulesLabel.set +'"><span>Historique</span></button>';
-			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary conf-link" data-conf="set"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
 			for( i = 0; i < KOCFIA.set.tasks.length; i += 1 ){
@@ -25070,6 +25212,7 @@ jQuery(document).ready(function(){
 		//@TODO
 
 	/* RESEARCH */
+		//@TODO
 
 	/* CHECK AND LAUNCH ATTACK */
 		KOCFIA.checkAndLaunchAttack = function( attack ){

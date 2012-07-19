@@ -8,6 +8,39 @@ html, body {
 	top: 23px !important;
 }
 
+/* jqgrid */
+	.ui-jqgrid {
+		margin: 2px 0 10px;
+	}
+
+	/* Headers: */
+	.ui-jqgrid .ui-jqgrid-htable th div,
+	/* Other cells: */
+	.ui-jqgrid tr.jqgrow td {
+		height: auto;
+		white-space: normal;
+	}
+
+	.ui-jqgrid tr.jqgrow td {
+		padding: 2px;
+	}
+
+	.ui-widget .ui-widget.ui-jqgrid {
+		font-size: 11px;
+	}
+
+	.ui-jqgrid-titlebar {
+		cursor: pointer;
+	}
+
+	.ui-jqdialog {
+		z-index: 100020 !important;
+	}
+
+	.zebra td {
+		background-color: #EAEAEA;
+	}
+
 /* popup management */
 	body.noModal .modalCurtain:not(.previous),
 	body.noModal .modalBox:not(.previous) {
@@ -404,22 +437,6 @@ html, body {
 		margin: 0;
 	}
 
-	.ui-widget .ui-widget.ui-jqgrid {
-		font-size: 11px;
-	}
-
-	.ui-jqgrid-titlebar {
-		cursor: pointer;
-	}
-
-	.ui-jqdialog {
-		z-index: 100020 !important;
-	}
-
-	.zebra td {
-		background-color: #EAEAEA;
-	}
-
 	.hostile td {
 		background-color: rgba(176, 0, 0, 0.5);
 	}
@@ -446,18 +463,6 @@ html, body {
 
 	.renfort td {
 		background-color: rgba(120, 33, 60, 0.5);
-	}
-
-	/* Headers: */
-	.ui-jqgrid .ui-jqgrid-htable th div,
-	/* Other cells: */
-	.ui-jqgrid tr.jqgrow td {
-		height: auto;
-		white-space: normal;
-	}
-
-	.ui-jqgrid tr.jqgrow td {
-		padding: 2px;
 	}
 
 	#kocfia-conf-panel .ui-jqgrid .ui-jqgrid-pager .ui-icon {
@@ -2805,6 +2810,11 @@ html, body {
 	#kocfia-quickMarch .form .refresh {
 		margin-right: 5px;
 		cursor: pointer;
+	}
+
+	#kocfia-quickMarch-set {
+		margin-right: 10px;
+		max-width: 150px;
 	}
 
 /* reports */

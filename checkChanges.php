@@ -33,6 +33,9 @@ function __autoload( $class_name ){
 $oChecker = new checker(1);
 $previous = $oChecker->version;
 
+$url = 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/js/camelotmain_fr-'.$previous.'.js';
+echo 'previous <a href="'.$url.'">'.$url.'</a>';
+
 for( $i = $previous + 1; $i <= $previous + 20; $i++ ){
 	//curl the javascript file and check the last-modified header against previous one stocked in database
 	$url = 'https://kabam1-a.akamaihd.net/kingdomsofcamelot/fb/e2/src/js/camelotmain_fr-'.$i.'.js';
@@ -48,7 +51,7 @@ for( $i = $previous + 1; $i <= $previous + 20; $i++ ){
 		$oChecker->save();
 
 		echo '<br>'.$i.' => found, sending email, <a href="'.$url.'">'.$url.'</a>';
-		mail('gmoulin.dev@gmail.com', 'kabam code change', 'Version from '.$previous.' to '.$i.' ('.$url.')', 'From: kocfia@kapok.fr');
+		mail('gmoulin.dev@gmail.com', 'kabam code change', 'Version from '.$previous.' to '.$i.' (<a href="'.$url.'">'.$url.'</a>)', 'From: kocfia@kapok.fr');
 	} else {
 		echo '<br>'.$i.' => '.$code;
 	}

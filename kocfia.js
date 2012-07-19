@@ -314,8 +314,10 @@ jQuery(document).ready(function(){
 			51: 'Ville ou CB',
 			511: 'Ville',
 			512: 'CB',
+			52: 'Ruine',
 			53: 'Ville sous brumes',
-			54: 'Forêt Obscure'
+			54: 'Forêt Obscure',
+			55: 'Repère de mercenaires'
 		};
 		KOCFIA.marchesTypes = {
 			0: '?', //MARCH_TYPE_NONE: 0,
@@ -4938,9 +4940,9 @@ jQuery(document).ready(function(){
 		KOCFIA.autoAttack.getHeader = function(){
 			var header = '<div class="infos">';
 			header += '<span class="buttonset"><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
-			header += '<label for="'+ this.module +'-panel-automatic">attaques automatiques</label></span>';
+			header += '<label for="'+ this.module +'-panel-automatic"><i class="icon-time"></i> Attaques automatiques</label></span>';
 			header += '<button class="button secondary history-toggle" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"><span>Historique</span></button>';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="'+ this.module +'"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div>';
 
@@ -7101,9 +7103,9 @@ jQuery(document).ready(function(){
 		KOCFIA.scout.getHeader = function(){
 			var header = '<div class="infos">';
 			header += '<span class="buttonset"><input type="checkbox" id="'+ this.module +'-panel-automatic" '+ (KOCFIA.conf[ this.module ].automatic ? 'checked' : '') +' autocomplete="off" />';
-			header += '<label for="'+ this.module +'-panel-automatic">éclairages automatiques</label></span>';
+			header += '<label for="'+ this.module +'-panel-automatic"><i class="icon-time"></i> Éclairages automatiques</label></span>';
 			header += '<button class="button secondary history-toggle" title="Historique des '+ KOCFIA.modulesLabel[ this.module ] +'"><span>Historique</span></button>';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="'+ this.module +'"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div>';
 
@@ -8248,7 +8250,7 @@ jQuery(document).ready(function(){
 			var $section = KOCFIA.$confPanel.find('#kocfia-map').html('');
 
 			var header = '<div class="infos">';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="map"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div>';
 
@@ -9114,8 +9116,8 @@ jQuery(document).ready(function(){
 
 			var form = '<div class="infos">';
 			form += '<span class="buttonset"><input type="checkbox" id="formation-panel-automatic" '+ (KOCFIA.conf.formation.automatic ? 'checked' : '') +' autocomplete="off" />';
-			form += '<label for="formation-panel-automatic">formations automatiques</label></span>';
-			form += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			form += '<label for="formation-panel-automatic"><i class="icon-time"></i> Formations automatiques</label></span>';
+			form += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			form += '<button class="button secondary conf-link" data-conf="formation"><span><i class="icon-cog"></i> Options</span></button>';
 			form += '</div><h3>Configurations</h3>';
 			form += '<div class="forms">';
@@ -9732,7 +9734,7 @@ jQuery(document).ready(function(){
 			$('#formation-panel-automatic').prop('checked', false);
 
 			window.clearInterval( autoFormationInterval );
-			//Shared.stopProgress( KOCFIA.formation.$nextTrainBar );
+			KOCFIA.formation.$nextTrainBar.html('');
 		};
 
 		KOCFIA.formation.getHelp = function(){
@@ -11198,10 +11200,10 @@ jQuery(document).ready(function(){
 
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="transport-panel-automatic-pileUp" '+ (KOCFIA.conf.transport.automaticPileUp ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="transport-panel-automatic-pileUp">Stockages automatiques</label>';
+			code += '<label for="transport-panel-automatic-pileUp"><i class="icon-time"></i> Stockages automatiques</label>';
 			code += '<input type="checkbox" id="transport-panel-automatic-supply" '+ (KOCFIA.conf.transport.automaticSupply ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="transport-panel-automatic-supply">Approvisionnements automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<label for="transport-panel-automatic-supply"><i class="icon-time"></i> Approvisionnements automatiques</label></span>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="transport"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
@@ -12418,8 +12420,8 @@ jQuery(document).ready(function(){
 
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="reassign-panel-automatic" '+ (KOCFIA.conf.reassign.automatic ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="reassign-panel-automatic">réassignements automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<label for="reassign-panel-automatic"><i class="icon-time"></i> Réassignements automatiques</label></span>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="reassign"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';
@@ -14625,7 +14627,7 @@ jQuery(document).ready(function(){
 
 			var header = '<div class="infos">';
 			header += '<button class="button secondary massSkillUp" title="Attribut à tous les chevaliers disponibles les points restant dans leur compétence principale"><span>Attribution en masse</span></button>';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="knights"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.knights +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
@@ -15400,7 +15402,7 @@ jQuery(document).ready(function(){
 			var i, l, cityKey, city;
 
 			var header = '<div class="infos">';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="estates"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.estates +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
@@ -15963,7 +15965,7 @@ jQuery(document).ready(function(){
 
 			var header = '<div class="infos">';
 			header += '<button class="button secondary refresh"><span>Raffraîchir</span></button>';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="dataAndStats"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
 
@@ -16669,9 +16671,9 @@ jQuery(document).ready(function(){
 			header += '<input type="checkbox" id="plan-mode-toggle" autocomplete="off" />';
 			header += '<label for="plan-mode-toggle">Mode planification</label>';
 			header += '<input type="checkbox" id="build-panel-automatic" '+ (KOCFIA.conf.build.automatic ? 'checked' : '') +' autocomplete="off" />';
-			header += '<label for="build-panel-automatic">constructions automatiques</label>';
+			header += '<label for="build-panel-automatic"><i class="icon-time"></i> Constructions automatiques</label>';
 			header += '</span>';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="build"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.build +'</h3>';
 
@@ -18027,7 +18029,7 @@ jQuery(document).ready(function(){
 			var header = '<div class="infos">';
 			header += '<span class="buttonset"><input type="checkbox" class="raid-toggle" name="kocfia-marches-raid-toggle" id="kocfia-marches-raid-toggle">';
 			header += '<label for="kocfia-marches-raid-toggle">Masquer les raids</label></span>';
-			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			header += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			header += '<button class="button secondary conf-link" data-conf="marches"><span><i class="icon-cog"></i> Options</span></button>';
 			header += '</div><h3>'+ KOCFIA.modulesLabel.marches +'</h3>';
 			header += '<div class="buttonset">Afficher : ';
@@ -19924,11 +19926,11 @@ jQuery(document).ready(function(){
 			code += '<div class="infos">';
 			code += '<span class="buttonset">';
 			code += '<input type="checkbox" id="throne-panel-automatic-improvements" '+ (KOCFIA.conf.throne.automaticImprovements ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="throne-panel-automatic-improvements">Améliorations automatiques</label>';
+			code += '<label for="throne-panel-automatic-improvements"><i class="icon-time"></i> Améliorations automatiques</label>';
 			code += '<input type="checkbox" id="throne-panel-automatic-salvage" '+ (KOCFIA.conf.throne.automaticSalvage ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="throne-panel-automatic-salvage">Recyclage automatique</label>';
+			code += '<label for="throne-panel-automatic-salvage"><i class="icon-time"></i> Recyclage automatique</label>';
 			code += '</span>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="throne"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += '<div>';
@@ -20582,7 +20584,7 @@ jQuery(document).ready(function(){
 			code += '<th>Trône</th>';
 			code += '<th>Table</th>';
 			code += '<th>Trophé</th>';
-			code += '<th>Vitrail</th>';
+			code += '<th>Fenêtre</th>';
 			code += '<th>Total</th>';
 			code += '</thead>';
 			code += '<tbody>';
@@ -21530,8 +21532,8 @@ jQuery(document).ready(function(){
 
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="reports-panel-automatic" '+ (KOCFIA.conf.reports.automatic ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="reports-panel-automatic">Suppressions automatiques</label></span>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<label for="reports-panel-automatic"><i class="icon-time"></i> Suppressions automatiques</label></span>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="reports"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += KOCFIA.reports.getHelp();
@@ -22598,9 +22600,9 @@ jQuery(document).ready(function(){
 
 			var code = '<div class="infos">';
 			code += '<span class="buttonset"><input type="checkbox" id="hospital-panel-automatic" '+ (KOCFIA.conf.hospital.automatic ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="hospital-panel-automatic">Soins automatiques</label></span>';
+			code += '<label for="hospital-panel-automatic"><i class="icon-time"></i> Soins automatiques</label></span>';
 			code += '<button class="button priority" title="Priorité des unités pour les soins"><span>Priorité</span></button>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="hospital"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><div class="accordion">';
 			code += '<h3>Configurations</h3>';
@@ -23303,7 +23305,7 @@ jQuery(document).ready(function(){
 			}
 		};
 
-	/* PLAYERS OR ALLIANCES SEARCH */
+	/* SEARCH - PLAYERS OR ALLIANCES */
 		KOCFIA.search = {
 			options: {
 				active: 1
@@ -23456,7 +23458,7 @@ jQuery(document).ready(function(){
 			var $section = KOCFIA.$confPanel.find('#kocfia-search').html('');
 
 			var code = '<div class="infos">';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="search"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += KOCFIA.search.getHelp();
@@ -23562,17 +23564,18 @@ jQuery(document).ready(function(){
 				})
 				;
 
+			KOCFIA.search.$div = KOCFIA.$confPanel.find('#kocfia-search');
+
 			KOCFIA.$confPanel.on('resizestop', function(){
 				if( KOCFIA.search.$div.is(':visible') ){
-					var size = KOCFIA.search.$div.find('.player').innerWidth() + 1;
-					KOCFIA.search.$resultsPlayer.jqGrid('setGridWidth', size);
+					var size = KOCFIA.search.$div.find('.form.players').innerWidth() + 1;
+
+					KOCFIA.search.$resultsPlayers.jqGrid('setGridWidth', size);
 					KOCFIA.search.$resultsAlliance.jqGrid('setGridWidth', size);
 					KOCFIA.search.$resultsMyAlliance.jqGrid('setGridWidth', size);
 					KOCFIA.search.$resultsCities.jqGrid('setGridWidth', size);
 				}
 			});
-
-			KOCFIA.search.$div = KOCFIA.$confPanel.find('#kocfia-search');
 		};
 
 		KOCFIA.search.on = function(){
@@ -24126,7 +24129,7 @@ jQuery(document).ready(function(){
 
 			var code = '<div class="infos">';
 			code += '<button class="button secondary refresh><span>Raffraîchir</span></button>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="tournament"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Tournoi</h3>';
 			code += '<div class="none">Aucun tournois en cours</div>';
@@ -24445,10 +24448,10 @@ jQuery(document).ready(function(){
 				i, title, task;
 
 			code += '<span class="buttonset"><input type="checkbox" id="set-panel-automatic" '+ (KOCFIA.conf.set.automatic ? 'checked' : '') +' autocomplete="off" />';
-			code += '<label for="set-panel-automatic">Equiper les sets automatiquement</label></span>';
+			code += '<label for="set-panel-automatic"><i class="icon-time"></i> Équiper les sets automatiquement</label></span>';
 			code += '<button class="button secondary refresh" title="Recharger les formulaires"><span>Raffraîchir</span></button>';
 			code += '<button class="button secondary history-toggle" title="Historique '+ KOCFIA.modulesLabel.set +'"><span>Historique</span></button>';
-			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"> Aide</span></button>';
+			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="set"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div><h3>Configurations</h3>';
 			code += '<div class="accordion">';

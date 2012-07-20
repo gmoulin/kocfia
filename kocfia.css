@@ -153,6 +153,11 @@ html, body {
 		border-color: #ccc;
 	}
 
+	.tab-link {
+		float: right;
+		margin: 0 5px;
+	}
+
 	/* jquery ui tabs and panel */
 		.ui-tabs .ui-tabs-panel {
 			padding: 0;

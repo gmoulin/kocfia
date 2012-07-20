@@ -1135,6 +1135,9 @@ jQuery(document).ready(function(){
 					KOCFIA.$confPanel.tabs('select', 'kocfia-options');
 					KOCFIA.$options.accordion('activate', KOCFIA.$options.find('.kocfia-'+ $(this).attr('data-conf') +'-conf'));
 				})
+				.on('click', '.tab-link', function(){
+					KOCFIA.$confPanel.tabs('select', 'kocfia-'+ $(this).attr('rel'));
+				})
 				.on('click', '.help-toggle', function(){
 					var $this = $(this),
 						pos = $this.offset(),
@@ -1740,7 +1743,7 @@ jQuery(document).ready(function(){
 			};
 
 			Shared.generateInput = function(module, option, text, value, type, rel){
-				return '<p><label for="'+ module +'-'+ option +'">'+ text +'</label><input type="'+ type +'" class="conf-choice" id="'+ module +'-'+ option +'" value="'+ value +'" rel="'+ rel +'"></p>';
+				return '<p><label for="'+ module +'-'+ option +'">'+ text +'</label>&nbsp;<input type="'+ type +'" class="conf-choice" id="'+ module +'-'+ option +'" value="'+ value +'" rel="'+ rel +'"></p>';
 			};
 
 			Shared.generateButton = function(module, action, text, param){
@@ -1777,7 +1780,7 @@ jQuery(document).ready(function(){
 
 			Shared.generateAudioInput = function(module, option, text, value, rel){
 				var code = '<p class="audio"><label for="'+ module +'-'+ option +'">'+ text +'</label><br>';
-				code += '<input type="url" class="conf-choice" id="'+ module +'-'+ option +'" value="'+ value +'" rel="'+ rel +'">';
+				code += '&nbsp;<input type="url" class="conf-choice" id="'+ module +'-'+ option +'" value="'+ value +'" rel="'+ rel +'">';
 				code += '<audio src="'+ value +'" preload="auto" />';
 				code += '<span class="icon-play"></span>';
 				code += '<span class="icon-pause"></span>';
@@ -2881,11 +2884,12 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat confPanel function');
 			var code = '<h3 class="kocfia-chat-conf">'+ KOCFIA.modulesLabel.chat +'</h3>';
 				code += '<div>';
+				code += '<button class="button secondary tab-link" rel="chat" title="Afficher l\'onglet '+ KOCFIA.tabLabel.chat +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.chat +'</span></button>';
 				code += Shared.generateCheckbox('chat', 'active', 'Activer', KOCFIA.conf.chat.active);
 				code += Shared.generateCheckbox('chat', 'moveable', 'Chat déplacable et redimensionnable', KOCFIA.conf.chat.moveable);
 				code += Shared.generateCheckbox('chat', 'cleanHelp', 'Aider automiquement et masquer les demandes', KOCFIA.conf.chat.cleanHelp);
 				code += '<br>'+ Shared.generateCheckbox('chat', 'playSoundOnWisper', 'Jouer un son lors de la réception d\'un chuchot', KOCFIA.conf.chat.playSoundOnWisper);
-				code += Shared.generateInput('chat', 'whisperSoundUrl', 'Adresse web du son à jouer <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.chat.whisperSoundUrl, 'url', 'whisper');
+				code += Shared.generateAudioInput('chat', 'whisperSoundUrl', 'Adresse web du son à jouer <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.chat.whisperSoundUrl, 'url', 'whisper');
 				code += '<br>'+ Shared.generateButton('chat', 'onRight', 'Repositionner le chat à droite');
 				code += '<br>'+ Shared.generateCheckbox('chat', 'highlightLeaders', 'Changer la couleur des messages de la chancellerie (chats Général et Alliance)', KOCFIA.conf.chat.highlightLeaders);
 				code += Shared.generateButton('chat', 'getLeadersList', 'Raffraîchir la liste des joueurs de la chancellerie');
@@ -4361,6 +4365,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty( this.module ) ) console.info('KOCFIA '+ this.module +' confPanel function');
 			var code = '<h3 class="kocfia-'+ this.module +'-conf">'+ KOCFIA.modulesLabel[ this.module ] +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="'+ this.module +'" title="Afficher l\'onglet '+ KOCFIA.tabLabel[ this.module ] +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel[ this.module ] +'</span></button>';
 			code += Shared.generateCheckbox(this.module, 'active', 'Activer', KOCFIA.conf[ this.module ].active);
 			code += Shared.generateCheckbox(this.module, 'automatic', 'Lancer les '+ (this.module == 'scout' ? 'éclairages' : 'attaques') +' automatiques', KOCFIA.conf[ this.module ].automatic);
 			code += Shared.generateButton(this.module, 'deleteAllPlans', 'Supprimer toutes les '+ (this.module == 'scout' ? 'éclairages' : 'attaques') +' enregistrées');
@@ -8229,6 +8234,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map confPanel function');
 			var code = '<h3 class="kocfia-map-conf">'+ KOCFIA.modulesLabel.map +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="map" title="Afficher l\'onglet '+ KOCFIA.tabLabel.map +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.map +'</span></button>';
 			code += Shared.generateCheckbox('map', 'active', 'Activer', KOCFIA.conf.map.active);
 			code += Shared.generateCheckbox('map', 'additionalInfo', 'Afficher les informations sur la carte (niveau, joueur, puissance, alliance, diplomatie)', KOCFIA.conf.map.additionalInfo);
 			code += Shared.generateCheckbox('map', 'improveCoordsForm', 'Améliorer le formulaire des coordonnées de la carte (placement, support touche entrée, champ pour copier-coller)', KOCFIA.conf.map.improveCoordsForm);
@@ -9100,6 +9106,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation confPanel function');
 			var code = '<h3 class="kocfia-formation-conf">'+ KOCFIA.modulesLabel.formation +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="formation" title="Afficher l\'onglet '+ KOCFIA.tabLabel.formation +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.formation +'</span></button>';
 			code += Shared.generateCheckbox('formation', 'active', 'Activer', KOCFIA.conf.formation.active);
 			code += Shared.generateCheckbox('formation', 'automatic', 'Lancer les formations automatiques', KOCFIA.conf.formation.automatic);
 			code += Shared.generateSelect('formation', 'minPercentage', 'Pourcentage du maximum pour calculer la quantité minimum d\'une formation', KOCFIA.conf.formation.minPercentage, {labels: ['0%', '25%', '50%', '75%', '90%', '100%'], values: [0, 0.25, 0.5, 0.75, 0.9, 1]});
@@ -11178,6 +11185,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport confPanel function');
 			var code = '<h3 class="kocfia-transport-conf">'+ KOCFIA.modulesLabel.transport +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="transport" title="Afficher l\'onglet '+ KOCFIA.tabLabel.transport +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.transport +'</span></button>';
 			code += Shared.generateCheckbox('transport', 'active', 'Activer', KOCFIA.conf.transport.active);
 			code += Shared.generateCheckbox('transport', 'automaticPileUp', 'Lancer les stockages automatiques', KOCFIA.conf.transport.automaticPileUp);
 			code += Shared.generateCheckbox('transport', 'automaticSupply', 'Lancer les approvisionnements automatiques', KOCFIA.conf.transport.automaticSupply);
@@ -12401,6 +12409,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reassign') ) console.info('KOCFIA reassign confPanel function');
 			var code = '<h3 class="kocfia-reassign-conf">'+ KOCFIA.modulesLabel.reassign +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="reassign" title="Afficher l\'onglet '+ KOCFIA.tabLabel.reassign +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.reassign +'</span></button>';
 			code += Shared.generateCheckbox('reassign', 'active', 'Activer', KOCFIA.conf.reassign.active);
 			code += Shared.generateCheckbox('reassign', 'automatic', 'Activer les réassignements automatiques', KOCFIA.conf.reassign.automatic);
 			code += Shared.generateCheckbox('reassign', 'reassignWithoutOptimizedThroneSet', 'Réassigner même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.reassign.reassignWithoutOptimizedThroneSet);
@@ -13267,6 +13276,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('canvas') ) console.info('KOCFIA canvas confPanel function');
 			var code = '<h3 class="kocfia-canvas-conf">'+ KOCFIA.modulesLabel.canvas +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="canvas" title="Afficher l\'onglet '+ KOCFIA.tabLabel.canvas +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.canvas +'</span></button>';
 			code += Shared.generateCheckbox('canvas', 'active', 'Activer', KOCFIA.conf.canvas.active);
 			code += '</div>';
 
@@ -14607,6 +14617,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('knights') ) console.info('KOCFIA knights confPanel function');
 			var code = '<h3 class="kocfia-knights-conf">'+ KOCFIA.modulesLabel.knights +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="knights" title="Afficher l\'onglet '+ KOCFIA.tabLabel.knights +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.knights +'</span></button>';
 			code += Shared.generateCheckbox('knights', 'active', 'Activer', KOCFIA.conf.knights.active);
 			code += '</div>';
 
@@ -15389,6 +15400,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('estates') ) console.info('KOCFIA estates confPanel function');
 			var code = '<h3 class="kocfia-estates-conf">'+ KOCFIA.modulesLabel.estates +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="estates" title="Afficher l\'onglet '+ KOCFIA.tabLabel.estates +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.estates +'</span></button>';
 			code += Shared.generateCheckbox('estates', 'active', 'Activer', KOCFIA.conf.estates.active);
 			code += '</div>';
 
@@ -15945,6 +15957,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('dataAndStats') ) console.info('KOCFIA dataAndStats confPanel function');
 			var code = '<h3 class="kocfia-dataAndStats-conf">'+ KOCFIA.modulesLabel.dataAndStats +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="dataAndStats" title="Afficher l\'onglet '+ KOCFIA.tabLabel.dataAndStats +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.dataAndStats +'</span></button>';
 			code += Shared.generateCheckbox('dataAndStats', 'active', 'Activer', KOCFIA.conf.dataAndStats.active);
 			code += '</div>';
 
@@ -16654,6 +16667,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build confPanel function');
 			var code = '<h3 class="kocfia-build-conf">'+ KOCFIA.modulesLabel.build +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="build" title="Afficher l\'onglet '+ KOCFIA.tabLabel.build +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.build +'</span></button>';
 			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
 			code += Shared.generateCheckbox('build', 'automatic', 'Activer les constructions automatiques', KOCFIA.conf.build.automatic);
 			code += Shared.generateButton('build', 'deleteQueues', 'Supprimer toutes les files d\'attente enregistrées');
@@ -18014,6 +18028,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('marches') ) console.info('KOCFIA marches confPanel function');
 			var code = '<h3 class="kocfia-marches-conf">'+ KOCFIA.modulesLabel.marches +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="marches" title="Afficher l\'onglet '+ KOCFIA.tabLabel.marches +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.marches +'</span></button>';
 			code += Shared.generateCheckbox('marches', 'active', 'Activer', KOCFIA.conf.marches.active);
 			code += '</div>';
 
@@ -18694,6 +18709,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('quickMarch') ) console.info('KOCFIA quickMarch confPanel function');
 			var code = '<h3 class="kocfia-quickMarch-conf">'+ KOCFIA.modulesLabel.quickMarch +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="quickMarch" title="Afficher l\'onglet '+ KOCFIA.tabLabel.quickMarch +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.quickMarch +'</span></button>';
 			code += Shared.generateCheckbox('quickMarch', 'active', 'Activer', KOCFIA.conf.quickMarch.active);
 			code += '</div>';
 
@@ -19904,6 +19920,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne confPanel function');
 			var code = '<h3 class="kocfia-throne-conf">'+ KOCFIA.modulesLabel.throne +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="throne" title="Afficher l\'onglet '+ KOCFIA.tabLabel.throne +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.throne +'</span></button>';
 			code += Shared.generateCheckbox('throne', 'active', 'Activer', KOCFIA.conf.throne.active);
 			/*code += Shared.generateCheckbox('throne', 'automatic', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automatic);*/
 			code += Shared.generateCheckbox('throne', 'automaticImprovements', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automaticImprovements);
@@ -21497,6 +21514,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('reports') ) console.info('KOCFIA reports confPanel function');
 			var code = '<h3 class="kocfia-reports-conf">'+ KOCFIA.modulesLabel.reports +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="reports" title="Afficher l\'onglet '+ KOCFIA.tabLabel.reports +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.reports +'</span></button>';
 			code += Shared.generateCheckbox('reports', 'active', 'Activer', KOCFIA.conf.reports.active);
 			code += Shared.generateCheckbox('reports', 'automatic', 'Activer la suppression automatique de rapport', KOCFIA.conf.reports.automatic);
 			code += '<div class="indent">';
@@ -22585,6 +22603,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital confPanel function');
 			var code = '<h3 class="kocfia-hospital-conf">'+ KOCFIA.modulesLabel.hospital +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="hospital" title="Afficher l\'onglet '+ KOCFIA.tabLabel.hospital +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.hospital +'</span></button>';
 			code += Shared.generateCheckbox('hospital', 'active', 'Activer', KOCFIA.conf.hospital.active);
 			code += Shared.generateCheckbox('hospital', 'automatic', 'Lancer les soins automatiques', KOCFIA.conf.hospital.automatic);
 			code += Shared.generateCheckbox('hospital', 'reviveWithoutOptimizedThroneSet', 'Lancer les soins même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.hospital.reviveWithoutOptimizedThroneSet);
@@ -23447,6 +23466,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('search') ) console.info('KOCFIA search confPanel function');
 			var code = '<h3 class="kocfia-search-conf">'+ KOCFIA.modulesLabel.search +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="search" title="Afficher l\'onglet '+ KOCFIA.tabLabel.search +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.search +'</span></button>';
 			code += Shared.generateCheckbox('search', 'active', 'Activer', KOCFIA.conf.search.active);
 			code += '</div>';
 
@@ -23991,6 +24011,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts confPanel function');
 			var code = '<h3 class="kocfia-gifts-conf">'+ KOCFIA.modulesLabel.gifts +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="gifts" title="Afficher l\'onglet '+ KOCFIA.tabLabel.gifts +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.gifts +'</span></button>';
 			code += '<p>Séléctionne automatiquement les joueurs précédemment sélectionnés pour l\'envoie de cadeaux</p>';
 			code += Shared.generateCheckbox('gifts', 'active', 'Activer', KOCFIA.conf.gifts.active);
 			code += Shared.generateButton('gifts', 'deletePlayers', 'Supprimer la liste des joueurs');
@@ -24112,6 +24133,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('tournament') ) console.info('KOCFIA tournament confPanel function');
 			var code = '<h3 class="kocfia-tournament-conf">'+ KOCFIA.modulesLabel.tournament +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="tournament" title="Afficher l\'onglet '+ KOCFIA.tabLabel.tournament +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.tournament +'</span></button>';
 			code += Shared.generateCheckbox('tournament', 'active', 'Activer', KOCFIA.conf.tournament.active);
 			code += Shared.generateCheckbox('tournament', 'monitor', 'Vérifier le lancement de tournoi', KOCFIA.conf.tournament.monitor);
 			code += Shared.generateAudioInput('tournament', 'soundUrl', 'Adresse web du son à jouer pour le démarrage d\'un tournoi <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.tournament.soundUrl, '');
@@ -24430,6 +24452,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set confPanel function');
 			var code = '<h3 class="kocfia-set-conf">'+ KOCFIA.modulesLabel.set +'</h3>';
 			code += '<div>';
+			code += '<button class="button secondary tab-link" rel="set" title="Afficher l\'onglet '+ KOCFIA.tabLabel.set +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.set +'</span></button>';
 			code += Shared.generateCheckbox('set', 'active', 'Activer', KOCFIA.conf.set.active);
 			code += Shared.generateCheckbox('set', 'automatic', 'Equiper les sets automatiquement', KOCFIA.conf.set.automatic);
 			code += Shared.generateCheckbox('set', 'noSwapWhileAttacked', 'Ne pas changer les objets équipés quand une des villes est attaquée', KOCFIA.conf.set.noSwapWhileAttacked);

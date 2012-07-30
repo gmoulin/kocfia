@@ -347,10 +347,6 @@ html, body {
 		margin: 3px 0;
 	}
 
-	#general-reloadFrequency {
-		margin-left: 5px;
-	}
-
 	#kocfia-options .button + .button {
 		margin-left: 6px;
 	}
@@ -2302,6 +2298,10 @@ html, body {
 
 	#kocfia-dataAndStats .calculator legend {
 		cursor: pointer;
+	}
+
+	#kocfia-dataAndStats .calculator legend span {
+		margin-right: 5px;
 	}
 
 /* build */

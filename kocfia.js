@@ -163,37 +163,37 @@ jQuery(document).ready(function(){
 	var KOCFIA = {
 		version: '0.8.1',
 		userScriptLoaderVersion: 4,
-		debug: true,
+		debug: false,
 		debugWhat: { //comment module line for no debug
 			//shared: 1,
-			dataAndStats : 1,
-			overview : 1,
-			summary : 1,
-			chat: 1,
-			map: 1,
+			//dataAndStats : 1,
+			//overview : 1,
+			//summary : 1,
+			//chat: 1,
+			//map: 1,
 			//canvas: 1,
-			marches: 1,
-			barbarian: 1,
-			wilderness: 1,
-			darkForest: 1,
-			scout: 1,
-			plunder: 1,
-			formation: 1,
-			transport: 1,
-			reassign: 1,
-			knights: 1,
-			estates: 1,
-			build: 1,
-			fbWallPopup: 1,
-			notepad: 1,
-			alarm: 1,
-			hospital: 1,
-			throne: 1,
-			set: 1,
-			quickMarch: 1,
-			reports: 1,
-			search: 1,
-			gifts: 1
+			//marches: 1,
+			//barbarian: 1,
+			//wilderness: 1,
+			//darkForest: 1,
+			//scout: 1,
+			//plunder: 1,
+			//formation: 1,
+			//transport: 1,
+			//reassign: 1,
+			//knights: 1,
+			//estates: 1,
+			//build: 1,
+			//fbWallPopup: 1,
+			//notepad: 1,
+			//alarm: 1,
+			//hospital: 1,
+			//throne: 1,
+			//set: 1,
+			//quickMarch: 1,
+			//reports: 1,
+			//search: 1,
+			//gifts: 1
 		},
 		server: null,
 		captchaDetected: false,
@@ -1058,7 +1058,7 @@ jQuery(document).ready(function(){
 								KOCFIA.overview.updateFromSeed();
 								KOCFIA.dataAndStats.update();
 								KOCFIA.summary.update();
-								KOCFIA.throne.updateCount();
+								KOCFIA.throne.updateCounter();
 							}, 500);
 						}, false);
 						break;
@@ -1463,7 +1463,7 @@ jQuery(document).ready(function(){
 				//code += Shared.generateCheckbox('general', 'refresh', 'Rafraîchir les données toutes les ', KOCFIA.conf.general.refresh).replace(/<\/p>/, '');
 				//code += Shared.generateInput('general', 'refreshFrequency', ' minutes', KOCFIA.conf.general.refreshFrequency).replace(/<p>/, '');
 				code += Shared.generateCheckbox('general', 'reload', 'Recharger toutes les ', KOCFIA.conf.general.reload).replace(/<\/p>/, '');
-				code += Shared.generateInput('general', 'reloadFrequency', '', KOCFIA.conf.general.reloadFrequency).replace(/<p>/, '') +' minutes';
+				code += Shared.generateInput('general', 'reloadFrequency', '', KOCFIA.conf.general.reloadFrequency).replace(/<p>/, '').replace(/<\/p>/, '') +' minutes</p>';
 				code += Shared.generateCheckbox('general', 'hideMagicalBoxPreview', 'Masquer automatiquement la pub pour la boîte magique de Merlin', KOCFIA.conf.general.hideMagicalBoxPreview);
 				code += Shared.generateCheckbox('general', 'hideOtherPlayersCourtInvitation', 'Masquer automatiquement les invations pour voir la cour d\'un joueur', KOCFIA.conf.general.hideOtherPlayersCourtInvitation);
 				code += Shared.generateCheckbox('general', 'hideFairPopup', 'Masquer automatiquement les fêtes foraines (avec envoie)', KOCFIA.conf.general.hideFairPopup);
@@ -8428,7 +8428,7 @@ jQuery(document).ready(function(){
 			KOCFIA.$confPanel.on('resizestop', function(){
 				var $div = $("#kocfia-map");
 				if( $div.is(':visible') ){
-					var size = $div.find('.search').innerWidth() + 1;
+					var size = $div.find('.search').innerWidth();
 					KOCFIA.map.$resultsCities.jqGrid('setGridWidth', size);
 					KOCFIA.map.$resultsBarbarians.jqGrid('setGridWidth', size);
 					KOCFIA.map.$resultsWilderness.jqGrid('setGridWidth', size);
@@ -8555,7 +8555,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('map') ) console.info('KOCFIA map addTilesInfo function');
 			if( !$('#mapwindow').is(':visible') || !KOCFIA.conf.map.additionalInfo ) return;
 
-			var id, tile, user, alliance, name, might, text;
+			var id, tile, user, alliance, name, might, text, a;
 			for( id in result.data ){
 				if( result.data.hasOwnProperty(id) ){
 					tile = result.data[id];
@@ -9101,6 +9101,10 @@ jQuery(document).ready(function(){
 			rules: {}, //by city id
 			savedRules: {} //by name
 		};
+
+		//@TODO add refresh to formation list
+		//@TODO sum might in formations in headers
+		//@TODO display in headers : city label <br> time <br> might
 
 		KOCFIA.formation.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation confPanel function');
@@ -11189,7 +11193,7 @@ jQuery(document).ready(function(){
 			code += Shared.generateCheckbox('transport', 'active', 'Activer', KOCFIA.conf.transport.active);
 			code += Shared.generateCheckbox('transport', 'automaticPileUp', 'Lancer les stockages automatiques', KOCFIA.conf.transport.automaticPileUp);
 			code += Shared.generateCheckbox('transport', 'automaticSupply', 'Lancer les approvisionnements automatiques', KOCFIA.conf.transport.automaticSupply);
-			code += Shared.generateCheckbox('transport', 'transportWithoutOptimizedThroneSet', 'Transporter des transports même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.transport.transportWithoutOptimizedThroneSet);
+			code += Shared.generateCheckbox('transport', 'transportWithoutOptimizedThroneSet', 'Transporter même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.transport.transportWithoutOptimizedThroneSet);
 			code += Shared.generateButton('transport', 'deleteSupply', 'Supprimer toutes les configurations d\'approvisionnement enregistrées');
 			code += Shared.generateButton('transport', 'deletePileUp', 'Supprimer toutes les configurations de stockage enregistrées');
 			code += '</div>';
@@ -14075,7 +14079,8 @@ jQuery(document).ready(function(){
 			var params = $.extend({}, window.g_ajaxparams),
 				found = false,
 				scanning = {},
-				messages = [];
+				messages = [],
+				elapsed;
 
 			params.group = 'a';
 			params.pageNo = 1;
@@ -14644,7 +14649,7 @@ jQuery(document).ready(function(){
 			header += '<div class="buttonset">Afficher : ';
 
 			var code = '<table><thead><tr>';
-			code += '<th><button class="button update" title="Met à jour les informations sur les chevaliers"><span>Raffraîchir</span></button></th>';
+			code += '<th><button class="button secondary update" title="Met à jour les informations sur les chevaliers"><span>Raffraîchir</span></button></th>';
 			code += '<th>Nom</th>';
 			/*code += '<th title="Niveau du chevalier">Niv</th>';
 			code += '<th>Coût</th>';*/
@@ -16060,7 +16065,7 @@ jQuery(document).ready(function(){
 			data += '<table class="might"><thead><tr><th colspan="5">Entretien et Puissance</th>';
 			data += '</tr><tr>';
 			data += '<th>&nbsp;</th>';
-			data += '<th title="'+ KOCFIA.resourceInfo.rec0.label +'"><img src="'+ KOCFIA.resourceInfo.rec0.icon +'"></th>';
+			data += '<th title="'+ KOCFIA.resourceInfo.rec1.label +'"><img src="'+ KOCFIA.resourceInfo.rec1.icon +'"></th>';
 			data += '<th>Puissance</th>';
 			data += '<th title="Temps pour former en secondes">Durée</th>';
 			data += '<th>Puissance / h</th>';
@@ -16075,7 +16080,7 @@ jQuery(document).ready(function(){
 				data += '<td>'+ window.unitupkeeps[ u ] +'</td>';
 				data += '<td>'+ window.unitmight[ unitKey ] +'</td>';
 				data += '<td class="stat">'+ window.unitcost[ unitKey ][7] / 1000 +'s</td>';
-				data += '<td class="stat">'+ Shared.readable(3600 / window.unitcost[ unitKey ][7] * window.unitmight[ unitKey ]) +'</td>';
+				data += '<td class="stat">'+ Shared.readable(3600 / window.unitcost[ unitKey ][7] / 1000 * window.unitmight[ unitKey ]) +'</td>';
 				data += '</tr>';
 			}
 			data += '</tbody></table>';
@@ -16160,9 +16165,9 @@ jQuery(document).ready(function(){
 				.on('click', '.update', function(){
 					KOCFIA.dataAndStats.modPanel(); //reset the whole panel
 				})
-				.on('click', 'legend', function(){
+				.on('click', '.calculator legend', function(){
 					$(this)
-						.find('.toogle').toggleClass('icon-caret-up icon-caret-up').end()
+						.find('.toogle').toggleClass('icon-caret-up icon-caret-down').end()
 						.closest('.calculator').find('dl').stop(true, true).slideToggle();
 				})
 				.on('click', '.calc', function(){
@@ -16278,12 +16283,12 @@ jQuery(document).ready(function(){
 				load = loadBase + loadBase * (parseInt(window.seed.tech.tch10, 10) * 10) / 100 + loadBase * loadPct / 100;
 
 				$unitStatsTds = KOCFIA.dataAndStats.$abilitiesTrs.filter('[data-unit="'+ unitKey +'"]').find('.stat');
-				$unitStatsTds.eq(0).html( Shared.readable(lifeBase) +'<br>'+ Shared.readable(life) );
-				$unitStatsTds.eq(1).html( Shared.readable(attackBase) +'<br>'+ Shared.readable(attack) );
-				$unitStatsTds.eq(2).html( Shared.readable(defenseBase) +'<br>'+ Shared.readable(defense) );
-				$unitStatsTds.eq(3).html( Shared.readable(speedBase) +'<br>'+ Shared.readable(speed) );
-				$unitStatsTds.eq(4).html( Shared.readable(rangeBase) +'<br>'+ Shared.readable(range) );
-				$unitStatsTds.eq(5).html( Shared.readable(loadBase) +'<br>'+ Shared.readable(load) );
+				$unitStatsTds.eq(0).html( Shared.readable(lifeBase) +'<br><i>'+ Shared.readable(life) +'</i>' );
+				$unitStatsTds.eq(1).html( Shared.readable(attackBase) +'<br><i>'+ Shared.readable(attack) +'</i>' );
+				$unitStatsTds.eq(2).html( Shared.readable(defenseBase) +'<br><i>'+ Shared.readable(defense) +'</i>' );
+				$unitStatsTds.eq(3).html( Shared.readable(speedBase) +'<br><i>'+ Shared.readable(speed) +'</i>' );
+				$unitStatsTds.eq(4).html( Shared.readable(rangeBase) +'<br><i>'+ Shared.readable(range) +'</i>' );
+				$unitStatsTds.eq(5).html( Shared.readable(loadBase) +'<br><i>'+ Shared.readable(load) +'</i>' );
 			}
 
 			//cities and troops data
@@ -16638,7 +16643,8 @@ jQuery(document).ready(function(){
 		KOCFIA.build = {
 			options: {
 				active: 1,
-				automatic: 0
+				automatic: 0,
+				buildWithoutOptimizedThroneSet: 1
 			},
 			stored: ['queues', 'chronology', 'destructsTimestamp'],
 			chronology: {},
@@ -16670,6 +16676,7 @@ jQuery(document).ready(function(){
 			code += '<button class="button secondary tab-link" rel="build" title="Afficher l\'onglet '+ KOCFIA.tabLabel.build +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.build +'</span></button>';
 			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
 			code += Shared.generateCheckbox('build', 'automatic', 'Activer les constructions automatiques', KOCFIA.conf.build.automatic);
+			code += Shared.generateCheckbox('build', 'buildWithoutOptimizedThroneSet', 'Construire même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.build.buildWithoutOptimizedThroneSet);
 			code += Shared.generateButton('build', 'deleteQueues', 'Supprimer toutes les files d\'attente enregistrées');
 			code += '</div>';
 
@@ -19812,11 +19819,12 @@ jQuery(document).ready(function(){
 	/* THRONE */
 		KOCFIA.throne = {
 			options: {
-				active: 0,
+				active: 1,
 				//automatic: 0
 				automaticImprovements: 0,
 				automaticSalvage: 0,
-				cityKey: '' //for salvage and upgrades
+				cityKey: '', //for salvage and upgrades
+				repairWithoutOptimizedThroneSet: 1
 			},
 			maxItems: 60,
 			stored: ['improvements', 'salvage', 'locks', 'names'],
@@ -19925,6 +19933,7 @@ jQuery(document).ready(function(){
 			/*code += Shared.generateCheckbox('throne', 'automatic', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automatic);*/
 			code += Shared.generateCheckbox('throne', 'automaticImprovements', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automaticImprovements);
 			code += Shared.generateCheckbox('throne', 'automaticSalvage', 'Activer le recyclage automatique', KOCFIA.conf.throne.automaticSalvage);
+			code += Shared.generateCheckbox('throne', 'repairWithoutOptimizedThroneSet', 'Réparer même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.throne.repairWithoutOptimizedThroneSet);
 			code += Shared.generateButton('throne', 'deleteImprovements', 'Supprimer la liste d\'attente des améliorations d\'objets enregistrée');
 			code += Shared.generateButton('throne', 'deleteSalvage', 'Supprimer les règles de recyclage');
 			code += Shared.generateButton('throne', 'deleteLocks', 'Supprimer la liste des objets protégés contre le recyclage');
@@ -20108,7 +20117,7 @@ jQuery(document).ready(function(){
 		};
 
 		KOCFIA.throne.updateCounter = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne updateCount function');
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne updateCounter function');
 
 			KOCFIA.throne.$counter.val( window.seed.throne.totalItems );
 		};
@@ -20432,7 +20441,7 @@ jQuery(document).ready(function(){
 			var entry = {},
 				inSet = [],
 				equiped = window.seed.throne.slotEquip[ window.seed.throne.activeSlot ],
-				itemId, item, effects, effectInfo, bonus, tierInfo, setNum,
+				itemId, item, effects, effectInfo, bonus, tierInfo, setNum, slot, effect,
 				i = 0,
 				maxAvailable = parseInt(window.seed.throne.rowNum, 10) * 5; //5 items per row in kabam throne view
 
@@ -20497,8 +20506,6 @@ jQuery(document).ready(function(){
 				}
 			}
 
-			KOCFIA.throne.data = data;
-
 			$('.tipsy').remove();
 
 			KOCFIA.throne.$itemList.jqGrid('setGridParam', {data: KOCFIA.throne.data}).trigger('reloadGrid');
@@ -20554,7 +20561,7 @@ jQuery(document).ready(function(){
 			//items by type using <optgroup>
 			var code = '',
 				items = {}, //by type
-				itemId, item, effect, slot, effectRank, tierInfo, bonus, type;
+				itemId, item, effect, slot, effectRank, tierInfo, bonus, type, effectInfo;
 
 			for( itemId in window.seed.throne.inventory ){
 				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
@@ -20615,7 +20622,8 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne loadSets function');
 
 			var $table = KOCFIA.$confPanel.find('#kocfia-throne').find('.manage-sets').find('body').empty(),
-				bonuses, item,
+				bonuses, item, itemId, $line, code, text, slotNum, setItems, i,
+				effectText = {},
 				advisorList = '',
 				windowList = '',
 				bannerList = '',
@@ -20623,9 +20631,7 @@ jQuery(document).ready(function(){
 				tableList = '',
 				trophyList = '',
 				$tr = $('<tr>'),
-				code, text,
-				empty = '<option value="">Choississez</option>',
-				slotNum;
+				empty = '<option value="">Choississez</option>';
 
 			code = '<td></td>';
 			code += '<td><input type="text" name="name"></td>';
@@ -20645,6 +20651,7 @@ jQuery(document).ready(function(){
 					bonuses = KOCFIA.throne.getSetBonus(null, [itemId]);
 
 					text = $.map(bonuses, function(effect){ return effect.percent +'% '+ effect.label; }).join(', ');
+					effectText[ itemId ] = text;
 
 					switch( item.type ){
 						case 'advisor':
@@ -20697,7 +20704,7 @@ jQuery(document).ready(function(){
 
 						//for each of the set items, set the corresponding select value and add a <span> with the item bonuses
 						for( i = 0; i < setItems.length; i += 1 ){
-							item = window.seed.inventory[ setItems[i] ];
+							item = window.seed.throne.inventory[ setItems[i] ];
 
 							if( Object.isObject(item) ){
 								$line.find('select').filter('[name="'+ item.type +'"]').val( item.id )
@@ -21309,7 +21316,7 @@ jQuery(document).ready(function(){
 					'enhance': 'déblocage',
 					'upgrade': 'augmentation'
 				},
-				i, key, nb, val, info;
+				i, key, nb, val, info, type;
 
 			code += '<i class="icon-refresh refresh-buffItems"></i>';
 			for( type in buffItems ){
@@ -21676,7 +21683,7 @@ jQuery(document).ready(function(){
 
 			KOCFIA.$confPanel.on('resizestop', function(){
 				if( KOCFIA.reports.$div.is(':visible') ){
-					var size = KOCFIA.reports.$div.find('.boundary.mine').innerWidth() + 1;
+					var size = KOCFIA.reports.$div.find('.boundary.mine').innerWidth();
 					KOCFIA.reports.$resultsMine.jqGrid('setGridWidth', size);
 					KOCFIA.reports.$resultsAlliance.jqGrid('setGridWidth', size);
 				}
@@ -23588,7 +23595,7 @@ jQuery(document).ready(function(){
 
 			KOCFIA.$confPanel.on('resizestop', function(){
 				if( KOCFIA.search.$div.is(':visible') ){
-					var size = KOCFIA.search.$div.find('.form.players').innerWidth() + 1;
+					var size = KOCFIA.search.$div.find('.form.players').innerWidth();
 
 					KOCFIA.search.$resultsPlayers.jqGrid('setGridWidth', size);
 					KOCFIA.search.$resultsAlliance.jqGrid('setGridWidth', size);
@@ -24069,7 +24076,7 @@ jQuery(document).ready(function(){
 				active: 1,
 				refresh: 0,
 				monitor: 0,
-				soundUrl: 'http://kocfia.kapok.fr/sounds/alliance.ogg',
+				soundUrl: 'http://kocfia.kapok.fr/sounds/tournament.ogg',
 				onGoing: 0
 			},
 			stored: []
@@ -24207,7 +24214,7 @@ jQuery(document).ready(function(){
 
 			KOCFIA.$confPanel.on('resizestop', function(){
 				if( KOCFIA.tournament.$div.is(':visible') ){
-					var size = KOCFIA.tournament.$div.find('.times').innerWidth() + 1;
+					var size = KOCFIA.tournament.$div.find('.times').innerWidth();
 					KOCFIA.tournament.$grid.jqGrid('setGridWidth', size);
 				}
 			});
@@ -24441,9 +24448,9 @@ jQuery(document).ready(function(){
 		//hospital ok
 		//transport ok
 		//reassign ok
-		//repair
-		//research
-		//build
+		//repair @TODO
+		//research @TODO
+		//build @TODO
 		//reinforce ok
 		//attack ok
 		//scout ok
@@ -24508,12 +24515,13 @@ jQuery(document).ready(function(){
 				})
 				.accordion('activate', false);
 
-			KOCFIA.set.addSectionListeners();
 
 			KOCFIA.set.$div = KOCFIA.$confPanel.find('#kocfia-set');
 			KOCFIA.set.$history = KOCFIA.set.$div.find('#kocfia-set-history');
 			KOCFIA.set.$log = KOCFIA.set.$div.find('.log');
 			KOCFIA.set.$forms = KOCFIA.set.$div.find('.forms');
+
+			KOCFIA.set.addSectionListeners();
 
 			//force every set dropdowns to have the same value (if in options)
 			$body.on('change', '.set-dropdown', function(){
@@ -24703,7 +24711,7 @@ jQuery(document).ready(function(){
 
 			for( i = 0; i < KOCFIA.set.itemTypes.length; i += 1 ){
 				type = KOCFIA.set.itemTypes[ i ];
-				code += '<label for="kocfia-set-'+ task +'-type-'+ type +'">'+ (window.hasOwnProperty('g_js_strings') ? window.g_js_strings.throneroom[ type ] : type) +'</label>';
+				code += '<label for="kocfia-set-'+ task +'-type-'+ type +'">'+ (window.hasOwnProperty('g_js_strings') ? window.g_js_strings.throneRoom[ type ] : type) +'</label>';
 				code += '<select id="kocfia-set-'+ task +'-type-'+ type +'" class="type" data-type="'+ type +'">';
 				code += '<option value="">Choisir</option>';
 
@@ -24722,7 +24730,7 @@ jQuery(document).ready(function(){
 						//limit on current type
 						if( item.type == type ){
 							name = KOCFIA.throne.getObjectLabel( itemId );
-							if( label !== '' ){
+							if( name !== '' ){
 								key = 'item-'+ itemId;
 								code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ name +'</option>';
 							}

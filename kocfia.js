@@ -151,7 +151,7 @@ jQuery(document).ready(function(){
 		resetRaidInterval, autoFormationInterval, autoReassignInterval,
 		autoPileUpInterval, autoSuppleInterval, watchReportsInterval,
 		autoBuildInterval, autoHospitalInterval, autoReportsCleanUpInterval,
-		tournamentMonitorInterval,
+		tournamentMonitorInterval, autoImprovementTimeout,
 		merlinBoxClick = false;
 
 	//drag handle
@@ -161,7 +161,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.8.1',
+		version: '0.8.2',
 		userScriptLoaderVersion: 4,
 		debug: false,
 		debugWhat: { //comment module line for no debug
@@ -16650,6 +16650,7 @@ jQuery(document).ready(function(){
 			chronology: {},
 			queues: {}, //by cityKey
 			destructsTimestamp: {}, //by cityKey and slotId
+			buildWithoutOptimizedThroneSet: 1,
 			/*buildingsLabel: {
 				1: {single: '', plural: ''}
 			},*/
@@ -17459,11 +17460,54 @@ jQuery(document).ready(function(){
 				var sequence = function(){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred sequence function');
 					return $.Deferred(function(dfd){
-						return dfd.pipe( byCity(dfd) );
+						return dfd.pipe( equipSet(dfd, 3) );
 					}).promise();
 				};
 
-				//step 1
+				//step 1 - optimize throne items
+				var equipSet = function( dfd, attempts ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred equipSet function', attempts);
+
+					if( KOCFIA.set.currentPair == 'build' ){
+						return dfd.pipe( byCity(dfd) );
+
+					} else {
+						if( !KOCFIA.set.isSwappingItems() ){
+							var setWrapper = function(){
+								return $.Deferred(function( wdfd ){
+									return wdfd.pipe( KOCFIA.set.activatePair('build', wdfd) );
+								}).promise();
+							};
+
+							$.when( setWrapper() )
+								.done(function(){
+									return dfd.pipe( byCity(dfd) );
+								})
+								.fail(function(){
+									if( KOCFIA.build.buildWithoutOptimizedThroneSet ){
+										return dfd.pipe( fromCity(dfd) );
+									} else {
+										return dfd.reject();
+									}
+								});
+
+						} else if( KOCFIA.build.buildWithoutOptimizedThroneSet ) {
+							return dfd.pipe( byCity(dfd) );
+
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){
+									return dfd.pipe( equipSet(dfd, attempts) );
+								}, 5000);
+							} else {
+								return dfd.reject();
+							}
+						}
+					}
+				};
+
+				//step 2
 				var byCity = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred byCity function');
 
@@ -17522,7 +17566,7 @@ jQuery(document).ready(function(){
 					return dfd.pipe( checkTask(dfd) );
 				};
 
-				//step 2 - check next construction task
+				//step 3 - check next construction task
 				var checkTask = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred checkTask function');
 
@@ -17680,7 +17724,7 @@ jQuery(document).ready(function(){
 					}
 				};
 
-				//step 2a, only for guardians
+				//step 3a, only for guardians
 				var summonGuardian = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred summonGuardian function');
 
@@ -17751,7 +17795,7 @@ jQuery(document).ready(function(){
 						});
 				};
 
-				//step 2b, only for guardian
+				//step 3b, only for guardian
 				var unlockGuardian = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred summonGuardian function');
 
@@ -17825,7 +17869,7 @@ jQuery(document).ready(function(){
 						});
 				};
 
-				//step 3
+				//step 4
 				var build = function( dfd ){
 					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build launchAutomaticBuild deferred checkTask function');
 
@@ -18019,7 +18063,10 @@ jQuery(document).ready(function(){
 						});
 				};
 
-				$.when( sequence() );
+				$.when( sequence() )
+					.always(function(){
+						KOCFIA.set.reequipSetItems();
+					});
 			}
 		};
 
@@ -19820,11 +19867,11 @@ jQuery(document).ready(function(){
 		KOCFIA.throne = {
 			options: {
 				active: 1,
-				//automatic: 0
 				automaticImprovements: 0,
 				automaticSalvage: 0,
 				cityKey: '', //for salvage and upgrades
-				repairWithoutOptimizedThroneSet: 1
+				repairWithoutOptimizedThroneSet: 1,
+				maxTry: 150
 			},
 			maxItems: 60,
 			stored: ['improvements', 'salvage', 'locks', 'names'],
@@ -19835,23 +19882,26 @@ jQuery(document).ready(function(){
 		};
 		//@TODO display number of protected items
 		//@TODO add color conf for bonus of interest
+		//@TODO launchAutomaticImprovements
+		//@TODO launchAutomaticSalvage
+		//@TODO change city for salvage if aether quantity limit is near
+		//@TODO display improvement history
+		//@TODO improvement history dirty state for new improvement success
+		//@TODO add aetherstone quantity check for grid lines buttons
 
 		/* grid related */
 		KOCFIA.throne.gridRowActions = function( cellValue, options, rowObject ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne gridRowActions function', cellValue, options, rowObject);
 			var code = '';
 
-			//@TODO add remaining time when repairing
 			//repair info in seed.queue_throne
-			/*
 			if( rowObject.repairing !== null ){
 				var time = new Date(rowObject.repairing * 1000),
 					hours = time.getHours(),
 					minutes = time.getMinutes();
 
-				code += 'Réparation, fin à '+ (hours < 10 ? '0'+ hours : hours) +':'+ (minutes < 10 ? '0'+ minutes : minutes);
+				code += 'Réparation en cours, fin à '+ (hours < 10 ? '0'+ hours : hours) +':'+ (minutes < 10 ? '0'+ minutes : minutes);
 			}
-			*/
 
 			if( !KOCFIA.throne.locks.hasOwnProperty(rowObject.id) ){
 				if( !rowObject.isBroken && rowObject.available ){
@@ -19865,12 +19915,16 @@ jQuery(document).ready(function(){
 			}
 
 			if( rowObject.available && rowObject.repairing !== null ){
-				if( rowObject.quality  < 5 ){
-					code += '<button class="button secondary manual_quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer un bonus de cet objet"><span><i class="icon-circle-arrow-up"></i> Bonus</span></button>';
-				}
+				if( !rowObject.isBroken ){
+					if( rowObject.quality  < 5 ){
+						code += '<button class="button secondary manual_quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer un bonus de cet objet"><span><i class="icon-circle-arrow-up"></i> Bonus</span></button>';
+					}
 
-				if( rowObject.level < 10 ){
-					code += '<button class="button secondary manual_level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><span><i class="icon-plus-sign"></i> Niveau</span></button>';
+					if( rowObject.level < 10 ){
+						code += '<button class="button secondary manual_level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><span><i class="icon-plus-sign"></i> Niveau</span></button>';
+					}
+				} else {
+					code += '<button class="button secondary manual_repair" data-id="'+ rowObject.id +'" title="Réparer cet objet"><span><i class="icon-wrench"></i> Réparer</span></button>';
 				}
 			}
 
@@ -19930,10 +19984,10 @@ jQuery(document).ready(function(){
 			code += '<div>';
 			code += '<button class="button secondary tab-link" rel="throne" title="Afficher l\'onglet '+ KOCFIA.tabLabel.throne +'"><span><i class="icon-share-alt"></i> Onglet '+ KOCFIA.tabLabel.throne +'</span></button>';
 			code += Shared.generateCheckbox('throne', 'active', 'Activer', KOCFIA.conf.throne.active);
-			/*code += Shared.generateCheckbox('throne', 'automatic', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automatic);*/
 			code += Shared.generateCheckbox('throne', 'automaticImprovements', 'Activer les améliorations automatiques', KOCFIA.conf.throne.automaticImprovements);
 			code += Shared.generateCheckbox('throne', 'automaticSalvage', 'Activer le recyclage automatique', KOCFIA.conf.throne.automaticSalvage);
 			code += Shared.generateCheckbox('throne', 'repairWithoutOptimizedThroneSet', 'Réparer même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.throne.repairWithoutOptimizedThroneSet);
+			code += Shared.generateInput('throne', 'maxTry', 'Nombre de tentatives maximum pour une amélioration', KOCFIA.conf.throne.maxTry)
 			code += Shared.generateButton('throne', 'deleteImprovements', 'Supprimer la liste d\'attente des améliorations d\'objets enregistrée');
 			code += Shared.generateButton('throne', 'deleteSalvage', 'Supprimer les règles de recyclage');
 			code += Shared.generateButton('throne', 'deleteLocks', 'Supprimer la liste des objets protégés contre le recyclage');
@@ -19960,7 +20014,7 @@ jQuery(document).ready(function(){
 			code += '<button class="button secondary conf-link" data-conf="throne"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
 			code += '<div>';
-			code += '<label for="kocfia-throne-cities">Ville où prendre et mettre les pierres d\'ether :</label>';
+			code += '<label for="kocfia-throne-cities">Ville préférée où prendre et mettre les pierres d\'ether :</label>';
 			code += '<select id="kocfia-throne-cities">';
 			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
 				cityKey = KOCFIA.citiesKey.length;
@@ -20055,7 +20109,7 @@ jQuery(document).ready(function(){
 			KOCFIA.throne.launchAutomaticImprovements();
 		};
 
-		KOCFIA.throne.automaticOff = function(){
+		KOCFIA.throne.automaticImprovementsOff = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne automaticImprovementsOff function');
 		};
 
@@ -20185,7 +20239,7 @@ jQuery(document).ready(function(){
 							.done(function(){
 								Shared.success('Recyclage réussi');
 
-								KOCFIA.throne.$itemList.jqGrid('delRowData', id);
+								KOCFIA.throne.loadItemList();
 							})
 							.fail(function(){
 								Shared.notify('Erreur durant le recyclage');
@@ -20240,55 +20294,44 @@ jQuery(document).ready(function(){
 
 						var sequence = function(){
 							return $.Deferred(function( dfd ){
-								return dfd.pipe( KOCFIA.throne.upgradeItem(($this.hasClass('.manual_quality_upgrade') ? 'quality' : 'level'), id, cityKey, buffItemId, false, dfd) );
+								return dfd.pipe( KOCFIA.throne.upgradeItem(($this.hasClass('.manual_quality_upgrade') ? 'quality' : 'level'), id, cityKey, buffItemId, false, dfd, 3) );
 							}).promise();
 						};
 
 						$.when( sequence )
 							.done(function(){
-								var item = new window.cm.ThroneItemModel(id, window.seed.throne.inventory[ id ]),
-									effects = {
-										slot1: '',
-										slot2: '',
-										slot3: '',
-										slot4: '',
-										slot5: ''
-									},
-									slot, effect, tierInfo, bonus, effectInfo;
+								KOCFIA.throne.loadItemList();
+							})
+							.fail(function(){
+								Shared.notify('Erreur durant l\'amélioration');
+							});
+					} else {
+						Shared.notify('Objet non trouvé');
+					}
+				})
+				.on('click', '.manual_repair', function(e){
+					e.preventDefault();
 
-								var data = KOCFIA.throne.$itemList.jqGrid('getRowData', id);
+					var $this = $(this),
+						id = $this.attr('data-id'),
+						item = window.seed.throne.inventory[ id ],
+						cityKey = KOCFIA.throne.$cities.val();
 
-								data.name = item.name;
+					if( item && Object.isObject(item) ){
+						Shared.working();
 
-								if( !item.isBroken ){
-									if( type == 'quality' ){
-										data.qualityLabel = item.createPrefix();
-										data.quality = item.quality;
-									} else {
-										data.level = item.level;
+						var sequence = function(){
+							return $.Deferred(function( dfd ){
+								return dfd.pipe( KOCFIA.throne.repairItem(id, cityKey, false, dfd, 3) );
+							}).promise();
+						};
 
-										for( slot in item.effects ){
-											if( item.effects.hasOwnProperty(slot) ){
-												effect = item.effects[ slot ];
-												tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
-												bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
-												effectInfo = window.cm.thronestats.effects[ effect.id ];
-
-												effects[ slot ] = bonus +'% '+ effectInfo[1];
-											}
-										}
-
-										data.effect1 = effects.slot1;
-										data.effect2 = effects.slot2;
-										data.effect3 = effects.slot3;
-										data.effect4 = effects.slot4;
-										data.effect5 = effects.slot5;
-									}
-								} else {
-									data.isBroken = 1;
-								}
-
-								KOCFIA.throne.$itemList.jqGrid('setRowData', id, data);
+						$.when( sequence )
+							.done(function(){
+								KOCFIA.throne.loadItemList();
+							})
+							.fail(function(){
+								Shared.notify('Erreur durant la réparation');
 							});
 					} else {
 						Shared.notify('Objet non trouvé');
@@ -20456,7 +20499,8 @@ jQuery(document).ready(function(){
 					item = window.seed.throne.inventory[ itemId ];
 
 					if( item && Object.isObject(item) ){
-						item = new cm.ThroneItemModel(itemId, item);
+						item = new window.cm.ThroneItemModel(itemId, item);
+						repairing = null;
 
 						var imp = KOCFIA.throne.getImprovementQualityAndLevelForItem( itemId );
 
@@ -20479,6 +20523,15 @@ jQuery(document).ready(function(){
 							}
 						}
 
+						if( !$.isEmptyObject(window.seed.queue_throne) ){
+							if( window.seed.queue_throne.itemId == itemId ){
+								var timeLeft = window.seed.queue_throne.end - timestamp();
+								if( timeLeft > 0 ){
+									repairing = timeLeft;
+								}
+							}
+						}
+
 						KOCFIA.throne.data[ itemId ] = {
 							id: itemId,
 							name: item.name,
@@ -20498,7 +20551,7 @@ jQuery(document).ready(function(){
 							isEquiped: ($.inArray(itemId, equiped) > -1 ? 1 : 0),
 							isInSet: ($.inArray(itemId, inSet) > -1 ? 1 : 0),
 							available: (i < maxAvailable ? 1 : 0),
-							repairing: null
+							repairing: repairing
 						};
 
 						i++;
@@ -20803,7 +20856,7 @@ jQuery(document).ready(function(){
 			});
 		};
 
-		KOCFIA.throne.upgradeItem = function( type, id, cityKey, buffItemId, isAuto, dfd ){
+		KOCFIA.throne.upgradeItem = function( type, id, cityKey, buffItemId, isAuto, dfd, attempts ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne upgradeItem function');
 			var params = $.extend({}, window.g_ajaxparams);
 			params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
@@ -20851,8 +20904,8 @@ jQuery(document).ready(function(){
 				} else {
 					attempts -= 1;
 					if( attempts > 0 ){
-						if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd ) );
-						else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd );
+						if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts ) );
+						else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts );
 					} else if( dfd ){
 						return dfd.reject();
 					}
@@ -20861,8 +20914,48 @@ jQuery(document).ready(function(){
 			.fail(function(){
 				attempts -= 1;
 				if( attempts > 0 ){
-					if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd ) );
-					else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd );
+					if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts ) );
+					else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts );
+				} else if( dfd ){
+					return dfd.reject();
+				}
+			});
+		};
+
+		KOCFIA.throne.repairItem = function( id, isAuto, dfd, attempts ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne repairItem function');
+			var params = $.extend({}, window.g_ajaxparams);
+			params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
+			params.action = 'timeRepair';
+			params.throneRoomItemId = id;
+
+			$.ajax({
+				url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+				type: 'post',
+				data: params,
+				dataType: 'json',
+				timeout: 10000
+			})
+			.done(function(data){
+				if( data.ok ){
+					if( !isAuto ) Shared.success('Réparation lancée');
+					if( dfd ) return dfd.resolve();
+
+				} else {
+					attempts -= 1;
+					if( attempts > 0 ){
+						if( dfd ) return dfd.pipe( KOCFIA.throne.repairItem( id, dfd, attempts ) );
+						else KOCFIA.throne.repairItem( id, dfd, attempts );
+					} else if( dfd ){
+						return dfd.reject();
+					}
+				}
+			})
+			.fail(function(){
+				attempts -= 1;
+				if( attempts > 0 ){
+					if( dfd ) return dfd.pipe( KOCFIA.throne.repairItem( id, dfd, attempts ) );
+					else KOCFIA.throne.repairItem( id, dfd, attempts );
 				} else if( dfd ){
 					return dfd.reject();
 				}
@@ -20902,7 +20995,7 @@ jQuery(document).ready(function(){
 					}
 
 					if( item && Object.isObject(item) ){
-						if( !item.hasOwnProperty('isBrocken') || !item.isBrocken ){
+						if( !item.hasOwnProperty('isBroken') || !item.isBroken ){
 							for( slot in item.effects ){
 								if( item.effects.hasOwnProperty(slot) ){
 									effect = item.effects[ slot ];
@@ -21340,7 +21433,7 @@ jQuery(document).ready(function(){
 		};
 
 		KOCFIA.throne.getImprovementQualityAndLevelForItem = function( itemId ){
-
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getImprovementQualityAndLevelForItem function');
 			var i, info,
 				upgradeQuality = 0,
 				upgradeLevel = 0;
@@ -21357,6 +21450,341 @@ jQuery(document).ready(function(){
 			}
 
 			return {quality: upgradeQuality, level: upgradeLevel};
+		};
+
+		KOCFIA.throne.launchAutomaticImprovements = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne launchAutomaticImprovements function');
+
+			if( !KOCFIA.conf.throne.automaticImprovements ){
+				return;
+			}
+
+			if( autoImprovementTimeout ) window.clearTimeout( autoImprovementTimeout );
+
+			if( KOCFIA.throne.improvements.length === 0 ){
+				autoImprovementTimeout = window.setTimeout(function(){
+					KOCFIA.throne.launchAutomaticImprovements();
+				}, 5 * 60 * 1000);
+			}
+
+			var improvement, item, delay, type, cityKey;
+
+			/* deferred functions */
+				var sequence = function(){
+					return $.Deferred(function( dfd ){
+						//get current improvement
+						improvement = KOCFIA.throne.improvements[0]; //{id: , quality: [x, y] or level: [x, y]}
+
+						if( improvement.hasOwnProperty('try') && improvement.try > KOCFIA.conf.throne.maxTry ){
+							KOCFIA.throne.refreshOnGoing('Nombre maximum de tentatives d\'amélioration atteind, amélioration déplacée à la fin de la queue');
+
+							KOFIA.throne.improvements.splice(0, 1);
+							KOCFIA.throne.improvements.push( improvement );
+
+							delay = 50;
+							return dfd.reject();
+						}
+
+						return dfd.pipe( getItem(dfd) );
+					}).promise();
+				};
+
+				//step 1
+				var getItem = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred getItem function');
+					if( !window.seed.throne.inventory.hasOwnProperty(improvement.id) || !Object.isObject(window.seed.throne.inventory[ improvement.id ]) ){
+						//remove improvement
+						KOFIA.throne.improvements.splice(0, 1);
+
+						//refresh history
+						KOCFIA.throne.refreshOnGoing('Objet non trouvé, amélioration supprimée');
+
+						delay = 50;
+						return dfd.reject();
+					}
+
+					item = new window.cm.ThroneItemModel(improvement.id, window.seed.throne.inventory[ improvement.id ]);
+
+					return dfd.pipe( checkImprovement(dfd) );
+				};
+
+				//step 2
+				var checkImprovement = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred checkImprovement function');
+
+					//if quantity or level do not match
+					if( (improvement.quality && improvement.quality != (item.quality + 1)) || (improvement.level && improvement.level != (item.level + 1)) ){
+						//remove improvement
+						KOFIA.throne.improvements.splice(0, 1);
+
+						if( (improvement.quality && improvement.quality >= item.quality) || (improvement.level && improvement.level >= item.level) ){
+							//put improvement at the end of the list
+							KOCFIA.throne.improvements.push( improvement );
+
+							//refresh history
+							KOCFIA.throne.refreshOnGoing('Amélioration ne correspondant pas à l\'état actuel de l\'objet, déplacée à la fin de la queue');
+
+						} else {
+							//refresh history
+							KOCFIA.throne.refreshOnGoing('Amélioration obsolète supprimée');
+						}
+
+						delay = 50;
+						return dfd.reject();
+					}
+
+					return dfd.pipe( checkState(dfd) );
+				};
+
+				//step 3
+				var checkState = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred checkState function');
+					if( item.isBroken ){
+						//check if item is already repairing
+						if( !$.isEmptyObject(window.seed.queue_throne) ){
+							if( window.seed.queue_throne.itemId == item.id ){
+								var timeLeft = window.seed.queue_throne.end - timestamp();
+								if( timeLeft > 0 ){
+									delay = timeLeft * 1000;
+
+									return dfd.reject();
+								}
+							}
+						}
+
+						return dfd.pipe( equipSet(dfd, 3) );
+					}
+
+					return dfd.pipe( checkAetherstone(dfd) );
+				};
+
+				//step 3a_1 - optimize throne items
+				var equipSet = function( dfd, attempts ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred equipSet function', attempts);
+
+					if( KOCFIA.set.currentPair == 'repair' ){
+						KOCFIA.throne.refreshOnGoing('set de réparation déjà équipé');
+						return dfd.pipe( fromCity(dfd) );
+					} else {
+						if( !KOCFIA.set.isSwappingItems() ){
+							var setWrapper = function(){
+								return $.Deferred(function( wdfd ){
+									return wdfd.pipe( KOCFIA.set.activatePair('repair', wdfd) );
+								}).promise();
+							};
+
+							$.when( setWrapper() )
+								.done(function(){
+									KOCFIA.throne.refreshOnGoing('set de réparation équipé');
+
+									return dfd.pipe( fromCity(dfd) );
+								})
+								.fail(function(){
+									KOCFIA.throne.refreshOnGoing('problème lors de l\'équipement du set de réparation');
+
+									if( KOCFIA.throne.repairWithoutOptimizedThroneSet ){
+										return dfd.pipe( repair(dfd, 3) );
+									} else {
+										return dfd.reject();
+									}
+								});
+
+						} else if( KOCFIA.throne.repairWithoutOptimizedThroneSet ) {
+							return dfd.pipe( repair(dfd, 3) );
+
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								window.setTimeout(function(){
+									return dfd.pipe( equipSet(dfd, attempts) );
+								}, 5000);
+							} else {
+								return dfd.reject();
+							}
+						}
+					}
+				};
+
+				//step 3a_2 - optimize throne items
+				var repair = function( dfd, attempts ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred repair function', attempts);
+
+					var repairSequence = function(){
+						return $.Deferred(function( wdfd ){
+							return wdfd.pipe( KOCFIA.throne.repairItem(id, true, wdfd, 3) );
+						}).promise();
+					};
+
+					$.when( repairSequence() )
+						.done(function(){
+							if( item.brokenType == 'quality' ){
+								delay = parseInt(window.cm.thronestats.repairCostEnhance[ item.quality ].Time, 10) * 1000;
+							} else {
+								delay = parseInt(window.cm.thronestats.repairCostUpgrade[ item.level ].Time, 10) * 1000;
+							}
+
+							if( isNaN(delay) ){
+								delay = 50;
+							}
+
+							KOCFIA.throne.refreshOnGoing('Réparation lancée');
+						})
+						.fail(function(){
+							KOCFIA.throne.refreshOnGoing('Problème durant la réparation');
+						})
+						.always(function(){
+							KOCFIA.set.reequipSetItems();
+
+							return dfd.resolve();
+						});
+				};
+
+				//set 3b_1
+				var checkAetherstone = function( dfd ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred equipSet function', attempts);
+
+					type = improvement.hasOwnProperty('quality') ? 'enhance' : 'upgrade';
+
+					//get improvement cost
+					var cost = parseInt(window.cm.thronestats[ type ][ (type == 'enhance' ? item.quality + 1 : item.level + 1) ].Stones, 10),
+						stock, i;
+
+					if( isNaN(cost) ){
+						console.error('incorrect improvement cost');
+						delay = 50;
+						return dfd.reject();
+					}
+
+					//check aetherstone availability (use prefered cityKey)
+					if( KOCFIA.conf.throne.cityKey !== '' && KOCFIA.cities.hasOwnProperty(KOCFIA.conf.throne.cityKey) ){
+						stock = parseInt(window.seed.resources[ KOCFIA.conf.throne.cityKey ]['rec5'][0], 10);
+						if( cost >= stock ){
+							cityKey = KOCFIA.conf.throne.cityKey;
+
+							return dfd.pipe( improve(dfd, 3) );
+						}
+					}
+
+					for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+						cityKey = KOCFIA.citiesKey[ i ];
+
+						if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+							stock = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10);
+
+							if( cost >= stock ){
+								cityKey = KOCFIA.conf.throne.cityKey;
+
+								return dfd.pipe( improve(dfd, 3) );
+							}
+						}
+					}
+
+					KOCFIA.throne.refreshOnGoing('Pas assez de pierre d\'ether');
+
+					delay = 2 * 60 * 1000;
+					return dfd.reject();
+				};
+
+				//set 3b_2
+				var improve = function( dfd, attempts ){
+					if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne launchAutomaticImprovements deferred improve function', attempts);
+
+					var cityKey;
+					if( KOCFIA.conf.throne.cityKey !== '' && KOCFIA.cities.hasOwnProperty(KOCFIA.conf.throne.cityKey) ){
+						cityKey = KOCFIA.conf.throne.cityKey;
+					} else {
+						cityKey = KOCFIA.citiesKey[0];
+					}
+
+					var improveSequence = function(){
+						return $.Deferred(function( wdfd ){
+							return wdfd.pipe( KOCFIA.throne.upgradeItem(type, item.id, cityKey, null, true, wdfd, 3) );
+						}).promise();
+					};
+
+					$.when( improveSequence() )
+						.done(function(){
+							if( window.seed.throne.inventory[ item.id ].isBroken ){
+								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration echouée');
+
+								//increment try counter
+								if( !KOCFIA.improvements[0].hasOwnProperty('try') ){
+									KOCFIA.improvements[0].try = 0;
+								}
+								KOCFIA.improvements[0].try += 1;
+							} else {
+								//add improvement in history
+								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration réussie : '+ KOCFIA.throne.getObjectLabel(item.id));
+
+								//remove improvement from array
+								KOCFIA.throne.improvements.splice(0, 1);
+							}
+
+							delay = 50;
+						})
+						.fail(function(){
+							KOCFIA.throne.refreshOnGoing('Problème durant la tentative d\'amélioration');
+							delay = 30 * 1000;
+						})
+						.always(function(){
+							return dfd.resolve();
+						});
+				};
+
+			$.when( sequence() )
+				.always(function(){
+					autoImprovementTimeout = window.setTimeout(function(){
+						KOCFIA.throne.launchAutomaticImprovements();
+					}, delay);
+				});
+		};
+
+		KOCFIA.throne.launchAutomaticSalvage = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne launchAutomaticSalvage function');
+
+			if( !KOCFIA.conf.throne.automaticSalvage ){
+				return;
+			}
+
+			//@TODO
+			//browse throne inventory
+			//for each items check
+				//is locked ? next
+				//is level > 0 ? next
+				//is brocken ? next
+				//is not salvageable ? next
+				//else add to mass salvage
+			//sum the aetherstone gain
+			//check the aetherstone on preferred city
+			//split mass salvage if necessary
+			//salvage
+			//callback in 2 minutes
+
+			/*var u;
+			AjaxCall.gPostRequest("ajax/_dispatch53.php", {
+				ctrl: "throneRoom\\ThroneRoomServiceAjax",
+				action: "salvage",
+				itemId: t.join(","),
+				cityId: currentcityid,
+				qualityId: v.join(",")
+			}, function(w) {
+				if (w.ok === true) {
+					g.each(t, function(y, x) {
+						u = kocThroneItems[x];
+						u.salvage()
+					})
+				} else {
+					cm.ModalManager.alert({
+						button_text: g_js_strings.commonstr.ok,
+						text: w.msg,
+						"class": "craftFailure",
+						exe: function() {
+							Modal.hideModalAll();
+							cm.ModalManager.close()
+						}
+					})
+				}
+			})*/
 		};
 
 	/* REPORTS */
@@ -24450,7 +24878,7 @@ jQuery(document).ready(function(){
 		//reassign ok
 		//repair @TODO
 		//research @TODO
-		//build @TODO
+		//build ok
 		//reinforce ok
 		//attack ok
 		//scout ok

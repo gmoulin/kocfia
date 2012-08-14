@@ -3426,6 +3426,15 @@ jQuery(document).ready(function(){
 			stored: ['barbarian_resources']
 		};
 
+		//@TODO add cockpit functionnalities
+			//throne set selector
+			//guardian visibility
+			//rallypoint slots
+			//aetherstone
+			//formations
+			//hospital
+			//defense switch
+
 		KOCFIA.overview.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview confPanel function');
 			var code = '<h3 class="kocfia-overview-conf">'+ KOCFIA.modulesLabel.overview +'</h3>';
@@ -4021,7 +4030,7 @@ jQuery(document).ready(function(){
 									else b = s;
 									$td.html( b );
 
-									if( KOCFIA.conf.alarm.active && KOCFIA.conf.alarm.autonomy && !isNaN(n) && n < 24 * 3600 ){
+									if( KOCFIA.conf.alarm.active && KOCFIA.conf.alarm.autonomy && KOCFIA.conf.alarm.autonomyCities.hasOwnProperty(cityKey) && !isNaN(n) && n < 24 * 3600 ){
 										KOCFIA.alarm.react('autonomy', cityKey, {res: stock.key, conso: total[j] * 3600, time: n});
 									}
 								}
@@ -13371,6 +13380,7 @@ jQuery(document).ready(function(){
 				minTroopOnHQ: 0,
 				minTroopOnOther: 0,
 				autonomy: 0,
+				autonomyCities: {},
 				playSoundForAttack: 0,
 				playSoundForScout: 0,
 				playSoundForAutonomy: 0,
@@ -13535,6 +13545,20 @@ jQuery(document).ready(function(){
 			code += '<br>';
 			code += Shared.generateCheckbox('alarm', 'autonomy', 'Alerter pour les autonomies inférieure à 24h', KOCFIA.conf.alarm.autonomy);
 
+			code += '<br><div class="buttonset">';
+			var i, city, cityKey;
+			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+
+				if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+					city = KOCFIA.cities[ cityKey ];
+					code += '<input type="checkbox" class="alarm-autonomy-cities" id="alarm-autonomy-'+ cityKey +'" value="'+ cityKey +'">';
+					code += '<label for="'+ KOCFIA.citiesKey[ i ] +'">'+ city.label +'</label>';
+				}
+			}
+			code +=
+			code += '</div>';
+
 			code += '<br><br>';
 			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK +',0"><span>Fausse attaque de ville</span></button>';
 			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK +',1"><span>Fausse attaque de terre sauvage</span></button>';
@@ -13566,6 +13590,16 @@ jQuery(document).ready(function(){
 
 					KOCFIA.alarm.generateFake(params[0], params[1]);
 					KOCFIA.alarm.checkIncoming();
+				})
+				.on('change', '.alarm-autonomy-cities', function(){
+					var cities = {};
+
+					$(this).parent().find('input').filter(':checked').each(function(){
+						cities[ this.value ] = 1;
+					});
+
+					KOCFIA.conf.alarm.autonomyCities = cities;
+					Shared.storeConf();
 				});
 
 			$section.find('.alarmColors').miniColors().each(function(){

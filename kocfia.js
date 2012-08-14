@@ -19887,7 +19887,6 @@ jQuery(document).ready(function(){
 		//@TODO change city for salvage if aether quantity limit is near
 		//@TODO display improvement history
 		//@TODO improvement history dirty state for new improvement success
-		//@TODO add aetherstone quantity check for grid lines buttons
 
 		/* grid related */
 		KOCFIA.throne.gridRowActions = function( cellValue, options, rowObject ){
@@ -19908,20 +19907,30 @@ jQuery(document).ready(function(){
 					code += '<span class="icon-trash salvage" data-id="'+ rowObject.id +'" title="Détruire cet objet"></span>';
 				}
 
-				code += '<span class="icon-lock lock" data-id="'+ rowObject.id +'" title="Protéger cet objet contre la destruction manuelle ou automatique"></span>';
+				code += '<span class="icon-lock lock) data-id="'+ rowObject.id +'" title="Protéger cet objet contre la destruction manuelle ou automatique"></span>';
 
 			} else {
 				code += '<span class="icon-unlock unlock" data-id="'+ rowObject.id +'" title="Enlever la protection de cet objet contre la destruction manuelle ou automatique"></span>';
 			}
 
+			var aetherstone = (KOCFIA.conf.throne.cityKey !== '' ? parseInt(window.seed.resources[ KOCFIA.conf.throne.cityKey ]['rec5'][0], 10) : 0);
+			if( isNaN(aetherstone) ) aetherstone = 0;
+
 			if( rowObject.available && rowObject.repairing !== null ){
 				if( !rowObject.isBroken ){
+
 					if( rowObject.quality  < 5 ){
-						code += '<button class="button secondary manual_quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer un bonus de cet objet"><span><i class="icon-circle-arrow-up"></i> Bonus</span></button>';
+						var qualityCost = parseInt(window.cm.thronestats[ type ][ rowObject.quality + 1 ].Stones, 10);
+						if( aetherstone >= qualityCost ){
+							code += '<button class="button secondary manual_quality_upgrade" data-id="'+ rowObject.id +'" title="Débloquer un bonus de cet objet"><span><i class="icon-circle-arrow-up"></i> Bonus</span></button>';
+						}
 					}
 
 					if( rowObject.level < 10 ){
-						code += '<button class="button secondary manual_level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><span><i class="icon-plus-sign"></i> Niveau</span></button>';
+						var levelCost = parseInt(window.cm.thronestats[ type ][ rowObject.level + 1 ].Stones, 10);
+						if( aetherstone >= levelCost ){
+							code += '<button class="button secondary manual_level_upgrade" data-id="'+ rowObject.id +'" title="Augmenter le niveau de cet objet"><span><i class="icon-plus-sign"></i> Niveau</span></button>';
+						}
 					}
 				} else {
 					code += '<button class="button secondary manual_repair" data-id="'+ rowObject.id +'" title="Réparer cet objet"><span><i class="icon-wrench"></i> Réparer</span></button>';
@@ -20200,6 +20209,8 @@ jQuery(document).ready(function(){
 					var cityKey = $(this).val();
 
 					KOCFIA.conf.throne.cityKey = cityKey;
+
+					KOCFIA.throne.loadItemList();
 
 					Shared.storeConf();
 				})

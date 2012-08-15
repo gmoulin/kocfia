@@ -2713,7 +2713,7 @@ html, body {
 		text-align: right;
 	}
 
-/* quick march */
+/* quick march and hospital manual forms */
 	#kocfia-quickMarch > h3 {
 		margin-bottom: 10px;
 	}
@@ -2723,33 +2723,43 @@ html, body {
 		color: #2F468B;
 	}
 
+	#kocfia-hospital .manual .chosen input,
 	#kocfia-quickMarch .form .chosen input {
 		width: 80px;
 	}
 
 	#kocfia-quickMarch .form .knight,
+	#kocfia-hospital .manual .troop,
 	#kocfia-quickMarch .form .troop {
 		margin: 22px 0;
 	}
 
+	#kocfia-hospital .manual input[type=text],
 	#kocfia-quickMarch .form input[type=number],
 	#kocfia-quickMarch .form input[type=text] {
 		text-align: center;
+	}
+
+	#kocfia-hospital .manual .res {
+		margin-top: 6px;
 	}
 
 	#kocfia-quickMarch .form .items {
 		margin-bottom: 6px;
 	}
 
+	#kocfia-hospital .manual .buttons,
 	#kocfia-quickMarch .form .buttons {
 		margin-top: 6px;
 		display: none;
 	}
 
+	#kocfia-hospital .manual .available,
 	#kocfia-quickMarch .form .available {
 		display: inline-block;
 	}
 
+	#kocfia-hospital .manual .available img,
 	#kocfia-quickMarch .form .available img {
 		margin: 0 3px 0 0;
 		top: 0;
@@ -2761,17 +2771,25 @@ html, body {
 	}
 
 	#kocfia-quickMarch .form .type,
+	#kocfia-hospital .manual .from,
 	#kocfia-quickMarch .form .from,
 	#kocfia-quickMarch .form .to,
 	#kocfia-quickMarch .form .items {
 		display: inline-block;
 	}
 
+	#kocfia-hospital .manual .res img,
 	#kocfia-quickMarch .form .items img,
+	#kocfia-hospital .manual .troop img,
 	#kocfia-quickMarch .form .troop img {
 		width: 20px;
 	}
 
+	#kocfia-hospital .manual .res img {
+		margin-right: 8px;
+	}
+
+	#kocfia-hospital .manual.buttonset label img,
 	#kocfia-quickMarch .form .buttonset label img {
 		top: 1px;
 	}
@@ -2794,11 +2812,13 @@ html, body {
 		padding: 0 1px 1px;
 	}
 
+	#kocfia-hospital .available .button,
 	#kocfia-quickMarch .available .button {
 		height: 26px;
 		padding: 2px;
 	}
 
+	#kocfia-hospital .button + .button,
 	#kocfia-quickMarch .button + .button {
 		margin: 5px 0 0 5px;
 	}
@@ -2812,11 +2832,13 @@ html, body {
 		color: #790619;
 	}
 
+	#kocfia-hospital .manual .refresh,
 	#kocfia-quickMarch .form .refresh {
 		margin-right: 5px;
 		cursor: pointer;
 	}
 
+	#kocfia-hospital-set,
 	#kocfia-quickMarch-set {
 		margin-right: 10px;
 		max-width: 150px;

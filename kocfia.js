@@ -27,18 +27,6 @@
 		};
 	}
 
-	var uniqueObject = function( arr ){
-		var hash = {}, result = [], i , length = arr.length;
-		for( i = 0; i < length; i += 1 ){
-			var key = JSON.stringify(arr[i]);
-			if( !hash.hasOwnProperty( key ) ){
-				hash[ key ] = true;
-				result.push( arr[i] );
-			}
-		}
-		return result;
-	};
-
 	if( !Array.hasOwnProperty('max') ){
 		Array.max = function( array ){
 			return Math.max.apply( Math, array );
@@ -9118,10 +9106,6 @@ jQuery(document).ready(function(){
 			savedRules: {} //by name
 		};
 
-		//@TODO add refresh to formation list
-		//@TODO sum might in formations in headers
-		//@TODO display in headers : city label <br> time <br> might
-
 		KOCFIA.formation.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation confPanel function');
 			var code = '<h3 class="kocfia-formation-conf">'+ KOCFIA.modulesLabel.formation +'</h3>';
@@ -9239,6 +9223,7 @@ jQuery(document).ready(function(){
 					}
 				}
 				onGoing += '<div class="unit-toggles buttonset">Afficher : '+ toggles +'</div>';
+				onGoing += '<div><button class="button secondary refresh"><span><span class="icon-refresh"></span> Raffraîchir</span></button></div>';
 				onGoing += '<table class="unit"><thead><tr>'+ headers +'<th>Suivi</th></tr></thead>';
 				onGoing += '<tbody><tr>'+ cels +'<td class="info"></td></tr></tbody></table></div>';
 
@@ -9294,7 +9279,17 @@ jQuery(document).ready(function(){
 				.on('change', '#formation-panel-automatic', function(){
 					$('#formation-automatic').prop('checked', $(this).prop('checked')).change();
 				})
-				//setmarche
+				//list refresh
+				.on('click', '.refresh', function(){
+					var i, cityKey;
+					for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+						cityKey = KOCFIA.citiesKey[i];
+						if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+							KOCFIA.formation.listCityFormations( cityKey );
+						}
+					}
+				})
+				//throne set
 				.on('click', '.equip', function(){
 					var set = $('#kocfia-formation-set').val();
 					if( set !== '' ){
@@ -10262,7 +10257,7 @@ jQuery(document).ready(function(){
 					$fortTh = $fort.find('th').filter('[data-city="'+ cityKey +'"]'),
 					$fortTd = $fort.find('td').filter('[data-city="'+ cityKey +'"]'),
 					code = '', formations = '', fortifications = '',
-					i, formation, unit, queue, duration, smallDuration,
+					i, formation, unit, queue, duration, smallDuration, might, fortmight,
 					timestamp = Date.timestamp();
 				//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
 
@@ -10272,51 +10267,82 @@ jQuery(document).ready(function(){
 					formations += '<div class="global"><button class="button danger recursive" title="Supprimer les formations de cette ville à partir de la x<sup>ème</sup> incluse">';
 					formations += '<span>Supprimer &ge; à</span></button></div>';
 				}
+
 				formations += '<ol class="formations">';
+				might = 0;
 				for( i = 0; i < queue.length; i += 1 ){
 					formation = queue[i];
-					unit = KOCFIA.unitInfo[ 'unt' + formation[0] ];
+					unitKey = 'unt'+ formation[0];
+					unit = KOCFIA.unitInfo[ unitKey ];
+					might += parseInt(formation[1], 10) * parseInt(window.unitmight[ unitKey ], 10);
 
 					formations += '<li title="'+ unit.label +' - '+ Shared.readable( formation[1] ) +' - '+ Shared.readableDuration(parseFloat(formation[3]) - parseFloat(formation[2])) +'">';
 					formations += '<span class="icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ formation[0] +','+ formation[1] +','+ formation[3] +','+ formation[2] +','+ formation[5] +'" title="Annuler cette formation"></span>&nbsp;';
 					formations += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"> ';
 					formations += '<span class="unit">'+ Shared.format( formation[1] ) +'</span></li>';
 				}
-				if( queue.length > 0 ){
+
+				if( queue.length > 0 ){ //use last formation finishing time
 					duration = Shared.readableDuration( parseFloat(formation[3]) - timestamp );
 					smallDuration = duration.split(' ');
 					if( smallDuration.length >= 2 ) smallDuration = smallDuration.slice(0, 2).join(' ');
 					else smallDuration = duration;
 
-					$unitTh.attr('title', duration).find('span').remove().end().append('<span>'+ smallDuration +'</span>');
-				} else $unitTh.attr('title', '').find('span').remove();
+					$unitTh.attr('title', duration)
+						.find('span').remove().end()
+						.append('<span>'+ smallDuration +'</span>')
+						.append('<span title="'+ Shared.readable(might) +'">'+ Shared.format(might) +'</span>');
+
+				} else {
+					$unitTh.attr('title', '').find('span').remove();
+				}
+
 				$unitTd.html( formations );
 				formations += '</ol>';
 
 				//defenses
-				queue = window.seed.queue_fort[cityKey];
+				queue = window.seed.queue_fort[ cityKey ];
 				if( queue.length > 0 ){
 					fortifications += '<div class="global"><button class="button danger recursive" title="Supprimer les formations de cette ville à partir de la deuxième incluse">';
 					fortifications += '<span>Supprimer &ge; 2e</span></button></div>';
 				}
+
 				fortifications += '<ol class="defenses">';
+				might = 0;
+				fortmight = {
+					frt53: "4",
+					frt55: "7",
+					frt60: "1",
+					frt61: "2",
+					frt62: "3"
+				};
 				for( i = 0; i < queue.length; i += 1 ){
 					formation = queue[i];
-					unit = KOCFIA.fortInfo[ 'frt' + formation[0] ];
+					unitKey = 'frt'+ formation[0];
+					unit = KOCFIA.fortInfo[ unitKey ];
+					might += fortmight[ unitKey ];
 
 					fortifications += '<li title="'+ unit.label +' - '+ Shared.readable( formation[1] ) +' - '+ Shared.readableDuration(parseFloat(formation[3]) - parseFloat(formation[2])) +'">';
 					fortifications += '<span class="icon-trash" rel="'+ i +','+ cityKey.replace(/city/, '') +','+ unit[0] +','+ unit[1] +','+ unit[3] +','+ unit[2] +','+ unit[5] +','+ unit[6] +'" title="Annuler cette fortification"></span>&nbsp;';
 					fortifications += '<img src="'+ unit.icon +'" alt="'+ unit.label +'"> ';
 					fortifications += '<span class="unit">'+ Shared.format( formation[1] ) +'</span></li>';
 				}
+
 				if( queue.length > 0 ){
 					duration = Shared.readableDuration( parseFloat(formation[3]) - timestamp );
 					smallDuration = duration.split(' ');
 					if( smallDuration.length >= 2 ) smallDuration = smallDuration.slice(0, 2).join(' ');
 					else smallDuration = duration;
 
-					$fortTh.attr('title', duration).find('span').remove().end().append('<span>'+ smallDuration +'</span>');
-				} else $fortTh.attr('title', '').find('span').remove();
+					$fortTh.attr('title', duration)
+						.find('span').remove().end()
+						.append('<span>'+ smallDuration +'</span>')
+						.append('<span title="'+ Shared.readable(might) +'">'+ Shared.format(might) +'</span>');
+
+				} else {
+					$fortTh.attr('title', '').find('span').remove();
+				}
+
 				$fortTd.html( fortifications );
 				fortifications += '</ol>';
 			}
@@ -20536,36 +20562,36 @@ jQuery(document).ready(function(){
 							infos = [ {id: itemId, level: [ (upgradeLevel === 0 ? level : upgradeLevel), (upgradeLevel === 0 ? level + 1 : upgradeLevel + 1) ]} ];
 
 						} else { //optimized upgrade
-							//@TODO
+							//@TODO check
 							var steps = {
-								'q0l0': [],
-								'q1l0': [],
-								'q2l0': [],
-								'q3l0': [],
-								'q4l0': [],
-								'q5l0': [],
-								'q0l1': [],
-								'q1l1': [],
-								'q2l1': [],
-								'q3l1': [],
-								'q4l1': [],
-								'q5l1': [],
-								'q0l2': [],
-								'q1l2': [],
-								'q2l2': [],
-								'q3l2': [],
-								'q4l2': [],
-								'q5l2': [],
-								'q0l3': [],
-								'q1l3': [],
-								'q2l3': [],
-								'q3l3': [],
-								'q4l3': [],
-								'q5l3': [],
-								'q0l4': [],
-								'q1l4': [],
-								'q2l4': [],
-								'q3l4': [],
+								'q0l0': ['l','l','q','q','l','q','q','l','q'],
+								'q1l0': ['l','l','q','l','q','q','l','q'],
+								'q2l0': ['l','l','l','q','q','l','q'],
+								'q3l0': ['l','l','l','q','l','q'],
+								'q4l0': ['l','l','l',,'l','q'],
+								'q5l0': ['l','l','l','l'],
+								'q0l1': ['l','q','q','l','q','q','l','q'],
+								'q1l1': ['l','q','l','q','q','l','q'],
+								'q2l1': ['l','l','q','q','l','q'],
+								'q3l1': ['l','l','q','l','q'],
+								'q4l1': ['l','l','l','q'],
+								'q5l1': ['l','l','l','l'],
+								'q0l2': ['q','q','l','q','q','l','q'],
+								'q1l2': ['q','l','q','q','l','q'],
+								'q2l2': ['l','q','q','l','q'],
+								'q3l2': ['l','q','l','q'],
+								'q4l2': ['l','l','q'],
+								'q5l2': ['l','l'],
+								'q0l3': ['q','q','q','q','l','q'],
+								'q1l3': ['q','q','q','l','q'],
+								'q2l3': ['q','q','l','q'],
+								'q3l3': ['q','l','q'],
+								'q4l3': ['l','q'],
+								'q5l3': ['l'],
+								'q0l4': ['q','q','q','q','q'],
+								'q1l4': ['q','q','q','q'],
+								'q2l4': ['q','q','q'],
+								'q3l4': ['q','q'],
 								'q4l4': ['q']
 							};
 

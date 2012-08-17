@@ -2818,6 +2818,19 @@ jQuery(document).ready(function(){
 				return help;
 			};
 
+		/* throne */
+			Shared.getThroneItemObject = function( itemId ){
+				var item, itemObject;
+				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
+					item = window.seed.throne.inventory[ itemId ];
+					if( item && Object.isObject(item) ){
+						itemObject = new cm.ThroneItemModel(itemId, item);
+					}
+				}
+
+				return itemObject;
+			};
+
 	/* FACEBOOK WALL POST POPUP */
 		KOCFIA.fbWallPopup = {
 			options: {
@@ -11019,7 +11032,7 @@ jQuery(document).ready(function(){
 
 				if( wallSlots - slotsUsed > 0 ){
 					if( checkBeforeEquipingSet ){
-						return fdfd.pipe( equipSet(fdfd, 'construction') );
+						return fdfd.pipe( equipSet(fdfd, 'build') );
 					} else {
 						return fdfd.pipe( build(fdfd) );
 					}
@@ -11129,14 +11142,16 @@ jQuery(document).ready(function(){
 
 			//equip optimized throne set
 			var equipSet = function( dfd, attempts, pair ){
+				var label = (pair == 'build' ? 'construction' : 'formation');
+
 				if( KOCFIA.set.currentPair == pair ){
 					setEquiped = true;
 
-					KOCFIA.formation.refreshInfo( ['set de '+ pair +' déjà équipé'] );
+					KOCFIA.formation.refreshInfo( ['set de '+ label +' déjà équipé'] );
 
 					if( pair == 'formation' ){
 						return dfd.pipe( train(dfd) );
-					} else if( pair == 'construction' ){
+					} else if( pair == 'build' ){
 						return dfd.pipe( build(dfd) );
 					}
 				} else {
@@ -11151,21 +11166,21 @@ jQuery(document).ready(function(){
 							.done(function(){
 								setEquiped = true;
 
-								KOCFIA.formation.refreshInfo( ['set de '+ pair +' équipé'] );
+								KOCFIA.formation.refreshInfo( ['set de '+ label +' équipé'] );
 
 								if( pair == 'formation' ){
 									return dfd.pipe( train(dfd) );
-								} else if( pair == 'construction' ){
+								} else if( pair == 'build' ){
 									return dfd.pipe( build(dfd) );
 								}
 							})
 							.fail(function(){
-								KOCFIA.formation.refreshInfo( ['problème lors de l\'équipement du set de '+ pair] );
+								KOCFIA.formation.refreshInfo( ['problème lors de l\'équipement du set de '+ label] );
 
 								if( pair == 'formation' && KOCFIA.formation.trainWithoutOptimizedThroneSet ){
 									return dfd.pipe( train(dfd) );
 
-								} else if( pair == 'construction' && KOCFIA.formation.constructWithoutOptimizedThroneSet ) {
+								} else if( pair == 'build' && KOCFIA.formation.constructWithoutOptimizedThroneSet ) {
 									return dfd.pipe( build(dfd) );
 
 								} else {
@@ -11176,7 +11191,7 @@ jQuery(document).ready(function(){
 					} else if( pair == 'formation' && KOCFIA.formation.trainWithoutOptimizedThroneSet ) {
 						return dfd.pipe( train(dfd) );
 
-					} else if( pair == 'construction' && KOCFIA.formation.constructWithoutOptimizedThroneSet ) {
+					} else if( pair == 'build' && KOCFIA.formation.constructWithoutOptimizedThroneSet ) {
 						return dfd.pipe( build(dfd) );
 
 					} else {
@@ -11291,6 +11306,7 @@ jQuery(document).ready(function(){
 			pileUp: {},
 			supply: {}
 		};
+		//@TODO check if aetherstone cap is checked before transport
 
 		KOCFIA.transport.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport confPanel function');
@@ -20057,9 +20073,6 @@ jQuery(document).ready(function(){
 		};
 		//@TODO display number of protected items
 		//@TODO add color conf for bonus of interest
-		//@TODO launchAutomaticImprovements
-		//@TODO launchAutomaticSalvage
-		//@TODO change city for salvage if aether quantity limit is near
 		//@TODO display improvement history
 		//@TODO improvement history dirty state for new improvement success
 
@@ -20187,6 +20200,7 @@ jQuery(document).ready(function(){
 			var i, cityKey, city,
 				code = '';
 
+			//header buttons
 			code += '<div class="infos">';
 			code += '<span class="buttonset">';
 			code += '<input type="checkbox" id="throne-panel-automatic-improvements" '+ (KOCFIA.conf.throne.automaticImprovements ? 'checked' : '') +' autocomplete="off" />';
@@ -20197,6 +20211,8 @@ jQuery(document).ready(function(){
 			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="throne"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
+
+			//city for aetherstone
 			code += '<div>';
 			code += '<label for="kocfia-throne-cities">Ville préférée où prendre et mettre les pierres d\'ether :</label>';
 			code += '<select id="kocfia-throne-cities">';
@@ -20209,9 +20225,13 @@ jQuery(document).ready(function(){
 			}
 			code += '</select>';
 			code += '</div>';
+
+			//buff items
 			code += '<div class="buttonset buff-items">';
 			code += KOCFIA.throne.getBuffItems();
 			code += '</div>';
+
+			//accordion parts
 			code += '<div class="accordion">';
 			code += '<h3>Objets</h3><div>';
 			code += '<button class="button secondary reload" title="Raffraîchir la liste des objets"><span>Raffraîchir</span></button>';
@@ -20377,7 +20397,6 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.addListeners = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne addListeners function');
-			//@TODO
 
 			KOCFIA.throne.$div
 				.on('change', '#kocfia-throne-cities', function(){
@@ -20409,7 +20428,7 @@ jQuery(document).ready(function(){
 				})
 				.on('click', '.salvage', function(){
 					var id = $(this).attr('data-id'),
-						item = window.seed.throne.inventory[ id ],
+						item = Shared.getThroneItemObject( id ),
 						cityKey = KOCFIA.throne.$cities.val();
 
 					var sequence = function(){
@@ -20417,7 +20436,7 @@ jQuery(document).ready(function(){
 
 						var salvage = function(){
 							return $.Deferred(function( dfd ){
-								return dfd.pipe( KOCFIA.throne.salvageItem(id, cityKey, 3, dfd) );
+								return dfd.pipe( KOCFIA.throne.salvageItem(item, cityKey, 3, dfd) );
 							}).promise();
 						};
 
@@ -20433,7 +20452,7 @@ jQuery(document).ready(function(){
 					};
 
 					if( item && Object.isObject(item) ){
-						if( !KOCFIA.throne.isSalvageable( id ) ){
+						if( !KOCFIA.throne.isSalvageable( item ) ){
 							if( confirm('êtes-vous sûr ?') ){
 								sequence();
 							}
@@ -20471,7 +20490,7 @@ jQuery(document).ready(function(){
 
 					var $this = $(this),
 						id = $this.attr('data-id'),
-						item = window.seed.throne.inventory[ id ],
+						item = Shared.getThroneItemObject( id ),
 						cityKey = KOCFIA.throne.$cities.val(),
 						buffItemId = KOCFIA.throne.$buffItems.find('input').filter(':checked').val();
 
@@ -20480,7 +20499,7 @@ jQuery(document).ready(function(){
 
 						var sequence = function(){
 							return $.Deferred(function( dfd ){
-								return dfd.pipe( KOCFIA.throne.upgradeItem(($this.hasClass('.manual_quality_upgrade') ? 'quality' : 'level'), id, cityKey, buffItemId, false, dfd, 3) );
+								return dfd.pipe( KOCFIA.throne.upgradeItem(($this.hasClass('.manual_quality_upgrade') ? 'quality' : 'level'), item, cityKey, buffItemId, false, dfd, 3) );
 							}).promise();
 						};
 
@@ -20500,7 +20519,7 @@ jQuery(document).ready(function(){
 
 					var $this = $(this),
 						id = $this.attr('data-id'),
-						item = window.seed.throne.inventory[ id ],
+						item = Shared.getThroneItemObject( id ),
 						cityKey = KOCFIA.throne.$cities.val();
 
 					if( item && Object.isObject(item) ){
@@ -20508,7 +20527,7 @@ jQuery(document).ready(function(){
 
 						var sequence = function(){
 							return $.Deferred(function( dfd ){
-								return dfd.pipe( KOCFIA.throne.repairItem(id, cityKey, false, dfd, 3) );
+								return dfd.pipe( KOCFIA.throne.repairItem(item, cityKey, false, dfd, 3) );
 							}).promise();
 						};
 
@@ -20612,7 +20631,7 @@ jQuery(document).ready(function(){
 
 						for( i = 0; i < improvements.length; i += 1 ){
 							info = improvements[ i ];
-							item = new window.cm.ThroneItemModel(info.id, window.seed.throne.inventory[ info.id ]);
+							item = Shared.getThroneItemObject( info.id );
 							code = '<li data-info="'+ JSON.stringify(info) +'">';
 
 							code += '<span>'; //float right
@@ -20659,7 +20678,87 @@ jQuery(document).ready(function(){
 							KOCFIA.throne.storeImprovements();
 						}
 					})
+				.end()
+				.find('.salvage-conf-form')
+					.on('click', '.more', function(){
+						var $div = $(this).parent(),
+							$td = $div.parent();
+
+						$div.parent()
+							.append( $div.clone() );
+					})
+					.on('click', '.less', function(){
+						$(this).parent().remove();
+					})
+					.on('click', '.save', function(){
+						var result = KOCFIA.throne.planSalvageRule();
+
+						if( result.errors.length > 0 ){
+							Shared.notify( result.errors );
+						} else {
+							Shared.success('Configuration validée');
+
+							KOCFIA.throne.salvage.push( result.plan );
+						}
+					})
+					.on('click', '.cancel', function(){
+						$(this).closest('.salvage-conf-form')
+							.find('div').filter(':gt(0)').remove().end()
+							.find('input, select')
+								.filter('[name="type"]').val('any').end()
+								.filter('[name="bonus"]').val('').end()
+								.filter('[name="occurence"]').val('2').end()
+								.filter('[name="line"]').val('3');
+					})
+				.end()
+				.find('.salvage-conf-list')
+					.on('click', '.reload', function(){
+						$(this).closest('table').replaceWith( KOCFIA.throne.getSalvageRules() );
+					})
+					.on('click', '.delete', function(){
+						var $this = $(this),
+							index = parseInt($this.data('index'), 10);
+
+						KOCFIA.throne.salvage.splice(index, 1);
+
+						$this.closest('table').replaceWith( KOCFIA.throne.getSalvageRules() );
+					})
 				;
+		};
+
+		KOCFIA.throne.planSalvageRule = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne planSalvageRule function');
+
+			var $table = KOCFIA.throne.$div.find('.salvage-conf-form'),
+				$inputs = $table.find('input, select'),
+				plan = {type: '', bonuses: [], occurence: 0, line: 0},
+				errors = [];
+
+			$inputs.each(function(){
+				var $field = $(this),
+					name = $field.attr('name');
+
+				if( name === 'type' ){
+					plan[ name ] = $field.val();
+
+				} else if( name !== 'bonus' ){
+					plan[ name ] = parseInt($field.val(), 10);
+
+				} else {
+					var v = $field.val();
+					if( $.inArray(v, plan.bonuses) > -1 ){
+						errors.push('Vous avez choisi plusieurs fois le même bonus.');
+					} else {
+						plan.bonuses.push(v);
+					}
+				}
+			});
+
+			if( plan.bonuses.length === 0 ){
+				errors.push('Vous devez choisir au moins un bonus.');
+			}
+
+			return {plan: plan, errors: errors};
 		};
 
 		KOCFIA.throne.loadItemList = function(){
@@ -20682,10 +20781,9 @@ jQuery(document).ready(function(){
 
 			for( itemId in window.seed.throne.inventory ){
 				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
-					item = window.seed.throne.inventory[ itemId ];
+					item = Shared.getThroneItemObject( itemId );
 
 					if( item && Object.isObject(item) ){
-						item = new window.cm.ThroneItemModel(itemId, item);
 						repairing = null;
 
 						var imp = KOCFIA.throne.getImprovementQualityAndLevelForItem( itemId );
@@ -20772,20 +20870,23 @@ jQuery(document).ready(function(){
 			for( i = 0; i < KOCFIA.throne.improvements.length; i += 1 ){
 				info = KOCFIA.throne.improvements[ i ];
 				if( window.seed.inventory.hasOwnProperty(info.id) ){
-					item = new window.cm.ThroneItemModel(info.id, window.seed.inventory[ info.id ]);
-					code += '<li data-info="'+ JSON.stringify(info) +'">';
+					item = Shared.getThroneItemObject( info.id );
 
-					code += '<span>'; //float right
-					if( info.hasOwnProperty('quality') ){
-						code += 'déblocage bonus '+ info.quality[0] +' &rarr; '+ info.quality[1];
-					} else {
-						code += 'augmentation niveau '+ info.level[0] +' &rarr; '+ info.level[1];
+					if( item && Object.isObject(item) ){
+						code += '<li data-info="'+ JSON.stringify(info) +'">';
+
+						code += '<span>'; //float right
+						if( info.hasOwnProperty('quality') ){
+							code += 'déblocage bonus '+ info.quality[0] +' &rarr; '+ info.quality[1];
+						} else {
+							code += 'augmentation niveau '+ info.level[0] +' &rarr; '+ info.level[1];
+						}
+						code += '</span>';
+
+						code += '<i class="icon-trash delete"></i>';
+						code += item.name;
+						code += '</li>';
 					}
-					code += '</span>';
-
-					code += '<i class="icon-trash delete"></i>';
-					code += item.name;
-					code += '</li>';
 				}
 			}
 			code += '</ol>';
@@ -20804,23 +20905,25 @@ jQuery(document).ready(function(){
 
 			for( itemId in window.seed.throne.inventory ){
 				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
-					item = new window.cm.ThroneItemModel(itemId, window.seed.throne.inventory[ itemId ]);
+					item = Shared.getThroneItemObject( itemId );
 
-					if( !items.hasOwnProperty(item.type) ) items[ item.type ] = '';
+					if( item && Object.isObject(item) ){
+						if( !items.hasOwnProperty(item.type) ) items[ item.type ] = '';
 
-					items[ item.type ] += '<option value="'+ itemId +'" data-quality="'+ item.quality +'" data-level="'+ item.level +'">'+ item.name +' #';
+						items[ item.type ] += '<option value="'+ itemId +'" data-quality="'+ item.quality +'" data-level="'+ item.level +'">'+ item.name +' #';
 
-					for( slot in item.effects ){
-						if( item.effects.hasOwnProperty(slot) ){
-							effect = item.effects[ slot ];
-							effectRank = parseInt(slot.replace(/slot/, ''), 10);
+						for( slot in item.effects ){
+							if( item.effects.hasOwnProperty(slot) ){
+								effect = item.effects[ slot ];
+								effectRank = parseInt(slot.replace(/slot/, ''), 10);
 
-							tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
-							bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+								tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
+								bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
 
-							effectInfo = window.cm.thronestats.effects[ effect.id ];
+								effectInfo = window.cm.thronestats.effects[ effect.id ];
 
-							items[ item.type ] += (effectRank > 1 ? ', ' : ' ')+ (effectInfo[1].indexOf('Debuff') > -1 ? '-' : '')+ bonus +'%'+ effectInfo[1];
+								items[ item.type ] += (effectRank > 1 ? ', ' : ' ')+ (effectInfo[1].indexOf('Debuff') > -1 ? '-' : '')+ bonus +'%'+ effectInfo[1];
+							}
 						}
 					}
 				}
@@ -20886,33 +20989,36 @@ jQuery(document).ready(function(){
 			//generate the <option>s for each item type
 			for( itemId in window.seed.throne.inventory ){
 				if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
-					item = window.seed.throne.inventory[ itemId ];
-					bonuses = KOCFIA.throne.getSetBonus(null, [itemId]);
+					item = Shared.getThroneItemObject( itemId );
 
-					text = $.map(bonuses, function(effect){ return effect.percent +'% '+ effect.label; }).join(', ');
-					effectText[ itemId ] = text;
+					if( item && Object.isObject(item) ){
+						bonuses = KOCFIA.throne.getSetBonus(null, [itemId]);
 
-					switch( item.type ){
-						case 'advisor':
-								advisorList += '<option value="'+ itemId +'">'+ text +'</option>';
-							break;
-						case 'banner':
-								bannerList += '<option value="'+ itemId +'">'+ text +'</option>';
-							break;
-						case 'chair':
-								chairList += '<option value="'+ itemId +'">'+ text +'</option>';
-							break;
-						case 'table':
-								tableList += '<option value="'+ itemId +'">'+ text +'</option>';
-							break;
-						case 'trophy':
-								trophyList += '<option value="'+ itemId +'">'+ text +'</option>';
-							break;
-						case 'window':
-								windowList += '<option value="'+ itemId +'">'+ text +'</option>';
-							break;
-						default:
-							break;
+						text = $.map(bonuses, function(effect){ return effect.percent +'% '+ effect.label; }).join(', ');
+						effectText[ itemId ] = text;
+
+						switch( item.type ){
+							case 'advisor':
+									advisorList += '<option value="'+ itemId +'">'+ text +'</option>';
+								break;
+							case 'banner':
+									bannerList += '<option value="'+ itemId +'">'+ text +'</option>';
+								break;
+							case 'chair':
+									chairList += '<option value="'+ itemId +'">'+ text +'</option>';
+								break;
+							case 'table':
+									tableList += '<option value="'+ itemId +'">'+ text +'</option>';
+								break;
+							case 'trophy':
+									trophyList += '<option value="'+ itemId +'">'+ text +'</option>';
+								break;
+							case 'window':
+									windowList += '<option value="'+ itemId +'">'+ text +'</option>';
+								break;
+							default:
+								break;
+						}
 					}
 				}
 			}
@@ -20944,9 +21050,9 @@ jQuery(document).ready(function(){
 
 						//for each of the set items, set the corresponding select value and add a <span> with the item bonuses
 						for( i = 0; i < setItems.length; i += 1 ){
-							item = window.seed.throne.inventory[ setItems[i] ];
+							item = Shared.getThroneItemObject( setItems[ i ] );
 
-							if( Object.isObject(item) ){
+							if( item && Object.isObject(item) ){
 								$line.find('select').filter('[name="'+ item.type +'"]').val( item.id )
 									.parent().append('<span>'+ effectText[ itemId ] +'</span>');
 							}
@@ -20960,193 +21066,421 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.getSalvageConf = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getSalvageConf function');
-			//@TODO
 
-			var code = '';
+			var code = '',
+				i, type, effectId, effect,
+				category = '';
+
+			code += '<p>Les objets de niveau supérieur ou égal à 1 ainsi que les objets protégés, cassés ou faisant partie d\'un set ne seront pas recyclés.<br />';
+			code += 'De plus les objets correspondant aux règles définies ci-dessous ne seront pas recyclés<br />';
+			code += 'Tout autre objet sera recyclé</p>';
+			code += '<table class="salvage-conf-form">';
+			code += '<tbody><tr>';
+
+			//item type
+			code += '<td><label for="kocfia-salvage-conf-type">Type d\'objet&nbsp;:&nbsp;</label>';
+			code += '<select name="type" id="kocfia-salvage-conf-type">';
+			code += '<option value="any">N\'importe</option>';
+			for( i = 0; i < KOCFIA.set.itemTypes.length; i += 1 ){
+				type = KOCFIA.set.itemTypes[ i ];
+				code += '<option value="'+ type +'">'+ type +'</option>';
+			}
+			code += '</select></td>';
+
+			//effect bonus
+			code += '<td>';
+			code += '<div><span class="or">ou</span>';
+			code += '<label>Bonus&nbsp;:&nbsp;</label>';
+			code += '<select name="bonus">';
+			code += '<option value="">Choisir</option>';
+			for( effectId in window.cm.thronestats.effects ){
+				if( window.cm.thronestats.effects.hasOwnProperty(effectId) ){
+					effect = window.cm.thronestats.effects[ effectId ];
+
+					if( Object.isObject(effect) && !$.isEmptyObject(effect) ){
+						if( category === '' || category != effect['3'] ){
+							if( category !== '' ) code += '</optgroup>';
+
+							category = effect['3'];
+							code += '<optgroup label="'+ category +'">';
+						}
+
+						code += '<option value="'+ effectId +'">'+ effect['1'] +'</option>';
+					}
+				}
+			}
+			code += '</optgroup></select>';
+			code += '<span class="icon-trash less" title="Enlevé cet effet"></span></div>';
+			code += '</td>';
+
+			//number of effects with this bonus
+			code += '<td><label for="kocfia-salvage-conf-occurence">Ocurrence&nbsp;:&nbsp;</label>';
+			code += '<input type="number" name="occurence" id="kocfia-salvage-conf-occurence" min="1" max="5" value="2">';
+			code += '</td>';
+
+			//inside x lines
+			code += '<td><label for="kocfia-salvage-conf-line">Ligne&nbsp;:&nbsp;</label>';
+			code += '<select name="line" id="kocfia-salvage-conf-line">';
+			code += '<option value="1">les 5</option>';
+			code += '<option value="2">les 4 dernières</option>';
+			code += '<option value="3" selected>les 3 dernières</option>';
+			code += '<option value="4">les 2 dernières</option>';
+			code += '<option value="5">la dernière</option>';
+			code += '</select></td>';
+
+			//actions
+			code += '<td>';
+			code += '<button class="button secondary more" title="Ajouter un autre effet"><span><span class="icon-plus-sign"></span> Effect</span></button>';
+			code += '<button class="button save"><span>Enregistrer</span></button>';
+			code += '<button class="button danger cancel"><span>Annuler</span></button>';
+			code += '<td>';
+
+			code += '</tr></tbody></table>';
+
+			code += KOCFIA.throne.getSalvageRules();
 
 			return code;
 		};
 
-		KOCFIA.throne.isSalvageable = function( id ){
+		KOCFIA.throne.getSalvageRules = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getSalvageRules function');
+
+			var code = '',
+				rule, i, j, effectId, effect;
+
+			code += '<table class="salvage-conf-list">';
+			code += '<thead><tr>';
+			code += '<th><button class="button secondary reload" title="Recharge la liste des améliorations"><span>Recharger</span></button></th>';
+			code += '<th>Type</th>';
+			code += '<th>Bonus</th>';
+			code += '<th>Occurence</th>';
+			code += '<th>Ligne</th>';
+			code += '</tr></thead>';
+			code += '<tbody>';
+			for( i = 0; i < KOCFIA.throne.salvage.length; i += 1 ){
+				rule = KOCFIA.throne.salvage[ i ];
+
+				code += '<tr>';
+				code += '<td><span class="icon-trash delete" data-index="'+ i +'"></span></td>';
+				code += '<td>'+ (rule.type == 'any' ? 'n\'importe' : KOCFIA.set.itemTypes[ rule.type ]) +'</td>';
+				code += '<td>';
+				for( j = 0; j < rule.bonuses.length; j += 1 ){
+					effectId = rules.bonuses[ j ];
+
+					if( window.cm.thronestats.effects.hasOwnProperty(effectId) ){
+						effect = window.cm.thronestats.effects[ effectId ];
+						code += '<div>'+ effect['1'] +' ('+ effect['3'] +')</div>';
+					}
+				}
+				code += '</td>';
+				code += '<td>'+ (rule.occurence === 1 || rule.occurence == 5 ? '' : 'au moins ') + rule.occurence +' fois</td>';
+				code += '<td>dans ';
+				if( rule.line === 1 ) code += 'les 5';
+				else if( rule.line == 2 ) code += 'les 4 dernières';
+				else if( rule.line == 3 ) code += 'les 3 dernières';
+				else if( rule.line == 4 ) code += 'les 2 dernières';
+				else if( rule.line == 5 ) code += 'la dernière';
+				code += ' ligne'+ (rule.line != 5 ? 's': '');
+				code += '</tr>';
+			}
+			code += '</tbody>';
+			code += '</table>';
+
+			return code;
+		};
+
+		KOCFIA.throne.isSalvageable = function( item ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne isSalvageable function');
-			var item = window.seed.throne.inventory[ id ];
+			if( !Object.isObject(item) ){
+				var itemId = item;
+				item = Shared.getThroneItemObject( itemId );
+			}
 
 			if( item && Object.isObject(item) ){
-				if( KOCFIA.throne.locks.hasOwnProperty(id) ){
+				//level check
+				if( item.level >= 1 ){
 					return false;
 				}
 
-				//match a salvage rule ?
-				//@TODO
-			}
+				//broken check
+				if( item.isBroken ){
+					return false;
+				}
 
-			return true;
-		};
+				//protection check
+				if( KOCFIA.throne.locks.hasOwnProperty(itemId) ){
+					return false;
+				}
 
-		KOCFIA.throne.salvageItem = function( id, cityKey, attempts, dfd ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne salvageItem function');
-			var params = $.extend({}, window.g_ajaxparams);
-			params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
-			params.action = 'salvage';
-			itemId = id;
-			cityId = cityKey.replace(/city/, '');
+				//kabam sets check
+				var setNum, items;
+				for( setNum in window.seed.throne.slotEquip ){
+					if( window.seed.throne.slotEquip.hasOwnProperty(setNum) ){
+						items = window.seed.throne.slotEquip[ setNum ];
 
-			$.ajax({
-				url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
-				type: 'post',
-				data: params,
-				dataType: 'json',
-				timeout: 10000
-			})
-			.done(function(data){
-				if( data.ok ){
-					var item = window.seed.throne.inventory[ id ],
-						modifier = 0,
-						gain = 0,
-						index;
-
-					for( effect in item.effects ){
-						if( item.effects.hasOwnProperty(effect) ){
-							modifier++;
+						if( $.inArray(id, items) != -1 ){
+							return false;
 						}
 					}
+				}
 
-					gain = item.quality * (modifier + item.level) * window.cm.WorldSettings.getSettingAsNumber("AETHERSTONE_SALVAGE_MULTIPLIER", 500);
-					window.seed.resources[ cityKey ]['rec5'][0] = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10) + gain;
+				//kocfia task sets check
+				var task, pairInfo, sort, type, tmp, id;
+				if( Object.isObject(KOCFIA.set.pairs) && !$.isEmptyObject(KOCFIA.set.pairs) ){
+					for( task in KOCFIA.set.pairs ){
+						if( KOCFIA.set.pairs.hasOwnProperty(task) ){
+							pairInfo = KOCFIA.set.pairs[ task ];
 
-					for( slotNum in window.seed.throne.slotEquip ){
-						if( window.seed.throne.slotEquip.hasOwnProperty(slotNum) ){
-							index = $.inArray(id, window.seed.throne.slotEquip[ slotNum ]);
-							if( index > -1 ){
-								window.seed.throne.slotEquip[ slotNum ].splice(index, 1);
+							if( !$.isEmptyObject(pairInfo) ){
+								//not a set number or a faction but items by type
+								if( !pairInfo.hasOwnProperty('advisor') || pairInfo.advisor === '' || pairInfo.advisor.indexOf('item') > -1 ){
+									for( i = 0; i < KOCFIA.set.itemTypes.length; i += 1 ){
+										type = KOCFIA.set.itemTypes[ i ];
+
+										if( pairInfo.hasOwnProperty(type) && pairInfo[ type ].indexOf('item') > -1 ){
+											id = pairInfo[ type ].split('-')[1];
+
+											if( id == itemId ){
+												return false;
+											}
+										}
+									}
+								}
 							}
 						}
 					}
-
-					delete window.seed.throne.inventory[ id ]; //added, missing in kabam code
-					delete window.kocThroneItems[ id ];
-
-				} else {
-					attempts -= 1;
-					if( attempts > 0 ){
-						if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( id, cityKey, attempts, dfd ) );
-						else KOCFIA.throne.salvageItem( id, cityKey, attempts, dfd );
-					} else if( dfd ) return dfd.reject();
 				}
-			})
-			.fail(function(){
-				attempts -= 1;
-				if( attempts > 0 ){
-					if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( id, cityKey, attempts, dfd ) );
-					else KOCFIA.throne.salvageItem( id, cityKey, attempts, dfd );
-				} else if( dfd ) return dfd.reject();
-			});
+
+				//match a salvage rule ?
+				var i, j, rule, found;
+				for( i = 0; i < KOCFIA.throne.salvage.length; i+= 1 ){
+					rule = KOCFIA.throne.salvage[ i ];
+
+					if( rule.type == 'any' || rule.type == item.type ){
+						found = 0;
+						for( j = rule.line; j <= 5; j += 1 ){
+							//check effect slots against rule bonuses
+							if( $.inArray( item.effects['slot'+ j].id, rule.bonuses) > -1 ){
+								found += 1;
+							}
+						}
+						if( found >= rule.occurence ){
+							return false;
+						}
+					}
+				}
+
+				return true;
+			}
+
+			return false;
 		};
 
-		KOCFIA.throne.upgradeItem = function( type, id, cityKey, buffItemId, isAuto, dfd, attempts ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne upgradeItem function');
-			var params = $.extend({}, window.g_ajaxparams);
-			params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
-			params.action = (type == 'quality' ? 'upgradeQuality' : 'upgradeLevel');
-			params.throneRoomItemId = id;
-			params.payment = 'aetherstone';
-			params.buffItemId = (buffItemId !== null ? buffItemId : 0); //global 20001 | 20002, enhance 20003 | 20004 | 20011, upgrade 20005 | 20006 | 20016
-			params.cityId = cityKey.replace(/city/, '');
+		KOCFIA.throne.salvageItem = function( item, cityKey, attempts, dfd ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne salvageItem function');
 
-			$.ajax({
-				url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
-				type: 'post',
-				data: params,
-				dataType: 'json',
-				timeout: 10000
-			})
-			.done(function(data){
-				if( data.ok ){
-					window.seed.resources[ cityKey ]['rec5'][0] = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10) - parseInt(data.aetherstones, 10);
+			if( !Object.isObject(item) ){
+				var itemId = item;
+				item = Shared.getThroneItemObject( itemId );
+			}
 
-					if( buffItemId !== null && buffItemId > 0 ) window.ksoItems[ buffItemId ].subtract(); //not a typo the function is named subtract...
+			if( item && Object.isObject(item) ){
+				var gain, effect, modifier = 0, aetherstone, i, key, cap;
 
-					var item = new window.cm.ThroneItemModel(id, window.seed.throne.inventory[ id ]);
+				for( effect in item.effects ){
+					if( item.effects.hasOwnProperty(effect) ){
+						modifier++;
+					}
+				}
 
-					if( data.success ){
-						item.quality = data.item.quality;
-						item.level = data.item.level;
-						item.name = item.createName();
+				gain = item.quality * (modifier + item.level) * window.cm.WorldSettings.getSettingAsNumber("AETHERSTONE_SALVAGE_MULTIPLIER", 500);
+				aetherstone = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10);
+				cap = parseInt(window.cm.WorldSettings.getSetting("DARK_FOREST_AETHERSTONE_CAP"), 10);
 
-						if( !isAuto ) Shared.success('Amélioration réussie.');
-					} else {
-						item.quality = data.item.quality;
-						item.level = data.item.level;
-						item.name = item.createName();
+				//change city if the salvage gain in aetherstone exceed the cap
+				//do not take into account aetherstone cap modifier like faction bonus or throne item bonus
+				if( aetherstone + gain > cap ){
+					for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+						key = KOCFIA.citiesKey[ i ];
+						if( key != cityKey && parseInt(window.seed.resources[ key ]['rec5'][0], 10) + gain <= cap ){
+							cityKey = key;
+						}
+					}
+				}
 
-						if( data['break'] ){
-							item.brokenType = type;
-							item.isBroken = true;
-							item.name = item.createName();
+				var params = $.extend({}, window.g_ajaxparams);
+				params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
+				params.action = 'salvage';
+				params.itemId = item.id;
+				params.cityId = cityKey.replace(/city/, '');
+
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(data){
+					if( data.ok ){
+						var index;
+
+						gain = item.quality * (modifier + item.level) * window.cm.WorldSettings.getSettingAsNumber("AETHERSTONE_SALVAGE_MULTIPLIER", 500);
+						window.seed.resources[ cityKey ]['rec5'][0] = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10) + gain;
+
+						for( slotNum in window.seed.throne.slotEquip ){
+							if( window.seed.throne.slotEquip.hasOwnProperty(slotNum) ){
+								index = $.inArray(id, window.seed.throne.slotEquip[ slotNum ]);
+								if( index > -1 ){
+									window.seed.throne.slotEquip[ slotNum ].splice(index, 1);
+								}
+							}
 						}
 
-						if( !isAuto ) Shared.notify('Amélioration échouée.');
-					}
+						delete window.seed.throne.inventory[ item.id ]; //added, missing in kabam code
+						delete window.kocThroneItems[ item.id ];
 
-				} else {
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd ) );
+							else KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd );
+						} else if( dfd ) return dfd.reject();
+					}
+				})
+				.fail(function(){
 					attempts -= 1;
 					if( attempts > 0 ){
-						if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts ) );
-						else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts );
-					} else if( dfd ){
-						return dfd.reject();
-					}
-				}
-			})
-			.fail(function(){
-				attempts -= 1;
-				if( attempts > 0 ){
-					if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts ) );
-					else KOCFIA.throne.upgradeItem( type, id, cityKey, buffItemId, dfd, attempts );
-				} else if( dfd ){
-					return dfd.reject();
-				}
-			});
+						if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd ) );
+						else KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd );
+					} else if( dfd ) return dfd.reject();
+				});
+			} else if( dfd ){
+				return dfd.reject();
+			}
 		};
 
-		KOCFIA.throne.repairItem = function( id, isAuto, dfd, attempts ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne repairItem function');
-			var params = $.extend({}, window.g_ajaxparams);
-			params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
-			params.action = 'timeRepair';
-			params.throneRoomItemId = id;
+		KOCFIA.throne.upgradeItem = function( type, item, cityKey, buffItemId, isAuto, dfd, attempts ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne upgradeItem function');
 
-			$.ajax({
-				url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
-				type: 'post',
-				data: params,
-				dataType: 'json',
-				timeout: 10000
-			})
-			.done(function(data){
-				if( data.ok ){
-					if( !isAuto ) Shared.success('Réparation lancée');
-					if( dfd ) return dfd.resolve();
+			if( !Object.isObject(item) ){
+				var itemId = item;
+				item = Shared.getThroneItemObject( itemId );
+			}
 
-				} else {
+			if( item && Object.isObject(item) ){
+				var params = $.extend({}, window.g_ajaxparams);
+				params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
+				params.action = (type == 'quality' ? 'upgradeQuality' : 'upgradeLevel');
+				params.throneRoomItemId = item.id;
+				params.payment = 'aetherstone';
+				params.buffItemId = (buffItemId !== null ? buffItemId : 0); //global 20001 | 20002, enhance 20003 | 20004 | 20011, upgrade 20005 | 20006 | 20016
+				params.cityId = cityKey.replace(/city/, '');
+
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(data){
+					if( data.ok ){
+						window.seed.resources[ cityKey ]['rec5'][0] = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10) - parseInt(data.aetherstones, 10);
+
+						if( buffItemId !== null && buffItemId > 0 ) window.ksoItems[ buffItemId ].subtract(); //not a typo the function is named subtract...
+
+						if( data.success ){
+							item.quality = data.item.quality;
+							item.level = data.item.level;
+							item.name = item.createName();
+
+							if( !isAuto ) Shared.success('Amélioration réussie.');
+						} else {
+							item.quality = data.item.quality;
+							item.level = data.item.level;
+							item.name = item.createName();
+
+							if( data['break'] ){
+								item.brokenType = type;
+								item.isBroken = true;
+								item.name = item.createName();
+							}
+
+							if( !isAuto ) Shared.notify('Amélioration échouée.');
+						}
+
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, item, cityKey, buffItemId, dfd, attempts ) );
+							else KOCFIA.throne.upgradeItem( type, item, cityKey, buffItemId, dfd, attempts );
+						} else if( dfd ){
+							return dfd.reject();
+						}
+					}
+				})
+				.fail(function(){
 					attempts -= 1;
 					if( attempts > 0 ){
-						if( dfd ) return dfd.pipe( KOCFIA.throne.repairItem( id, dfd, attempts ) );
-						else KOCFIA.throne.repairItem( id, dfd, attempts );
+						if( dfd ) return dfd.pipe( KOCFIA.throne.upgradeItem( type, item, cityKey, buffItemId, dfd, attempts ) );
+						else KOCFIA.throne.upgradeItem( type, item, cityKey, buffItemId, dfd, attempts );
 					} else if( dfd ){
 						return dfd.reject();
 					}
-				}
-			})
-			.fail(function(){
-				attempts -= 1;
-				if( attempts > 0 ){
-					if( dfd ) return dfd.pipe( KOCFIA.throne.repairItem( id, dfd, attempts ) );
-					else KOCFIA.throne.repairItem( id, dfd, attempts );
-				} else if( dfd ){
-					return dfd.reject();
-				}
-			});
+				});
+			} else if( dfd ){
+				return dfd.reject();
+			}
+		};
+
+		KOCFIA.throne.repairItem = function( item, isAuto, dfd, attempts ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne repairItem function');
+			if( !Object.isObject(item) ){
+				var itemId = item;
+				item = Shared.getThroneItemObject( itemId );
+			}
+
+			if( item && Object.isObject(item) ){
+				var params = $.extend({}, window.g_ajaxparams);
+				params.ctrl = 'throneRoom\\ThroneRoomServiceAjax';
+				params.action = 'timeRepair';
+				params.throneRoomItemId = id;
+
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch53.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(data){
+					if( data.ok ){
+						if( !isAuto ) Shared.success('Réparation lancée');
+						if( dfd ) return dfd.resolve();
+
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							if( dfd ) return dfd.pipe( KOCFIA.throne.repairItem( item, dfd, attempts ) );
+							else KOCFIA.throne.repairItem( item, dfd, attempts );
+						} else if( dfd ){
+							return dfd.reject();
+						}
+					}
+				})
+				.fail(function(){
+					attempts -= 1;
+					if( attempts > 0 ){
+						if( dfd ) return dfd.pipe( KOCFIA.throne.repairItem( item, dfd, attempts ) );
+						else KOCFIA.throne.repairItem( item, dfd, attempts );
+					} else if( dfd ){
+						return dfd.reject();
+					}
+				});
+			} else if( dfd ){
+				return dfd.reject();
+			}
 		};
 
 		KOCFIA.throne.getSetBonus = function( setNum, items ){
@@ -21178,7 +21512,9 @@ jQuery(document).ready(function(){
 						}
 						item = items[ itemId ];
 					} else {
-						item = window.seed.throne.inventory[ itemId ];
+						item = Shared.getThroneItemObject( itemId );
+
+
 					}
 
 					if( item && Object.isObject(item) ){
@@ -21211,7 +21547,7 @@ jQuery(document).ready(function(){
 			return summary;
 		};
 
-		KOCFIA.throne.getObjectLabel = function( itemId ){
+		KOCFIA.throne.getObjectLabel = function( item ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getObjectLabel function');
 
 			var label = '',
@@ -21220,34 +21556,34 @@ jQuery(document).ready(function(){
 				effectRank, effectInfo, tierInfo, bonus,
 				item, itemObject;
 
-			if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
-				item = window.seed.throne.inventory[ itemId ];
-				if( item && Object.isObject(item) ){
-					itemObject = new cm.ThroneItemModel(item.id, item);
+			if( !Object.isObject(item) ){
+				var itemId = item;
+				item = Shared.getThroneItemObject( itemId );
+			}
 
-					for( slot in item.effects ){
-						if( item.effects.hasOwnProperty(slot) ){
-							effect = item.effects[ slot ];
-							effectRank = parseInt(slot.replace(/slot/, ''), 10);
-							if( effectRank <= item.quality ){
-								tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
-								bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
+			if( item && Object.isObject(item) ){
+				for( slot in item.effects ){
+					if( item.effects.hasOwnProperty(slot) ){
+						effect = item.effects[ slot ];
+						effectRank = parseInt(slot.replace(/slot/, ''), 10);
+						if( effectRank <= item.quality ){
+							tierInfo = window.cm.thronestats.tiers[ effect.id ][ effect.tier ];
+							bonus = parseInt(tierInfo.base, 10) + (item.level * item.level + item.level) * parseInt(tierInfo.growth, 10) / 2;
 
-								if( !summary.hasOwnProperty(effect.id) ){
-									effectInfo = window.cm.thronestats.effects[ effect.id ];
-									summary[ effect.id ] = {
-										label: effectInfo[1],
-										percent: bonus
-									};
-								} else {
-									summary[ effect.id ].percent += bonus;
-								}
+							if( !summary.hasOwnProperty(effect.id) ){
+								effectInfo = window.cm.thronestats.effects[ effect.id ];
+								summary[ effect.id ] = {
+									label: effectInfo[1],
+									percent: bonus
+								};
+							} else {
+								summary[ effect.id ].percent += bonus;
 							}
 						}
 					}
-
-					label = itemObject.name +' - '+ $.map(summary, function(effect){ return effect.label +' '+ effect.percent +'%'; }).join(', ');
 				}
+
+				label = itemObject.name +' - '+ $.map(summary, function(effect){ return effect.label +' '+ effect.percent +'%'; }).join(', ');
 			}
 
 			return label;
@@ -21690,7 +22026,7 @@ jQuery(document).ready(function(){
 						return dfd.reject();
 					}
 
-					item = new window.cm.ThroneItemModel(improvement.id, window.seed.throne.inventory[ improvement.id ]);
+					item = Shared.getThroneItemObject( improvement.id );
 
 					return dfd.pipe( checkImprovement(dfd) );
 				};
@@ -21798,7 +22134,7 @@ jQuery(document).ready(function(){
 
 					var repairSequence = function(){
 						return $.Deferred(function( wdfd ){
-							return wdfd.pipe( KOCFIA.throne.repairItem(id, true, wdfd, 3) );
+							return wdfd.pipe( KOCFIA.throne.repairItem(item, true, wdfd, 3) );
 						}).promise();
 					};
 
@@ -21885,13 +22221,15 @@ jQuery(document).ready(function(){
 
 					var improveSequence = function(){
 						return $.Deferred(function( wdfd ){
-							return wdfd.pipe( KOCFIA.throne.upgradeItem(type, item.id, cityKey, null, true, wdfd, 3) );
+							return wdfd.pipe( KOCFIA.throne.upgradeItem(type, item, cityKey, null, true, wdfd, 3) );
 						}).promise();
 					};
 
 					$.when( improveSequence() )
 						.done(function(){
-							if( window.seed.throne.inventory[ item.id ].isBroken ){
+							item = Shared.getThroneItemObject( improvement.id );
+
+							if( item.isBroken ){
 								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration echouée');
 
 								//increment try counter
@@ -21901,7 +22239,7 @@ jQuery(document).ready(function(){
 								KOCFIA.improvements[0]['try'] += 1;
 							} else {
 								//add improvement in history
-								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration réussie : '+ KOCFIA.throne.getObjectLabel(item.id));
+								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration réussie : '+ KOCFIA.throne.getObjectLabel( item ));
 
 								//remove improvement from array
 								KOCFIA.throne.improvements.splice(0, 1);
@@ -21933,45 +22271,80 @@ jQuery(document).ready(function(){
 				return;
 			}
 
-			//@TODO
-			//browse throne inventory
-			//for each items check
-				//is locked ? next
-				//is level > 0 ? next
-				//is brocken ? next
-				//is not salvageable ? next
-				//else add to mass salvage
-			//sum the aetherstone gain
-			//check the aetherstone on preferred city
-			//split mass salvage if necessary
-			//salvage
-			//callback in 2 minutes
+			if( !Object.isObject(window.seed.throne.inventory) || $.isEmptyObject(window.seed.throne.inventory) ){
+				window.setTimeout(function(){
+					KOCFIA.throne.launchAutomaticSalvage();
+				}, 2 * 60 * 1000);
+			}
 
-			/*var u;
-			AjaxCall.gPostRequest("ajax/_dispatch53.php", {
-				ctrl: "throneRoom\\ThroneRoomServiceAjax",
-				action: "salvage",
-				itemId: t.join(","),
-				cityId: currentcityid,
-				qualityId: v.join(",")
-			}, function(w) {
-				if (w.ok === true) {
-					g.each(t, function(y, x) {
-						u = kocThroneItems[x];
-						u.salvage()
-					})
-				} else {
-					cm.ModalManager.alert({
-						button_text: g_js_strings.commonstr.ok,
-						text: w.msg,
-						"class": "craftFailure",
-						exe: function() {
-							Modal.hideModalAll();
-							cm.ModalManager.close()
-						}
-					})
-				}
-			})*/
+			var unavailableThreshold = parseInt(window.seed.throne.rowNum, 10) * 5, //5 objects per line
+				itemId, itemIds, params, item, cityKey,
+				itemIndex = 0;
+
+			/* deferred functions */
+				var sequence = function(){
+					return $.Deferred(function( dfd ){
+						itemIds = Object.keys( window.seed.throne.inventory );
+
+						return dfd.pipe( byItem(dfd) );
+					}).promise();
+				};
+
+				var byItem = function( dfd ){
+					if( itemIndex >= itemIds.length ){
+						return dfd.resolve();
+					}
+
+					//availability threshold check
+					//need to get current inventory item ids as a previous salvage modify it
+					inventory = Object.keys( window.seed.throne.inventory );
+					if( $.inArray(itemId, inventory) >= unavailableThreshold ){
+						//non avaible object, no need to continue
+						return dfd.reject();
+					}
+
+					itemId = itemIds[ itemIndex ];
+					item = Shared.getThroneItemObject( itemId );
+
+					if( item && Object.isObject(item) && KOCFIA.throne.isSalvageable(item) ){
+						cityKey = (KOCFIA.conf.throne.cityKey !== '' ? KOCFIA.conf.throne.cityKey : KOCFIA.citiesKey[0]);
+
+						return dfd.pipe( salvage(dfd, 3) );
+
+					} else {
+						itemIndex += 1;
+						return dfd.pipe( byItem(dfd) );
+					}
+				};
+
+				var salvage = function(dfd, attempts){
+					var salvageSequence = function(){
+						return $.Deferred(function( wdfd ){
+							return wdfd.pipe( KOCFIA.throne.salvageItem(item, cityKey, 3, wdfd) );
+						}).promise();
+					};
+
+					var label = KOCFIA.throne.getObjectLabel(item);
+
+					$.when( salvageSequence() )
+						.done(function(){
+							KOCFIA.throne.refreshOnGoing('Recyclage lancée pour '+ label);
+						})
+						.fail(function(){
+							KOCFIA.throne.refreshOnGoing('Problème durant le recyclage pour'+ label);
+						})
+						.always(function(){
+							itemIndex += 1;
+							return dfd.pipe( byItem(dfd) );
+						});
+				};
+
+			$.when( sequence() )
+				.always(function(){
+					window.setTimeout(function(){
+						KOCFIA.throne.launchAutomaticSalvage();
+					}, 2 * 60 * 1000);
+				});
 		};
 
 	/* REPORTS */
@@ -23613,7 +23986,7 @@ jQuery(document).ready(function(){
 							Shared.success('Configuration du soin validée');
 							KOCFIA.hospital.launchRevive( result.plan );
 						}
-					})
+					});
 
 			KOCFIA.hospital.$autoForm
 				.on('click', '.addRule', function(){
@@ -23797,7 +24170,7 @@ jQuery(document).ready(function(){
 			var check = cm.ThroneController.hasFactionBonus();
 			if( check.hazBonus && check.faction == "druid" ){
 				var bonus = cm.ThroneController.effectBonus(94);
-				time = time - (time * (bonus / 100))
+				time = time - (time * (bonus / 100));
 			}
 
 			return time;
@@ -24936,7 +25309,7 @@ jQuery(document).ready(function(){
 											alliance: users[playerId].allianceName,
 											fbUserId: users[ playerId ].fbuid,
 											might: users[playerId].might,
-											title: users[playerId].title,
+											title: users[playerId].title
 										});
 									}
 								}
@@ -25424,8 +25797,8 @@ jQuery(document).ready(function(){
 				noSwapWhileAttacked: 1
 			},
 			stored: ['pairs', 'currentPair', 'previousSet', 'previousEquipedItems'],
-			tasks: ['formation', 'hospital', 'transport', 'reassign', 'attack', 'scout', 'reinforce'/*, 'repair', 'research', 'build'*/],
-			pairs: {}, //by task
+			tasks: ['formation', 'hospital', 'transport', 'reassign', 'attack', 'scout', 'reinforce', 'build'/*, 'repair', 'research'*/],
+			pairs: {}, //by task : {type: id} - {advisor: set-num} for sets - {advisor: faction-factionName} for faction bonus - {type: item-id} for items by item type
 			currentPair: '',
 			previousEquipedItems: {}, //by type
 			previousSet: '',
@@ -25488,7 +25861,7 @@ jQuery(document).ready(function(){
 			code += '<div class="accordion">';
 			for( i = 0; i < KOCFIA.set.tasks.length; i += 1 ){
 				task = KOCFIA.set.tasks[ i ];
-				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabel[ task ] : KOCFIA.set.labels[ task ]),
+				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabel[ task ] : KOCFIA.set.labels[ task ]);
 
 				code += '<h3>'+ title +'</h3>';
 				code += KOCFIA.set.getForm( task );
@@ -25631,12 +26004,17 @@ jQuery(document).ready(function(){
 					var $form = $(this).closest('.form'),
 						task = $form.attr('data-task'),
 						set = $form.find('.set').val(),
+						faction = $form.find('.faction').val(),
 						$types = $form.find('.type');
 
 					KOCFIA.pairs[ task ] = {};
 
 					if( set !== '' ){
 						KOCFIA.pairs[ task ]['advisor'] = set;
+
+					} else if( faction !== '' ){
+						KOCFIA.pairs[ task ]['advisor'] = faction;
+
 					} else {
 						$types.each(function(){
 							var $this = $(this),
@@ -25658,11 +26036,19 @@ jQuery(document).ready(function(){
 						if( KOCFIA.set.pairs[ task ].hasOwnProperty('advisor') && KOCFIA.set.pairs[ task ].advisor.indexOf('set') > -1 ){
 							$form
 								.find('.set').val( KOCFIA.set.pairs[ task ].advisor ).end()
+								.find('.faction').val('').end()
+								.find('.type').val('');
+
+						} else if( KOCFIA.set.pairs[ task ].hasOwnProperty('advisor') && KOCFIA.set.pairs[ task ].advisor.indexOf('faction') > -1 ){
+							$form
+								.find('.set').val('').end()
+								.find('.faction').val( KOCFIA.set.pairs[ task ].advisor ).end()
 								.find('.type').val('');
 
 						} else {
 							$form
 								.find('.set').val('').end()
+								.find('.faction').val('').end()
 								.find('.type').each(function(){
 									var $this = $(this),
 										type = $this.attr('data-type');
@@ -25692,7 +26078,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.set.getForm = function( task ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set getForm function', task);
-			var defaultActions = ['noSwap', 'briton', 'druid', 'fey'],
+			var factions = ['briton', 'druid', 'fey'],
 				i, j, type, action, itemId, item, setNum, set, key, name;
 
 			var code = '<div id="kocfia-set-'+ task +'-form" class="forms" data-task="'+ task +'">';
@@ -25710,27 +26096,29 @@ jQuery(document).ready(function(){
 			}
 			code += '</select><br />';
 
+			code += '<label for="kocfia-set-'+ task +'-faction">ou Obtenir un bonus de faction précis</label>';
+			code += '<select id="kocfia-set-'+ task +'-faction" class="faction">';
+			code += '<option value="">Aucun</option>';
+			for( i = 0; i < factions.length; i += 1 ){
+				key = 'faction'+ faction[i];
+				code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ KOCFIA.set.labels[ faction[i] ] +'</option>';
+			}
+			code += '</select><br />';
+
+			code += '<div>ou spécifier un ou plusieurs objets précis</div>';
 			for( i = 0; i < KOCFIA.set.itemTypes.length; i += 1 ){
 				type = KOCFIA.set.itemTypes[ i ];
 				code += '<label for="kocfia-set-'+ task +'-type-'+ type +'">'+ (window.hasOwnProperty('g_js_strings') ? window.g_js_strings.throneRoom[ type ] : type) +'</label>';
 				code += '<select id="kocfia-set-'+ task +'-type-'+ type +'" class="type" data-type="'+ type +'">';
 				code += '<option value="">Choisir</option>';
 
-				//default actions
-				for( j = 0; j < defaultActions.length; j += 1 ){
-					action = defaultActions[ j ];
-					key = 'action-'+ action;
-					code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ KOCFIA.set.labels[ action ] +'</option>';
-				}
-
 				//object list
 				for( itemId in window.seed.throne.inventory ){
 					if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
-						item = window.seed.throne.inventory[ itemId ];
+						item = Shared.getThroneItemObject( itemId );
 
-						//limit on current type
-						if( item.type == type ){
-							name = KOCFIA.throne.getObjectLabel( itemId );
+						if( item && Object.isObject(item) && item.type == type ){
+							name = KOCFIA.throne.getObjectLabel( item );
 							if( name !== '' ){
 								key = 'item-'+ itemId;
 								code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ name +'</option>';
@@ -25831,9 +26219,6 @@ jQuery(document).ready(function(){
 
 		KOCFIA.set.equipItem = function( dfd, attempts, itemId ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set equipItem function');
-			return $.Deferred(function(dfd){
-
-			}).promise();
 
 			var params = $.extend({}, window.g_ajaxparams);
 			params.ctrl = "throneRoom\\ThroneRoomServiceAjax";
@@ -25929,7 +26314,7 @@ jQuery(document).ready(function(){
 				pairItems = KOCFIA.set.pairs[ task ],
 				typeIndex, type, pairInfo,
 				faction, itemId, item,
-				setNum,
+				setNum, sort, id,
 				nbItemsForFaction = 4,
 				title = (KOCFIA.modulesLabel.hasOwnProperty(task) ? KOCFIA.modulesLabels[ task ] : KOCFIA.set.labels[ task ]);
 
@@ -25940,7 +26325,7 @@ jQuery(document).ready(function(){
 
 			if( pairItems !== null && Object.isObject(pairItems) && !$.isEmptyObject(pairItems) ){
 				//for sets the "advisor" type is used
-				if( pairItem.advisor.indexOf('set') > -1 ){
+				if( pairItems.advisor.indexOf('set') > -1 ){
 					KOCFIA.set.previousSet = window.seed.throne.activeSlot;
 					KOCFIA.set.storePreviousSet();
 
@@ -25948,30 +26333,34 @@ jQuery(document).ready(function(){
 					//by type check if item match
 					for( itemId in setItems ){
 						if( setItems.hasOwnProperty(itemId) ){
-							item = window.seed.throne.inventory[ itemId ];
+							item = Shared.getThroneItemObject( itemId );
 							if( item && Object.isObject(item) ){
-								KOCFIA.set.previousEquipedItems[ item.type ] = item.id;
+								KOCFIA.set.previousEquipedItems[ item.type ] = itemId;
 							}
 						}
 					}
 					KOCFIA.set.storePreviousEquipedItems();
-				}
 
-				//faction set, find how many items are needed
-				if( sort == 'action' && id != 'noSwap' && setItems !== null && Object.isObject(setItems) && !$.isEmptyObject(setItems) ){
-					for( itemId in setItems ){
-						if( setItems.hasOwnProperty(itemId) ){
-							item = window.seed.throne.inventory[ itemId ];
-							if( item && Object.isObject(item) && item.faction == id ){
-								nbItemsForFaction--;
+					//faction set, find how many items are needed
+					if( pairItems.advisor.indexOf('faction') > -1 ){
+						pairInfo = pairInfo.advisor.split('-');
+						sort = pairItem[0];
+						id = pairItem[1];
+
+						for( itemId in setItems ){
+							if( setItems.hasOwnProperty(itemId) ){
+								item = Shared.getThroneItemObject( itemId );
+								if( item && Object.isObject(item) && item.faction == id ){
+									nbItemsForFaction--;
+								}
 							}
 						}
-					}
-					if( nbItemsForFaction <= 0 ){
-						KOCFIA.set.userInformation('Les objets équipés donnent déjà le bonus de faction '+ id);
+						if( nbItemsForFaction <= 0 ){
+							KOCFIA.set.userInformation('Les objets équipés donnent déjà le bonus de faction '+ id);
 
-						if( dfd ) return dfd.resolve();
-						return true;
+							if( dfd ) return dfd.resolve();
+							return true;
+						}
 					}
 				}
 
@@ -25997,29 +26386,24 @@ jQuery(document).ready(function(){
 						sort = pairItem[0];
 						id = pairItem[1];
 
-						if( sort == 'action' ){
-							if( id == 'noSwap' ){
-								typeIndex += 1;
-								return sdfd.pipe( byType(sdfd) );
+						if( sort == 'faction' ){
+							faction = id;
 
-							} else {
-								faction = id;
-
-								if( nbItemsForFaction <= 0 ){
-									return sdfd.resolve();
-								}
-
-								if( KOCFIA.set.previousEquipedItems.hasOwnProperty(type) ){
-									item = window.seed.throne.inventory[ KOCFIA.set.previousEquipedItems[ type ] ];
-									if( item && Object.isObject(item) && item.faction == faction ){
-										KOCFIA.set.userInformation('Objet du type '+ type +' déjà de la faction configurée');
-										typeIndex += 1;
-										return sdfd.pipe( byType(sdfd) );
-									}
-								}
-
-								return sdfd.pipe( findItemByTypeAndFaction(sdfd) );
+							if( nbItemsForFaction <= 0 ){
+								return sdfd.resolve();
 							}
+
+							if( KOCFIA.set.previousEquipedItems.hasOwnProperty(type) ){
+								item = Shared.getThroneItemObject( KOCFIA.set.previousEquipedItems[ type ] );
+
+								if( item && Object.isObject(item) && item.faction == faction ){
+									KOCFIA.set.userInformation('Objet du type '+ type +' déjà de la faction configurée');
+									typeIndex += 1;
+									return sdfd.pipe( byType(sdfd) );
+								}
+							}
+
+							return sdfd.pipe( findItemByTypeAndFaction(sdfd) );
 
 						} else if( sort == 'set' ){
 							setNum = id;
@@ -26061,7 +26445,7 @@ jQuery(document).ready(function(){
 
 					for( itemId in window.seed.throne.inventory ){
 						if( window.seed.throne.inventory.hasOwnProperty(itemId) ){
-							item = window.seed.throne.inventory[ itemId ];
+							item = Shared.getThroneItemObject( itemId );
 
 							if( item.type == type && item.faction == faction && !item.isBroken ){
 								return sdfd.pipe( equipItemWrapper(dfd) );
@@ -26077,7 +26461,7 @@ jQuery(document).ready(function(){
 					return $.Deferred(function( wdfd ){
 						$.when( KOCFIA.set.equipItem(wdfd, 3, itemId) )
 							.done(function(){
-								if( sort == 'action' && id != 'noSwap' ) nbItemsForFaction--;
+								if( sort == 'faction' ) nbItemsForFaction--;
 								typeIndex += 1;
 								return sdfd.pipe( byType(sdfd) );
 							})
@@ -26155,7 +26539,7 @@ jQuery(document).ready(function(){
 				} else {
 					for( var i = 0; i < currentItems.length; i += 1 ){
 						item = window.seed.throne.inventory[ currentItems[ i ] ];
-						if( item && item.type == type ){
+						if( item && Object.isObject(item) && item.type == type ){
 							itemId = currentItems[ i ];
 							return dfd.pipe( unequipItemWrapper(dfd) );
 						}
@@ -26232,7 +26616,7 @@ jQuery(document).ready(function(){
 			}
 
 			if( module == 'formation' ){
-				types = ['formation', 'construction'];
+				types = ['formation', 'build'];
 			}
 
 			code = '<option value="">Choisir</option>';

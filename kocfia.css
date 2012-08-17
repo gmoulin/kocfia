@@ -2909,6 +2909,25 @@ html, body {
 		margin-right: 15px;
 	}
 
+	.salvage-conf-form td {
+		vertical-align: top;
+		padding: 6px;
+	}
+
+	.salvage-conf-form .or {
+		margin-right: 8px;
+		display: inline-block;
+	}
+
+	.salvage-conf-form td div:first-of-type:last-of-type .or,
+	.salvage-conf-form td div:first-of-type:last-of-type .less {
+		visibility: hidden;
+	}
+
+	.salvage-conf-list {
+		margin-top: 30px;
+	}
+
 /* throne compare */
 	.throne-compare {
 		width: 100%;

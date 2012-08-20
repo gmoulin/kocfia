@@ -149,7 +149,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.8.2',
+		version: '0.8.3',
 		userScriptLoaderVersion: 4,
 		debug: false,
 		debugWhat: { //comment module line for no debug
@@ -205,7 +205,8 @@ jQuery(document).ready(function(){
 			'reports',
 			'search',
 			'gifts',
-			'tournament'
+			'tournament',
+			'craft'
 		],
 		modulesLabel: {
 			dataAndStats: 'Informations et Statistiques',
@@ -236,7 +237,8 @@ jQuery(document).ready(function(){
 			reports: 'Rapports',
 			search: 'Recherche de joueurs et alliances',
 			gifts: 'Cadeaux',
-			tournament: 'Tournoi'
+			tournament: 'Tournoi',
+			craft: 'Artisanat'
 		},
 		tabLabel: {
 			dataAndStats: 'Infos & Stats',
@@ -263,7 +265,8 @@ jQuery(document).ready(function(){
 			reports: 'Rapports',
 			search: 'Recherche',
 			gifts: 'Cadeaux',
-			tournament: 'Tournoi'
+			tournament: 'Tournoi',
+			craft: 'Artisanat'
 		},
 		stored: ['conf'],
 		/* default configuration */
@@ -8025,7 +8028,9 @@ jQuery(document).ready(function(){
 								nb += parseInt(parseInt(train[1], 10) * parseInt(window.unitcost['unt'+ train[0]][6], 10) / 2, 10);
 							}
 
-							time = train[3] - timestamp;
+							if( Array.isArray(train) && train.length > 3 ){
+								time = train[3] - timestamp;
+							}
 						}
 
 						if( time < 0 ) time = 0;
@@ -10270,7 +10275,7 @@ jQuery(document).ready(function(){
 					$fortTh = $fort.find('th').filter('[data-city="'+ cityKey +'"]'),
 					$fortTd = $fort.find('td').filter('[data-city="'+ cityKey +'"]'),
 					code = '', formations = '', fortifications = '',
-					i, formation, unit, queue, duration, smallDuration, might, fortmight,
+					i, formation, unit, queue, duration, smallDuration, might, fortmight, unitKey,
 					timestamp = Date.timestamp();
 				//array of [tid, num, rslt.initTS, parseInt(rslt.initTS) + time, 0, time, null]
 
@@ -20062,19 +20067,18 @@ jQuery(document).ready(function(){
 				automaticSalvage: 0,
 				cityKey: '', //for salvage and upgrades
 				repairWithoutOptimizedThroneSet: 1,
-				maxTry: 150
+				maxTry: 150,
+				startSalvageCheckAt: 1
 			},
 			maxItems: 105, //21 lines of 5 items
-			stored: ['improvements', 'salvage', 'locks', 'names'],
+			stored: ['improvements', 'salvage', 'locks', 'names', 'history'],
 			names: {}, //by set number
 			improvements: [], //{id: , quality: [x, y] or level: [x, y]}
 			salvage: {},
-			locks: {} //by item id
+			locks: {}, //by item id
+			history: []
 		};
-		//@TODO display number of protected items
 		//@TODO add color conf for bonus of interest
-		//@TODO display improvement history
-		//@TODO improvement history dirty state for new improvement success
 
 		/* grid related */
 		KOCFIA.throne.gridRowActions = function( cellValue, options, rowObject ){
@@ -20188,6 +20192,7 @@ jQuery(document).ready(function(){
 			code += Shared.generateButton('throne', 'deleteImprovements', 'Supprimer la liste d\'attente des améliorations d\'objets enregistrée');
 			code += Shared.generateButton('throne', 'deleteSalvage', 'Supprimer les règles de recyclage');
 			code += Shared.generateButton('throne', 'deleteLocks', 'Supprimer la liste des objets protégés contre le recyclage');
+			code += Shared.generateButton('throne', 'deleteHistory', 'Supprimer l\'historique des améliorations');
 			code += '</div>';
 
 			$section.append( code );
@@ -20208,6 +20213,7 @@ jQuery(document).ready(function(){
 			code += '<input type="checkbox" id="throne-panel-automatic-salvage" '+ (KOCFIA.conf.throne.automaticSalvage ? 'checked' : '') +' autocomplete="off" />';
 			code += '<label for="throne-panel-automatic-salvage"><i class="icon-time"></i> Recyclage automatique</label>';
 			code += '</span>';
+			code += '<button class="button secondary history-toggle" title="Historique des actions automatiques sur les objets de trône"><span>Historique</span></button>';
 			code += '<button class="button secondary help-toggle"><span><i class="icon-question-sign"></i> Aide</span></button>';
 			code += '<button class="button secondary conf-link" data-conf="throne"><span><i class="icon-cog"></i> Options</span></button>';
 			code += '</div>';
@@ -20243,8 +20249,12 @@ jQuery(document).ready(function(){
 			code += KOCFIA.throne.getImprovementsQueue();
 			code += '<h3>Configuration du recyclage automatique</h3>';
 			code += KOCFIA.throne.getSalvageConf();
+			code += '<h3>Prévisualisation du recyclage automatique</h3>';
+			code += KOCFIA.throne.getSalvagePreview();
 			code += '</div>';
 			code += KOCFIA.throne.getHelp();
+			code += '<div id="kocfia-throne-history" class="history" title="Historique des actions automatiques sur les objets de trône"></div>';
+			code += '<div class="ongoing"></div>';
 
 			$section.append( code )
 			//listener
@@ -20261,6 +20271,8 @@ jQuery(document).ready(function(){
 			KOCFIA.throne.$cities = $section.find('#kocfia-throne-cities');
 			KOCFIA.throne.$buffItems = $section.find('.buff-items');
 			KOCFIA.throne.$history = $section.find('.history');
+			KOCFIA.throne.$ongoing = $section.find('.ongoing');
+			KOCFIA.throne.$salvagePreview = $section.find('#salvage-preview');
 
 			$section.find('.accordion').accordion({
 				collapsible: true,
@@ -20290,6 +20302,10 @@ jQuery(document).ready(function(){
 
 			KOCFIA.throne.loadItemList();
 			KOCFIA.throne.loadSets();
+			KOCFIA.throne.refreshHistory();
+
+			//dry run, will update salvage preview
+			KOCFIA.throne.launchAutomaticSalvage( true );
 		};
 
 		KOCFIA.throne.on = function(){
@@ -20362,6 +20378,82 @@ jQuery(document).ready(function(){
 			localStorage.removeItem('kocfia_throne_locks_' + KOCFIA.storeUniqueId);
 
 			KOCFIA.throne.locks = {};
+		};
+
+		KOCFIA.throne.storeHistory = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne storeHistory function');
+			localStorage.setObject('kocfia_throne_history_' + KOCFIA.storeUniqueId, KOCFIA.throne.history);
+		};
+
+		KOCFIA.throne.deleteHistory = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne deleteHistory function');
+			localStorage.removeItem('kocfia_throne_history_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.throne.history = [];
+		};
+
+		KOCFIA.throne.refreshHistory = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne refreshHistory function');
+
+			var code = '',
+				info, i, d, day, month, hour, minute;
+
+			code += '<table><thead><tr>';
+			code += '<th>Date</th>';
+			code += '<th>Objet</th>';
+			code += '<th>Essai(s)</th>';
+			code += '</tr></thead>';
+			code += '<tbody>';
+			for( i = 0; i < KOCFIA.throne.history.length; i += 1 ){
+				info = KOCFIA.throne.history[ i ];
+
+				code += '<tr>';
+				d = new Date( info[0] );
+				day = d.getDate();
+				month = d.getMonth();
+				hour = d.getHours();
+				minute = d.getMinutes();
+				second = d.getSeconds();
+
+				code += '<td>';
+				code += (day < 10 ? '0' : '') + day +'/';
+				code += (month < 10 ? '0' : '') + month +'/';
+				code += d.getFullYear();
+				code += ' ';
+				code += (hour < 10 ? '0' : '') + hour +':';
+				code += (minute < 10 ? '0' : '') + minute +':';
+				code += (second < 10 ? '0' : '') + second +':';
+				code += '</td>';
+				code += '<td>'+ info[1] +'</td>';
+				code += '<td>'+ info[2] +'</td>';
+				code += '</tr>';
+			}
+			code += '</tbody></table>';
+
+			KOCFIA.throne.$history.html( code );
+		};
+
+		KOCFIA.throne.refreshOnGoing = function(msg){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne refreshOnGoing function');
+
+			//clean old messages
+			var timestamp = Date.timestamp(),
+				obsolete = 5 * 60 * 1000,
+				msgTimestamp, $div, $m;
+
+			$div = KOCFIA.throne.$ongoing;
+
+			$div.find('div').each(function(){
+				$m = $(this);
+				msgTimestamp = $m.data('timestamp');
+				if( msgTimestamp && timestamp - msgTimestamp > obsolete ){
+					$m.remove();
+				}
+			});
+
+			if( msg !== '' ){
+				$div.append( '<div data-timestamp="'+ timestamp+'">'+ msg +'</div>' );
+			}
 		};
 
 		KOCFIA.throne.setCounter = function(){
@@ -20657,6 +20749,10 @@ jQuery(document).ready(function(){
 				.on('click', '.reload_set', function(){
 					KOCFIA.throne.loadSets();
 				})
+				.on('click', '.refresh-salvage-preview', function(){
+					//dry run, will update salvage preview
+					KOCFIA.throne.launchAutomaticSalvage( true );
+				})
 				.find('.improvements')
 					.on('click', '.delete', function(){
 						var $this = $(this),
@@ -20680,6 +20776,15 @@ jQuery(document).ready(function(){
 					})
 				.end()
 				.find('.salvage-conf-form')
+					.on('keyup, change', '#startSalvageCheckAt', function(){
+						var value = parseInt($(this).val(), 10);
+
+						if( !isNaN(value) ){
+							KOCFIA.conf.throne.startSalvageCheckAt = value;
+
+							Shared.storeConf();
+						}
+					})
 					.on('click', '.more', function(){
 						var $div = $(this).parent(),
 							$td = $div.parent();
@@ -21064,16 +21169,43 @@ jQuery(document).ready(function(){
 			}
 		};
 
+		KOCFIA.throne.refreshSalvagePreview = function( list ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne refreshSalvagePreview function');
+
+			var code = '';
+
+			if( Array.isArray(list) && list.length > 0 ){
+				code += '<li>'+ list.join('</li><li>') +'</li>';
+			}
+
+			KOCFIA.throne.$salvagePreview.html( code );
+		};
+
+		KOCFIA.throne.getSalvagePreview = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getSalvagePreview function');
+
+			var code = '<div>';
+			code += '<button class="button secondary refresh-salvage-preview" title="Relancer la prévisualisation du recyclage automatique"><span>Recharger</span></button>';
+			code += '<ul id="salvage-preview"></ul>';
+			code += '</div>';
+
+			return code;
+		};
+
 		KOCFIA.throne.getSalvageConf = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne getSalvageConf function');
 
-			var code = '',
+			var code = '<div>',
 				i, type, effectId, effect,
 				category = '';
 
 			code += '<p>Les objets de niveau supérieur ou égal à 1 ainsi que les objets protégés, cassés ou faisant partie d\'un set ne seront pas recyclés.<br />';
 			code += 'De plus les objets correspondant aux règles définies ci-dessous ne seront pas recyclés<br />';
 			code += 'Tout autre objet sera recyclé</p>';
+			code += '<div>';
+			code += '<label>Commencer les vérifications pour recyclage à partir du ';
+			code += '<input type="number" id="startSalvageCheckAt" min="1" max="'+ KOCFIA.throne.maxItems +'"> inclus</label>';
+			code += '</div>';
 			code += '<table class="salvage-conf-form">';
 			code += '<tbody><tr>';
 
@@ -21138,6 +21270,8 @@ jQuery(document).ready(function(){
 			code += '</tr></tbody></table>';
 
 			code += KOCFIA.throne.getSalvageRules();
+
+			code += '</div>';
 
 			return code;
 		};
@@ -21583,7 +21717,7 @@ jQuery(document).ready(function(){
 					}
 				}
 
-				label = itemObject.name +' - '+ $.map(summary, function(effect){ return effect.label +' '+ effect.percent +'%'; }).join(', ');
+				label = item.name +' - '+ $.map(summary, function(effect){ return effect.label +' '+ effect.percent +'%'; }).join(', ');
 			}
 
 			return label;
@@ -21978,11 +22112,11 @@ jQuery(document).ready(function(){
 		KOCFIA.throne.launchAutomaticImprovements = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne launchAutomaticImprovements function');
 
+			if( autoImprovementTimeout ) window.clearTimeout( autoImprovementTimeout );
+
 			if( !KOCFIA.conf.throne.automaticImprovements ){
 				return;
 			}
-
-			if( autoImprovementTimeout ) window.clearTimeout( autoImprovementTimeout );
 
 			if( KOCFIA.throne.improvements.length === 0 ){
 				autoImprovementTimeout = window.setTimeout(function(){
@@ -22019,7 +22153,7 @@ jQuery(document).ready(function(){
 						//remove improvement
 						KOFIA.throne.improvements.splice(0, 1);
 
-						//refresh history
+						//refresh log
 						KOCFIA.throne.refreshOnGoing('Objet non trouvé, amélioration supprimée');
 
 						delay = 50;
@@ -22044,11 +22178,11 @@ jQuery(document).ready(function(){
 							//put improvement at the end of the list
 							KOCFIA.throne.improvements.push( improvement );
 
-							//refresh history
+							//refresh log
 							KOCFIA.throne.refreshOnGoing('Amélioration ne correspondant pas à l\'état actuel de l\'objet, déplacée à la fin de la queue');
 
 						} else {
-							//refresh history
+							//refresh log
 							KOCFIA.throne.refreshOnGoing('Amélioration obsolète supprimée');
 						}
 
@@ -22238,8 +22372,14 @@ jQuery(document).ready(function(){
 								}
 								KOCFIA.improvements[0]['try'] += 1;
 							} else {
-								//add improvement in history
-								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration réussie : '+ KOCFIA.throne.getObjectLabel( item ));
+								//add improvement in log and history
+								var label = KOCFIA.throne.getObjectLabel( item );
+								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration réussie : '+ label);
+
+								var times = (improvement.hasOwnProperty('try') ? improvement['try'] : 0) + 1;
+								KOCFIA.throne.history.push([Date.now(), label, times]);
+								KOCFIA.throne.storeHistory();
+								KOCFIA.throne.refreshHistory();
 
 								//remove improvement from array
 								KOCFIA.throne.improvements.splice(0, 1);
@@ -22264,27 +22404,44 @@ jQuery(document).ready(function(){
 				});
 		};
 
-		KOCFIA.throne.launchAutomaticSalvage = function(){
+		KOCFIA.throne.launchAutomaticSalvage = function( dryRun ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne launchAutomaticSalvage function');
 
-			if( !KOCFIA.conf.throne.automaticSalvage ){
-				return;
+			if( dryRun !== true ) dryRun = false;
+
+			if( !dryRun && !KOCFIA.conf.throne.automaticSalvage ){
+				return false;
+			}
+
+			if( dryRun ){
+				var list = [];
 			}
 
 			if( !Object.isObject(window.seed.throne.inventory) || $.isEmptyObject(window.seed.throne.inventory) ){
-				window.setTimeout(function(){
-					KOCFIA.throne.launchAutomaticSalvage();
-				}, 2 * 60 * 1000);
+				if( dryRun ){
+					KOCFIA.throne.refreshSalvagePreview( list );
+				} else {
+					window.setTimeout(function(){
+						KOCFIA.throne.launchAutomaticSalvage();
+					}, 2 * 60 * 1000);
+
+					return false;
+				}
 			}
 
 			var unavailableThreshold = parseInt(window.seed.throne.rowNum, 10) * 5, //5 objects per line
 				itemId, itemIds, params, item, cityKey,
-				itemIndex = 0;
+				itemIndex = parseInt(KOCFIA.conf.throne.startSalvageCheckAt, 10) - 1;
 
 			/* deferred functions */
 				var sequence = function(){
 					return $.Deferred(function( dfd ){
 						itemIds = Object.keys( window.seed.throne.inventory );
+
+						if( isNaN(itemIndex) || itemIndex < 0 ){
+							if( !dryRun ) KOCFIA.throne.refreshOnGoing('Valeur incorrecte pour le numéro de l\'objet à partir duquel commencer les vérifications pour le recyclage, démarrage au premier.');
+							itemIndex = 0;
+						}
 
 						return dfd.pipe( byItem(dfd) );
 					}).promise();
@@ -22300,6 +22457,7 @@ jQuery(document).ready(function(){
 					inventory = Object.keys( window.seed.throne.inventory );
 					if( $.inArray(itemId, inventory) >= unavailableThreshold ){
 						//non avaible object, no need to continue
+						if( !dryRun ) KOCFIA.throne.refreshOnGoing('Objet non disponible, vérification terminée.')
 						return dfd.reject();
 					}
 
@@ -22326,24 +22484,34 @@ jQuery(document).ready(function(){
 
 					var label = KOCFIA.throne.getObjectLabel(item);
 
-					$.when( salvageSequence() )
-						.done(function(){
-							KOCFIA.throne.refreshOnGoing('Recyclage lancée pour '+ label);
-						})
-						.fail(function(){
-							KOCFIA.throne.refreshOnGoing('Problème durant le recyclage pour'+ label);
-						})
-						.always(function(){
-							itemIndex += 1;
-							return dfd.pipe( byItem(dfd) );
-						});
+					if( dryRun === true ){
+						list.push( label );
+						itemIndex += 1;
+						return dfd.pipe( byItem(dfd) );
+					} else {
+						$.when( salvageSequence() )
+							.done(function(){
+								KOCFIA.throne.refreshOnGoing('Recyclage lancée pour '+ label);
+							})
+							.fail(function(){
+								KOCFIA.throne.refreshOnGoing('Problème durant le recyclage pour'+ label);
+							})
+							.always(function(){
+								itemIndex += 1;
+								return dfd.pipe( byItem(dfd) );
+							});
+					}
 				};
 
 			$.when( sequence() )
 				.always(function(){
-					window.setTimeout(function(){
-						KOCFIA.throne.launchAutomaticSalvage();
-					}, 2 * 60 * 1000);
+					if( dryRun ){
+						KOCFIA.throne.refreshSalvagePreview( list );
+					} else {
+						window.setTimeout(function(){
+							KOCFIA.throne.launchAutomaticSalvage();
+						}, 2 * 60 * 1000);
+					}
 				});
 		};
 
@@ -25986,12 +26154,17 @@ jQuery(document).ready(function(){
 		KOCFIA.set.getHelp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('set') ) console.info('KOCFIA set getHelp function');
 			var help = '<div id="kocfia-set-help" class="help" title="Aide set">';
-			help += '<h4>Informations et limitations :</h4><ul>';
-			help += '<li>L\'équipement automatique d\'un objet ou set avant la réalisation d\'une tâche (formation, ...) ne modifie pas l\'affichage de la salle du trône</li>';
-			help += '<li>Si une des villes est attaquée, aucun changement d\'objet n\'est réalisé (limitation désactivable dans l\'onglet option)</li>';
-			help += '<li>Les sets optimisés pour les attaques automatiques ou manuelle (pas les renforts ou transport) n\'optimisent que le lancement, pas le combat. Donc cela permet de maximiser la vitesse et la taille de la marche uniquement</li>';
-			help += '<li><b>Il est conseillé de configurer les tâches en utilisant des sets plutôt que plusieurs objets, chaque objet nécessitant une requête au serveur, ralentissant donc les tâches</b></li>';
-			help += '</ul></div>';
+
+			var texts = {
+				'Informations et limitations :': [
+					'L\'équipement automatique d\'un objet ou set avant la réalisation d\'une tâche (formation, ...) ne modifie pas l\'affichage de la salle du trône',
+					'Si une des villes est attaquée, aucun changement d\'objet n\'est réalisé (limitation désactivable dans l\'onglet option)',
+					'Les sets optimisés pour les attaques automatiques ou manuelle (pas les renforts ou transport) n\'optimisent que le lancement, pas le combat. Donc cela permet de maximiser la vitesse et la taille de la marche uniquement',
+					'<b>Il est conseillé de configurer les tâches en utilisant des sets plutôt que plusieurs objets, chaque objet nécessitant une requête au serveur, ralentissant donc les tâches</b>'
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
 
 			return help;
 		};
@@ -26100,8 +26273,8 @@ jQuery(document).ready(function(){
 			code += '<select id="kocfia-set-'+ task +'-faction" class="faction">';
 			code += '<option value="">Aucun</option>';
 			for( i = 0; i < factions.length; i += 1 ){
-				key = 'faction'+ faction[i];
-				code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ KOCFIA.set.labels[ faction[i] ] +'</option>';
+				key = 'faction'+ factions[i];
+				code += '<option value="'+ key +'" '+ (KOCFIA.set.pairs[ task ] == key ? 'selected' : '') +'>'+ KOCFIA.set.labels[ factions[i] ] +'</option>';
 			}
 			code += '</select><br />';
 
@@ -26633,6 +26806,256 @@ jQuery(document).ready(function(){
 	/* CRAFT */
 		//kocRecipes
 		//@TODO
+		KOCFIA.craft = {
+			options: {
+				active: 0,
+				automatic: 0
+			},
+			stored: ['queue', 'priority'],
+			queue: {}, //by kocRecipe category-id: quantity
+			priority: {} //by kocRecipe category-id: priority
+		};
+
+		KOCFIA.craft.confPanel = function( $section ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft confPanel function');
+			var code = '<h3>'+ KOCFIA.modulesLabel.craft +'</h3>';
+			code += '<div>';
+			code += Shared.generateCheckbox('craft', 'active', 'Activer', KOCFIA.conf.craft.active);
+			code += Shared.generateCheckbox('craft', 'automatic', 'Activer les craft automatiques', KOCFIA.conf.craft.automatic);
+			code += Shared.generateButton('queue', 'deleteQueue', 'Supprimer toutes les fabrications configurées');
+			code += Shared.generateButton('priority', 'deletePriority', 'Supprimer toutes les priorités de fabrication configurées');
+			code += '</div>';
+
+			$section.append( code );
+		};
+
+		KOCFIA.craft.modPanel = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft modPanel function');
+			var $section = KOCFIA.$confPanel.find('#kocfia-craft').html('');
+
+			var code = '<div class="infos">';
+			code += '<span class="buttonset"><input type="checkbox" id="craft-panel-automatic" '+ (KOCFIA.conf.craft.automatic ? 'checked' : '') +' autocomplete="off" />';
+			code += '<label for="craft-panel-automatic">fabrications automatiques</label></span>';
+			code += '<button class="button secondary help-toggle"><span>Aide</span></button>';
+			code += '</div><h3>Configurations</h3>';
+			code += '<div class="accordion">';
+			code += KOCFIA.craft.getForm();
+			code += KOCFIA.craft.getPriority();
+			code += '</div>';
+			code += KOCFIA.craft.getHelp();
+
+			$section.append( code )
+			//listener
+				.on('change', '#craft-panel-automatic', function(){
+					$('#craft-automatic').prop('checked', $(this).prop('checked')).change();
+				});
+
+			KOCFIA.craft.$queue = $section.find('.craft-queue');
+			KOCFIA.craft.$priority = $section.find('.craft-priority');
+
+			$section.find('.accordion').accordion({
+				collapsible: true,
+				autoHeight: false,
+				animated: false,
+				change: function(event, ui){
+					KOCFIA.$confPanelWrapper[0].scrollTop = 0;
+					KOCFIA.$confPanelWrapper[0].scrollLeft = 0;
+				}
+			})
+			.accordion('activate', false);
+
+			KOCFIA.craft.$div = $section;
+
+			KOCFIA.craft.addSectionListeners();
+
+			KOCFIA.craft.loadQueue();
+			KOCFIA.craft.loadPriority();
+		};
+
+		KOCFIA.craft.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft on function');
+
+			if( KOCFIA.conf.craft.automatic ){
+				KOCFIA.craft.automaticOn();
+			}
+		};
+
+		KOCFIA.craft.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft off function');
+
+			KOCFIA.craft.automaticOff();
+		};
+
+		KOCFIA.craft.automaticOn = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft automaticOn function');
+			$('#craft-panel-automatic').prop('checked', true);
+
+			autoCraftInterval = window.setInterval(function(){
+				KOCFIA.craft.launchAutomaticCraft();
+			}, 3 * 60 * 1000);
+		};
+
+		KOCFIA.craft.automaticOff = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft automaticOff function');
+
+			window.clearInterval(autoCraftInterval);
+		};
+
+		KOCFIA.craft.storeQueue = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('kocfia craft storeQueue function');
+			localStorage.setObject('kocfia_craft_queue_' + KOCFIA.storeUniqueId, KOCFIA.craft.queue);
+		};
+
+		KOCFIA.craft.deleteQueue = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft deleteQueue function');
+			localStorage.removeItem('kocfia_craft_queue_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.craft.queue = {};
+		};
+
+		KOCFIA.craft.storePriority = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('kocfia craft storePriority function');
+			localStorage.setObject('kocfia_craft_priority_' + KOCFIA.storeUniqueId, KOCFIA.craft.priority);
+		};
+
+		KOCFIA.craft.deletePriority = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft deletePriority function');
+			localStorage.removeItem('kocfia_craft_priority_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.craft.priority = {};
+		};
+
+		KOCFIA.craft.getHelp = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft getHelp function');
+			var help = '<div id="kocfia-craft-help" class="help" title="Aide fabrication">';
+
+			var texts = {
+				'Informations et limitations :': [
+				]
+			};
+
+			help += Shared.generateHelp(texts) +'</div>';
+
+			return help;
+		};
+
+		KOCFIA.craft.addSectionListerners = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft addSectionListerners function');
+			//@TODO
+
+			KOCFIA.craft.$div
+				.on('click', '.refresh-queue, .reset-queue', function(){
+					KOCFIA.craft.$queue.html( KOCFIA.craft.getForm );
+				})
+				.on('click', '.save-queue', function(){
+					var $inputs = KOCFIA.craft.$queue.find('input'),
+						queue = {};
+					$inputs.each(function(){
+						var $this = $(this),
+							category = $this.attr('data-category'),
+							id = $this.attr('data-recipe-id'),
+							qty = parseInt($this.val(), 10);
+
+						if( qty > 0 ){
+							queue[ category +'-' + id ] = qty;
+						}
+					});
+
+					KOCFIA.craft.queue = queue;
+
+					KOCFIA.craft.storeQueue();
+				})
+				;
+		};
+		//"6":{"id":6,"recipeId":12,"name":"Knit Grace","category":1,"failure":"low","insurance":5,"consolation":3000,"input":{"items":{"3000":"1","3001":"2"},"resources":{"1":"21000"}},"output":3011,"requirements":{"building":"1"}},
+
+		KOCFIA.craft.getForm = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft getForm function');
+			//@TODO
+
+			var code = '<div class="craft-queue">',
+				category, id, recipes, recipe, itemInfo, stock, type, ingredients, itemKey, ingId, list, ing, qty, queued;
+
+			code += '<button class="button secondary refresh-queue" title="Raffraîchit la liste des recettes"><span>Raffraîchir</span></button>';
+			code += '<button class="button save-queue" title="Sauvegarde la configuration"><span>Enregistrer</span></button>';
+			code += '<button class="button danger reset-queue" title="Annule les modifications"><span>Annuler</span></button>';
+			code += '<ul>';
+
+			for( category in window.kocRecipes ){
+				if( window.kocRecipes.hasOwnProperty(category) ){
+					recipes = window.kocRecipes[ category ];
+
+					if( !$.isEmptyObject(recipes) ){
+						for( id in recipes ){
+							if( recipes.hasOwnProperty(id) ){
+								recipe = recipes[ id ];
+								itemKey = 'i'+ recipe.output;
+								itemInfo = window.itemlist[ itemKey ];
+								stock = window.seed.items[ itemKey ] || 0;
+								queued = (KOCFIA.craft.queue.hasOwnProperty( id ) ? KOCFIA.craft.queue[ id ] : 0);
+
+								code += '<li>';
+								code += '<input type="number" min="0" max="9999" value="'+ queued +'" data-category="'+ category +'" data-recipe-id="'+ id +'">';
+								code += '<span data-count="'+ stock +'"';
+								code += ' title="'+ itemInfo.name +' ('+ stock +') - '+ itemInfo.description +'">';
+								code += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg"></span>';
+
+								code += 'requiert: ';
+								list = [];
+								for( type in recipe.input ){
+									if( recipe.input.hasOwnProperty(type) ){
+										ingredients = recipe.input[ type ];
+
+										if( Object.isObject(ingredients) && !$.isEmptyObject(ingredients) ){
+											if( type == 'items' ){
+												for( ingId in ingredients ){
+													if( ingredients.hasOwnProperty(ingId) ){
+														itemKey = 'i'+ ingId;
+														itemInfo = window.itemlist[ itemKey ];
+														qty = ingredients[ ingId ];
+														ing = '<span data-count="'+ qty +'" ';
+														ing += 'title="'+ itemInfo.name +' ('+ qty +') - '+ itemInfo.description +'">';
+														ing += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg"></span>';
+
+														list.push( ing );
+													}
+												}
+											} else {
+												qty = ingredients['1'];
+												ing = '<span data-count="'+ Shared.format(qty) +'" ';
+												ing += 'title="'+ Shared.readable(qty) +' '+ KOCFIA.resourcesInfo.rec5.label +'">';
+												ing += '<img src="'+ KOCFIA.resourcesInfo.rec5.icon +'"></span>';
+											}
+										}
+									}
+								}
+
+								code += list.join(', ');
+								code += '</li>';
+							}
+						}
+					}
+				}
+			}
+
+			code += '</ul>';
+			code += '<button class="button secondary refresh-queue" title="Raffraîchit la liste des recettes"><span>Raffraîchir</span></button>';
+			code += '<button class="button save-queue" title="Sauvegarde la configuration"><span>Enregistrer</span></button>';
+			code += '<button class="button danger reset-queue" title="Annule les modifications"><span>Annuler</span></button>';
+			code += '</div>';
+
+			return code;
+		};
+
+		KOCFIA.craft.getPriority = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft getPriority function');
+			//@TODO
+		};
+
+		KOCFIA.craft.launchAutomaticCraft = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft launchAutomaticCraft function');
+			//@TODO
+		};
 
 	/* RESEARCH */
 		//@TODO

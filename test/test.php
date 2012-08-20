@@ -149,6 +149,65 @@
 		<script src="http://kocfia.kapok.dev/plugins/grid.locale-fr.js"></script>
 		<script src="http://kocfia.kapok.dev/plugins/jquery.jqGrid.min.js"></script>
 		<script>
+			var unitmight = {"unt1":1,"unt2":1,"unt3":2,"unt4":2,"unt5":3,"unt6":4,"unt7":5,"unt8":7,"unt9":6,"unt10":9,"unt11":9,"unt12":10};
+
+			var fortcost = {
+				"frt53":["Arbalètes montées sur les Remparts",250,2000,750,500,0,0,180,{"b19":[1,6],"b15":[1,6]},{"t13":[1,5]},"De Puissantes Arbalètes sont montées au meilleur poste d'observation pour tirer sur l'ennemi"],
+				"frt55":["Trébuchet Défensif",500,3500,1800,1200,0,0,135,{"b19":[1,8],"b15":[1,8]},{"t13":[1,7],"t5":[1,7]},"Excellent pour détruire les armes d'assaut de l'ennemi, un trébuchet ne tire qu'une fois par bataille et doit être reconstruit et rechargé"],
+				"frt60":["Piège",400,800,200,400,0,0,90,{"b19":[1,4],"b15":[1,4]},{"t8":[1,2]},"Similaires au champ de mines moderne, ces pièges sont enterrés autour du château et nuisent aux attaquants non avertis."],
+				"frt61":["Chausse-trape",100,0,0,400,0,0,30,{"b19":[1,1]},{"t9":[1,1]},"Empêche l'infanterie d'avancer jusqu'à ce qu'elle soit dispersée. Se trouve à la portée maximale d'attaque des défenseurs."],
+				"frt62":["Palissade à Pointes",150,750,50,0,0,0,60,{"b19":[1,2],"b15":[1,2]},{"t2":[1,2]},"Empêche les unités à cheval (et les armes d'assaut) d'avancer jusqu'à ce qu'elles soient dispersées. Se trouve à la portée maximale d'attaque des défenseurs."]
+			};
+
+			function convertKnightExpToLvl(a) {
+				return Math.floor(Math.sqrt(+ a / 75)) + 1;
+			}
+
+			var kocRecipes = {
+				"1":{
+					"0":{"id":0,"recipeId":1,"name":"Crystal Song","category":1,"failure":"low","insurance":5,"consolation":null,"input":{"items":[],"resources":{"1":"10500"}},"output":3000,"requirements":{"building":"1"}},
+					"1":{"id":1,"recipeId":2,"name":"Tricked Wind","category":1,"failure":"low","insurance":5,"consolation":null,"input":{"items":[],"resources":{"1":"5200"}},"output":3001,"requirements":{"building":"1"}},
+					"2":{"id":2,"recipeId":4,"name":"Spun Bone","category":1,"failure":"low","insurance":5,"consolation":null,"input":{"items":[],"resources":{"1":"10500"}},"output":3003,"requirements":{"building":"1"}},
+					"3":{"id":3,"recipeId":8,"name":"Sewn Blood","category":1,"failure":"low","insurance":5,"consolation":null,"input":{"items":[],"resources":{"1":"2500"}},"output":3007,"requirements":{"building":"1"}},
+					"4":{"id":4,"recipeId":9,"name":"Sewn Weight","category":1,"failure":"low","insurance":5,"consolation":null,"input":{"items":[],"resources":{"1":"2500"}},"output":3008,"requirements":{"building":"1"}},
+					"5":{"id":5,"recipeId":10,"name":"Shape Muck","category":1,"failure":"low","insurance":5,"consolation":null,"input":{"items":[],"resources":{"1":"2500"}},"output":3009,"requirements":{"building":"1"}},
+					"6":{"id":6,"recipeId":12,"name":"Knit Grace","category":1,"failure":"low","insurance":5,"consolation":3000,"input":{"items":{"3000":"1","3001":"2"},"resources":{"1":"21000"}},"output":3011,"requirements":{"building":"1"}},
+					"7":{"id":7,"recipeId":33,"name":"Forged Stone","category":1,"failure":"low","insurance":1,"consolation":null,"input":{"items":{"3008":"2"},"resources":{"1":"1500"}},"output":20001,"requirements":{"building":"1"}},
+					"8":{"id":8,"recipeId":34,"name":"Forged Shield","category":1,"failure":"med","insurance":1,"consolation":null,"input":{"items":{"3008":"2","3009":"2"},"resources":{"1":"3000"}},"output":20002,"requirements":{"building":"2"}},
+					"9":{"id":9,"recipeId":35,"name":"Forged Luck","category":1,"failure":"med","insurance":3,"consolation":null,"input":{"items":{"3007":"5"},"resources":{"1":"7500"}},"output":20005,"requirements":{"building":"3"}},
+					"10":{"id":10,"recipeId":11,"name":"Cast Hide","category":1,"failure":"low","insurance":5,"consolation":1107,"input":{"items":{"1107":"1","3002":"2"},"resources":{"1":"75000"}},"output":3010,"requirements":{"building":"5"}},
+					"11":{"id":11,"recipeId":25,"name":"Knit Courage","category":1,"failure":"med","insurance":33,"consolation":3003,"input":{"items":{"3003":"2","3007":"5"},"resources":{"1":"50000"}},"output":221,"requirements":{"building":"5"}},
+					"12":{"id":12,"recipeId":26,"name":"Knit Wisdom","category":1,"failure":"med","insurance":33,"consolation":3003,"input":{"items":{"3003":"2","3009":"5"},"resources":{"1":"50000"}},"output":231,"requirements":{"building":"5"}},
+					"13":{"id":13,"recipeId":27,"name":"Knit Beauty","category":1,"failure":"med","insurance":33,"consolation":3000,"input":{"items":{"3000":"2","3007":"5"},"resources":{"1":"50000"}},"output":211,"requirements":{"building":"5"}},
+					"14":{"id":14,"recipeId":28,"name":"Knit Toil","category":1,"failure":"med","insurance":33,"consolation":3000,"input":{"items":{"3000":"2","3009":"5"},"resources":{"1":"50000"}},"output":241,"requirements":{"building":"5"}},
+					"15":{"id":15,"recipeId":5,"name":"Divine Act","category":1,"failure":"med","insurance":20,"consolation":3010,"input":{"items":{"3000":"3","3003":"3","3010":"1"},"resources":{"1":"120000"}},"output":3004,"requirements":{"building":"6"}},
+					"16":{"id":16,"recipeId":29,"name":"Forge Fury","category":1,"failure":"high","insurance":40,"consolation":3003,"input":{"items":{"3003":"7","3007":"21"},"resources":{"1":"400000"}},"output":2002,"requirements":{"building":"6"}},
+					"17":{"id":17,"recipeId":6,"name":"Divine Rite","category":1,"failure":"high","insurance":40,"consolation":3004,"input":{"items":{"3000":"3","3003":"3","3004":"1"},"resources":{"1":"180000"}},"output":3005,"requirements":{"building":"7"}},
+					"18":{"id":18,"recipeId":7,"name":"Divine Toll","category":1,"failure":"high","insurance":40,"consolation":3005,"input":{"items":{"3000":"3","3003":"3","3005":"1"},"resources":{"1":"240000"}},"output":3006,"requirements":{"building":"8"}},
+					"19":{"id":19,"recipeId":13,"name":"Divine Song","category":1,"failure":"high","insurance":40,"consolation":3006,"input":{"items":{"3000":"3","3003":"3","3006":"1"},"resources":{"1":"320000"}},"output":401,"requirements":{"building":"9"}},
+					"20":{"id":20,"recipeId":14,"name":"Divine Hymn","category":1,"failure":"high","insurance":124,"consolation":401,"input":{"items":{"3000":"3","3003":"3","401":"1"},"resources":{"1":"500000"}},"output":402,"requirements":{"building":"10"}},
+					"21":{"id":21,"recipeId":31,"name":"Mist Song","category":1,"failure":"low","insurance":18,"consolation":1110,"input":{"items":{"1110":"1","261":"1","3007":"7","3011":"2"},"resources":{"1":"80000"}},"output":1120,"requirements":{"building":"10"}},
+					"22":{"id":22,"recipeId":32,"name":"Mist Dirge","category":1,"failure":"med","insurance":20,"consolation":1120,"input":{"items":{"1120":"1","272":"1","3009":"3","3008":"3","3011":"2"},"resources":{"1":"85000"}},"output":1121,"requirements":{"building":"10"}}
+				},
+				"2":{},
+				"3":{
+					"0":{"id":0,"recipeId":15,"name":"Crimson Act","category":3,"failure":"low","insurance":9,"consolation":3007,"input":{"items":{"3007":"5"},"resources":{"1":"10000"}},"output":261,"requirements":{"building":"2"}},
+					"1":{"id":1,"recipeId":18,"name":"Aegis Act","category":3,"failure":"low","insurance":9,"consolation":3008,"input":{"items":{"3008":"5"},"resources":{"1":"10000"}},"output":271,"requirements":{"building":"2"}},
+					"2":{"id":2,"recipeId":20,"name":"Trapped Wind","category":3,"failure":"low","insurance":5,"consolation":1103,"input":{"items":{"1103":"1","3001":"5"},"resources":{"1":"25000"}},"output":55,"requirements":{"building":"2"}},
+					"3":{"id":3,"recipeId":22,"name":"Trick Hunger","category":3,"failure":"med","insurance":33,"consolation":3000,"input":{"items":{"3000":"5"},"resources":{"1":"160000"}},"output":273,"requirements":{"building":"2"}},
+					"4":{"id":4,"recipeId":16,"name":"Crimson Rite","category":3,"failure":"med","insurance":43,"consolation":261,"input":{"items":{"261":"1","3007":"3"},"resources":{"1":"30000"}},"output":262,"requirements":{"building":"3"}},
+					"5":{"id":5,"recipeId":19,"name":"Aegis Rite","category":3,"failure":"med","insurance":43,"consolation":271,"input":{"items":{"271":"1","3008":"3"},"resources":{"1":"30000"}},"output":272,"requirements":{"building":"3"}},
+					"6":{"id":6,"recipeId":21,"name":"Poached Wind","category":3,"failure":"med","insurance":20,"consolation":55,"input":{"items":{"55":"1","3001":"3"},"resources":{"1":"75000"}},"output":57,"requirements":{"building":"3"}},
+					"7":{"id":7,"recipeId":23,"name":"Trap Hunger","category":3,"failure":"med","insurance":60,"consolation":273,"input":{"items":{"273":"1","3000":"3"},"resources":{"1":"240000"}},"output":274,"requirements":{"building":"3"}},
+					"8":{"id":8,"recipeId":17,"name":"Crimson Toll","category":3,"failure":"high","insurance":40,"consolation":262,"input":{"items":{"262":"1","3007":"3"},"resources":{"1":"90000"}},"output":280,"requirements":{"building":"4"}},
+					"9":{"id":9,"recipeId":24,"name":"Poach Hunger","category":3,"failure":"high","insurance":168,"consolation":274,"input":{"items":{"274":"1","3000":"3"},"resources":{"1":"320000"}},"output":275,"requirements":{"building":"4"}},
+					"10":{"id":10,"recipeId":30,"name":"Aegis Toll","category":3,"failure":"high","insurance":40,"consolation":272,"input":{"items":{"272":"1","3008":"3"},"resources":{"1":"90000"}},"output":281,"requirements":{"building":"4"}}
+				},
+				"4":{},
+				"5":{},
+				"6":{}
+			};
+
 			var cm = cm || {};
 			cm.AUTO_BARB_TROOP_MODE = {
 				AUTO_BARB_TROOP_MODE_STOP_ON_PERCENTAGE_LOST: 0,

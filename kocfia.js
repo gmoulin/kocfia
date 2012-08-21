@@ -21687,8 +21687,7 @@ jQuery(document).ready(function(){
 			var label = '',
 				summary = {},
 				slot, effect,
-				effectRank, effectInfo, tierInfo, bonus,
-				item, itemObject;
+				effectRank, effectInfo, tierInfo, bonus;
 
 			if( !Object.isObject(item) ){
 				var itemId = item;
@@ -22457,7 +22456,7 @@ jQuery(document).ready(function(){
 					inventory = Object.keys( window.seed.throne.inventory );
 					if( $.inArray(itemId, inventory) >= unavailableThreshold ){
 						//non avaible object, no need to continue
-						if( !dryRun ) KOCFIA.throne.refreshOnGoing('Objet non disponible, vérification terminée.')
+						if( !dryRun ) KOCFIA.throne.refreshOnGoing('Objet non disponible, vérification terminée.');
 						return dfd.reject();
 					}
 
@@ -26804,8 +26803,6 @@ jQuery(document).ready(function(){
 		};
 
 	/* CRAFT */
-		//kocRecipes
-		//@TODO
 		KOCFIA.craft = {
 			options: {
 				active: 0,
@@ -26815,6 +26812,7 @@ jQuery(document).ready(function(){
 			queue: {}, //by kocRecipe category-id: quantity
 			priority: {} //by kocRecipe category-id: priority
 		};
+		//@TODO
 
 		KOCFIA.craft.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft confPanel function');
@@ -26868,8 +26866,8 @@ jQuery(document).ready(function(){
 
 			KOCFIA.craft.addSectionListeners();
 
-			KOCFIA.craft.loadQueue();
-			KOCFIA.craft.loadPriority();
+			KOCFIA.craft.$priority
+				.find('ol').sortable({ zIndex: 100002 });
 		};
 
 		KOCFIA.craft.on = function(){
@@ -26931,6 +26929,20 @@ jQuery(document).ready(function(){
 
 			var texts = {
 				'Informations et limitations :': [
+					'Pas besoin de gérer les ingrédients du premier niveau (héliotrope, ...). Elles seront fabriquées automatiquement quand nécessaire.',
+					'Saisissez le nombre d\'objets voulu puis enregistrer.',
+					'Chaque nouvel objet est ajouté à la fin de la liste des priorités.',
+					'Les nouveaux nombres sont pris en compte à la prochaine tentative.',
+					'Chaque tentative essaye de lancer une fabrication pour chacune des tours de fée disponible.',
+					'La fréquence des tentatives est de 3 minutes.',
+					'La tour avec le plus petit niveau est utilisé en priorité.',
+					'Chaque requête de fabrication est envoyée au maximum 3 fois.'
+				],
+				'Priorités :': [
+					'La priorité la plus basse est la plus forte.',
+					'Vous pouvez changer l\'ordre des objets via des cliquer-glisser (cliquer, maintenir enfoncé, déplacer, relacher à l\'emplacement voulu).',
+					'Chaque nouvel objet est ajouté à la fin de la liste des priorités.',
+					'Lors des tentatives, les vérifications de possibilités de fabrication se font dans l\'ordre des priorités défini.'
 				]
 			};
 
@@ -26945,11 +26957,12 @@ jQuery(document).ready(function(){
 
 			KOCFIA.craft.$div
 				.on('click', '.refresh-queue, .reset-queue', function(){
-					KOCFIA.craft.$queue.html( KOCFIA.craft.getForm );
+					KOCFIA.craft.$queue.find('ul').html( $(KOCFIA.craft.getForm()).find('ul').html() );
 				})
 				.on('click', '.save-queue', function(){
 					var $inputs = KOCFIA.craft.$queue.find('input'),
 						queue = {};
+
 					$inputs.each(function(){
 						var $this = $(this),
 							category = $this.attr('data-category'),
@@ -26957,7 +26970,7 @@ jQuery(document).ready(function(){
 							qty = parseInt($this.val(), 10);
 
 						if( qty > 0 ){
-							queue[ category +'-' + id ] = qty;
+							queue[ category +'-'+ id ] = qty;
 						}
 					});
 
@@ -26965,14 +26978,30 @@ jQuery(document).ready(function(){
 
 					KOCFIA.craft.storeQueue();
 				})
+				.on('click', '.refresh-priority, .reset-priority', function(){
+					KOCFIA.craft.$priority.find('ol').html( $(KOCFIA.craft.getPriority()).find('ol').html() );
+				})
+				.on('click', '.save-priority', function(){
+					var $lis = KOCFIA.craft.$priority.find('li'),
+						priority = {};
+
+					$lis.each(function(i){
+						var $this = $(this),
+							category = $this.attr('data-category'),
+							id = $this.attr('data-recipe-id');
+
+						priority[ category +'-'+ id ] = i;
+					});
+
+					KOCFIA.craft.priority = priority;
+
+					KOCFIA.craft.storePriority();
+				})
 				;
 		};
-		//"6":{"id":6,"recipeId":12,"name":"Knit Grace","category":1,"failure":"low","insurance":5,"consolation":3000,"input":{"items":{"3000":"1","3001":"2"},"resources":{"1":"21000"}},"output":3011,"requirements":{"building":"1"}},
 
 		KOCFIA.craft.getForm = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft getForm function');
-			//@TODO
-
 			var code = '<div class="craft-queue">',
 				category, id, recipes, recipe, itemInfo, stock, type, ingredients, itemKey, ingId, list, ing, qty, queued;
 
@@ -27049,12 +27078,399 @@ jQuery(document).ready(function(){
 
 		KOCFIA.craft.getPriority = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft getPriority function');
-			//@TODO
+
+			var code = '<div class="craft-priority">',
+				key, recipe, category, id, itemKey, itemInfo;
+
+			code += '<button class="button secondary refresh-priority" title="Raffraîchit les priorités"><span>Raffraîchir</span></button>';
+			code += '<button class="button save-priority" title="Sauvegarde les priorités"><span>Enregistrer</span></button>';
+			code += '<button class="button danger reset-priority" title="Annule les modifications"><span>Annuler</span></button>';
+			code += '<ol>';
+
+			for( key in KOCFIA.craft.priority ){
+				if( KOCFIA.craft.priority.hasOwnProperty(key) && KOCFIA.craft.queue.hasOwnProperty(key) ){
+					key = key.split('-');
+					category = key[0];
+					id = key[1];
+
+					if( window.kocRecipes.hasOwnProperty(category) && window.kocRecipes[ category ].hasOwnProperty(id) ){
+						recipe = window.kocRecipes[ category ][ id ];
+						if( Object.isObject(recipe) ){
+							itemKey = 'i'+ recipe.output;
+							itemInfo = window.itemlist[ itemKey ];
+
+							code += '<li data-category="'+ category +'" data-recipe-id="'+ id +'">';
+							code += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg">'+ itemInfo.name;
+							code += '</li>';
+						}
+					}
+				}
+			}
+
+			for( key in KOCFIA.craft.queue ){
+				if( KOCFIA.craft.queue.hasOwnProperty(key) && !KOCFIA.craft.queue.hasOwnProperty(key) ){
+					key = key.split('-');
+					category = key[0];
+					id = key[1];
+
+					if( window.kocRecipes.hasOwnProperty(category) && window.kocRecipes[ category ].hasOwnProperty(id) ){
+						recipe = window.kocRecipes[ category ][ id ];
+						if( Object.isObject(recipe) ){
+							itemKey = 'i'+ recipe.output;
+							itemInfo = window.itemlist[ itemKey ];
+
+							code += '<li data-category="'+ category +'" data-recipe-id="'+ id +'">';
+							code += '<img src="'+ window.stimgUrl +'img/items/70/'+ items[i] +'.jpg">'+ itemInfo.name;
+							code += '</li>';
+						}
+					}
+				}
+			}
+
+			code += '</ol>';
+			code += '<button class="button secondary refresh-priority" title="Raffraîchit les priorités"><span>Raffraîchir</span></button>';
+			code += '<button class="button save-priority" title="Sauvegarde les priorités"><span>Enregistrer</span></button>';
+			code += '<button class="button danger reset-priority" title="Annule les modifications"><span>Annuler</span></button>';
+			code += '</div>';
+
+			return code;
 		};
 
 		KOCFIA.craft.launchAutomaticCraft = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft launchAutomaticCraft function');
-			//@TODO
+			//@TODO check delay between two craft
+
+			if( !KOCFIA.conf.craft.automatic ){
+				return false;
+			}
+
+			var key, recipe, category, id, params, category, recipes, recipe, id,
+				i, info, cityKey, stock, itemId, itemKey, quantity,
+				crafting = {}, //by item id: quantity
+				tower,
+				towers = [], //only available ones with aetherstone, {cityKey: cityKey, level: x, aetherstone: y}
+				priorityIndex,
+				priority,
+				ingredientIndex,
+				ingredientsKey,
+				priorityList = [];
+
+			var sequence = function(){
+				return $.Deferred(function( dfd ){
+					return dfd.pipe( computePriority(dfd) );
+				}).promise();
+			};
+
+			var computePriority = function( dfd ){
+				for( key in KOCFIA.craft.priority ){
+					if( KOCFIA.craft.priority.hasOwnProperty(key) && KOCFIA.craft.queue.hasOwnProperty(key) ){
+						key = key.split('-');
+						category = key[0];
+						id = key[1];
+
+						if( window.kocRecipes.hasOwnProperty(category) && window.kocRecipes[ category ].hasOwnProperty(id) ){
+							recipe = window.kocRecipes[ category ][ id ];
+
+							if( Object.isObject(recipe) ){
+								priorityList.push({
+									category: category,
+									id: id,
+									ingredients: recipe.ingredients.items,
+									aetherstone: parseInt(recipe.ingredients.resources[1], 10),
+									consolation: recipe.consolation,
+									building: parseInt(recipe.requirements.building, 10)
+								});
+							}
+						}
+					}
+				}
+
+				for( key in KOCFIA.craft.queue ){
+					if( KOCFIA.craft.queue.hasOwnProperty(key) && !KOCFIA.craft.queue.hasOwnProperty(key) ){
+						key = key.split('-');
+						category = key[0];
+						id = key[1];
+
+						if( window.kocRecipes.hasOwnProperty(category) && window.kocRecipes[ category ].hasOwnProperty(id) ){
+							recipe = window.kocRecipes[ category ][ id ];
+							if( Object.isObject(recipe) ){
+								priorityList.push({category: category, id: id, ingredients: recipe.ingredients.items, aetherstone: parseInt(recipe.ingredients.resources[1], 10)});
+							}
+						}
+					}
+				}
+
+				return dfd.pipe( getAvailableTowers(dfd) );
+			};
+
+			var getTowers = function( dfd ){
+				var level, craft;
+
+				for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+					cityKey = KOCFIA.citiesKey[ i ];
+					if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+						//get tower level
+						level = Shared.buildingHighestLevel(cityKey, 20);
+
+						if( level > 0 ){
+							//get aetherstone stock
+							stock = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10);
+
+							if( !isNaN(stock) && stock > 0 ){
+								towers.push({cityKey: cityKey, level: level, aetherstone: stock});
+							}
+						}
+
+						//currently crafting ?
+						if( window.seed.queue_craft.hasOwnProperty(cityKey) ){
+							craft = window.seed.queue_craft[ cityKey ];
+
+							//finished ?
+							if( craft.craftingEtaUnixTime < Date.timestamp() ){
+								for( category in window.kocRecipes ){
+									recipe = null;
+									if( window.kocRecipes.hasOwnProperty(category) ){
+										recipes = window.kocRecipes[ category ];
+
+										if( Object.isObject(recipes) && !$.isEmptyObject(recipes) ){
+											for( id in recipes ){
+												if( recipes.hasOwnProperty(id) && id == craft.recipeId ){
+													recipe = recipes[ id ];
+
+													if( (!Object.isObject(recipe.ingredients.items) || $.isEmptyObject(recipe.ingredients.items)) ){
+														if( !crafting.hasOwnProperty(recipe.output) ) crafting[ recipe.output ] = 0;
+
+														crafting[ recipe.output ] += 1;
+
+														break;
+													}
+												}
+											}
+										}
+									}
+
+									if( recipe !== null ) break;
+								}
+							}
+						}
+					}
+				}
+
+				//no tower available
+				if( towers.length === 0 ){
+					return dfd.reject();
+				}
+
+				return dfd.pipe( byPriority(dfd) );
+			};
+
+			var byPriority = function( dfd ){
+				if( priorityIndex >= priorityList.length ){
+					return dfd.resolve();
+				}
+
+				priority = priorityList[ priorityIndex ];
+
+				if( Object.isObject(priority.ingredients) && !$.isEmptyObject(priority.ingredients) ){
+					ingredientIndex = 0;
+					ingredientsKey = Object.keys(priority.ingredients);
+					return dfd.pipe( byIngredient(dfd) );
+
+				} else {
+					return dfd.pipe( findTower(dfd, 'priority') );
+				}
+			};
+
+			var byIngredient = function( dfd ){
+				if( ingredientsIndex >= ingredientsKey.length ){
+					//all ingredients in stock
+					return dfd.pipe( findTower(dfd, 'priority') );
+				}
+
+				itemId = ingredientsKey[ ingredientIndex ];
+
+				if( priority.ingredients.hasOwnProperty(itemId) ){
+					itemKey = 'i'+ itemId;
+					quantity = parseInt(priority.ingredients[ itemId ], 10);
+					inQueue = (crafting.hasOwnProperty(itemId) ? crafting[ itemId ] : 0);
+
+					stock = (window.seed.items.hasOwnProperty(itemKey) ? parseInt(window.seed.items[ itemKey ], 10) : 0);
+
+					if( quantity > stock + inQueue ){
+						return dfd.pipe( findMissingIngredientRecipe(dfd) );
+					}
+				}
+
+				ingredientIndex += 1;
+				return dfd.pipe( byIngredient(dfd) );
+			};
+
+			var findMissingIngredientRecipe = function( dfd ){
+				for( category in window.kocRecipes ){
+					if( window.kocRecipes.hasOwnProperty(category) ){
+						recipes = window.kocRecipes[ category ];
+
+						if( Object.isObject(recipes) && !$.isEmptyObject(recipes) ){
+							for( id in recipes ){
+								if( recipes.hasOwnProperty(id) ){
+									recipe = recipes[ id ];
+
+									if( recipe.output == itemId && (!Object.isObject(recipe.ingredients.items) || $.isEmptyObject(recipe.ingredients.items)) ){
+										//create a priority object for the missing ingredient recipe
+										priority = {
+											category: category,
+											id: id,
+											ingredients: recipe.ingredients.items,
+											aetherstone: parseInt(recipe.ingredients.resources[1], 10),
+											consolation: recipe.consolation,
+											building: parseInt(recipe.requirements.building, 10)
+										};
+
+										return dfd.pipe( findTower(dfd, 'ingredient') );
+									}
+								}
+							}
+						}
+					}
+				}
+
+				ingredientIndex += 1;
+				return dfd.pipe( byIngredient(dfd) );
+			};
+
+			var findTower = function( dfd, caller ){
+				var lowestLevel = 99,
+					index = null;
+
+				for( i = 0; i <= towers.length; i+= 1 ){
+					if( towers.hasOwnProperty(cityKey) ){
+						tower = towers[ i ];
+						if( tower.level >= priority.building && tower.aetherstone >= priority.aetherstone ){
+							if( lowestLevel > tower.level ){
+								lowestLevel = tower.level;
+								index = i;
+							}
+						}
+					}
+				}
+
+				if( index !== null ){
+					tower = towers[ i ];
+					params = $.extend(window.g_ajaxparams);
+					params.ctrl = 'Crafting';
+					params.action = 'craft';
+					params.cityId = cityKey.replace(/city/, '');
+					params.itemId = itemId;
+					params.categoryId = category;
+					params.recipeId = id;
+					params.insurance = false;
+
+					return dfd.pipe( launch(dfd, 3, type) );
+
+				} else if( caller == 'ingredient' ){
+					ingredientIndex += 1;
+					return dfd.pipe( byIngredient(dfd) );
+
+				} else {
+					priorityIndex += 1;
+					return dfd.pipe( byPriority(dfd) );
+				}
+			};
+
+			var launch = function(dfd, attempts, caller){
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(data){
+					if( data.ok ){
+						for( itemId in priority.ingredients ){
+							if( priority.ingredients.hasOwnProperty(itemId) ){
+								window.kosItems[ itemId ].subtract( priority.ingredients[ itemId ] );
+							}
+						}
+
+						window.seed.resources[ cityKey ]['rec5'][0] = parseInt(window.seed.resources[ cityKey ]['rec5'][0], 10) - priority.aetherstone;
+
+						if( data.status == 'failure' ){
+							if( priority.consolation ){
+								window.ksoItems[ priority.consolation ].add();
+							}
+						} else if( data.status == 'success' ){
+							if( !window.seed.queue_craft.hasOwnProperty(cityKey) ){
+								window.seed.queue_craft[ cityKey ] = [];
+							}
+
+							var bonus = window.cm.ThroneController.effectBonus(81);
+								craft = {
+									recipeId: id,
+									craftingUnixTime: data.time.startTime,
+									craftingEtaUnixTime: data.time.endTime,
+									craftingId: data.craftingId,
+									categoryId: null,
+									recipeIndex: null
+								};
+
+							window.seed.queue_craft[ cityKey ].push( craft );
+
+							key = category +'-'+ id;
+							KOCFIA.craft.queue[ key ] -= 1;
+
+							if( KOCFIA.craft.queue[ key ] === 0 ){
+								delete KOCFIA.craft.queue[ key ];
+							}
+
+							if( 'city'+ window.currentcityid == cityKey ){
+								queue_changetab_building();
+								update_queue();
+							}
+						}
+
+						if( caller == 'ingredient' ){
+							ingredientIndex += 1;
+							return dfd.pipe( byIngredient(dfd) );
+
+						} else {
+							priorityIndex += 1;
+							return dfd.pipe( byPriority(dfd) );
+						}
+
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							return dfd.pipe( launch(dfd, attempts) );
+
+						} else if( caller == 'ingredient' ){
+							ingredientIndex += 1;
+							return dfd.pipe( byIngredient(dfd) );
+
+						} else {
+							priorityIndex += 1;
+							return dfd.pipe( byPriority(dfd) );
+						}
+					}
+				})
+				.fail(function(){
+					attempts -= 1;
+					if( attempts > 0 ){
+						return dfd.pipe( launch(dfd, attempts) );
+
+					} else if( caller == 'ingredient' ){
+						ingredientIndex += 1;
+						return dfd.pipe( byIngredient(dfd) );
+
+					} else {
+						priorityIndex += 1;
+						return dfd.pipe( byPriority(dfd) );
+					}
+				});
+			};
+
+			$.when( sequence() )
+				;
 		};
 
 	/* RESEARCH */

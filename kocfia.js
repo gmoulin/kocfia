@@ -20076,7 +20076,10 @@ jQuery(document).ready(function(){
 			improvements: [], //{id: , quality: [x, y] or level: [x, y]}
 			salvage: {},
 			locks: {}, //by item id
-			history: []
+			history: {
+				improvements: [],
+				salvage: []
+			}
 		};
 		//@TODO add color conf for bonus of interest
 
@@ -20389,7 +20392,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne deleteHistory function');
 			localStorage.removeItem('kocfia_throne_history_' + KOCFIA.storeUniqueId);
 
-			KOCFIA.throne.history = [];
+			KOCFIA.throne.history = {};
 		};
 
 		KOCFIA.throne.refreshHistory = function(){
@@ -20398,14 +20401,48 @@ jQuery(document).ready(function(){
 			var code = '',
 				info, i, d, day, month, hour, minute;
 
+			code += '<h3>Améliorations</h3>';
 			code += '<table><thead><tr>';
 			code += '<th>Date</th>';
 			code += '<th>Objet</th>';
 			code += '<th>Essai(s)</th>';
 			code += '</tr></thead>';
 			code += '<tbody>';
-			for( i = 0; i < KOCFIA.throne.history.length; i += 1 ){
-				info = KOCFIA.throne.history[ i ];
+			for( i = 0; i < KOCFIA.throne.history.improvements.length; i += 1 ){
+				info = KOCFIA.throne.history.improvements[ i ];
+
+				code += '<tr>';
+				d = new Date( info[0] );
+				day = d.getDate();
+				month = d.getMonth();
+				hour = d.getHours();
+				minute = d.getMinutes();
+				second = d.getSeconds();
+
+				code += '<td>';
+				code += (day < 10 ? '0' : '') + day +'/';
+				code += (month < 10 ? '0' : '') + month +'/';
+				code += d.getFullYear();
+				code += ' ';
+				code += (hour < 10 ? '0' : '') + hour +':';
+				code += (minute < 10 ? '0' : '') + minute +':';
+				code += (second < 10 ? '0' : '') + second +':';
+				code += '</td>';
+				code += '<td>'+ info[1] +'</td>';
+				code += '<td>'+ info[2] +'</td>';
+				code += '</tr>';
+			}
+			code += '</tbody></table>';
+
+			code += '<h3>Recyclage</h3>';
+			code += '<table><thead><tr>';
+			code += '<th>Date</th>';
+			code += '<th>Objet</th>';
+			code += '<th>Gain</th>';
+			code += '</tr></thead>';
+			code += '<tbody>';
+			for( i = 0; i < KOCFIA.throne.history.salvage.length; i += 1 ){
+				info = KOCFIA.throne.history.salvage[ i ];
 
 				code += '<tr>';
 				d = new Date( info[0] );
@@ -20528,7 +20565,7 @@ jQuery(document).ready(function(){
 
 						var salvage = function(){
 							return $.Deferred(function( dfd ){
-								return dfd.pipe( KOCFIA.throne.salvageItem(item, cityKey, 3, dfd) );
+								return dfd.pipe( KOCFIA.throne.salvageItem(item, cityKey, 3, dfd, 'manual') );
 							}).promise();
 						};
 
@@ -21410,7 +21447,7 @@ jQuery(document).ready(function(){
 			return false;
 		};
 
-		KOCFIA.throne.salvageItem = function( item, cityKey, attempts, dfd ){
+		KOCFIA.throne.salvageItem = function( item, cityKey, attempts, dfd, type ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne salvageItem function');
 
 			if( !Object.isObject(item) ){
@@ -21438,6 +21475,7 @@ jQuery(document).ready(function(){
 						key = KOCFIA.citiesKey[ i ];
 						if( key != cityKey && parseInt(window.seed.resources[ key ]['rec5'][0], 10) + gain <= cap ){
 							cityKey = key;
+							break;
 						}
 					}
 				}
@@ -21471,22 +21509,28 @@ jQuery(document).ready(function(){
 							}
 						}
 
+						var label = KOCFIA.throne.getObjectLabel(item);
+						if( type != 'manual' ){
+							KOCFIA.throne.history.salvage.push([Date.now(), label, gain]);
+							KOCFIA.throne.storeHistory();
+						}
+
 						delete window.seed.throne.inventory[ item.id ]; //added, missing in kabam code
 						delete window.kocThroneItems[ item.id ];
 
 					} else {
 						attempts -= 1;
 						if( attempts > 0 ){
-							if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd ) );
-							else KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd );
+							if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd, type ) );
+							else KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd, type );
 						} else if( dfd ) return dfd.reject();
 					}
 				})
 				.fail(function(){
 					attempts -= 1;
 					if( attempts > 0 ){
-						if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd ) );
-						else KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd );
+						if( dfd ) return dfd.pipe( KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd, type ) );
+						else KOCFIA.throne.salvageItem( item, cityKey, attempts, dfd, type );
 					} else if( dfd ) return dfd.reject();
 				});
 			} else if( dfd ){
@@ -22132,7 +22176,7 @@ jQuery(document).ready(function(){
 						improvement = KOCFIA.throne.improvements[0]; //{id: , quality: [x, y] or level: [x, y]}
 
 						if( improvement.hasOwnProperty('try') && improvement['try'] > KOCFIA.conf.throne.maxTry ){
-							KOCFIA.throne.refreshOnGoing('Nombre maximum de tentatives d\'amélioration atteind, amélioration déplacée à la fin de la queue');
+							KOCFIA.throne.refreshOnGoing('Nombre maximum de tentatives d\'amélioration atteind, amélioration déplacée à la fin de la queue.');
 
 							KOFIA.throne.improvements.splice(0, 1);
 							KOCFIA.throne.improvements.push( improvement );
@@ -22370,13 +22414,14 @@ jQuery(document).ready(function(){
 									KOCFIA.improvements[0]['try'] = 0;
 								}
 								KOCFIA.improvements[0]['try'] += 1;
+
 							} else {
 								//add improvement in log and history
 								var label = KOCFIA.throne.getObjectLabel( item );
 								KOCFIA.throne.refreshOnGoing('Tentative d\'amélioration réussie : '+ label);
 
 								var times = (improvement.hasOwnProperty('try') ? improvement['try'] : 0) + 1;
-								KOCFIA.throne.history.push([Date.now(), label, times]);
+								KOCFIA.throne.history.improvements.push([Date.now(), label, times]);
 								KOCFIA.throne.storeHistory();
 								KOCFIA.throne.refreshHistory();
 
@@ -22477,7 +22522,7 @@ jQuery(document).ready(function(){
 				var salvage = function(dfd, attempts){
 					var salvageSequence = function(){
 						return $.Deferred(function( wdfd ){
-							return wdfd.pipe( KOCFIA.throne.salvageItem(item, cityKey, 3, wdfd) );
+							return wdfd.pipe( KOCFIA.throne.salvageItem(item, cityKey, 3, wdfd, 'automatic') );
 						}).promise();
 					};
 

@@ -2789,6 +2789,57 @@ jQuery(document).ready(function(){
 				}
 			};
 
+			Shared.summonGuardian = function(dfd, requestParams, attempts){
+				$.ajax({
+					url: window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix,
+					type: 'post',
+					data: requestParams,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function(result){
+					if( result.ok ){
+						if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
+							var guardian;
+							for( i = 0, l = window.seed.guardian.length; i < l; i += 1 ){
+								guardian = window.seed.guardian[ i ];
+								if( Object.isObject(guardian) && !$.isEmptyObject(guardian) ){
+									if( guardian.city == requestParams.city ){
+										guardianType = window.cm.guardianConst.numTypes[ type ];
+										window.seed.guardian[ i ].timeLeft = 0;
+										window.seed.guardian[ i ].level = guardian.cityGuardianLevels[ guardianType ];
+										window.seed.guardian[ i ].type = guardianType;
+
+										window.cm.guardianCity.rerender(true);
+									}
+								}
+							}
+						}
+
+					} else {
+						if( result.msg ){
+							return dfd.reject();
+						} else {
+							attempts -= 1;
+							if( attempts > 0 ){
+								return dfd.pipe( Shared.summonGuardian(dfd, requestParams, attempts) );
+							} else {
+								return dfd.reject();
+							}
+						}
+					}
+				})
+				.fail(function(){
+					//network or server error
+					attempts -= 1;
+					if( attempts > 0 ){
+						return dfd.pipe( Shared.summonGuardian(dfd, requestParams, attempts) );
+					} else {
+						return dfd.reject();
+					}
+				});
+			};
+
 		/* captcha */
 			Shared.manageCaptcha = function( from ){
 				KOCFIA.captchaDetected = true;
@@ -3145,11 +3196,17 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA chat getHelp function');
 			var help = '<div id="kocfia-chat-help" class="help" title="Aide chat">';
 
-			//@TODO
 			var texts = {
 				'Couleurs :': [
+					'Cliquer sur le bouton contenant la palette de couleur pour afficher celle-ci et pouvoir modifier la couleur de fond des messages.',
+					'Une fois les couleurs modifiées, cliquer que le bouton "Appliquer".',
+					'Les modifications appliquées sont automatiquement prise en compte, même pour les anciens messages.'
 				],
 				'Amis et ennemis :': [
+					'Il est possible d\'ajouter des joueurs en amis ou ennemis et ainsi avoir le fond de le message d\'une couleur différente sur le chat global.',
+					'La coloration des messages des joueurs listés se fait uniquement sur le chat global, cela ne modifie pas les chuchots et le chat alliance.',
+					'Pour cela il suffit de saisir le nom du joueur voulu, sans le "Lord" ou "Lady" correspondant au sexe de son avatar.',
+					'Les modifications sont prises en compte uniquement pour les nouveaux messages.'
 				]
 			};
 
@@ -3435,15 +3492,6 @@ jQuery(document).ready(function(){
 			barbarian_resources: {}, //by cityKey and marchId, contains resources []
 			stored: ['barbarian_resources']
 		};
-
-		//@TODO add cockpit functionnalities
-			//throne set selector
-			//guardian visibility
-			//rallypoint slots
-			//aetherstone
-			//formations
-			//hospital
-			//defense switch
 
 		KOCFIA.overview.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview confPanel function');
@@ -7826,6 +7874,17 @@ jQuery(document).ready(function(){
 			}
 		};
 
+		//@TODO add cockpit functionnalities
+			//throne set selector
+			//guardian visibility
+			//rallypoint slots
+			//aetherstone
+			//formations
+			//hospital
+			//defense switch
+
+		//@TODO dynamize milicians lines for every units
+
 		KOCFIA.summary.confPanel = function( $section ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary confPanel function');
 			var code = '<h3 class="kocfia-summary-conf">'+ KOCFIA.modulesLabel.summary +'</h3>';
@@ -7839,11 +7898,34 @@ jQuery(document).ready(function(){
 
 		KOCFIA.summary.on = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary on function');
-			var $summary = $('<div id="kocfia-summary" class="ui-widget ui-widget-content ui-corner-all">');
+			var $summary = $('<div id="kocfia-summary" class="ui-widget ui-widget-content ui-corner-all">')
+				i, length, city, info,
+				cels = '',
+				code = '';
 
-			var code = '<h3 class="title">Résumé</h3><div class="wrap">';
+			code += '<h3 class="title">Résumé</h3>';
+			code += '<div class="wrap">';
+
+			code += '<div class="accordion cockpit">';
+			code += ''; //@TODO sets selector
+			code += '<table><thead><tr>';
+			code += '<th>Ville</th>';
+			code += '<th>Défense</th>';
+			code += '<th title="Nombre de marches dans le point de ralliement">Marches</th>';
+			code += '<th title="Stock '+ KOCFIA.resourceInfo.rec5.labelBis + KOCFIA.resourceInfo.rec5.label +'"><img src="'+ KOCFIA.resourcesInfo.rec5.icon +'"></th>';
+			code += '<th title="Nombre de formations">Formations</th>';
+			code += '<th>Population</th>';
+			code += '<th title="Temps restant sur le soin">Hôpital</th>';
+			code += '<th>Gardien</th>';
+			code += '</tr></thead>';
+			code += '<tbody>';
+			KOCFIA.summary.getCockpit();
+			code += '</tbody></table>';
+			code += '</div>';
+
+			code += '<div class="accordion tournament">';
+			code += '<h3>Tournois</h3>';
 			code += '<table><thead><tr><th>&nbsp;</th>';
-			var i, length, city, cels = '', info;
 			for( i = 0, length = KOCFIA.citiesKey.length; i < length; i += 1 ){
 				if( KOCFIA.cities.hasOwnProperty(KOCFIA.citiesKey[ i ]) ){
 					city = KOCFIA.cities[ KOCFIA.citiesKey[ i ] ];
@@ -7884,7 +7966,9 @@ jQuery(document).ready(function(){
 			//total ore
 			code += '<tr><td title="Stock '+ KOCFIA.resourceInfo.rec4.labelBis + KOCFIA.resourceInfo.rec4.label +'"><img src="'+ KOCFIA.resourceInfo.rec4.icon +'"></td>'+ cels +'</tr>';
 
-			code += '</tbody></table></div>';
+			code += '</tbody></table>';
+			code += '</div>';
+
 
 			$summary
 				.append( '<span class="icon-remove"></span>' )
@@ -7922,7 +8006,43 @@ jQuery(document).ready(function(){
 					KOCFIA.summary.$div.hide();
 					KOCFIA.conf.summary.visible = 0;
 					Shared.storeConf();
-				});
+				})
+				.on('click', '.gate', function(){
+					//@TODO switch gate mode
+					var $this = $(this),
+						cityKey = $this.closest('tr').attr('data-city');
+
+					if( parseInt(window.seed.citystats[ cityKey ].gate, 10) === 0 ){
+						$this.replaceWith('<button class="button secondary gate" title="Status actuel : sanctuaire - cliquer pour passer en défense"><span>Sanctuaire</span></button>');
+					} else {
+						$this.replaceWith('<button class="button secondary gate" title="Status actuel : défense - cliquer pour passer en sanctuaire"><span>Défense</span></button>');
+					}
+				})
+				.on('change', '.guardian', function(){
+					var $this = $(this),
+						cityKey = $this.closest('tr').attr('data-city'),
+						type = $this.val(),
+						params = $.extend({}, window.g_ajaxparams);
+
+					params.ctrl = 'Guardian';
+					params.action = 'summon';
+					params.cityId = cityKey.replace(/city/, '');
+					params.tvuid = window.tvuid;
+					params.type = type;
+
+					$.when( wrapper() )
+						.fail(function(){
+							var guardian = Shared.getGuardian( cityKey );
+							$this.val( gardian.type );
+							alert('Erreur durant l\'invocation du gardien');
+						});
+				})
+				.find('.accordion').accordion({
+					collapsible: true,
+					autoHeight: false,
+					animated: true
+				})
+				;
 
 			$body.append( $summary );
 
@@ -7931,7 +8051,8 @@ jQuery(document).ready(function(){
 			KOCFIA.summary.$div = $('#kocfia-summary');
 			KOCFIA.summary.$wrapper = KOCFIA.summary.$div.find('.wrap');
 			KOCFIA.summary.$title = KOCFIA.summary.$div.find('.title');
-			KOCFIA.summary.$tds = KOCFIA.summary.$div.find('tbody').find('td');
+			KOCFIA.summary.$tds = KOCFIA.summary.$div.find('.tournament').find('tbody').find('td');
+			KOCFIA.summary.$cockpit = KOCFIA.summary.$div.find('.cockpit').find('tbody');
 			KOCFIA.summary.numCelsPerLine = KOCFIA.citiesKey.length + 2;
 
 			if( KOCFIA.conf.summary.visible ){
@@ -7986,10 +8107,103 @@ jQuery(document).ready(function(){
 			Shared.storeConf();
 		};
 
+		KOCFIA.summary.getCockpit = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary getCockpit function');
+			var i, city, cityKey, stat, code = '',
+				nb, max, m, marches, formations, revive,
+				unit, wounded, timestamp, finish, guardians;
+
+			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
+				if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+					city = KOCFIA.cities[ cityKey ];
+					stat = KOCFIA.dataAndStats.stats[ cityKey ];
+					marches = window.seed.queue_atkp[ cityKey ];
+					formations = window.seed.queue_unt[ cityKey ];
+
+					code += '<tr data-city="'+ cityKey +'">';
+					code += '<th>'+ city.label +'</th>';
+
+					//defense
+						code += '<td>';
+						if( parseInt(window.seed.citystats[ cityKey ].gate, 10) === 0 ){
+							code += '<button class="button secondary gate" title="Status actuel : sanctuaire - cliquer pour passer en défense"><span>Sanctuaire</span></button>';
+						} else {
+							code += '<button class="button secondary gate" title="Status actuel : défense - cliquer pour passer en sanctuaire"><span>Défense</span></button>';
+						}
+						code += '</td>';
+
+					//marches
+						nb = 0;
+						max = Shared.buildingHighestLevel(cityKey, 12);
+
+						if( max == 12 ) max -= 1;
+
+						for( m in marches ){
+							if( marches.hasOwnProperty(m) ) nb += 1;
+						}
+						code += '<td>'+ nb +' / '+ max +'</td>';
+
+
+					//Aetherstone
+						code += '<td>'+ Shared.format(window.seed.resources[ cityKey ].rec5) +'</td>';
+
+					//formations
+						nb = 0;
+						if( Array.isArray(formations) ) nb = formations.length;
+						code += '<td>'+ nb +' / '+ stats.nbBarracks +'</td>';
+
+					//Population
+						code += '<td>'+ Shared.format(stats.population) +'</td>';
+
+					//Hospital
+						revive = window.seed.queue_revive[ cityKey ];
+						if( Array.isArray(revive) && revive.length > 0 ){
+							unit = KOCFIA.unitInfo['unt'+ revive[0][0]];
+							wounded = revive[0][1];
+
+							timestamp = Date.timestamp();
+							finish = parseInt(queue[0][3], 10);
+
+							code += '<td title="'+ unit.label +' - '+ Shared.readable(wounded) +'">'+ +'</td>';
+							code += (finish > timestamp ? Shared.readableDuration( finish - timestamp ) : '0s');
+							code += '</td>';
+						} else {
+							code += '<td></td>';
+						}
+
+					//Guardians selector
+						guardians = Shared.getGuardian( cityKey );
+						code += '<td>';
+
+						if( guardians !== false ){
+							code += '<select class="guardian">';
+							for( type in guardians.cityGuardianLevels ){
+								if( guardians.cityGuardianLevels.hasOwnProperty(type) && parseInt(guardians.cityGuardianLevels[ type ], 10) > 0 ){
+									code += '<option value="'+ type +'" '+ (guardian.type == type ? 'selected' : '') +'>';
+									code += window.g_js_strings.guardian[type +'_name'];
+									code += ' ('+ window.g_js_strings.commonstr[ type ] +')';
+									code += '</option>';
+								}
+							}
+							code += '</select>';
+						}
+						code += '</td>';
+
+					code += '</tr>';
+				}
+			}
+
+			return code;
+		};
+
 		KOCFIA.summary.update = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('summary') ) console.info('KOCFIA summary update function');
 			if( !KOCFIA.conf.summary.active ) return;
 			if( !KOCFIA.summary.hasOwnProperty('$tds') ) return;
+
+			KOCFIA.summary.$cockpit.html( KOCFIA.summary.getCockpit() );
+
 			var i, b, l, t, length, nb, queue, keys,
 				cityKey, time, train, food, ore,
 				popPerHour, hapiness, unit2Delta, stat,
@@ -17875,68 +18089,27 @@ jQuery(document).ready(function(){
 					params.tvuid = window.tvuid;
 					params.type = type;
 
-					$.ajax({
-							url: window.g_ajaxpath + "ajax/_dispatch.php" + window.g_ajaxsuffix,
-							type: 'post',
-							data: params,
-							dataType: 'json',
-							timeout: 10000
-						})
-						.done(function(result){
-							if( result.ok ){
-								if( Array.isArray(window.seed.guardian) && window.seed.guardian.length > 0 ){
-									for( i = 0, l = window.seed.guardian.length; i < l; i += 1 ){
-										guardian = window.seed.guardian[ i ];
-										if( Object.isObject(guardian) && !$.isEmptyObject(guardian) ){
-											if( guardian.city == city.id ){
-												guardianType = window.cm.guardianConst.numTypes[ type ];
-												window.seed.guardian[ i ].timeLeft = 0;
-												window.seed.guardian[ i ].level = guardian.cityGuardianLevels[ guardianType ];
-												window.seed.guardian[ i ].type = guardianType;
+					var wrapper = function(){
+						return $.Deferred(function( wdfd ){
+							return wdfd.pipe( Shared.summonGuardian(wdfd, params, 3) );
+						}).promise();
+					};
 
-												window.cm.guardianCity.rerender(true);
-											}
-										}
-									}
-								}
-
-								attempts = 3;
-								if( checkBeforeEquipingSet ){
-									checkBeforeEquipingSet = false;
-									return dfd.pipe( equipSet(dfd, 3) );
-								} else {
-									return dfd.pipe( build(dfd) );
-								}
+					$.when( wrapper() )
+						.done(function(){
+							attempts = 3;
+							if( checkBeforeEquipingSet ){
+								checkBeforeEquipingSet = false;
+								return dfd.pipe( equipSet(dfd, 3) );
 							} else {
-								if( result.msg ){
-									msg.push(city.label +': invocation de gardien refusée ('+ result.msg +').');
-
-									cityIndex += 1;
-									return dfd.pipe( byCity(dfd) );
-								} else {
-									attempts -= 1;
-									if( attempts > 0 ){
-										window.setTimeout(function(){ return dfd.pipe( summonGuardian(udfd) ); }, 10000);
-									} else {
-										msgUnit.push(city.label +': invocation de gardien refusée.');
-
-										cityIndex += 1;
-										return dfd.pipe( byCity(dfd) );
-									}
-								}
+								return dfd.pipe( build(dfd) );
 							}
 						})
 						.fail(function(){
-							//network or server error
-							attempts -= 1;
-							if( attempts > 0 ){
-								window.setTimeout(function(){ return dfd.pipe( summonGuardian(udfd) ); }, 10000);
-							} else {
-								msg.push(city.label +': invocation de gardien refusée (erreur internet).');
+							msg.push(city.label +': invocation de gardien refusée.');
 
-								cityIndex += 1;
-								return dfd.pipe( byCity(dfd) );
-							}
+							cityIndex += 1;
+							return dfd.pipe( byCity(dfd) );
 						});
 				};
 

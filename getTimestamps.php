@@ -13,6 +13,7 @@ $urls = array(
 	'http://'.$_SERVER['SERVER_NAME'].'/plugins/ui.jqgrid.css',
 	'http://'.$_SERVER['SERVER_NAME'].'/plugins/grid.locale-fr.js',
 	'http://'.$_SERVER['SERVER_NAME'].'/plugins/jquery.jqGrid.min.js',
+	'http://'.$_SERVER['SERVER_NAME'].'/plugins/FileSaver.min.js',
 	'http://'.$_SERVER['SERVER_NAME'].'/kocfia.css?ts='.filemtime('kocfia.css'),
 	'http://'.$_SERVER['SERVER_NAME'].'/kocfia.js?ts='.filemtime('kocfia.js')
 );

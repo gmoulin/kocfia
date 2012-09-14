@@ -148,6 +148,7 @@
 		<script src="http://kocfia.kapok.dev/plugins/jquery.tipsy.min.js"></script>
 		<script src="http://kocfia.kapok.dev/plugins/grid.locale-fr.js"></script>
 		<script src="http://kocfia.kapok.dev/plugins/jquery.jqGrid.min.js"></script>
+		<script src="http://kocfia.kapok.dev/plugins/FileSaver.min.js"></script>
 		<script>
 			var unitmight = {"unt1":1,"unt2":1,"unt3":2,"unt4":2,"unt5":3,"unt6":4,"unt7":5,"unt8":7,"unt9":6,"unt10":9,"unt11":9,"unt12":10};
 

@@ -149,7 +149,7 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
 	var KOCFIA = {
-		version: '0.8.3',
+		version: '0.8.4',
 		userScriptLoaderVersion: 4,
 		debug: false,
 		debugWhat: { //comment module line for no debug
@@ -580,7 +580,7 @@ jQuery(document).ready(function(){
 		}
 
 		//gather stored items list for deletion ease
-			KOCFIA.stored.push( 'conf' );
+			KOCFIA.stored.push('conf');
 			var j, length, stored;
 			for( i = 0; i < modulesLength; i += 1 ){
 				mod = KOCFIA.modules[i];
@@ -1296,6 +1296,92 @@ jQuery(document).ready(function(){
 					$audio[0].pause();
 					$audio[0].currentTime = 0;
 				})
+				//backup and restore
+				.on('click', '.backup', function(){
+					var conf = {},
+						i, mod, tag, varName;
+					for( i = 0; i < KOCFIA.stored.length; i += 1 ){
+						tag = KOCFIA.stored[ i ];
+						if( tag == 'conf' ){
+							conf.conf = $.extend(true, {}, KOCFIA.conf);
+						} else {
+							tag = tag.split('_');
+							mod = tag.shift();
+							varName = tag.join('_');
+							if( !conf.hasOwnProperty(mod) ) conf[ mod ] = {};
+							conf[ mod ][ varName ] = $.extend(true, (Array.isArray(KOCFIA[ mod ][ varName ]) ? [] : {}), KOCFIA[ mod ][ varName ]);
+						}
+					}
+
+					console.log(conf);
+
+					//create a file with json value of conf variable
+					//@TODO not completely working (filename, prompt)
+					saveAs(new Blob([JSON.stringify(conf)], {type: "text/plain;charset=utf-8"}), 'kocfia_conf_'+ KOCFIA.server +'.txt');
+				})
+				.on('change', '#kocfia-conf-import-file', function(event){
+					var files = event.target.files,
+						f, reader; // FileList object
+
+					// Loop through the FileList and render image files as thumbnails.
+					f = files[0];
+
+					// Only process image files.
+					if( !f.type.match('text/plain') ){
+						Shared.notify('Le fichier de sauvegarde proposé n\'est pas du type attendu.');
+						return false;
+					}
+
+					reader = new FileReader();
+
+					// Closure to capture the file information.
+					reader.onload = (function( theFile ){
+						return function(e){
+							var conf = JSON.parse( e.target.result );
+							console.log(conf);
+							if( Object.isObject(conf) && !$.isEmptyObject(conf) ){
+								var i, tag, mod, varName;
+								for( i = 0; i < KOCFIA.stored.length; i += 1 ){
+									tag = KOCFIA.stored[ i ];
+									if( tag == 'conf' ){
+										if( conf.hasOwnProperty('conf') ){
+											KOCFIA.conf = $.extend(true, {}, conf.conf);
+
+											//store the restored conf part
+											Shared.storeConf();
+										}
+
+									} else {
+										tag = tag.split('_');
+										mod = tag.shift();
+										varName = tag.join('_');
+										if( conf.hasOwnProperty(mod) && conf[ mod ].hasOwnProperty(varName) ){
+											KOCFIA[ mod ][ varName ] = $.extend(true, (Array.isArray(conf[ mod ][ varName ]) ? [] : {}), conf[ mod ][ varName ]);
+
+											//store the restored conf part
+											if( typeof KOCFIA[ mod ]['store'+ varName.capitalize()] == 'function' ){
+												KOCFIA[ mod ]['store'+ varName.capitalize()]();
+											} else {
+												console.error('not a function KOCFIA.'+ mod +'.store'+ varName.capitalize());
+											}
+										} else {
+											console.error('missing KOCFIA.'+ mod +'.'+ varName);
+										}
+									}
+								}
+
+								//window.location.reload();
+
+							} else {
+								Shared.notify('Les données du fichier de sauvegarde ne correspondent pas au format attendu');
+							}
+						};
+					})(f);
+
+					// Read in the image file as a data URL.
+					reader.readAsText(f);
+				})
+				//jqgrid
 				.on('click', '.ui-jqgrid-titlebar', function(){
 					$(this).find('.ui-jqgrid-titlebar-close').trigger('click');
 				})
@@ -1478,12 +1564,14 @@ jQuery(document).ready(function(){
 				KOCFIA[ KOCFIA.modules[i] ].confPanel( $optionsSection );
 			}
 
-			/*code = '<h3>Crédits</h3>';
-			code += '<div><ul>';
-			code += '<li><a href="http://beworld.perso.sfr.fr/bao/">Beworld</a> pour son travail</li>';
-			code += '</ul></div>';
+			code = '<h3>Sauvegarde globale</h3>';
+			code += '<div>';
+			code += '<button class="button secondary backup" title="Sauvegarder la configuration de KOCFIA"><span><span class="icon-copy"></span> Sauvegarder</span></button>';
+			code += ' ou restaurer une configuration : <input type="file" id="kocfia-conf-import-file">';
+			code += '<br><small>Pour la sauvegarde, faire enregistrer sous dans le nouvel onglet ouvert et sauvegarder en tant que fichier texte (extension .txt)</small>';
+			code += '</div>';
 
-			$optionsSection.append( code );*/
+			$optionsSection.append( code );
 		};
 
 	/* SHARED */
@@ -2981,7 +3069,7 @@ jQuery(document).ready(function(){
 				playSoundOnWhisper: 0,
 				whisperSoundUrl: 'http://kocfia.kapok.fr/sounds/whisper.ogg'
 			},
-			stored: ['friends_list', 'foes_list'],
+			stored: ['friendsList', 'foesList'],
 			friendsList: [],
 			foesList: [],
 			leaders: {}
@@ -3437,7 +3525,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.chat.storeFriendsList = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA storeFriendsList function');
-			localStorage.setObject('kocfia_chat_friends_list_' + KOCFIA.storeUniqueId, KOCFIA.chat.friendsList);
+			localStorage.setObject('kocfia_chat_friendsList_' + KOCFIA.storeUniqueId, KOCFIA.chat.friendsList);
 		};
 
 		KOCFIA.chat.cleanFriendsList = function(){
@@ -3461,7 +3549,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.chat.storeFoesList = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('chat') ) console.info('KOCFIA storeFoesList function');
-			localStorage.setObject('kocfia_chat_foes_list_' + KOCFIA.storeUniqueId, KOCFIA.chat.foesList);
+			localStorage.setObject('kocfia_chat_foesList_' + KOCFIA.storeUniqueId, KOCFIA.chat.foesList);
 		};
 
 		KOCFIA.chat.cleanFoesList = function(){
@@ -3535,8 +3623,8 @@ jQuery(document).ready(function(){
 				resources_production_total: 'total production',
 				resources_autonomy: 'autonomie'
 			},
-			barbarian_resources: {}, //by cityKey and marchId, contains resources []
-			stored: ['barbarian_resources']
+			barbarianResources: {}, //by cityKey and marchId, contains resources []
+			stored: ['barbarianResources']
 		};
 
 		KOCFIA.overview.confPanel = function( $section ){
@@ -3775,24 +3863,24 @@ jQuery(document).ready(function(){
 											//get resources in one hour
 											barbarianRes = [ factor * parseFloat(march.gold), factor * parseFloat(march.resource1), factor * parseFloat(march.resource2), factor * parseFloat(march.resource3), factor * parseFloat(march.resource4) ];
 
-											if( !KOCFIA.overview.barbarian_resources.hasOwnProperty(cityKey) ){
-												KOCFIA.overview.barbarian_resources[ cityKey ] = {};
+											if( !KOCFIA.overview.barbarianResources.hasOwnProperty(cityKey) ){
+												KOCFIA.overview.barbarianResources[ cityKey ] = {};
 											}
 
-											KOCFIA.overview.barbarian_resources[ cityKey ][ m ] = barbarianRes;
+											KOCFIA.overview.barbarianResources[ cityKey ][ m ] = barbarianRes;
 
 											//cleaning
-											for( b in KOCFIA.overview.barbarian_resources[ cityKey ] ){
-												if( KOCFIA.overview.barbarian_resources[ cityKey ].hasOwnProperty(b) && !marches.hasOwnProperty(b) ){
-													delete KOCFIA.overview.barbarian_resources[ cityKey ][ b ];
+											for( b in KOCFIA.overview.barbarianResources[ cityKey ] ){
+												if( KOCFIA.overview.barbarianResources[ cityKey ].hasOwnProperty(b) && !marches.hasOwnProperty(b) ){
+													delete KOCFIA.overview.barbarianResources[ cityKey ][ b ];
 												}
 											}
 											KOCFIA.overview.storeBarbarianResources();
 
 										} else if( (march.botMarchStatus == window.cm.BOT_STATUS.BOT_MARCH_MARCHING || march.botMarchStatus == window.cm.BOT_STATUS.BOT_MARCH_RESTING)
-											&& KOCFIA.overview.barbarian_resources.hasOwnProperty(m)
+											&& KOCFIA.overview.barbarianResources.hasOwnProperty(m)
 										){
-											barbarianRes = KOCFIA.overview.barbarian_resources[ cityKey ][ m ];
+											barbarianRes = KOCFIA.overview.barbarianResources[ cityKey ][ m ];
 										} else {
 											barbarianRes = [ 0, 0, 0, 0, 0 ];
 										}
@@ -4326,7 +4414,7 @@ jQuery(document).ready(function(){
 
 		KOCFIA.overview.storeBarbarianResources = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('overview') ) console.info('KOCFIA overview storeBarbarianResources function');
-			localStorage.setObject('kocfia_overview_barbarian_resources_' + KOCFIA.storeUniqueId, KOCFIA.overview.barbarian_resources);
+			localStorage.setObject('kocfia_overview_barbarianResources_' + KOCFIA.storeUniqueId, KOCFIA.overview.barbarianResources);
 		};
 
 		/* moveable */
@@ -13895,7 +13983,7 @@ jQuery(document).ready(function(){
 			incomings: {}, //march ids
 			lastScanned: {}, //for reports
 			summary: {}, //march ids
-			stored: ['incomings', 'summary']
+			stored: ['incomings']
 		};
 
 		/* grid related */
@@ -13998,589 +14086,589 @@ jQuery(document).ready(function(){
 			code += Shared.generateCheckbox('alarm', 'scout', 'Alerter en cas d\'éclairage', KOCFIA.conf.alarm.scout);
 
 			code += '<br>';
-				code += Shared.generateCheckbox('alarm', 'postToAllianceChat', 'Mettre les alarmes dans le chat alliance', KOCFIA.conf.alarm.postToAllianceChat);
-				var labels = $.map(KOCFIA.citiesKey, function(cityKey){ return KOCFIA.cities[ cityKey ].label; }),
-					values = KOCFIA.citiesKey.slice(); //independant copy
-				labels.unshift('Choisissez');
-				values.unshift('');
-				code += Shared.generateSelect('alarm', 'HQ', 'Spécifier le quartier général', KOCFIA.conf.alarm.HQ, {labels: labels, values: values});
-				code += Shared.generateInput('alarm', 'minTroopOnHQ', 'Minimum de troupe pour poster les alertes relatives quartier général', KOCFIA.conf.alarm.minTroopOnHQ);
-				code += Shared.generateInput('alarm', 'minTroopOnOther', 'Seuil de troupe pour poster les alertes relatives aux autres villes', KOCFIA.conf.alarm.minTroopOnOther);
+			code += Shared.generateCheckbox('alarm', 'postToAllianceChat', 'Mettre les alarmes dans le chat alliance', KOCFIA.conf.alarm.postToAllianceChat);
+			var labels = $.map(KOCFIA.citiesKey, function(cityKey){ return KOCFIA.cities[ cityKey ].label; }),
+				values = KOCFIA.citiesKey.slice(); //independant copy
+			labels.unshift('Choisissez');
+			values.unshift('');
+			code += Shared.generateSelect('alarm', 'HQ', 'Spécifier le quartier général', KOCFIA.conf.alarm.HQ, {labels: labels, values: values});
+			code += Shared.generateInput('alarm', 'minTroopOnHQ', 'Minimum de troupe pour poster les alertes relatives quartier général', KOCFIA.conf.alarm.minTroopOnHQ);
+			code += Shared.generateInput('alarm', 'minTroopOnOther', 'Seuil de troupe pour poster les alertes relatives aux autres villes', KOCFIA.conf.alarm.minTroopOnOther);
 
-				code += '<br>';
-				//attacks
-				code += Shared.generateCheckbox('alarm', 'playSoundForAttack', 'Jouer un son pour les attaques', KOCFIA.conf.alarm.playSoundForAttack);
-				code += Shared.generateAudioInput('alarm', 'attackSoundUrl', 'Adresse web du son à jouer pour les attaques <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.attackSoundUrl, 'attack');
-				code += '<p><label for="kocfia-alarm-attackColor">Couleur des attaques&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-attackColor" name="attackColor" class="alarmColors">';
+			code += '<br>';
+			//attacks
+			code += Shared.generateCheckbox('alarm', 'playSoundForAttack', 'Jouer un son pour les attaques', KOCFIA.conf.alarm.playSoundForAttack);
+			code += Shared.generateAudioInput('alarm', 'attackSoundUrl', 'Adresse web du son à jouer pour les attaques <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.attackSoundUrl, 'attack');
+			code += '<p><label for="kocfia-alarm-attackColor">Couleur des attaques&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-attackColor" name="attackColor" class="alarmColors">';
 
-				//scouts
-				code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForScout', 'Jouer un son pour les éclairages', KOCFIA.conf.alarm.playSoundForScout);
-				code += Shared.generateAudioInput('alarm', 'scoutSoundUrl', 'Adresse web du son à jouer pour les éclairages <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.scoutSoundUrl, 'scout');
-				code += '<p><label for="kocfia-alarm-scoutColor">Couleur des éclairages&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-scoutColor" name="scoutColor" class="alarmColors">';
+			//scouts
+			code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForScout', 'Jouer un son pour les éclairages', KOCFIA.conf.alarm.playSoundForScout);
+			code += Shared.generateAudioInput('alarm', 'scoutSoundUrl', 'Adresse web du son à jouer pour les éclairages <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.scoutSoundUrl, 'scout');
+			code += '<p><label for="kocfia-alarm-scoutColor">Couleur des éclairages&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-scoutColor" name="scoutColor" class="alarmColors">';
 
-				//autonomy
-				code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForAutonomy', 'Jouer un son pour les autonomies', KOCFIA.conf.alarm.playSoundForAutonomy);
-				code += Shared.generateAudioInput('alarm', 'autonomySoundUrl', 'Adresse web du son à jouer pour les alertes d\'autonomie <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.autonomySoundUrl, 'autonomy');
-				code += '<p><label for="kocfia-alarm-autonomyColor">Couleur des autonomies&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-autonomyColor" name="autonomyColor" class="alarmColors">';
+			//autonomy
+			code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForAutonomy', 'Jouer un son pour les autonomies', KOCFIA.conf.alarm.playSoundForAutonomy);
+			code += Shared.generateAudioInput('alarm', 'autonomySoundUrl', 'Adresse web du son à jouer pour les alertes d\'autonomie <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.autonomySoundUrl, 'autonomy');
+			code += '<p><label for="kocfia-alarm-autonomyColor">Couleur des autonomies&nbsp;:&nbsp;</label><input type="text" id="kocfia-alarm-autonomyColor" name="autonomyColor" class="alarmColors">';
 
-				//alliance reports
-				code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForAllianceReport', 'Jouer un son pour les rapports d\'alliance', KOCFIA.conf.alarm.playSoundForAllianceReport);
-				code += Shared.generateAudioInput('alarm', 'autonomySoundUrl', 'Adresse web du son à jouer pour les alertes de rapports d\'alliance <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.allianceSoundUrl, 'alliance');
+			//alliance reports
+			code += '<br><br>'+ Shared.generateCheckbox('alarm', 'playSoundForAllianceReport', 'Jouer un son pour les rapports d\'alliance', KOCFIA.conf.alarm.playSoundForAllianceReport);
+			code += Shared.generateAudioInput('alarm', 'autonomySoundUrl', 'Adresse web du son à jouer pour les alertes de rapports d\'alliance <small>(wave, vorbis, ogg, webm)</small>', KOCFIA.conf.alarm.allianceSoundUrl, 'alliance');
 
-				code += '<br><br><p>Les transports, attaques et raids seront bloqués tant que la ville est attaquée</p>';
-				code += Shared.generateCheckbox('alarm', 'stopAutoAttack', 'Bloquer les attaques automatiques en cas d\'attaque (pour la ville attaquée, CB, TS, FO, Eclairages)', KOCFIA.conf.alarm.stopAutoAttack);
-				code += Shared.generateCheckbox('alarm', 'stopAutoTransport', 'Bloquer les transports automatiques en cas d\'attaque (pour la ville attaquée, expéditrice ou destinatrice)', KOCFIA.conf.alarm.stopAutoTransport);
-				code += Shared.generateCheckbox('alarm', 'stopAutoReassign', 'Bloquer les réassignements automatiques en cas d\'attaque (pour la ville attaquée, expéditrice ou destinatrice)', KOCFIA.conf.alarm.stopAutoReassign);
-				//code += Shared.generateCheckbox('alarm', 'stopRaids', 'Bloquer les raids barbares (pour la ville attaquée)', KOCFIA.conf.alarm.stopRaids);
-				code += '<br>';
-				code += Shared.generateCheckbox('alarm', 'watchAllianceReports', 'Scanner les rapports d\'alliance (pas de post)', KOCFIA.conf.alarm.watchAllianceReports);
-				code += '<br>';
-				code += Shared.generateCheckbox('alarm', 'autonomy', 'Alerter pour les autonomies inférieure à 24h', KOCFIA.conf.alarm.autonomy);
+			code += '<br><br><p>Les transports, attaques et raids seront bloqués tant que la ville est attaquée</p>';
+			code += Shared.generateCheckbox('alarm', 'stopAutoAttack', 'Bloquer les attaques automatiques en cas d\'attaque (pour la ville attaquée, CB, TS, FO, Eclairages)', KOCFIA.conf.alarm.stopAutoAttack);
+			code += Shared.generateCheckbox('alarm', 'stopAutoTransport', 'Bloquer les transports automatiques en cas d\'attaque (pour la ville attaquée, expéditrice ou destinatrice)', KOCFIA.conf.alarm.stopAutoTransport);
+			code += Shared.generateCheckbox('alarm', 'stopAutoReassign', 'Bloquer les réassignements automatiques en cas d\'attaque (pour la ville attaquée, expéditrice ou destinatrice)', KOCFIA.conf.alarm.stopAutoReassign);
+			//code += Shared.generateCheckbox('alarm', 'stopRaids', 'Bloquer les raids barbares (pour la ville attaquée)', KOCFIA.conf.alarm.stopRaids);
+			code += '<br>';
+			code += Shared.generateCheckbox('alarm', 'watchAllianceReports', 'Scanner les rapports d\'alliance (pas de post)', KOCFIA.conf.alarm.watchAllianceReports);
+			code += '<br>';
+			code += Shared.generateCheckbox('alarm', 'autonomy', 'Alerter pour les autonomies inférieure à 24h', KOCFIA.conf.alarm.autonomy);
 
-				code += '<br><div class="buttonset">';
-				var i, city, cityKey;
-				for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
-					cityKey = KOCFIA.citiesKey[ i ];
+			code += '<br><div class="buttonset">';
+			var i, city, cityKey;
+			for( i = 0; i < KOCFIA.citiesKey.length; i += 1 ){
+				cityKey = KOCFIA.citiesKey[ i ];
 
-					if( KOCFIA.cities.hasOwnProperty(cityKey) ){
-						city = KOCFIA.cities[ cityKey ];
-						code += '<input type="checkbox" class="alarm-autonomy-cities" id="alarm-autonomy-'+ cityKey +'" value="'+ cityKey +'">';
-						code += '<label for="'+ KOCFIA.citiesKey[ i ] +'">'+ city.label +'</label>';
-					}
+				if( KOCFIA.cities.hasOwnProperty(cityKey) ){
+					city = KOCFIA.cities[ cityKey ];
+					code += '<input type="checkbox" class="alarm-autonomy-cities" id="alarm-autonomy-'+ cityKey +'" value="'+ cityKey +'">';
+					code += '<label for="'+ KOCFIA.citiesKey[ i ] +'">'+ city.label +'</label>';
 				}
-				code +=
-				code += '</div>';
+			}
+			code +=
+			code += '</div>';
 
-				code += '<br><br>';
-				code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK +',0"><span>Fausse attaque de ville</span></button>';
-				code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK +',1"><span>Fausse attaque de terre sauvage</span></button>';
-				code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT +',0"><span>Faux éclairage de ville</span></button>';
-				code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT +',1"><span>Faux éclairage de terre sauvage</span></button>';
-				code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE +',0"><span>Faux renfort de ville</span></button>';
-				code += '</div>';
+			code += '<br><br>';
+			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK +',0"><span>Fausse attaque de ville</span></button>';
+			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK +',1"><span>Fausse attaque de terre sauvage</span></button>';
+			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT +',0"><span>Faux éclairage de ville</span></button>';
+			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT +',1"><span>Faux éclairage de terre sauvage</span></button>';
+			code += '<button class="fakeAttacks button secondary" rel="'+ window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE +',0"><span>Faux renfort de ville</span></button>';
+			code += '</div>';
 
-				$section.append( code )
-					.on('change', '.alarmColors', function(){
-						KOCFIA.conf.alarm[ this.name ] = $(this).miniColors('value');
+			$section.append( code )
+				.on('change', '.alarmColors', function(){
+					KOCFIA.conf.alarm[ this.name ] = $(this).miniColors('value');
 
-						if( KOCFIA.conf.alarm.active ){
-							$('#kocfia-chat-highlight-alarm').remove();
+					if( KOCFIA.conf.alarm.active ){
+						$('#kocfia-chat-highlight-alarm').remove();
 
-							var css = chatHighlightAlarmCss;
-							css = css.replace(/%attackColor%/, KOCFIA.conf.alarm.attackColor);
-							css = css.replace(/%scoutColor%/, KOCFIA.conf.alarm.scoutColor);
-							css = css.replace(/%autonomyColor%/, KOCFIA.conf.alarm.autonomyColor);
+						var css = chatHighlightAlarmCss;
+						css = css.replace(/%attackColor%/, KOCFIA.conf.alarm.attackColor);
+						css = css.replace(/%scoutColor%/, KOCFIA.conf.alarm.scoutColor);
+						css = css.replace(/%autonomyColor%/, KOCFIA.conf.alarm.autonomyColor);
 
-							$head.append( $('<style id="kocfia-chat-highlight-alarm">').html(css) );
-						}
+						$head.append( $('<style id="kocfia-chat-highlight-alarm">').html(css) );
+					}
 
-						Shared.storeConf();
-					})
-					.on('click', '.fakeAttacks', function(){
-						var $this = $(this),
-							params = $this.attr('rel').split(',');
+					Shared.storeConf();
+				})
+				.on('click', '.fakeAttacks', function(){
+					var $this = $(this),
+						params = $this.attr('rel').split(',');
 
-						KOCFIA.alarm.generateFake(params[0], params[1]);
-						KOCFIA.alarm.checkIncoming();
-					})
-					.on('change', '.alarm-autonomy-cities', function(){
-						var cities = {};
+					KOCFIA.alarm.generateFake(params[0], params[1]);
+					KOCFIA.alarm.checkIncoming();
+				})
+				.on('change', '.alarm-autonomy-cities', function(){
+					var cities = {};
 
-						$(this).parent().find('input').filter(':checked').each(function(){
-							cities[ this.value ] = 1;
-						});
-
-						KOCFIA.conf.alarm.autonomyCities = cities;
-						Shared.storeConf();
+					$(this).parent().find('input').filter(':checked').each(function(){
+						cities[ this.value ] = 1;
 					});
 
-				$section.find('.alarmColors').miniColors().each(function(){
-					$(this).miniColors('value', KOCFIA.conf.alarm[ this.name ]);
+					KOCFIA.conf.alarm.autonomyCities = cities;
+					Shared.storeConf();
 				});
-			};
 
-			KOCFIA.alarm.on = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm on function');
+			$section.find('.alarmColors').miniColors().each(function(){
+				$(this).miniColors('value', KOCFIA.conf.alarm[ this.name ]);
+			});
+		};
 
-				var $soundAttack = $('<audio id="kocfia-sound-attack" src="'+ KOCFIA.conf.alarm.attackSoundUrl +'" preload="auto">'),
-					$soundScout = $('<audio id="kocfia-sound-scout" src="'+ KOCFIA.conf.alarm.scoutSoundUrl +'" preload="auto">'),
-					$soundAutonomy = $('<audio id="kocfia-sound-autonomy" src="'+ KOCFIA.conf.alarm.autonomySoundUrl +'" preload="auto">'),
-					$soundAlliance = $('<audio id="kocfia-sound-alliance" src="'+ KOCFIA.conf.alarm.allianceSoundUrl +'" preload="auto">');
+		KOCFIA.alarm.on = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm on function');
 
-				$body.append( $soundAttack )
-					.append( $soundScout )
-					.append( $soundAutonomy )
-					.append( $soundAlliance );
+			var $soundAttack = $('<audio id="kocfia-sound-attack" src="'+ KOCFIA.conf.alarm.attackSoundUrl +'" preload="auto">'),
+				$soundScout = $('<audio id="kocfia-sound-scout" src="'+ KOCFIA.conf.alarm.scoutSoundUrl +'" preload="auto">'),
+				$soundAutonomy = $('<audio id="kocfia-sound-autonomy" src="'+ KOCFIA.conf.alarm.autonomySoundUrl +'" preload="auto">'),
+				$soundAlliance = $('<audio id="kocfia-sound-alliance" src="'+ KOCFIA.conf.alarm.allianceSoundUrl +'" preload="auto">');
 
-				KOCFIA.alarm.sounds.attack.$tag = $soundAttack;
-				KOCFIA.alarm.sounds.scout.$tag = $soundScout;
-				KOCFIA.alarm.sounds.autonomy.$tag = $soundAutonomy;
-				KOCFIA.alarm.sounds.alliance.$tag = $soundAlliance;
+			$body.append( $soundAttack )
+				.append( $soundScout )
+				.append( $soundAutonomy )
+				.append( $soundAlliance );
 
-				$('#kocfia-chat-highlight-alarm').remove();
+			KOCFIA.alarm.sounds.attack.$tag = $soundAttack;
+			KOCFIA.alarm.sounds.scout.$tag = $soundScout;
+			KOCFIA.alarm.sounds.autonomy.$tag = $soundAutonomy;
+			KOCFIA.alarm.sounds.alliance.$tag = $soundAlliance;
 
-				var css = chatHighlightAlarmCss;
-				css = css.replace(/%attackColor%/, KOCFIA.conf.alarm.attackColor);
-				css = css.replace(/%scoutColor%/, KOCFIA.conf.alarm.scoutColor);
-				css = css.replace(/%autonomyColor%/, KOCFIA.conf.alarm.autonomyColor);
+			$('#kocfia-chat-highlight-alarm').remove();
 
-				$head.append( $('<style id="kocfia-chat-highlight-alarm">').html(css) );
+			var css = chatHighlightAlarmCss;
+			css = css.replace(/%attackColor%/, KOCFIA.conf.alarm.attackColor);
+			css = css.replace(/%scoutColor%/, KOCFIA.conf.alarm.scoutColor);
+			css = css.replace(/%autonomyColor%/, KOCFIA.conf.alarm.autonomyColor);
 
-				if( KOCFIA.conf.alarm.watchAllianceReports ){
-					KOCFIA.alarm.watchAllianceReportsOn();
-				}
-			};
+			$head.append( $('<style id="kocfia-chat-highlight-alarm">').html(css) );
 
-			KOCFIA.alarm.off = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm off function');
-				if( KOCFIA.conf.alarm.watchAllianceReports ){
-					KOCFIA.alarm.watchReportsIntervalOff();
-				}
+			if( KOCFIA.conf.alarm.watchAllianceReports ){
+				KOCFIA.alarm.watchAllianceReportsOn();
+			}
+		};
 
-				$('#kocfia-chat-highlight-alarm').remove();
+		KOCFIA.alarm.off = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm off function');
+			if( KOCFIA.conf.alarm.watchAllianceReports ){
+				KOCFIA.alarm.watchReportsIntervalOff();
+			}
 
-				KOCFIA.alarm.sounds.attack.$tag.remove();
-				KOCFIA.alarm.sounds.scout.$tag.remove();
-				KOCFIA.alarm.sounds.autonomy.$tag.remove();
-				KOCFIA.alarm.sounds.alliance.$tag.remove();
+			$('#kocfia-chat-highlight-alarm').remove();
 
-				KOCFIA.alarm.sounds.attack.$tag = null;
-				KOCFIA.alarm.sounds.scout.$tag = null;
-				KOCFIA.alarm.sounds.autonomy.$tag = null;
-				KOCFIA.alarm.sounds.alliance.$tag = null;
-			};
+			KOCFIA.alarm.sounds.attack.$tag.remove();
+			KOCFIA.alarm.sounds.scout.$tag.remove();
+			KOCFIA.alarm.sounds.autonomy.$tag.remove();
+			KOCFIA.alarm.sounds.alliance.$tag.remove();
 
-			KOCFIA.alarm.watchAllianceReportsOn = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm watchAllianceReportsOn function');
+			KOCFIA.alarm.sounds.attack.$tag = null;
+			KOCFIA.alarm.sounds.scout.$tag = null;
+			KOCFIA.alarm.sounds.autonomy.$tag = null;
+			KOCFIA.alarm.sounds.alliance.$tag = null;
+		};
 
-				watchReportsInterval = window.setInterval(function(){
-					KOCFIA.alarm.scanReports();
-				}, 2 * 60 * 1000);
-			};
+		KOCFIA.alarm.watchAllianceReportsOn = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm watchAllianceReportsOn function');
 
-			KOCFIA.alarm.watchAllianceReportsOff = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm watchAllianceReportsOff function');
-				if( watchReportsInterval ){
-					window.cleanInterval( watchReportsInterval );
-				}
-			};
+			watchReportsInterval = window.setInterval(function(){
+				KOCFIA.alarm.scanReports();
+			}, 2 * 60 * 1000);
+		};
 
-			KOCFIA.alarm.storeIncomings = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('kocfia alarm storeIncomings function');
-				localStorage.setObject('kocfia_alarm_incomings_' + KOCFIA.storeUniqueId, KOCFIA.alarm.incomings);
-			};
+		KOCFIA.alarm.watchAllianceReportsOff = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm watchAllianceReportsOff function');
+			if( watchReportsInterval ){
+				window.cleanInterval( watchReportsInterval );
+			}
+		};
 
-			KOCFIA.alarm.deleteIncomings = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport deleteIncomings function');
-				localStorage.removeItem('kocfia_alarm_incomings_' + KOCFIA.storeUniqueId);
+		KOCFIA.alarm.storeIncomings = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('kocfia alarm storeIncomings function');
+			localStorage.setObject('kocfia_alarm_incomings_' + KOCFIA.storeUniqueId, KOCFIA.alarm.incomings);
+		};
 
-				KOCFIA.alarm.incomings = {};
-			};
+		KOCFIA.alarm.deleteIncomings = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('transport') ) console.info('KOCFIA transport deleteIncomings function');
+			localStorage.removeItem('kocfia_alarm_incomings_' + KOCFIA.storeUniqueId);
 
-			KOCFIA.alarm.checkIncoming = function(){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm checkIncoming function');
+			KOCFIA.alarm.incomings = {};
+		};
 
-				if( KOCFIA.conf.alarm.active ){
-					if( !Array.isArray(window.seed.queue_atkinc) ){
-						var m, march, cityKey,
-							changed = false,
-							timestamp = Date.timestamp();
+		KOCFIA.alarm.checkIncoming = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm checkIncoming function');
 
-						KOCFIA.alarm.underAttack = {};
+			if( KOCFIA.conf.alarm.active ){
+				if( !Array.isArray(window.seed.queue_atkinc) ){
+					var m, march, cityKey,
+						changed = false,
+						timestamp = Date.timestamp();
 
-						for( m in window.seed.queue_atkinc ){
-							if( window.seed.queue_atkinc.hasOwnProperty(m) ){
-								march = window.seed.queue_atkinc[ m ];
-								if( (march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK || march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT) ){
-									if( parseInt(march.arrivalTime, 10) > timestamp ){
-										cityKey = 'city'+ march.toCityId;
-										KOCFIA.alarm.underAttack[ cityKey ] = 1;
+					KOCFIA.alarm.underAttack = {};
 
-										if( !KOCFIA.alarm.incomings.hasOwnProperty(m) ){
-											changed = true;
-											KOCFIA.alarm.incomings[ m ] = march;
-											KOCFIA.alarm.incomings[ m ].added = timestamp;
-
-											KOCFIA.alarm.react((march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK ? 'attack' : 'scout'), cityKey, march);
-										}
-									} else if( KOCFIA.alarm.incomings.hasOwnProperty(m) ){
-										changed = true;
-										delete KOCFIA.alarm.incomings[ m ];
-									}
-								} else if( march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE ){
+					for( m in window.seed.queue_atkinc ){
+						if( window.seed.queue_atkinc.hasOwnProperty(m) ){
+							march = window.seed.queue_atkinc[ m ];
+							if( (march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK || march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT) ){
+								if( parseInt(march.arrivalTime, 10) > timestamp ){
 									cityKey = 'city'+ march.toCityId;
+									KOCFIA.alarm.underAttack[ cityKey ] = 1;
 
 									if( !KOCFIA.alarm.incomings.hasOwnProperty(m) ){
 										changed = true;
 										KOCFIA.alarm.incomings[ m ] = march;
 										KOCFIA.alarm.incomings[ m ].added = timestamp;
 
-										KOCFIA.alarm.react('reinforcement', cityKey, march);
+										KOCFIA.alarm.react((march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_ATTACK ? 'attack' : 'scout'), cityKey, march);
 									}
+								} else if( KOCFIA.alarm.incomings.hasOwnProperty(m) ){
+									changed = true;
+									delete KOCFIA.alarm.incomings[ m ];
 								}
-							}
-						}
+							} else if( march.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE ){
+								cityKey = 'city'+ march.toCityId;
 
-						for( m in KOCFIA.alarm.incomings ){
-							if( KOCFIA.alarm.incomings.hasOwnProperty(m) ){
-								if( window.seed.queue_atkinc.hasOwnProperty(m) ){
-									//attack arrived
-									march = window.seed.queue_atkinc[ m ];
-									if( parseInt(march.arrivalTime, 10) > timestamp ){
-										changed = true;
-										delete KOCFIA.alarm.incomings[ m ];
-									}
-								} else {
-									march = KOCFIA.alarm.incomings[ m ];
-									//add message for canceled attacks
-									if( march.marchType != window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE && parseInt(march.arrivalTime, 10) < timestamp ){
-										KOCFIA.alarm.react('canceled', 'city'+ march.toCityId, march);
-										changed = true;
-										delete KOCFIA.alarm.incomings[ m ];
-									}
+								if( !KOCFIA.alarm.incomings.hasOwnProperty(m) ){
+									changed = true;
+									KOCFIA.alarm.incomings[ m ] = march;
+									KOCFIA.alarm.incomings[ m ].added = timestamp;
+
+									KOCFIA.alarm.react('reinforcement', cityKey, march);
 								}
 							}
 						}
-					//no incoming (attack, scout, reinforcement), reset variables
-					} else if( !$.isEmptyObject(KOCFIA.alarm.underAttack) || !$.isEmptyObject(KOCFIA.alarm.incomings) ){
-						changed = true;
-						KOCFIA.alarm.underAttack = {};
-						KOCFIA.alarm.incomings = {};
 					}
 
-					if( changed ) KOCFIA.alarm.storeIncomings();
-				}
-			};
-
-			KOCFIA.alarm.react = function(type, city, info){
-				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm react function', type, city, info);
-
-				if( KOCFIA.conf.alarm.postToAllianceChat ){
-				var message,
-					noPost = false; //on summarize for attack with total troop below thresold
-				switch( type ){
-					case 'autonomy':
-							city = KOCFIA.cities[ cityKey ];
-							var resInfo = KOCFIA.resourceInfo[ info.res ];
-							message = '&Psi;&phi;'+ city.name +' '+ Shared.mapLink(city.coords.x +','+ city.coords.y) +' a besoin '+ resInfo.labelBis + resInfo.label +' ! ';
-							message += 'Autonomie : '+ Shared.readableDuration( info.time ) +', consommation : -'+ Shared.readable( info.conso ) +'/h';
-						break;
-					case 'attack':
-					case 'scout':
-					case 'canceled':
-					case 'reinforcement':
-							city = KOCFIA.cities[ cityKey ];
-							console.log(city.tileId, info.toTileId, city);
-
-							var target, targetText;
-							if( city.tileId == info.toTileId ){
-								targetText = city.name;
-								target = city.name;
+					for( m in KOCFIA.alarm.incomings ){
+						if( KOCFIA.alarm.incomings.hasOwnProperty(m) ){
+							if( window.seed.queue_atkinc.hasOwnProperty(m) ){
+								//attack arrived
+								march = window.seed.queue_atkinc[ m ];
+								if( parseInt(march.arrivalTime, 10) > timestamp ){
+									changed = true;
+									delete KOCFIA.alarm.incomings[ m ];
+								}
 							} else {
-								targetText = 'TS';
-								target = 'TS';
+								march = KOCFIA.alarm.incomings[ m ];
+								//add message for canceled attacks
+								if( march.marchType != window.cm.MARCH_TYPES.MARCH_TYPE_REINFORCE && parseInt(march.arrivalTime, 10) < timestamp ){
+									KOCFIA.alarm.react('canceled', 'city'+ march.toCityId, march);
+									changed = true;
+									delete KOCFIA.alarm.incomings[ m ];
+								}
 							}
-							targetText += ' &rArr;('+ info.toXCoord +','+ info.toYCoord +')';
+						}
+					}
+				//no incoming (attack, scout, reinforcement), reset variables
+				} else if( !$.isEmptyObject(KOCFIA.alarm.underAttack) || !$.isEmptyObject(KOCFIA.alarm.incomings) ){
+					changed = true;
+					KOCFIA.alarm.underAttack = {};
+					KOCFIA.alarm.incomings = {};
+				}
 
-							//troops
-							var troops = '',
-								i = 0,
-								uId,
-								total = 0,
-								hasInfantry = false,
-								hasRanged = false,
-								hasHorsed = false,
-								hasSiege = false;
-							for( u in info.unts ){
-								if( info.unts.hasOwnProperty(u) ){
-									nb = parseInt(info.unts[u], 10);
-									if( nb > 0 ){
-										if( i > 0 ) troops += ', ';
-										uId = parseInt(u.replace(/u/, ''), 10);
-										unitInfo = KOCFIA.unitInfo[ 'unt'+ uId ];
+				if( changed ) KOCFIA.alarm.storeIncomings();
+			}
+		};
 
-										if( uId == 6 ){
-											hasRanged = true;
-										} else if( uId < 6 ){
-											hasInfantry = true;
-										} else if( uId > 6 && uId < 9 ){
-											hasHorsed = true;
-										} else if( uId > 8 ){
-											hasSiege = true;
-										}
+		KOCFIA.alarm.react = function(type, city, info){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('alarm') ) console.info('KOCFIA alarm react function', type, city, info);
 
-										total += nb;
+			if( KOCFIA.conf.alarm.postToAllianceChat ){
+			var message,
+				noPost = false; //on summarize for attack with total troop below thresold
+			switch( type ){
+				case 'autonomy':
+						city = KOCFIA.cities[ cityKey ];
+						var resInfo = KOCFIA.resourceInfo[ info.res ];
+						message = '&Psi;&phi;'+ city.name +' '+ Shared.mapLink(city.coords.x +','+ city.coords.y) +' a besoin '+ resInfo.labelBis + resInfo.label +' ! ';
+						message += 'Autonomie : '+ Shared.readableDuration( info.time ) +', consommation : -'+ Shared.readable( info.conso ) +'/h';
+					break;
+				case 'attack':
+				case 'scout':
+				case 'canceled':
+				case 'reinforcement':
+						city = KOCFIA.cities[ cityKey ];
+						console.log(city.tileId, info.toTileId, city);
 
-										troops += Shared.format( nb ) +' '+ unitInfo.label;
-										i += 1;
+						var target, targetText;
+						if( city.tileId == info.toTileId ){
+							targetText = city.name;
+							target = city.name;
+						} else {
+							targetText = 'TS';
+							target = 'TS';
+						}
+						targetText += ' &rArr;('+ info.toXCoord +','+ info.toYCoord +')';
+
+						//troops
+						var troops = '',
+							i = 0,
+							uId,
+							total = 0,
+							hasInfantry = false,
+							hasRanged = false,
+							hasHorsed = false,
+							hasSiege = false;
+						for( u in info.unts ){
+							if( info.unts.hasOwnProperty(u) ){
+								nb = parseInt(info.unts[u], 10);
+								if( nb > 0 ){
+									if( i > 0 ) troops += ', ';
+									uId = parseInt(u.replace(/u/, ''), 10);
+									unitInfo = KOCFIA.unitInfo[ 'unt'+ uId ];
+
+									if( uId == 6 ){
+										hasRanged = true;
+									} else if( uId < 6 ){
+										hasInfantry = true;
+									} else if( uId > 6 && uId < 9 ){
+										hasHorsed = true;
+									} else if( uId > 8 ){
+										hasSiege = true;
 									}
+
+									total += nb;
+
+									troops += Shared.format( nb ) +' '+ unitInfo.label;
+									i += 1;
 								}
 							}
+						}
 
-							//alarm conf limitation
-							if( (cityKey == KOCFIA.conf.alarm.HQ && total < KOCFIA.conf.alarm.minTroopOnHQ)
-								|| (cityKey != KOCFIA.conf.alarm.HQ && total < KOCFIA.conf.alarm.minTroopOnOther)
-							){
-								noPost = true;
+						//alarm conf limitation
+						if( (cityKey == KOCFIA.conf.alarm.HQ && total < KOCFIA.conf.alarm.minTroopOnHQ)
+							|| (cityKey != KOCFIA.conf.alarm.HQ && total < KOCFIA.conf.alarm.minTroopOnOther)
+						){
+							noPost = true;
+						}
+
+						//marshall
+						var knights = window.seed.knights[ cityKey ],
+							marshallId = window.seed.leaders[ cityKey ].combatKnightId,
+							marshallMsg = '',
+							atk, def = 0;
+
+						if( type != 'scout' && knights && marshallId ){
+							var marshall = knights[ 'knt'+ marshallId ],
+								timestamp = Date.timestamp();
+							def = marshall.combat; //for reinforcements knight display check
+
+							marshallMsg += 'maréchal '+ def;
+
+							//defense boost
+							if( window.seed.playerEffects.defExpire > timestamp ){
+								marshallMsg += ', def +20%';
 							}
-
-							//marshall
-							var knights = window.seed.knights[ cityKey ],
-								marshallId = window.seed.leaders[ cityKey ].combatKnightId,
-								marshallMsg = '',
-								atk, def = 0;
-
-							if( type != 'scout' && knights && marshallId ){
-								var marshall = knights[ 'knt'+ marshallId ],
-									timestamp = Date.timestamp();
-								def = marshall.combat; //for reinforcements knight display check
-
-								marshallMsg += 'maréchal '+ def;
-
-								//defense boost
-								if( window.seed.playerEffects.defExpire > timestamp ){
-									marshallMsg += ', def +20%';
-								}
-								if( window.seed.playerEffects.def2Expire > timestamp ){
-									marshallMsg += ', def +50%';
-								}
+							if( window.seed.playerEffects.def2Expire > timestamp ){
+								marshallMsg += ', def +50%';
 							}
+						}
 
-							//attacker
-							var attacker = '',
-								playerName = '',
-								alliance = '',
-								player = (window.seed.players.hasOwnProperty('u' + info.pid) ? window.seed.players['u' + info.pid] : (info.hasOwnProperty('players') && info.players.hasOwnProperty('u' + info.pid) ? info.players['u' + info.pid] : null ));
-							if( player ){
-								attacker += 'par &oplus;('+ player.n +') ('+ Shared.format( parseInt(player.m, 10) ) +')';
+						//attacker
+						var attacker = '',
+							playerName = '',
+							alliance = '',
+							player = (window.seed.players.hasOwnProperty('u' + info.pid) ? window.seed.players['u' + info.pid] : (info.hasOwnProperty('players') && info.players.hasOwnProperty('u' + info.pid) ? info.players['u' + info.pid] : null ));
+						if( player ){
+							attacker += 'par &oplus;('+ player.n +') ('+ Shared.format( parseInt(player.m, 10) ) +')';
 
-								playerName = player.n;
+							playerName = player.n;
 
-								var allianceId = player.a;
-								if( window.seed.allianceNames.hasOwnProperty('a'+ allianceId) ){
-									alliance = window.seed.allianceNames[ 'a'+ allianceId ];
-									attacker += ' - &forall;('+ alliance +')';
-								}
+							var allianceId = player.a;
+							if( window.seed.allianceNames.hasOwnProperty('a'+ allianceId) ){
+								alliance = window.seed.allianceNames[ 'a'+ allianceId ];
+								attacker += ' - &forall;('+ alliance +')';
 							}
+						}
 
-							var fromCoords = '';
-							if( info.hasOwnProperty('fromXCoord') ){
-								attacker += ' depuis &Xi;('+ info.fromXCoord +','+ info.fromYCoord +')';
-								fromCoords = info.fromXCoord +','+ info.fromYCoord;
+						var fromCoords = '';
+						if( info.hasOwnProperty('fromXCoord') ){
+							attacker += ' depuis &Xi;('+ info.fromXCoord +','+ info.fromYCoord +')';
+							fromCoords = info.fromXCoord +','+ info.fromYCoord;
+						}
+
+						if( type != 'scout' && info.hasOwnProperty('knt') && info.knt.hasOwnProperty('cbt') ){
+							atk = parseInt(info.knt.cbt, 10);
+							if( !isNaN(atk) ){
+								attacker += ' (chevalier '+ atk +')';
 							}
+						}
 
-							if( type != 'scout' && info.hasOwnProperty('knt') && info.knt.hasOwnProperty('cbt') ){
-								atk = parseInt(info.knt.cbt, 10);
-								if( !isNaN(atk) ){
-									attacker += ' (chevalier '+ atk +')';
-								}
-							}
+						//ETA
+						var arrival = new Date();
+						arrival.setTime( parseInt(info.arrivalTime, 10) * 1000 );
+						var eta = arrival.getHours() +':'+ arrival.getMinutes() +':'+ arrival.getSeconds();
+						eta += ' ('+ Shared.readableDuration( info.arrivalTime - Date.timestamp() ) +')';
 
-							//ETA
-							var arrival = new Date();
-							arrival.setTime( parseInt(info.arrivalTime, 10) * 1000 );
-							var eta = arrival.getHours() +':'+ arrival.getMinutes() +':'+ arrival.getSeconds();
-							eta += ' ('+ Shared.readableDuration( info.arrivalTime - Date.timestamp() ) +')';
+						if( type == 'attack' || type == 'scout' ){
+							var reinforcements = '',
+								autoReinforcements = '';
+							if( city.tileId == info.toTileId ){
+								var lvl = Shared.buildingHighestLevel(cityKey, 8);
+								var slots = lvl,
+									sUnits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+									s = 0, //self
+									o = 0, //other
+									slot = 1, r, c, k, n;
 
-							if( type == 'attack' || type == 'scout' ){
-								var reinforcements = '',
-									autoReinforcements = '';
-								if( city.tileId == info.toTileId ){
-									var lvl = Shared.buildingHighestLevel(cityKey, 8);
-									var slots = lvl,
-										sUnits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-										s = 0, //self
-										o = 0, //other
-										slot = 1, r, c, k, n;
-
-									for( m in window.seed.queue_atkinc ){
-										if( window.seed.queue_atkinc.hasOwnProperty(m) ){
-											march = window.seed.queue_atkinc[ m ];
-											if( march.marchType == 2 && ('city'+ march.toCityId) == cityKey ){
-												if( KOCFIA.cities.hasOwnProperty('city'+ march.fromCityId ) ){ //self reinforcements
-													if( type == 'scout' ){ //only summing scouts
-														r = parseInt(march['unit3Return'], 10) || 0;
-														c = parseInt(march['unit3Count'], 10) || 0;
-														if( r > 0 && r != c ){
-															sUnits[3] += r;
-														} else {
-															sUnits[3] += c;
-														}
+								for( m in window.seed.queue_atkinc ){
+									if( window.seed.queue_atkinc.hasOwnProperty(m) ){
+										march = window.seed.queue_atkinc[ m ];
+										if( march.marchType == 2 && ('city'+ march.toCityId) == cityKey ){
+											if( KOCFIA.cities.hasOwnProperty('city'+ march.fromCityId ) ){ //self reinforcements
+												if( type == 'scout' ){ //only summing scouts
+													r = parseInt(march['unit3Return'], 10) || 0;
+													c = parseInt(march['unit3Count'], 10) || 0;
+													if( r > 0 && r != c ){
+														sUnits[3] += r;
 													} else {
-														//only need sum for auto reinforcements
-														for( i = 1; i < 13; i += 1 ){
-															r = parseInt(march['unit' + i + 'Return'], 10) || 0;
-															c = parseInt(march['unit' + i + 'Count'], 10) || 0;
-															if( r > 0 && r != c ){
-																sUnits[i] += r;
-															} else {
-																sUnits[i] += c;
-															}
-														}
+														sUnits[3] += c;
 													}
 												} else {
-													slots -= 1;
-
-													if( type == 'scout' ){
-														n = '';
-														if( window.seed.players.hasOwnProperty('u'+ info.fromPlayerId) ) n = window.seed.players[ 'u'+ info.fromPlayerId ].n +' ';
-
-														r = parseInt(march['unit3Return'], 10) || 0;
-														c = parseInt(march['unit3Count'], 10) || 0;
+													//only need sum for auto reinforcements
+													for( i = 1; i < 13; i += 1 ){
+														r = parseInt(march['unit' + i + 'Return'], 10) || 0;
+														c = parseInt(march['unit' + i + 'Count'], 10) || 0;
 														if( r > 0 && r != c ){
-															reinforcements += (o > 0 ? ', ': '') + n + Shared.format(r) +' '+ KOCFIA.unitInfo.unt3.label;
-															o += 1;
+															sUnits[i] += r;
 														} else {
-															reinforcements += (o > 0 ? ', ': '') + n + Shared.format(c) +' '+ KOCFIA.unitInfo.unt3.label;
-															o += 1;
-														}
-													} else {
-														if( slot > 1 ) reinforcements += ', ';
-
-														reinforcements += slot +' ';
-														if( window.seed.players.hasOwnProperty('u'+ info.fromPlayerId) ) reinforcements += window.seed.players[ 'u'+ info.fromPlayerId ].n +' ';
-
-														k = parseInt(march.knightCombat, 10);
-														if( k > 0 && k > def ) reinforcements += ' (chevalier '+ k +')';
-
-														for( i = 1; i < 13; i += 1 ){
-															r = parseInt(march['unit' + i + 'Return'], 10) || 0;
-															c = parseInt(march['unit' + i + 'Count'], 10) || 0;
-															if( r > 0 && r != c ){
-																reinforcements += (o > 0 ? ', ': '') + Shared.format(r) +' '+ KOCFIA.unitInfo[ 'unt'+ i ].label;
-																o += 1;
-															} else {
-																reinforcements += (o > 0 ? ', ': '') + Shared.format(c) +' '+ KOCFIA.unitInfo[ 'unt'+ i ].label;
-																o += 1;
-															}
+															sUnits[i] += c;
 														}
 													}
-
-													slot += 1;
 												}
+											} else {
+												slots -= 1;
+
+												if( type == 'scout' ){
+													n = '';
+													if( window.seed.players.hasOwnProperty('u'+ info.fromPlayerId) ) n = window.seed.players[ 'u'+ info.fromPlayerId ].n +' ';
+
+													r = parseInt(march['unit3Return'], 10) || 0;
+													c = parseInt(march['unit3Count'], 10) || 0;
+													if( r > 0 && r != c ){
+														reinforcements += (o > 0 ? ', ': '') + n + Shared.format(r) +' '+ KOCFIA.unitInfo.unt3.label;
+														o += 1;
+													} else {
+														reinforcements += (o > 0 ? ', ': '') + n + Shared.format(c) +' '+ KOCFIA.unitInfo.unt3.label;
+														o += 1;
+													}
+												} else {
+													if( slot > 1 ) reinforcements += ', ';
+
+													reinforcements += slot +' ';
+													if( window.seed.players.hasOwnProperty('u'+ info.fromPlayerId) ) reinforcements += window.seed.players[ 'u'+ info.fromPlayerId ].n +' ';
+
+													k = parseInt(march.knightCombat, 10);
+													if( k > 0 && k > def ) reinforcements += ' (chevalier '+ k +')';
+
+													for( i = 1; i < 13; i += 1 ){
+														r = parseInt(march['unit' + i + 'Return'], 10) || 0;
+														c = parseInt(march['unit' + i + 'Count'], 10) || 0;
+														if( r > 0 && r != c ){
+															reinforcements += (o > 0 ? ', ': '') + Shared.format(r) +' '+ KOCFIA.unitInfo[ 'unt'+ i ].label;
+															o += 1;
+														} else {
+															reinforcements += (o > 0 ? ', ': '') + Shared.format(c) +' '+ KOCFIA.unitInfo[ 'unt'+ i ].label;
+															o += 1;
+														}
+													}
+												}
+
+												slot += 1;
 											}
 										}
 									}
 								}
-
-								if( type == 'scout' ){
-									if( sUnits[i] > 3 ) autoReinforcements += 'auto-renforts ' + shared.format( sUnits[3] ) +' '+ KOCFIA.unitInfo.unt3.label;
-								} else {
-									for( i = 1; i < sUnits.length; i += 1 ){
-										if( sUnits[i] > 0 ){
-											if( s === 0 ) autoReinforcements += 'auto-renforts ';
-											else autoReinforcements += ', ';
-
-											autoReinforcements += shared.format( sUnits[i] ) +' '+ KOCFIA.unitInfo[ 'unt'+ i ].label;
-											s += 1;
-										}
-									}
-								}
-
-								if( reinforcements !== '' ) reinforcements += 'renforts '+ slots +'/'+ lvl +' : ' + reinforcements;
-								else if( lvl === 0 ) reinforcements += 'pas d\'ambassade';
 							}
 
-							if( type == 'attack' || type == 'scout' ){
-								//throne bonus
-								var throneBonus = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null),
-									bonusText = '',
-									ranges = [0, 0, 0], //range, ranged range, siege range
-									debuffs = [0, 0, 0]; //range debuff, ranged range debuff, siege range debuff
-								if( !$.isEmptyObject(throneBonus) ){
-									//generic bonus
-									if( throneBonus[5] ) ranges[0] = throneBonus[5].percent; //range
-									if( throneBonus[21] ) debuffs[0] = throneBonus[21].percent; //range debuff
-
-									//specific bonus
-									if( hasRanged ){
-										if( throneBonus[37] ) ranges[1] = throneBonus[37].percent; //ranged range
-										if( throneBonus[42] ) debuffs[1] = throneBonus[42].percent; //ranged range
-									}
-
-									if( hasSiege ){
-										if( throneBonus[58] ) ranges[2] = throneBonus[58].percent; //siege range
-										if( throneBonus[63] ) debuffs[2] = throneBonus[63].percent; //siege range
-									}
-								}
-
-								bonusText = 'range '+ ranges[0] +'%';
-								if( ranges[1] > 0 || ranges[2] > 0 ){
-									bonusText += ' (';
-									if( ranges[1] > 0 ) bonusText += 'A '+ ranges[1];
-									if( ranges[2] > 0 ){
-										if( ranges[1] > 0 ) bonusText += ', ';
-										bonusText += 'A '+ ranges[1];
-									}
-									bonusText += ')';
-								}
-
-								bonusText = 'debuff '+ debuffs[0] +'%';
-								if( debuffs[1] > 0 || debuffs[2] > 0 ){
-									bonusText += ' (';
-									if( debuffs[1] > 0 ) bonusText += 'A '+ debuffs[1];
-									if( debuffs[2] > 0 ){
-										if( debuffs[1] > 0 ) bonusText += ', ';
-										bonusText += 'A '+ debuffs[1];
-									}
-									bonusText += ')';
-								}
-							}
-
-							if( type == 'attack' || type == 'scout' ){
-								var status = (parseInt(window.seed.citystats[ cityKey ].gate, 10) === 1 ? 'défense' : 'sanctuaire');
-							}
-
-							message = '&Psi;&';
-							if( type == 'scout' ) message += 'epsilon';
-							else if( type == 'attack' ) message += 'alpha';
-							else if( type == 'canceled' ) message += 'omega';
-							else if( type == 'reinforce' ) message += 'rho';
-							message += '; '+ targetText +' ';
-
-							if( type == 'scout' ) message += 'éclairée';
-							else if( type == 'attack' ) message += 'attaquée';
-							else if( type == 'reinforce' ) message += 'renforcée';
-							else if( type == 'canceled' ) message += (info.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT ? 'éclairage annulé' : 'attaque annulée');
-
-							if( type == 'attack' || type == 'scout' ){
-								message += ' | '+ eta;
-								message += ' | '+ attacker;
-								message += ' | '+ troops;
-								message += ' | '+ status;
-								message += ' | empennage '+ parseInt(window.seed.tech.tch13, 10);
-								message += ' | trône '+ bonusText;
-								message += ' | '+ marshallMsg;
-								message += ' | '+ autoReinforcements;
-								message += ' | '+ reinforcements;
-
-								KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name, KOCFIA.kabamuid, info.pid);
-
-								KOCFIA.alarm.summarize();
-							} else if( type == 'reinforce' ){
-								message += ' | '+ eta;
-								message += ' | '+ attacker;
-								message += ' | '+ troops;
-
-								KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name, KOCFIA.kabamuid, info.pid);
-
-								KOCFIA.alarm.summarize();
+							if( type == 'scout' ){
+								if( sUnits[i] > 3 ) autoReinforcements += 'auto-renforts ' + shared.format( sUnits[3] ) +' '+ KOCFIA.unitInfo.unt3.label;
 							} else {
-								message += attacker;
+								for( i = 1; i < sUnits.length; i += 1 ){
+									if( sUnits[i] > 0 ){
+										if( s === 0 ) autoReinforcements += 'auto-renforts ';
+										else autoReinforcements += ', ';
 
-								if( KOCFIA.alarm.summary.hasOwnProperty(info.marchId) ){
-									delete KOCFIA.alarm.summary[ info.marchId ];
-									KOCFIA.alarm.summarize();
+										autoReinforcements += shared.format( sUnits[i] ) +' '+ KOCFIA.unitInfo[ 'unt'+ i ].label;
+										s += 1;
+									}
 								}
 							}
 
-							message += '#'+ info.marchId +'#'+ info.arrivalTime +'#'+ KOCFIA.kabamuid +'#'+ info.pid;
-						break;
-					default:
-						return false;
-				}
+							if( reinforcements !== '' ) reinforcements += 'renforts '+ slots +'/'+ lvl +' : ' + reinforcements;
+							else if( lvl === 0 ) reinforcements += 'pas d\'ambassade';
+						}
 
-				if( !noPost ) KOCFIA.alarm.postToChat( type, message );
+						if( type == 'attack' || type == 'scout' ){
+							//throne bonus
+							var throneBonus = KOCFIA.throne.getSetBonus(window.seed.throne.activeSlot, null),
+								bonusText = '',
+								ranges = [0, 0, 0], //range, ranged range, siege range
+								debuffs = [0, 0, 0]; //range debuff, ranged range debuff, siege range debuff
+							if( !$.isEmptyObject(throneBonus) ){
+								//generic bonus
+								if( throneBonus[5] ) ranges[0] = throneBonus[5].percent; //range
+								if( throneBonus[21] ) debuffs[0] = throneBonus[21].percent; //range debuff
+
+								//specific bonus
+								if( hasRanged ){
+									if( throneBonus[37] ) ranges[1] = throneBonus[37].percent; //ranged range
+									if( throneBonus[42] ) debuffs[1] = throneBonus[42].percent; //ranged range
+								}
+
+								if( hasSiege ){
+									if( throneBonus[58] ) ranges[2] = throneBonus[58].percent; //siege range
+									if( throneBonus[63] ) debuffs[2] = throneBonus[63].percent; //siege range
+								}
+							}
+
+							bonusText = 'range '+ ranges[0] +'%';
+							if( ranges[1] > 0 || ranges[2] > 0 ){
+								bonusText += ' (';
+								if( ranges[1] > 0 ) bonusText += 'A '+ ranges[1];
+								if( ranges[2] > 0 ){
+									if( ranges[1] > 0 ) bonusText += ', ';
+									bonusText += 'A '+ ranges[1];
+								}
+								bonusText += ')';
+							}
+
+							bonusText = 'debuff '+ debuffs[0] +'%';
+							if( debuffs[1] > 0 || debuffs[2] > 0 ){
+								bonusText += ' (';
+								if( debuffs[1] > 0 ) bonusText += 'A '+ debuffs[1];
+								if( debuffs[2] > 0 ){
+									if( debuffs[1] > 0 ) bonusText += ', ';
+									bonusText += 'A '+ debuffs[1];
+								}
+								bonusText += ')';
+							}
+						}
+
+						if( type == 'attack' || type == 'scout' ){
+							var status = (parseInt(window.seed.citystats[ cityKey ].gate, 10) === 1 ? 'défense' : 'sanctuaire');
+						}
+
+						message = '&Psi;&';
+						if( type == 'scout' ) message += 'epsilon';
+						else if( type == 'attack' ) message += 'alpha';
+						else if( type == 'canceled' ) message += 'omega';
+						else if( type == 'reinforce' ) message += 'rho';
+						message += '; '+ targetText +' ';
+
+						if( type == 'scout' ) message += 'éclairée';
+						else if( type == 'attack' ) message += 'attaquée';
+						else if( type == 'reinforce' ) message += 'renforcée';
+						else if( type == 'canceled' ) message += (info.marchType == window.cm.MARCH_TYPES.MARCH_TYPE_SCOUT ? 'éclairage annulé' : 'attaque annulée');
+
+						if( type == 'attack' || type == 'scout' ){
+							message += ' | '+ eta;
+							message += ' | '+ attacker;
+							message += ' | '+ troops;
+							message += ' | '+ status;
+							message += ' | empennage '+ parseInt(window.seed.tech.tch13, 10);
+							message += ' | trône '+ bonusText;
+							message += ' | '+ marshallMsg;
+							message += ' | '+ autoReinforcements;
+							message += ' | '+ reinforcements;
+
+							KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name, KOCFIA.kabamuid, info.pid);
+
+							KOCFIA.alarm.summarize();
+						} else if( type == 'reinforce' ){
+							message += ' | '+ eta;
+							message += ' | '+ attacker;
+							message += ' | '+ troops;
+
+							KOCFIA.alarms.generateSummaryForAttack([message, info.marchId, info.arrivalTime], window.seed.player.name, KOCFIA.kabamuid, info.pid);
+
+							KOCFIA.alarm.summarize();
+						} else {
+							message += attacker;
+
+							if( KOCFIA.alarm.summary.hasOwnProperty(info.marchId) ){
+								delete KOCFIA.alarm.summary[ info.marchId ];
+								KOCFIA.alarm.summarize();
+							}
+						}
+
+						message += '#'+ info.marchId +'#'+ info.arrivalTime +'#'+ KOCFIA.kabamuid +'#'+ info.pid;
+					break;
+				default:
+					return false;
+			}
+
+			if( !noPost ) KOCFIA.alarm.postToChat( type, message );
 			}
 		};
 
@@ -17203,7 +17291,7 @@ jQuery(document).ready(function(){
 			code += Shared.generateCheckbox('build', 'active', 'Activer', KOCFIA.conf.build.active);
 			code += Shared.generateCheckbox('build', 'automatic', 'Activer les constructions automatiques', KOCFIA.conf.build.automatic);
 			code += Shared.generateCheckbox('build', 'buildWithoutOptimizedThroneSet', 'Construire même si le set optimisé d\'objects de trône n\'est pas équipé', KOCFIA.conf.build.buildWithoutOptimizedThroneSet);
-			code += Shared.generateButton('build', 'deleteQueues', 'Supprimer toutes les files d\'attente enregistrées');
+			code += Shared.generateButton('build', 'deleteStored', 'Supprimer toutes les files d\'attente enregistrées');
 			code += '</div>';
 
 			$section.append( code );
@@ -17901,16 +17989,34 @@ jQuery(document).ready(function(){
 		KOCFIA.build.storeQueues = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build storeQueues function');
 			localStorage.setObject('kocfia_build_queues_' + KOCFIA.storeUniqueId, KOCFIA.build.queues);
-			localStorage.setObject('kocfia_build_chronology_' + KOCFIA.storeUniqueId, KOCFIA.build.chronology);
 		};
 
 		KOCFIA.build.deleteQueues = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteQueues function');
 			localStorage.removeItem('kocfia_build_queues_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.build.queues = {};
+		};
+
+		KOCFIA.build.storeChronology = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build storeChronology function');
+			localStorage.setObject('kocfia_build_chronology_' + KOCFIA.storeUniqueId, KOCFIA.build.chronology);
+		};
+
+		KOCFIA.build.deleteChronology = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteChronology function');
 			localStorage.removeItem('kocfia_build_chronology_' + KOCFIA.storeUniqueId);
 
 			KOCFIA.build.chronology = {};
+		};
+
+		KOCFIA.build.deleteStored = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteStored function');
+			localStorage.removeItem('kocfia_build_queues_' + KOCFIA.storeUniqueId);
+			localStorage.removeItem('kocfia_build_chronology_' + KOCFIA.storeUniqueId);
+
 			KOCFIA.build.queues = {};
+			KOCFIA.build.chronology = {};
 		};
 
 		KOCFIA.build.deleteQueueByCity = function( cityKey ){
@@ -17922,13 +18028,13 @@ jQuery(document).ready(function(){
 			}
 		};
 
-		KOCFIA.build.storeDestructsTimestamps = function(){
+		KOCFIA.build.storeDestructsTimestamp = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('kocfia build storeDestructsTimestamps function');
 			localStorage.setObject('kocfia_build_destructsTimestamp_' + KOCFIA.storeUniqueId, KOCFIA.build.destructsTimestamp);
 		};
 
-		KOCFIA.build.deleteDestructsTimestampsByCity = function( cityKey ){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteDestructsTimestampsByCity function');
+		KOCFIA.build.deleteDestructsTimestampByCity = function( cityKey ){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('build') ) console.info('KOCFIA build deleteDestructsTimestampByCity function');
 			if( KOCFIA.build.destructsTimestamp.hasOwnProperty( cityKey ) ){
 				delete KOCFIA.build.destructsTimestamp[ cityKey ];
 				KOCFIA.build.storeDestructsTimestamps();
@@ -18393,7 +18499,7 @@ jQuery(document).ready(function(){
 								KOCFIA.build.chronology[ cityKey ].splice(chronologyIndex, 1);
 
 								//cleaning
-								KOCFIA.build.deleteDestructsTimestampsByCity( cityKey );
+								KOCFIA.build.deleteDestructsTimestampByCity( cityKey );
 
 								cityIndex += 1;
 								return dfd.pipe( byCity(dfd) );
@@ -18455,7 +18561,7 @@ jQuery(document).ready(function(){
 								KOCFIA.build.chronology[ cityKey ].splice(chronologyIndex, 1);
 
 								//cleaning
-								KOCFIA.build.deleteDestructsTimestampsByCity( cityKey );
+								KOCFIA.build.deleteDestructsTimestampByCity( cityKey );
 
 								if( city.id == window.currentcityid ){
 									if( result.guardian ){
@@ -20631,6 +20737,18 @@ jQuery(document).ready(function(){
 
 		KOCFIA.throne.automaticSalvageOff = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne automaticSalvageOff function');
+		};
+
+		KOCFIA.throne.storeNames = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('kocfia throne storeNames function');
+			localStorage.setObject('kocfia_throne_names_' + KOCFIA.storeUniqueId, KOCFIA.throne.names);
+		};
+
+		KOCFIA.throne.deleteNames = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('throne') ) console.info('KOCFIA throne deleteNames function');
+			localStorage.removeItem('kocfia_throne_names_' + KOCFIA.storeUniqueId);
+
+			KOCFIA.throne.names = {};
 		};
 
 		KOCFIA.throne.storeImprovements = function(){
@@ -25952,7 +26070,7 @@ jQuery(document).ready(function(){
 		KOCFIA.gifts.storePlayers = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('gifts') ) console.info('KOCFIA gifts storePlayers function');
 
-			localStorage.setObject('kocfia_gifts_players_' + KOCFIA.storeUniqueId, KOCIFA.gifts.players);
+			localStorage.setObject('kocfia_gifts_players_' + KOCFIA.storeUniqueId, KOCFIA.gifts.players);
 		};
 
 		KOCFIA.gifts.deletePlayers = function(){

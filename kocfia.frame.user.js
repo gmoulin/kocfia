@@ -133,6 +133,7 @@ if( unsafeWindow.location.href.indexOf('standAlone.php') > -1 ){
 			domain + "plugins/ui.jqgrid.css",
 			domain + "plugins/grid.locale-fr.js",
 			domain + "plugins/jquery.jqGrid.min.js",
+			domain + "plugins/FileSaver.min.js",
 			domain + "kocfia.css?ts=" + d.getTime(),
 			domain + "kocfia.js?ts=" + d.getTime()
 		];

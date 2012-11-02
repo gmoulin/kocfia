@@ -1,3 +1,8 @@
+//@TODO
+//	two revive queue for ascended cities with specific blessing
+//	build for ascended cities (apothecary, guardian, fields)
+//	throne item drop in march data "throneRoomDrop"
+
 /* helpers */
 	//localStorage method for caching javascript objects
 		if( typeof window.Storage != "undefined" ){
@@ -127,7 +132,7 @@
 		chatHighlightAlarmCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.scout { background-color: %scoutColor%; }";
 		chatHighlightAlarmCss += "\n.kocmain .mod_comm .comm_global .chatlist .chatwrap.autonomy { background-color: %autonomyColor%; }";
 
-jQuery(document).ready(function(){
+var KOCFIA;
 (function(window, document, $, undefined){
 	'use strict';
 
@@ -148,8 +153,8 @@ jQuery(document).ready(function(){
 		moveHandles += '<div class="move-handle move-handle-s"></div>';
 		moveHandles += '<div class="move-handle move-handle-n"></div>';
 
-	var KOCFIA = {
-		version: '0.8.4',
+	KOCFIA = {
+		version: '0.9.0',
 		userScriptLoaderVersion: 4,
 		debug: false,
 		debugWhat: { //comment module line for no debug
@@ -505,7 +510,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('server', KOCFIA.server);
 			if( KOCFIA.server === null ){
 				alert('Wrong server id, aborting !');
-				return;
+				return false;
 			}
 
 		//get user id
@@ -513,7 +518,7 @@ jQuery(document).ready(function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('init') ) console.info('kabamuid', KOCFIA.kabamuid);
 			if( KOCFIA.kabamuid === null ){
 				alert('Wrong user id, aborting !');
-				return;
+				return false;
 			}
 
 		KOCFIA.storeUniqueId = KOCFIA.server + '_' + KOCFIA.kabamuid;
@@ -771,6 +776,8 @@ jQuery(document).ready(function(){
 						alert('L\'onglet '+ KOCFIA.tabLabel.quickMarch +' n\'est pas actif.');
 					}
 				});
+
+		return true;
 	};
 
 	/* AJAX SNIFFER */
@@ -1380,6 +1387,8 @@ jQuery(document).ready(function(){
 
 					// Read in the image file as a data URL.
 					reader.readAsText(f);
+
+					return true;
 				})
 				//jqgrid
 				.on('click', '.ui-jqgrid-titlebar', function(){
@@ -1633,6 +1642,8 @@ jQuery(document).ready(function(){
 						if( result.updateSeed ){
 							window.update_seed( result.updateSeed );
 						}
+
+						return dfd.resolve();
 					} else {
 						if( result.msg ){
 							return dfd.reject();
@@ -1645,6 +1656,7 @@ jQuery(document).ready(function(){
 							}
 						}
 					}
+
 				})
 				.fail(function(){
 					//network or server error
@@ -2057,7 +2069,7 @@ jQuery(document).ready(function(){
 
 											if( data.march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
 												window.setTimeout(function(){ //create a copy of i
-													Shared.cancelMarch( attack.marching[i], attack.cityKey, 1, 3, cdfd );
+													Shared.cancelMarch( attack.marching[i], attack.cityKey, 1, 3, null );
 												}, 0);
 											}
 										}
@@ -2067,9 +2079,13 @@ jQuery(document).ready(function(){
 											return checkMarch(i, 3);
 										} else {
 											for( var j = 0; j < marchStatus.length; j += 1 ){
-												if( !marchStatus[j] ) return window.setTimeout(function(){ Shared.forceMarchUpdate( attack, force, null ); }, 10000);
+												if( !marchStatus[j] ) return window.setTimeout(function(){
+													if( dfd ) return dfd.pipe( Shared.forceMarchUpdate( attack, force, null ) );
+												}, 10000);
 											}
 										}
+
+										if( dfd ) return dfd.resolve();
 
 									} else {
 										attempts -= 1;
@@ -2081,8 +2097,10 @@ jQuery(document).ready(function(){
 												return checkMarch(i, 3);
 											} else {
 												for( j = 0; j < marchStatus.length; j += 1 ){
-													if( !marchStatus[j] ) return setTimeout(function(){ Shared.forceMarchUpdate( attack, force, dfd ); }, 10000);
+													if( !marchStatus[j] ) return window.setTimeout(function(){ Shared.forceMarchUpdate( attack, force, null ); }, 10000);
 												}
+
+												if( dfd ) return dfd.reject();
 											}
 										}
 									}
@@ -2097,8 +2115,10 @@ jQuery(document).ready(function(){
 											return checkMarch(i, 3);
 										} else {
 											for( var j = 0; j < marchStatus.length; j += 1 ){
-												if( !marchStatus[j] ) return setTimeout(function(){ Shared.forceMarchUpdate( attack, force, dfd ); }, 10000);
+												if( !marchStatus[j] ) return window.setTimeout(function(){ Shared.forceMarchUpdate( attack, force, null ); }, 10000);
 											}
+
+											if( dfd ) return dfd.reject();
 										}
 									}
 								});
@@ -2106,8 +2126,10 @@ jQuery(document).ready(function(){
 								marchStatus[i] = true;
 								if( march.marchStatus == 2 ){ //MARCH_STATUS_DEFENDING
 									window.setTimeout(function(){ //create a copy of i
-										Shared.cancelMarch( attack.marching[i], attack.cityKey, 1, 3, cdfd );
+										Shared.cancelMarch( attack.marching[i], attack.cityKey, 1, 3, null );
 									}, 0);
+
+									if( dfd ) return dfd.resolve();
 								}
 							}
 						} else {
@@ -2118,12 +2140,16 @@ jQuery(document).ready(function(){
 								for( var j = 0; j < marchStatus.length; j += 1 ){
 									if( !marchStatus[j] ) return setTimeout(function(){ Shared.forceMarchUpdate( attack, force, dfd ); }, 10000);
 								}
+
+								if( dfd ) return dfd.reject();
 							}
 						}
 					};
 
 					checkMarch(i, 3);
 				}
+
+				if( dfd ) return dfd.resolve();
 			};
 
 			Shared.refreshMarchByCity = function( cityKey, force, dfd ){
@@ -2280,7 +2306,18 @@ jQuery(document).ready(function(){
 				}
 
 				var effect = window.cm.ThroneController.effectBonus(66),
-					limit = 0;
+					limit = 0,
+					cityId = cityKey.replace(/city/, '');
+
+				if( window.cm.PrestigeModel.isPrestige( cityId ) ){
+					var prestigeLevel = cm.PrestigeModel.getPrestigeLevel( cityId );
+					if( prestigeLevel > 0 ){
+						var data = cm.WorldSettings.getSetting("ASCENSION_RALLYPOINT_BOOST"),
+							bonuses = JSON.parse(data);
+						modifier *= parseFloat(bonuses.values[prestigeLevel - 1][1]);
+					}
+				}
+
 				if( rallyPointLevel == 11 ){
 					limit = Math.round(150000 * modifier);
 				} else if( rallyPointLevel == 12 ){
@@ -2527,7 +2564,7 @@ jQuery(document).ready(function(){
 			Shared.updateSeed = function(){
 				if( !Shared.updatingSeed ){
 					Shared.updatingSeed = true;
-					window.update_seed_ajax(true, null);
+					window.update_seed_ajax(true, null, true);
 					window.setTimeout(function(){ Shared.updatingSeed = false; }, 10000);
 				}
 			};
@@ -2855,12 +2892,13 @@ jQuery(document).ready(function(){
 				//make sure all the guardian type level are present
 				guardian.cityGuardianLevels = $.extend(defaults, guardian.cityGuardianLevels);
 
-				var isSet = guardian.guardianCount == 4;
+				var isSet = guardian.guardianCount == 4,
+					base, isFood, isStone;
 
 				switch( type ){
 					case 'train':
-							var base = bonusPerLevel[guardian.cityGuardianLevels.stone] / 100,
-								isStone = guardian.type == 'stone';
+							base = bonusPerLevel[guardian.cityGuardianLevels.stone] / 100;
+							isStone = guardian.type == 'stone';
 
 							if( isStone && isSet ){
 								return base * 1.5;
@@ -2873,8 +2911,8 @@ jQuery(document).ready(function(){
 							}
 						break;
 					case 'march':
-							var base = bonusPerLevel[guardian.cityGuardianLevels.food] / 100,
-								isFood = guardian.type == 'food';
+							base = bonusPerLevel[guardian.cityGuardianLevels.food] / 100;
+							isFood = guardian.type == 'food';
 
 							if( isFood && isSet ){
 								return base * 1.5;
@@ -2898,10 +2936,10 @@ jQuery(document).ready(function(){
 								stone = bonusPerLevel[guardian.cityGuardianLevels.stone] / 100,
 								wood = bonusPerLevel[guardian.cityGuardianLevels.wood] / 100,
 								ore = bonusPerLevel[guardian.cityGuardianLevels.ore] / 100,
-								isFood = guardian.type == 'food',
-								isStone = guardian.type == 'stone',
 								isWood = guardian.type == 'wood',
 								isOre = guardian.type == 'ore';
+							isFood = guardian.type == 'food';
+							isStone = guardian.type == 'stone';
 
 							if( isSet ){
 								bonuses.food = isFood ? food * 1.5 : food * 0.5;
@@ -2949,6 +2987,8 @@ jQuery(document).ready(function(){
 								}
 							}
 						}
+
+						return dfd.resolve();
 
 					} else {
 						if( result.msg ){
@@ -10070,7 +10110,8 @@ jQuery(document).ready(function(){
 					var $this = $(this),
 						$fieldset = $this.closest('fieldset'),
 						$other = $fieldset.siblings('fieldset'),
-						rel = $this.attr('rel');
+						rel = $this.attr('rel'),
+						speed;
 
 					switch( rel ){
 						case 'keep':
@@ -10131,13 +10172,16 @@ jQuery(document).ready(function(){
 							break;
 
 						case 'train-speed':
-							var speed = $fieldset.find('.train-speed').val();
+							speed = $fieldset.find('.train-speed').val();
 							$other.find('.train-speed').val( speed );
 							break;
 
 						case 'train-workforce':
-							var speed = $fieldset.find('.train-workforce').val();
+							speed = $fieldset.find('.train-workforce').val();
 							$other.find('.train-workforce').val( speed );
+							break;
+
+						default :
 							break;
 					}
 				})
@@ -10810,34 +10854,37 @@ jQuery(document).ready(function(){
 
 			for( u in window.unitcost ){
 				if( window.unitcost.hasOwnProperty(u) ){
-					unitc = window.unitcost[u];
-					//check building requirement
-						b = true;
-						if( typeof unitc[8] == 'object' && !$.isArray(unitc[8]) && !$.isEmptyObject(unitc[8]) ){
-							b = false;
-							for( building in unitc[8] ){
-								if( unitc[8].hasOwnProperty( building ) ){
-									if( Shared.buildingHighestLevel( cityKey, building.substr(1) ) >= unitc[8][building][1] ){
-										b = true;
+					var canCityHaveUnit = window.cm.BarracksUnitsTypeMap.canCityHaveUnit(u.replace(/unt/, ''), cityKey.replace(/city/, ''));
+					if( canCityHaveUnit ){
+						unitc = window.unitcost[u];
+						//check building requirement
+							b = true;
+							if( typeof unitc[8] == 'object' && !$.isArray(unitc[8]) && !$.isEmptyObject(unitc[8]) ){
+								b = false;
+								for( building in unitc[8] ){
+									if( unitc[8].hasOwnProperty( building ) ){
+										if( Shared.buildingHighestLevel( cityKey, building.substr(1) ) >= unitc[8][building][1] ){
+											b = true;
+										}
 									}
 								}
 							}
-						}
 
-					//check tech requirement
-						t = true;
-						if( typeof unitc[9] == 'object' && !$.isArray(unitc[9]) && !$.isEmptyObject(unitc[9]) ){
-							t = false;
-							for( tech in unitc[9] ){
-								if( unitc[9].hasOwnProperty( tech ) ){
-									if( window.seed.tech[ 'tch' + tech.substr(1) ] >= unitc[9][tech][1] ){
-										t = true;
+						//check tech requirement
+							t = true;
+							if( typeof unitc[9] == 'object' && !$.isArray(unitc[9]) && !$.isEmptyObject(unitc[9]) ){
+								t = false;
+								for( tech in unitc[9] ){
+									if( unitc[9].hasOwnProperty( tech ) ){
+										if( window.seed.tech[ 'tch' + tech.substr(1) ] >= unitc[9][tech][1] ){
+											t = true;
+										}
 									}
 								}
 							}
-						}
 
-					if( b && t ) units[ u ] = unitc.name;
+						if( b && t && canCityHaveUnit ) units[ u ] = unitc.name;
+					}
 				}
 			}
 			return units;
@@ -10987,8 +11034,24 @@ jQuery(document).ready(function(){
 				modifier = modifier * (1 + Shared.getGuardianBonus( cityKey, 'train' ));
 			}
 
+			time = Math.max(1, Math.ceil(time / modifier));
+			var cityId = cityKey.replace(/city/, '');
+			if( window.cm.PrestigeModel.isPrestige(cityId) ){
+				var level = cm.PrestigeModel.getPrestigeLevel(cityId);
+				if( level > 0 ){
+					var data = cm.WorldSettings.getSetting("ASCENSION_BARRACKS_BOOST"),
+						bonuses = JSON.parse(data),
+						boost = bonuses.values[level - 1][1];
+					time = Math.ceil(time * parseFloat(boost));
+				}
+			}
+			var archery_blessing = window.cm.BlessingSystemModel.isBlessingActive(window.cm.BlessingSystemModel.getBlessing().DEATH_FROM_AFAR, cityId);
+			if( u == 6 && archery_blessing ){
+				time = Math.ceil(time - (time * window.cm.BlessingSystemModel.applyBlessing(window.cm.BlessingSystemModel.getBlessing().DEATH_FROM_AFAR, cityId, {})));
+			}
+
 			if( speed == '0' ){
-				return Math.max(1, Math.ceil(time / modifier));
+				return time;
 			} else if( speed == '1' ){
 				return [Math.ceil((100 - window.gambleOptionResults1[1]) / 100 * time), Math.ceil((100 - window.gambleOptionResults1[0]) / 100 * time)];
 			} else if( speed == '2' ){
@@ -11088,7 +11151,7 @@ jQuery(document).ready(function(){
 								totalReturn = parseInt(window.unitcost["unt" + info[1]][k], 10) * parseInt(info[2], 10) * 3600 / 2;
 								window.seed.resources[ cityKey ]["rec" + k][0] = parseInt(window.seed.resources[ cityKey ]["rec" + k][0], 10) + totalReturn;
 							}
-						});
+						}, true);
 
 						var j = 0, k;
 						for( k = 0; k < window.seed.queue_unt[ cityKey ].length; k += 1 ){
@@ -11181,7 +11244,7 @@ jQuery(document).ready(function(){
 								window.seed.resources[cityKey]["rec" + i][0] = parseInt(window.seed.resources[cityKey]["rec" + i][0], 10) + totalReturn;
 							}
 							if( dfd !== null ) KOCFIA.formation.listCityFormations( info[1] );
-						});
+						}, true);
 
 						if( dfd !== null ){
 							return dfd.pipe( KOCFIA.formation.cancelFortification(dfd, cityKey, i-1, null, 3) );
@@ -11329,8 +11392,9 @@ jQuery(document).ready(function(){
 			//step 3 of 3 for trainUnitSequence
 			var train = function( udfd ){
 				if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('formation') ) console.info('KOCFIA formation addToQueue deferred train function');
-				var wParams = $.extend({}, baseParams);
-				wParams.type = rule.troop.replace(/unt/, '');
+				var wParams = $.extend({}, baseParams),
+					unitId = rule.troop.replace(/unt/, '');
+				wParams.type = unitId;
 				wParams.quant = qty;
 				wParams.items = '';
 				wParams.gambleId = rule.speed;
@@ -11346,17 +11410,17 @@ jQuery(document).ready(function(){
 					.done(function( result ){
 						if( result.ok ){
 							var resourceFactors = [],
-								resourceLost, r, unit;
-
+								resourceLost, r, unit,
+								MORE_WITH_LESS_FACTOR = window.cm.BlessingSystemModel.applyBlessing(window.cm.BlessingSystemModel.getBlessing().MORE_WITH_LESS, baseParams.cid, {unitid: unitId});
 							for( r = 1; r < 5; r += 1 ){
 								resourceFactors.push( result.gamble ? result.gamble[i] : 1 );
-								resourceLost = parseInt(window.unitcost[rule.troop][i], 10) * 3600 * qty * resourceFactors[i - 1];
+								resourceLost = Math.ceil(parseInt(window.unitcost[rule.troop][i], 10) * MORE_WITH_LESS_FACTOR) * 3600 * qty * resourceFactors[i - 1];
 								window.seed.resources[rule.cityKey]["rec" + r][0] = parseInt(window.seed.resources[rule.cityKey]["rec" + r][0], 10) - resourceLost;
 							}
 							window.seed.citystats[rule.cityKey].gold[0] = parseInt(window.seed.citystats[rule.cityKey].gold[0], 10) - parseInt(window.unitcost[rule.troop][5], 10) * qty;
-							window.seed.citystats[rule.cityKey].pop[0] = parseInt(window.seed.citystats[rule.cityKey].pop[0], 10) - parseInt(window.unitcost[rule.troop][6], 10) * qty;
+							window.seed.citystats[rule.cityKey].pop[0] = parseInt(window.seed.citystats[rule.cityKey].pop[0], 10) - Math.ceil(parseInt(window.unitcost[rule.troop][6], 10) * MORE_WITH_LESS_FACTOR) * qty;
 
-							window.seed.queue_unt[rule.cityKey].push([rule.troop.replace(/unt/, ''), qty, result.initTS, parseInt(result.initTS, 10) + result.timeNeeded, 0, result.timeNeeded, null]);
+							window.seed.queue_unt[rule.cityKey].push([rule.troop.replace(/unt/, ''), qty, result.initTS, parseInt(result.initTS, 10) + result.timeNeeded, 0, result.timeNeeded, null, window.cm.PrestigeModel.isPrestige(baseParams.cid)]);
 
 							/*
 							seed.items["i" + iid] = Number(seed.items["i" + iid]) - 1;
@@ -17263,7 +17327,7 @@ jQuery(document).ready(function(){
 			stored: ['queues', 'chronology', 'destructsTimestamp'],
 			chronology: {},
 			queues: {}, //by cityKey
-			destructsTimestamp: {}, //by cityKey and slotId
+			destructsTimestamp: {} //by cityKey and slotId
 			/*buildingsLabel: {
 				1: {single: '', plural: ''}
 			},*/
@@ -17519,7 +17583,8 @@ jQuery(document).ready(function(){
 						isNew = KOCFIA.build.$buildMenu.find('#hover').hasClass('.-blank-'),
 						messages = [],
 						errors = false,
-						needReset = false;
+						needReset = false,
+						i;
 
 					console.log('$slot ', $slot);
 					console.log('slotId ',slotId, ' slotClass ', slotClass);
@@ -17620,14 +17685,14 @@ jQuery(document).ready(function(){
 
 							//var durations = KOCFIA.build.getDuration( cityKey, buildingType, fromLevel, toLevel );
 
-							for( var i = fromLevel + 1; i <= toLevel; i += 1 ){
+							for( i = fromLevel + 1; i <= toLevel; i += 1 ){
 								KOCFIA.build.queues[ cityKey ][ slotId ].push( {buildingType: buildingType, fromLevel: i - 1, toLevel: i} );
 							}
 						} else {
 							toLevel = $level.val();
 
 							//update the task
-							for( var i = fromLevel + 1; i <= toLevel; i += 1 ){
+							for( i = fromLevel + 1; i <= toLevel; i += 1 ){
 								KOCFIA.build.queues[ cityKey ][ slotId ].push( {buildingType: currentBuildingType, fromLevel: i - 1, toLevel: i} );
 							}
 						}
@@ -17949,8 +18014,10 @@ jQuery(document).ready(function(){
 				KOCFIA.build.chronology[ cityKey ] = [];
 			}
 
+			var i;
+
 			if( needReset || !KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId ) ){
-				var pointer, i,
+				var pointer,
 					target = slotId +'_';
 				for( i = KOCFIA.build.chronology[ cityKey ].length - 1; i > 0; i -= 1 ){
 					pointer = KOCFIA.build.chronology[ cityKey ][ i ];
@@ -17959,8 +18026,7 @@ jQuery(document).ready(function(){
 			}
 
 			if( KOCFIA.build.queues[ cityKey ].hasOwnProperty( slotId ) ){
-				var tasks = KOCFIA.build.queues[ cityKey ][ slotId ],
-					i;
+				var tasks = KOCFIA.build.queues[ cityKey ][ slotId ];
 				for( i = 0; i < tasks.length; i += 1 ){
 					if( $.inArray(slotId + '_' + i) == -1 ){
 						KOCFIA.build.chronology[ cityKey ].push(slotId + '_' + i);
@@ -18471,6 +18537,7 @@ jQuery(document).ready(function(){
 
 					$.ajax( options )
 						.done(function(result){
+							var ts, duration;
 							if( !isGuardian && !isDestruct && result.ok ){
 								window.seed.resources[ cityKey ].rec1[0] -= resNeeded[0];
 								window.seed.resources[ cityKey ].rec2[0] -= resNeeded[1];
@@ -18478,8 +18545,8 @@ jQuery(document).ready(function(){
 								window.seed.resources[ cityKey ].rec4[0] -= resNeeded[3];
 								window.seed.citystats[ cityKey ].gold[0] -= resNeeded[4];
 
-								var ts = Date.timestamp(),
-									duration = parseInt(result.timeNeeded, 10);
+								ts = Date.timestamp();
+								duration = parseInt(result.timeNeeded, 10);
 								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slotId]);
 
 								if( task.fromLevel === 0 ){
@@ -18504,8 +18571,8 @@ jQuery(document).ready(function(){
 								cityIndex += 1;
 								return dfd.pipe( byCity(dfd) );
 							} else if( isDestruct && result.ok ){
-								var ts = Date.timestamp(),
-									duration = parseInt(result.timeNeeded, 10);
+								ts = Date.timestamp();
+								duration = parseInt(result.timeNeeded, 10);
 								window.seed.queue_con[ cityKey ].push([type, 0, parseInt(result.buildingId, 10), ts, ts + duration, 0, ts, slotId]);
 
 								window.update_bdg();
@@ -18540,8 +18607,8 @@ jQuery(document).ready(function(){
 								window.seed.resources[ cityKey ].rec4[0] -= resNeeded[3];
 								window.seed.citystats[ cityKey ].gold[0] -= resNeeded[4];
 
-								var ts = Date.timestamp(),
-									duration = parseInt(result.time, 10);
+								ts = Date.timestamp();
+								duration = parseInt(result.time, 10);
 								window.seed.queue_con[ cityKey ].push([type, task.toLevel, parseInt(result.buildingId, 10), ts, ts + duration, 0, duration, slotId]);
 
 								//set upgrading to true
@@ -20413,7 +20480,7 @@ jQuery(document).ready(function(){
 						attack.cityKey = plan.from;
 						attack.marching = [ data.marchId ];
 						window.setTimeout(function(){
-							Shared.forceMarchUpdate(attack, false, dfd);
+							Shared.forceMarchUpdate(attack, false, null);
 						}, eta + 10000);
 
 					} else if( data.user_action ){
@@ -21113,46 +21180,17 @@ jQuery(document).ready(function(){
 						} else if( isLevel ) {
 							infos = [ {id: itemId, level: [ (upgradeLevel === 0 ? level : upgradeLevel), (upgradeLevel === 0 ? level + 1 : upgradeLevel + 1) ]} ];
 
-						} else { //optimized upgrade
-							//@TODO check
-							var steps = {
-								'q0l0': ['l','l','q','q','l','q','q','l','q'],
-								'q1l0': ['l','l','q','l','q','q','l','q'],
-								'q2l0': ['l','l','l','q','q','l','q'],
-								'q3l0': ['l','l','l','q','l','q'],
-								'q4l0': ['l','l','l',,'l','q'],
-								'q5l0': ['l','l','l','l'],
-								'q0l1': ['l','q','q','l','q','q','l','q'],
-								'q1l1': ['l','q','l','q','q','l','q'],
-								'q2l1': ['l','l','q','q','l','q'],
-								'q3l1': ['l','l','q','l','q'],
-								'q4l1': ['l','l','l','q'],
-								'q5l1': ['l','l','l','l'],
-								'q0l2': ['q','q','l','q','q','l','q'],
-								'q1l2': ['q','l','q','q','l','q'],
-								'q2l2': ['l','q','q','l','q'],
-								'q3l2': ['l','q','l','q'],
-								'q4l2': ['l','l','q'],
-								'q5l2': ['l','l'],
-								'q0l3': ['q','q','q','q','l','q'],
-								'q1l3': ['q','q','q','l','q'],
-								'q2l3': ['q','q','l','q'],
-								'q3l3': ['q','l','q'],
-								'q4l3': ['l','q'],
-								'q5l3': ['l'],
-								'q0l4': ['q','q','q','q','q'],
-								'q1l4': ['q','q','q','q'],
-								'q2l4': ['q','q','q'],
-								'q3l4': ['q','q'],
-								'q4l4': ['q']
-							};
-
+						} else { //optimized upgrade to quality 5 (superbe) and level 4 (+4)
 							var q = (upgradeQuality === 0 ? quality : upgradeQuality),
 								l = (upgradeLevel === 0 ? level : upgradeLevel),
-								current = 'q'+ q +'l'+ l;
+								target = (5 + 4) - q - l; //5 quality, 4 level
+
 							infos = [];
-							for( i = 0; i < steps[ current ].length; i += 1 ){
-								if( steps[ current ][ i ] == 'q' ){
+							for( i = 0; i < target; i += 1 ){
+								if( i === 0 && l === 0 ){
+									infos.push({id: itemId, level: [l, l + 1]});
+									l++;
+								} else if( q < 5 ){
 									infos.push({id: itemId, quality: [q, q + 1]});
 									q++;
 								} else {
@@ -24336,7 +24374,7 @@ jQuery(document).ready(function(){
 			//priority list
 				code += '<div id="kocfia-hospital-priority" class="priority-list" title="Priorité des unités lors des soins">';
 				code += '<ol>';
-				var unitKey, unitInfo, i, l;
+				var unitKey, unitInfo, l;
 				for( i = 0, l = KOCFIA.conf.hospital.priority.length; i < l; i += 1 ){
 					unitKey = KOCFIA.conf.hospital.priority[ i ];
 					unitInfo = KOCFIA.unitInfo[ unitKey ];
@@ -24932,7 +24970,7 @@ jQuery(document).ready(function(){
 
 			if( !$.isEmptyObject( KOCFIA.hospital.rules ) ){
 				var cityIndex = 0, city, cityKey, unitsKey, unitsIndex,
-					params, unitKey, rules, rule, wounded, rule, gold,
+					params, unitKey, rules, rule, wounded, gold,
 					available, quantity, cost, time,
 					setEquiped = false,
 					checkBeforeEquipingSet = true;
@@ -25081,7 +25119,13 @@ jQuery(document).ready(function(){
 										data.initTS = Date.timestamp() - 1;
 									}
 
-									window.seed.queue_revive[ cityKey ].push([unitId, quantity, data.initTS, parseInt(data.initTS, 10) + time, 0, time, null]);
+									var recentlyEntryWasAddedQueue;
+									if( window.seed.queue_revive[ cityKey ].length === 0 ){
+										recentlyEntryWasAddedQueue = window.seed.queue_revive[ cityKey ];
+									} else {
+										recentlyEntryWasAddedQueue = window.seed.queue_revive2[ cityKey ];
+									}
+									recentlyEntryWasAddedQueue.push([unitId, quantity, data.initTS, parseInt(data.initTS, 10) + time, 0, time, null]);
 
 									window.seed.citystats[ cityKey ].gold[0] -= cost;
 									window.update_gold();
@@ -25274,7 +25318,13 @@ jQuery(document).ready(function(){
 								data.initTS = Date.timestamp() - 1;
 							}
 
-							window.seed.queue_revive[ cityKey ].push([unitId, quantity, data.initTS, parseInt(data.initTS, 10) + time, 0, time, null]);
+							var recentlyEntryWasAddedQueue;
+							if( window.seed.queue_revive[ cityKey ].length === 0 ){
+								recentlyEntryWasAddedQueue = window.seed.queue_revive[ cityKey ];
+							} else {
+								recentlyEntryWasAddedQueue = window.seed.queue_revive2[ cityKey ];
+							}
+							recentlyEntryWasAddedQueue.push([unitId, quantity, data.initTS, parseInt(data.initTS, 10) + time, 0, time, null]);
 
 							window.seed.citystats[ cityKey ].gold[0] -= cost;
 							window.update_gold();
@@ -25334,10 +25384,76 @@ jQuery(document).ready(function(){
 
 		KOCFIA.hospital.cancelRevive = function( cityKey ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('hospital') ) console.info('KOCFIA hospital cancelRevive function');
-			//@TODO
+			var j, totalReturn, index,
+				params = $.extend({}, window.g_ajaxparams),
+				info = window.seed.queue_revive[ cityKey ][0];
 
-			//use removeTraining(trainingId, cityId, typetrn, numtrptrn, trnETA, trnTmp, trnNeeded, speedUpTraining)
-			//ajax/cancelTraining.php
+			params.requestType = "CANCEL_TRAINING";
+			params.cityId = info[1];
+			params.typetrn = info[2];
+			params.numtrptrn = info[3];
+			params.trnETA = info[4];
+			params.trnTmp = info[5];
+			params.trnNeeded = info[6];
+
+			$.ajax({
+					url: window.g_ajaxpath + 'ajax/cancelTraining.php' + window.g_ajaxsuffix,
+					type: 'post',
+					data: params,
+					dataType: 'json',
+					timeout: 10000
+				})
+				.done(function( result ){
+					if( result.ok ){
+						window.update_seed_ajax(true, function(){
+							for( var k = 1; k < 5; k += 1 ){
+								totalReturn = parseInt(window.unitcost['unt'+ info[0]][k], 10) * parseInt(info[2], 10) * 3600 / 2;
+								window.seed.resources[ cityKey ]['rec'+ k][0] = parseInt(window.seed.resources[ cityKey ]['rec' + k][0], 10) + totalReturn;
+							}
+						}, true);
+
+						var queue = window.seed.queue_revive;
+						/*if (params.slotNum == 1) {
+							queue = seed.queue_revive
+						} else {
+							queue = seed.queue_revive2
+						}*/
+
+						/*
+						var j = 0, k;
+						for( k = 0; k < queue[ cityKey ].length; k += 1 ){
+							if( k > info[0] ){
+								queue[ cityKey ][k][2] = parseInt(result.dateTraining[j]['start'], 10);
+								queue[ cityKey ][k][3] = parseInt(result.dateTraining[j]['end'], 10);
+								j += 1;
+							}
+						}
+						*/
+
+						//remove canceled training
+						queue[ cityKey ].splice(info[0], 1);
+
+						//update wounded numbers
+						window.seed.woundedUnits[ cityKey ]['unt'+ info[0]] = parseInt(window.seed.woundedUnits[ cityKey ]['unt'+ info[0]], 10) + parseInt(info[1], 10);
+
+						Shared.success('Annulation réussie');
+					} else {
+						attempts -= 1;
+						if( attempts > 0 ){
+							return KOCFIA.hospital.cancelRevive(cityKey);
+						} else {
+							Shared.notify('Annulation échouée (erreur serveur)');
+						}
+					}
+				}).fail(function(){
+					//network or server error
+					attempts -= 1;
+					if( attempts > 0 ){
+						return KOCFIA.hospital.cancelRevive(cityKey);
+					} else {
+						Shared.notify('Annulation échouée (erreur internet)');
+					}
+				});
 		};
 
 	/* SEARCH - PLAYERS OR ALLIANCES */
@@ -27431,8 +27547,8 @@ jQuery(document).ready(function(){
 			return help;
 		};
 
-		KOCFIA.craft.addSectionListerners = function(){
-			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft addSectionListerners function');
+		KOCFIA.craft.addSectionListeners = function(){
+			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('craft') ) console.info('KOCFIA craft addSectionListeners function');
 			KOCFIA.craft.$div
 				.on('click', '.refresh-queue, .reset-queue', function(){
 					KOCFIA.craft.$queue.find('ul').html( $(KOCFIA.craft.getForm()).find('ul').html() );
@@ -27645,7 +27761,7 @@ jQuery(document).ready(function(){
 				return false;
 			}
 
-			var key, recipe, category, id, params, category, recipes, recipe, id,
+			var key, recipe, category, id, params, recipes,
 				i, info, cityKey, stock, itemId, itemKey, quantity, missingIngredient,
 				crafting = {}, //by item id: quantity
 				tower,
@@ -28306,7 +28422,8 @@ jQuery(document).ready(function(){
 				});
 		};
 
-		KOCFIA.raid.planRaids = function( plan ){
+		/*
+		KOCFIA.raid.planRaids = function(){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('raid') ) console.info('KOCFIA raid planRaids function');
 			var plan = {},
 				errors = [],
@@ -28410,6 +28527,7 @@ jQuery(document).ready(function(){
 
 			return {plan: plan, errors: errors};
 		};
+		*/
 
 		KOCFIA.raid.launchRaids = function( plan ){
 			if( KOCFIA.debug && KOCFIA.debugWhat.hasOwnProperty('raid') ) console.info('KOCFIA raid launchRaids function');
@@ -28508,7 +28626,7 @@ jQuery(document).ready(function(){
 							Shared.success('Tous les raids ont été lancés.');
 
 							//force seed update only after all launch and not after each launch
-							window.setTimeout(window.update_seed_ajax, 500);
+							window.setTimeout(function(){ window.update_seed_ajax(true, null, true); }, 500);
 						}
 
 					} else if( data.user_action ){
@@ -28639,7 +28757,7 @@ jQuery(document).ready(function(){
 				.done(function(data){
 					if( data.ok ){
 						delete window.seed.queue_atkp[ cityKey ]["m"+ tParams.marchId];
-						if( Object.keys(window.seed.queue_atkp[ cityKey ]).length == 0 ){
+						if( Object.keys(window.seed.queue_atkp[ cityKey ]).length === 0 ){
 							window.seed.queue_atkp[ cityKey ] = [];
 						}
 
@@ -29056,10 +29174,10 @@ jQuery(document).ready(function(){
 						return dfd.reject();
 					}
 
+					var params = $.extend(true, {}, window.g_ajaxparams);
 					if( attack.hasOwnProperty('targetUserId') ){
 						//get user id for targetted player
-						var name = attack.targetName.replace(/\'/g, '_'),
-							params = $.extend(true, {}, window.g_ajaxparams);
+						var name = attack.targetName.replace(/\'/g, '_');
 						params.searchName = name;
 						params.subType = "ALLIANCE_INVITE";
 
@@ -29093,7 +29211,7 @@ jQuery(document).ready(function(){
 						});
 					}
 
-					var params = $.extend(true, {}, window.g_ajaxparams);
+					params = $.extend(true, {}, window.g_ajaxparams);
 					params.pid = attack.targetUserId;
 
 					$.ajax({
@@ -30051,48 +30169,8 @@ jQuery(document).ready(function(){
 					}
 				});
 		};
-
-	KOCFIA.init();
 })(window, document, jQuery);
 
+jQuery(document).ready(function(){
+	KOCFIA.init();
 });
-
-/*
-	//Construction :
-	//- mise en place de la ville (à détailler)
-		//- positionnement
-		//- nombre
-	//- file d'attente des construction par ville
-		//- modifiable (suppression, insertion, ordre)
-		//- gestion des erreurs
-
-	//Entraînement :
-	//- entraînement programmé (x miliciens puis y archers puis ...)
-
-	//Exploration :
-	//recherche joueur
-
-	//Rapport :
-	//- auto-suppression
-	//- sauvegarde
-	//- consultation simplifiée
-	//- vision claire des horaires
-
-	//Coordination :
-	//Si on pouvait intégrer le planificateur ce serait top (au moins les données source : récupérer tous les temps de marche des membres connectés jusqu'à un point donné, pour un type d'unité à choisir)
-
-	//Laboratory :
-	//-auto search
-	//-liste d'attente
-
-	//paying features
-		//import / export whole conf
-		//teleport warning
-		//programmed training
-			//x archers
-			//y catapultes
-		//clever training (population optimisation)
-		//clever building
-		//occupied wilderness attack option
-		//auto plunder
-*/

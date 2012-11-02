@@ -11,10 +11,12 @@
 		<a href="//<?php echo $_SERVER['SERVER_NAME']; ?>/kocfia.frame.user.js">
 			script 2 - page du jeu (script principal)
 		</a>
+		<!--
 		<br>
 		<a href="//<?php echo $_SERVER['SERVER_NAME']; ?>/kocfia.fb-popup.user.js">
 			script 3 - popup facebook pour les posts sur le mur (utile pour le post automatique)
 		</a>
+		-->
 
 		<!--
 		<h1>Envoie des cadeaux</h1>
@@ -30,6 +32,7 @@
 		</a>
 		-->
 
+		<!--
 		<h1>Gestion de la page d'erreur Facebook et de la page "nouveau serveur" de Kabam</h1>
 		<form id="fb-404" method="get" action="//<?php echo $_SERVER['SERVER_NAME']; ?>/kocfia.fb-404.user.php">
 			<label for="numServer">Numéro du serveur Kingdoms of Camelot :</label>
@@ -45,5 +48,6 @@
 		</a>
 		<br>Requiert l'autorisation d'afficher les popups sur kabam.com.
 		<br>Affichez une fois la page et attendez 10 secondes, la demande d'autorisation apparaîtra.
+		-->
 	</body>
 </html>
